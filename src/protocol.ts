@@ -43,6 +43,7 @@ export class BcLiteClient {
   private manualDisconnect = false;
   private serverReady = false;
   private searchTimer: number | null = null;
+  private roomTimer: number | null = null;
 
   subscribe(listener: Listener): () => void {
     this.listeners.add(listener);
@@ -68,6 +69,7 @@ export class BcLiteClient {
     this.loginAccepted = false;
     this.serverReady = false;
     this.clearSearchTimer();
+    this.clearRoomTimer();
     this.socket?.removeAllListeners();
     this.socket?.disconnect();
     this.socket = null;
@@ -79,14 +81,31 @@ export class BcLiteClient {
     if (this.searchTimer !== null) throw new Error("上一個搜尋仍在進行中");
     this.patch({ rooms: [], status: "正在搜尋房間…" });
     this.clearSearchTimer();
-    this.searchTimer = window.setTimeout(() => this.patch({ status: "搜尋逾時，請稍後再試" }), SEARCH_TIMEOUT_MS);
+    this.searchTimer = window.setTimeout(() => {
+      this.clearSearchTimer();
+      this.patch({ status: "搜尋逾時（未收到伺服器回應），可以重新搜尋" });
+    }, SEARCH_TIMEOUT_MS);
     this.socket!.emit("ChatRoomSearch", { ...request, Query: request.Query.toUpperCase().trim() });
   }
 
   join(roomName: string): void {
-    if (!this.canSend() || !roomName.trim()) return;
+    if (!this.canSend() || !roomName.trim() || this.state.phase !== "ready") return;
+    this.startRoomTimer();
     this.patch({ phase: "joining", status: `正在加入「${roomName}」…`, messages: [] });
     this.socket!.emit("ChatRoomJoin", { Name: roomName });
+  }
+
+  createRoom(name: string, space: RoomSearchRequest["Space"], language: RoomSearchRequest["Language"], unlisted: boolean): void {
+    if (!this.canSend() || this.state.phase !== "ready") throw new Error("請等待目前操作完成");
+    if (!name.trim() || name.trim().length > 20) throw new Error("房名請填 1–20 個字元");
+    this.startRoomTimer();
+    this.patch({ phase: "joining", status: `正在建立「${name.trim()}」…` });
+    this.socket!.emit("ChatRoomCreate", {
+      Name: name.trim(), Description: "BC Lite chat room", Background: "MainHall",
+      Space: space, Language: language || "EN", Game: "", Limit: 10,
+      Admin: [this.state.player!.MemberNumber], Whitelist: [], Ban: [], BlockCategory: [],
+      Visibility: unlisted ? [] : ["All"], Access: ["All"],
+    });
   }
 
   leave(): void {
@@ -127,19 +146,26 @@ export class BcLiteClient {
     });
     this.socket.on("LoginQueue", (position: unknown) => this.patch({ status: `登入排隊中（第 ${String(position)} 位）…` }));
     this.socket.on("LoginResponse", (data: unknown) => this.handleLogin(data));
-    this.socket.on("ServerInfo", () => {
+    this.socket.on("ServerInfo", (info: { OnlinePlayers?: number }) => {
       this.serverReady = true;
-      if (this.loginAccepted && !this.state.room) this.patch({ phase: "ready", status: "登入成功，可以搜尋房間" });
+      this.patch({ onlinePlayers: typeof info?.OnlinePlayers === "number" ? info.OnlinePlayers : undefined });
+      if (this.loginAccepted && this.state.phase === "waiting-server") this.patch({ phase: "ready", status: "登入成功，可以搜尋房間" });
     });
     this.socket.on("ChatRoomSearchResult", (rooms: RoomSearchResult[]) => {
       this.clearSearchTimer();
-      const safeRooms = Array.isArray(rooms) ? rooms : [];
+      if (!Array.isArray(rooms)) { this.patch({ status: "搜尋回應格式不符，並非零個房間" }); return; }
+      const safeRooms = rooms;
       this.patch({ rooms: safeRooms, status: `找到 ${safeRooms.length} 個房間` });
     });
     this.socket.on("ChatRoomSearchResponse", (result: unknown) => {
-      if (result !== "JoinedRoom") this.patch({ phase: "ready", status: `無法加入房間：${String(result)}` });
+      if (result !== "JoinedRoom") { this.clearRoomTimer(); this.patch({ phase: "ready", room: null, characters: [], status: `無法加入房間：${String(result)}` }); }
+    });
+    this.socket.on("ChatRoomCreateResponse", (result: unknown) => {
+      if (result === "ChatRoomCreated") this.patch({ status: "房間已建立，等待房間同步…" });
+      else { this.clearRoomTimer(); this.patch({ phase: "ready", status: `建立房間失敗：${String(result)}` }); }
     });
     this.socket.on("ChatRoomSync", (room: RoomSync) => {
+      this.clearRoomTimer();
       const characters = Array.isArray(room.Character) ? room.Character : [];
       this.patch({ phase: "in-room", room, characters, messages: [], status: `已加入「${room.Name}」` });
       this.localMessage(`已加入「${room.Name}」`);
@@ -173,6 +199,8 @@ export class BcLiteClient {
       if (this.manualDisconnect || !this.credentials) return;
       this.serverReady = false;
       this.loginAccepted = false;
+      this.clearSearchTimer();
+      this.clearRoomTimer();
       this.patch({ phase: "reconnecting", status: `連線中斷（${reason}），正在重試…`, room: null, characters: [] });
     });
     this.socket.on("connect_error", () => {
@@ -231,6 +259,14 @@ export class BcLiteClient {
   }
 
   private canSend(): boolean { return Boolean(this.socket?.connected && this.loginAccepted && this.serverReady); }
+  private clearRoomTimer(): void { if (this.roomTimer !== null) window.clearTimeout(this.roomTimer); this.roomTimer = null; }
+  private startRoomTimer(): void {
+    this.clearRoomTimer();
+    this.roomTimer = window.setTimeout(() => {
+      this.clearRoomTimer();
+      this.patch({ phase: "ready", status: "進房操作逾時，未收到 ChatRoomSync；可重試" });
+    }, 12_000);
+  }
   private clearSearchTimer(): void { if (this.searchTimer !== null) window.clearTimeout(this.searchTimer); this.searchTimer = null; }
   private patch(change: Partial<ClientSnapshot>): void {
     this.state = { ...this.state, ...change };

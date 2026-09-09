@@ -13,7 +13,9 @@ class LiteApp {
   private query = "";
   private chatDraft = "";
   private language: RoomSearchRequest["Language"] = "";
-  private space: RoomSearchRequest["Space"] = "";
+  private space: RoomSearchRequest["Space"] = "X";
+  private newRoomName = "";
+  private unlisted = true;
   private showFull = false;
   private showLocked = true;
   private searchDescriptions = false;
@@ -119,7 +121,7 @@ class LiteApp {
     query.addEventListener("input", () => { this.query = query.value; });
     const language = this.select("語言", [["", "全部"], ["EN", "EN"], ["CN", "CN"], ["DE", "DE"], ["FR", "FR"], ["ES", "ES"], ["RU", "RU"], ["UA", "UA"]], this.language);
     language.addEventListener("change", () => { this.language = language.value as RoomSearchRequest["Language"]; });
-    const space = this.select("區域", [["", "一般"], ["X", "私人／隱藏 (X)"], ["M", "M"], ["Asylum", "Asylum"]], this.space);
+    const space = this.select("區域", [["X", "混合區 (X)"], ["", "女性區"], ["M", "男性區 (M)"], ["Asylum", "Asylum"]], this.space);
     space.addEventListener("change", () => { this.space = space.value as RoomSearchRequest["Space"]; });
     form.append(this.field("關鍵字", query), this.field("語言", language), this.field("區域", space));
     const options = this.el("div", "search-options");
@@ -132,6 +134,7 @@ class LiteApp {
     form.append(options, search);
     form.addEventListener("submit", (event) => {
       event.preventDefault();
+      this.notice = "";
       try {
         bcClient.search({ Query: this.query, Language: this.language, Space: this.space, Game: "", FullRooms: this.showFull, ShowLocked: this.showLocked, SearchDescs: this.searchDescriptions });
       } catch (error) { this.notice = error instanceof Error ? error.message : "搜尋失敗"; this.render(); }
@@ -142,7 +145,26 @@ class LiteApp {
     const rooms = this.el("div", "room-list");
     if (!state.rooms.length) rooms.append(this.el("div", "empty-state", "輸入條件後搜尋；空白搜尋會列出公開房間。"));
     else state.rooms.forEach((room) => rooms.append(this.roomCard(room)));
-    section.append(heading, form, resultHeader, rooms);
+    const status = this.el("p", "form-notice", this.notice || state.status);
+    status.setAttribute("role", "status");
+    const diagnostics = this.el("p", "security-note", `伺服器回報在線人數：${state.onlinePlayers ?? "未知"} · 帳號已登入，尚未進房；好友可見狀態尚未驗證。`);
+    const create = this.el("form", "search-form") as HTMLFormElement;
+    const roomName = this.input("NewRoomName", "輸入房名", "text", this.newRoomName);
+    roomName.maxLength = 20;
+    roomName.addEventListener("input", () => { this.newRoomName = roomName.value; });
+    const createButton = this.button("建立並進入", "primary", "submit");
+    createButton.disabled = state.phase !== "ready";
+    const directJoin = this.button("按房名加入", "secondary", "button");
+    directJoin.disabled = state.phase !== "ready";
+    directJoin.addEventListener("click", () => { if (create.reportValidity()) bcClient.join(this.newRoomName.trim()); });
+    create.append(this.field("建立房間／直接加入（建立時沿用上方區域與語言）", roomName), this.checkbox("不列入公開搜尋", this.unlisted, value => { this.unlisted = value; }), createButton, directJoin);
+    create.addEventListener("submit", event => {
+      event.preventDefault();
+      this.notice = "";
+      try { bcClient.createRoom(this.newRoomName, this.space, this.language, this.unlisted); }
+      catch (error) { this.notice = error instanceof Error ? error.message : "建立失敗"; this.render(); }
+    });
+    section.append(heading, form, status, diagnostics, this.el("h2", "", "建立或直接加入房間"), create, resultHeader, rooms);
     return section;
   }
 
@@ -187,6 +209,9 @@ class LiteApp {
     const topMenu = this.el("div", "chat-room-top-menu");
     topMenu.id = "chat-room-top-menu";
     topMenu.append(this.el("strong", "", state.room!.Name), this.el("span", "", `${state.characters.length}/${state.room!.Limit}`));
+    const mobileLeave = this.button("離開", "ghost", "button");
+    mobileLeave.addEventListener("click", () => bcClient.leave());
+    topMenu.append(mobileLeave);
     const struggle = this.el("div", "chat-room-struggle-bar"); struggle.id = "chat-room-struggle-bar";
     const log = this.el("div", "text-area-chat-log"); log.id = "TextAreaChatLog"; log.setAttribute("role", "log"); log.setAttribute("aria-live", "polite");
     state.messages.forEach((message) => log.append(this.messageNode(message)));
@@ -195,7 +220,7 @@ class LiteApp {
     const input = document.createElement("textarea"); input.id = "InputChat"; input.placeholder = "輸入訊息…（/me 動作，/w 編號 密語）"; input.maxLength = 1000; input.value = this.chatDraft;
     const length = this.el("span", "input-chat-length", `${this.chatDraft.length}/1000`); length.id = "InputChatLength";
     input.addEventListener("input", () => { this.chatDraft = input.value; length.textContent = `${input.value.length}/1000`; });
-    input.addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); bot.requestSubmit(); } });
+    input.addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey && !event.isComposing && event.keyCode !== 229) { event.preventDefault(); bot.requestSubmit(); } });
     const buttons = this.el("div", "chat-room-buttons-div"); buttons.id = "chat-room-buttons-div";
     const inner = this.el("div", "chat-room-buttons"); inner.id = "chat-room-buttons";
     const send = this.button("傳送", "primary", "submit"); inner.append(length, send); buttons.append(inner); bot.append(input, buttons);

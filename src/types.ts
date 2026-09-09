@@ -91,6 +91,7 @@ export interface DisplayMessage {
 }
 
 export interface ClientSnapshot {
+  onlinePlayers?: number;
   phase: ConnectionPhase;
   status: string;
   player: PlayerSummary | null;
