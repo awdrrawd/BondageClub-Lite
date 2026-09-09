@@ -121,7 +121,7 @@ class LiteApp {
     query.addEventListener("input", () => { this.query = query.value; });
     const language = this.select("語言", [["", "全部"], ["EN", "EN"], ["CN", "CN"], ["DE", "DE"], ["FR", "FR"], ["ES", "ES"], ["RU", "RU"], ["UA", "UA"]], this.language);
     language.addEventListener("change", () => { this.language = language.value as RoomSearchRequest["Language"]; });
-    const space = this.select("區域", [["X", "混合區 (X)"], ["", "女性區"], ["M", "男性區 (M)"], ["Asylum", "Asylum"]], this.space);
+    const space = this.select("區域", [["X", "混合區 (X)"], ["", "女性區"], ["M", "男性區 (M)"]], this.space);
     space.addEventListener("change", () => { this.space = space.value as RoomSearchRequest["Space"]; });
     form.append(this.field("關鍵字", query), this.field("語言", language), this.field("區域", space));
     const options = this.el("div", "search-options");
@@ -147,7 +147,14 @@ class LiteApp {
     else state.rooms.forEach((room) => rooms.append(this.roomCard(room)));
     const status = this.el("p", "form-notice", this.notice || state.status);
     status.setAttribute("role", "status");
-    const diagnostics = this.el("p", "security-note", `伺服器回報在線人數：${state.onlinePlayers ?? "未知"} · 帳號已登入，尚未進房；好友可見狀態尚未驗證。`);
+    const environment = state.player?.Environment;
+    const diagnostics = this.el("div", "form-notice");
+    diagnostics.append(this.el("p", "", `伺服器登入環境：${environment || "未提供（不能判定為 PROD）"} · 網頁來源：${location.origin}`));
+    diagnostics.append(this.el("p", "", environment === "DEV"
+      ? "你已登入 DEV 環境。BC 依網頁 Origin 分配環境；正式環境的好友和房間不會出現在這裡，建立房間也不會改變環境。"
+      : environment === "PROD" ? "伺服器確認為正式環境。搜尋會排除隱藏房間；輸入完整房名可搜尋隱藏房間，仍受權限與其他篩選條件限制。"
+      : "帳密驗證已通過，但伺服器未確認正式環境；不能只以登入成功或在線人數判定。"));
+    diagnostics.append(this.el("small", "", `伺服器總在線人數：${state.onlinePlayers ?? "未知"}（不代表所在環境人數）`));
     const create = this.el("form", "search-form") as HTMLFormElement;
     const roomName = this.input("NewRoomName", "輸入房名", "text", this.newRoomName);
     roomName.maxLength = 20;

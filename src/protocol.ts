@@ -149,7 +149,7 @@ export class BcLiteClient {
     this.socket.on("ServerInfo", (info: { OnlinePlayers?: number }) => {
       this.serverReady = true;
       this.patch({ onlinePlayers: typeof info?.OnlinePlayers === "number" ? info.OnlinePlayers : undefined });
-      if (this.loginAccepted && this.state.phase === "waiting-server") this.patch({ phase: "ready", status: "登入成功，可以搜尋房間" });
+      if (this.loginAccepted && this.state.phase === "waiting-server") this.patch({ phase: "ready", status: this.loginStatus() });
     });
     this.socket.on("ChatRoomSearchResult", (rooms: RoomSearchResult[]) => {
       this.clearSearchTimer();
@@ -221,8 +221,17 @@ export class BcLiteClient {
       this.patch({ phase: "error", status: "登入資料不完整" }); return;
     }
     this.loginAccepted = true;
-    const player: PlayerSummary = { AccountName: value.AccountName, ID: value.ID, MemberNumber: value.MemberNumber!, Name: value.Name, Nickname: value.Nickname };
-    this.patch({ player, phase: this.serverReady ? "ready" : "waiting-server", status: this.serverReady ? "登入成功，可以搜尋房間" : "登入成功，等待伺服器準備…" });
+    const player: PlayerSummary = { AccountName: value.AccountName, ID: value.ID, MemberNumber: value.MemberNumber!, Name: value.Name, Nickname: value.Nickname,
+      Environment: typeof value.Environment === "string" ? value.Environment : undefined };
+    this.patch({ player, phase: "waiting-server", status: "帳密驗證通過，等待伺服器資訊…" });
+    if (this.serverReady) this.patch({ phase: "ready", status: this.loginStatus() });
+  }
+
+  private loginStatus(): string {
+    const environment = this.state.player?.Environment;
+    if (environment === "PROD") return "已登入正式環境 PROD";
+    if (environment === "DEV") return "已登入 DEV；無法查詢 PROD 的好友與房間";
+    return "帳密驗證通過；正式環境尚未確認";
   }
 
   private handleMessage(message: ChatMessage): void {

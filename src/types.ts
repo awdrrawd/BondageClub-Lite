@@ -10,6 +10,7 @@ export type ConnectionPhase =
   | "error";
 
 export interface PlayerSummary {
+  Environment?: string;
   AccountName: string;
   ID: string;
   MemberNumber: number;

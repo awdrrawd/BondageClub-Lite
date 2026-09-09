@@ -2,10 +2,14 @@
 
 一個只載入登入、聊天室搜尋與純文字聊天室的 Bondage Club 非官方輕量入口。它是純靜態前端，部署後由玩家的瀏覽器直接連線 BC；不需要自架 API、WebSocket 中繼或常駐伺服器。
 
+**目前的架構限制：能驗證帳密不等於能登入 PROD。** BC 公開伺服器依 WebSocket `Origin` 比對正式來源名單；不在名單內的來源分配到 DEV。Cloudflare Pages 自訂入口若未被允許，會與正式玩家的好友／房間隔離。WebSocket-only 只解決傳輸，不解決環境分配。介面現在顯示 `LoginResponse.Environment`，請以此確認。這不是增加 AccountUpdate、等待 ServerInfo 或建立房間就能修復的問題。
+
+維持純靜態且要連正式環境，需要 BC 管理者允許入口來源，或調整架構讓 Lite 在已被允許的官方頁面中執行。中繼服務是另一種架構，會改變流量與帳密信任路徑，尚未實作。
+
 ## 目前功能
 
 - BC 帳號登入與自動重連
-- 公開／私人空間、語言、滿房、鎖房與描述搜尋
+- 女性／男性／混合區、語言、滿房、鎖房與描述搜尋；隱藏是房間 Visibility 屬性
 - 加入／離開聊天室及房內成員列表
 - 接收 Chat、Whisper、Emote、Action、Activity 與系統訊息
 - 傳送一般聊天、`/me 動作`、`*動作*`、`/w 會員編號 密語`
@@ -45,7 +49,7 @@ npm run build
 3. 選擇 `awdrrawd/BondageClub-Lite`。
 4. Build command 填 `npm run build`，Build output directory 填 `dist`。
 5. 不要新增 Functions，也不需要設定任何帳密環境變數。
-6. 部署後先用測試帳號登入，確認搜尋與進房。
+6. 部署後先確認登入回應環境；DEV 不會看見 PROD 的好友和房間。發布成功不代表能進入正式遊戲環境。
 
 `public/_headers` 會隨建置複製到 `dist/_headers`。若使用 GitHub Pages，網站仍可運作，但 `_headers` 不會生效；基於帳密入口的安全考量，建議優先用 Cloudflare Pages。
 

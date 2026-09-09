@@ -10,12 +10,24 @@ Cloudflare Pages（HTML / CSS / JS）
             │ Socket.IO 4 / WebSocket only
             │ AccountLogin、ChatRoomSearch、ChatRoomJoin、ChatRoomChat
             ▼
-Bondage Club production server
+Bondage Club server → 按 Origin 分配 PROD / DEV
 ```
 
 Cloudflare Pages 只傳送靜態檔案。帳號、密碼、搜尋與聊天內容均由瀏覽器直接送往 BC，不經過本專案的伺服器，因為本專案根本沒有伺服器端程式。
 
 ## 登入狀態機
+
+### 環境隔離（2026-09-09 查證）
+
+公開伺服器 [app.js](https://github.com/Ben987/Bondage-Club-Server/blob/master/app.js) 的 `AccountGetEnvironment` 比對 `socket.request.headers.origin` 與 `ChatRoomProduction`（部署環境變數 PRODUCTION0…16）。匹配為 PROD；非空但不匹配為 DEV。
+
+`AccountLoginProcess` 設定 `result.Environment` 後才發送 LoginResponse；OnLogin 已在此之前註冊房間與帳號操作，未見第二階段遊戲認證。AccountUpdate 不是切換 PROD 的步驟。
+
+`AccountQuery` 的好友結果需符合 `OtherAcc.Environment == Acc.Environment`；`ChatRoomSearch` 排除 `Acc.Environment !== room.Environment`。好友不在聊天室時仍可產生 friendInfo，進房不是顯示在線的普遍前提。
+
+ServerInfo 的 OnlinePlayers 是 Account.length，並非當前環境人數，且連線初期也會發送，不能當作正式環境认证。正式部署可能與公開程式碼版本不同，應再核對實際 LoginResponse.Environment；本客戶端只讀取這個單一欄位，不記錄完整帳號資料。
+
+普通搜尋與完整名稱搜尋由伺服器處理：完整房名可以越過 Visibility 篩選，但環境、區域、封鎖、語言等條件依然生效。瀏覽器 JavaScript 不能自行指定 WebSocket Origin；Pages 的 CSP/CORS、帳號更新和額外 query 參數不能取代伺服器來源名單。
 
 ```text
 idle → connecting → authenticating → waiting-server → ready

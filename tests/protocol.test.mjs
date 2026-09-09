@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { stripTypeScriptTypes } from 'node:module';
 
-function setup() {
+function setup(environment) {
   const handlers = new Map();
   const sent = [];
   const timers = new Map();
@@ -31,12 +31,20 @@ function setup() {
   let state;
   client.subscribe(value => { state = value; });
   client.login('test', 'not-a-real-password');
-  handlers.get('LoginResponse')({ AccountName: 'test', Name: 'Test', ID: 'socket', MemberNumber: 123 });
+  handlers.get('LoginResponse')({ AccountName: 'test', Name: 'Test', ID: 'socket', MemberNumber: 123, Environment: environment });
   handlers.get('ServerInfo')({ OnlinePlayers: 345 });
   return { client, handlers, sent, timers, state: () => state };
 }
 
 const request = { Query: '', Space: 'X', Language: '', Game: '', FullRooms: false, ShowLocked: true, SearchDescs: false };
+
+test('login environment is preserved and DEV never claims production login', () => {
+  const dev = setup('DEV');
+  assert.equal(dev.state().player.Environment, 'DEV');
+  assert.match(dev.state().status, /已登入 DEV/);
+  assert.match(setup('PROD').state().status, /已登入正式環境 PROD/);
+  assert.match(setup().state().status, /正式環境尚未確認/);
+});
 
 test('timed-out room search can be retried', () => {
   const fixture = setup();
