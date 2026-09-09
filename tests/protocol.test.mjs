@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { stripTypeScriptTypes } from 'node:module';
 
-function setup(environment) {
+async function setup(environment, relayAvailable = true) {
   const handlers = new Map();
   const sent = [];
   const timers = new Map();
@@ -21,6 +21,9 @@ function setup(environment) {
     require: () => ({ io: () => socket }),
     window: { setTimeout(fn) { timers.set(++timerId, fn); return timerId; }, clearTimeout(id) { timers.delete(id); } },
     crypto: { randomUUID: () => 'message-id' },
+    location: { origin: 'https://lite.example' },
+    AbortSignal,
+    fetch: async () => ({ ok: relayAvailable, json: async () => relayAvailable ? ({ service: 'bc-lite-relay', version: 1 }) : ({}) }),
   };
   const source = readFileSync(new URL('../src/protocol.ts', import.meta.url), 'utf8');
   const javascript = stripTypeScriptTypes(source)
@@ -30,7 +33,8 @@ function setup(environment) {
   const client = new context.exports.BcLiteClient();
   let state;
   client.subscribe(value => { state = value; });
-  client.login('test', 'not-a-real-password');
+  await client.login('test', 'not-a-real-password');
+  if (!relayAvailable) return { client, handlers, sent, timers, state: () => state };
   handlers.get('LoginResponse')({ AccountName: 'test', Name: 'Test', ID: 'socket', MemberNumber: 123, Environment: environment });
   handlers.get('ServerInfo')({ OnlinePlayers: 345 });
   return { client, handlers, sent, timers, state: () => state };
@@ -38,16 +42,34 @@ function setup(environment) {
 
 const request = { Query: '', Space: 'X', Language: '', Game: '', FullRooms: false, ShowLocked: true, SearchDescs: false };
 
-test('login environment is preserved and DEV never claims production login', () => {
-  const dev = setup('DEV');
-  assert.equal(dev.state().player.Environment, 'DEV');
-  assert.match(dev.state().status, /已登入 DEV/);
-  assert.match(setup('PROD').state().status, /已登入正式環境 PROD/);
-  assert.match(setup().state().status, /正式環境尚未確認/);
+test('missing relay does not send credentials or fall back to direct BC connection', async () => {
+  const fixture = await setup(undefined, false);
+  assert.equal(fixture.state().phase, 'error');
+  assert.equal(fixture.handlers.size, 0);
+  assert.equal(fixture.sent.length, 0);
+  assert.match(fixture.state().status, /中繼未就緒/);
 });
 
-test('timed-out room search can be retried', () => {
-  const fixture = setup();
+test('duplicate login stops reconnection credentials and clears pending operations', async () => {
+  const fixture = await setup('PROD');
+  fixture.client.search(request);
+  fixture.handlers.get('ForceDisconnect')('ErrorDuplicatedLogin');
+  fixture.handlers.get('connect')();
+  assert.equal(fixture.state().phase, 'error');
+  assert.equal(fixture.timers.size, 0);
+  assert.equal(fixture.sent.some(item => item.event === 'AccountLogin'), false);
+});
+
+test('login environment is preserved and DEV never claims production login', async () => {
+  const dev = await setup('DEV');
+  assert.equal(dev.state().player.Environment, 'DEV');
+  assert.match(dev.state().status, /已登入 DEV/);
+  assert.match((await setup('PROD')).state().status, /已登入正式環境 PROD/);
+  assert.match((await setup()).state().status, /正式環境尚未確認/);
+});
+
+test('timed-out room search can be retried', async () => {
+  const fixture = await setup();
   fixture.client.search(request);
   [...fixture.timers.values()][0]();
   fixture.client.search(request);
@@ -56,8 +78,8 @@ test('timed-out room search can be retried', () => {
   assert.equal(fixture.state().status, '找到 0 個房間');
 });
 
-test('creation waits for room sync; periodic ServerInfo cannot reset pending operation', () => {
-  const fixture = setup();
+test('creation waits for room sync; periodic ServerInfo cannot reset pending operation', async () => {
+  const fixture = await setup();
   fixture.client.createRoom('Lite test', 'X', 'CN', true);
   const payload = fixture.sent.find(item => item.event === 'ChatRoomCreate').payload;
   assert.equal(payload.Space, 'X');
@@ -72,8 +94,8 @@ test('creation waits for room sync; periodic ServerInfo cannot reset pending ope
   assert.equal(fixture.timers.size, 0);
 });
 
-test('creation failure restores controls and exposes server error', () => {
-  const fixture = setup();
+test('creation failure restores controls and exposes server error', async () => {
+  const fixture = await setup();
   fixture.client.createRoom('Lite test', 'X', '', false);
   fixture.handlers.get('ChatRoomCreateResponse')('RoomAlreadyExist');
   assert.equal(fixture.state().phase, 'ready');

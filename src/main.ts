@@ -71,8 +71,8 @@ class LiteApp {
     intro.append(
       this.el("p", "eyebrow", "LOW-BANDWIDTH CLIENT"),
       this.el("h1", "", "只帶聊天室，輕一點登入。"),
-      this.el("p", "lede", "不載入角色繪圖、服裝素材與遊戲畫面；瀏覽器直接連到 BC，本站不經手也不儲存帳密。"),
-      this.feature("WebSocket 直連", "沒有自架中繼伺服器"),
+      this.el("p", "lede", "不載入角色繪圖、服裝素材與遊戲畫面；透過本站 Cloudflare 中繼連到 BC。中繼不儲存帳密或聊天內容。"),
+      this.feature("WebSocket 中繼", "Cloudflare 託管連線"),
       this.feature("純文字聊天室", "搜尋、進房、聊天與密語"),
       this.feature("密碼只在記憶體", "重新整理或登出即消失"),
     );
@@ -97,10 +97,13 @@ class LiteApp {
     }
     card.append(this.el("p", "security-note", "提醒：登入會讓同帳號在其他 BC 視窗斷線。請只使用你信任的部署網址。"));
     if (this.notice || state.phase === "error") card.append(this.el("div", "form-notice", this.notice || state.status));
-    card.addEventListener("submit", (event) => {
+    card.addEventListener("submit", async (event) => {
       event.preventDefault();
       this.notice = "";
-      try { bcClient.login(this.accountName, this.password); } catch (error) { this.notice = error instanceof Error ? error.message : "無法登入"; this.render(); }
+      const secret = this.password;
+      this.password = "";
+      password.value = "";
+      try { await bcClient.login(this.accountName, secret); } catch (error) { this.notice = error instanceof Error ? error.message : "無法登入"; this.render(); }
     });
     wrap.append(intro, card);
     return wrap;
@@ -149,9 +152,9 @@ class LiteApp {
     status.setAttribute("role", "status");
     const environment = state.player?.Environment;
     const diagnostics = this.el("div", "form-notice");
-    diagnostics.append(this.el("p", "", `伺服器登入環境：${environment || "未提供（不能判定為 PROD）"} · 網頁來源：${location.origin}`));
+    diagnostics.append(this.el("p", "", `伺服器登入環境：${environment || "未提供（不能判定為 PROD）"} · 連線方式：本站 Cloudflare 中繼`));
     diagnostics.append(this.el("p", "", environment === "DEV"
-      ? "你已登入 DEV 環境。BC 依網頁 Origin 分配環境；正式環境的好友和房間不會出現在這裡，建立房間也不會改變環境。"
+      ? "中繼連線仍被 BC 分配到 DEV。請回報 /api/relay-status 的 bcOrigin 與目前環境；建立房間不會切換環境。"
       : environment === "PROD" ? "伺服器確認為正式環境。搜尋會排除隱藏房間；輸入完整房名可搜尋隱藏房間，仍受權限與其他篩選條件限制。"
       : "帳密驗證已通過，但伺服器未確認正式環境；不能只以登入成功或在線人數判定。"));
     diagnostics.append(this.el("small", "", `伺服器總在線人數：${state.onlinePlayers ?? "未知"}（不代表所在環境人數）`));
@@ -260,7 +263,7 @@ class LiteApp {
 
   private buildFooter(): HTMLElement {
     const footer = this.el("footer", "app-footer");
-    footer.append(this.el("span", "", "BC Lite · 靜態前端"), this.el("span", "", "非 Bondage Club 官方客戶端"));
+    footer.append(this.el("span", "", "BC Lite · Relay v1"), this.el("span", "", "非 Bondage Club 官方客戶端"));
     return footer;
   }
 

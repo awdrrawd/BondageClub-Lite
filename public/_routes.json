@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "include": ["/socket.io/*", "/api/relay-status"],
+  "exclude": []
+}

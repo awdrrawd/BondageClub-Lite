@@ -6,6 +6,7 @@
   "description": "A static, low-bandwidth Bondage Club chat client.",
   "scripts": {
     "dev": "vite",
+    "dev:relay": "wrangler pages dev dist --ip 127.0.0.1 --port 8788 --compatibility-date 2026-09-01",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "node --test tests/*.test.mjs"
@@ -18,8 +19,12 @@
   "dependencies": {
     "socket.io-client": "4.8.3"
   },
+  "overrides": {
+    "sharp": "^0.35.4"
+  },
   "devDependencies": {
     "typescript": "^7.0.2",
-    "vite": "^8.2.2"
+    "vite": "^8.2.2",
+    "wrangler": "4.130.0"
   }
 }

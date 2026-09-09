@@ -1,7 +1,6 @@
 import { io, type Socket } from "socket.io-client";
 import type { CharacterSummary, ChatMessage, ClientSnapshot, DictionaryEntry, DisplayMessage, PlayerSummary, RoomSearchRequest, RoomSearchResult, RoomSync } from "./types";
 
-const SERVER_URL = "https://bondage-club-server.herokuapp.com";
 const MAX_MESSAGES = 600;
 const SEARCH_TIMEOUT_MS = 8_000;
 
@@ -51,7 +50,7 @@ export class BcLiteClient {
     return () => this.listeners.delete(listener);
   }
 
-  login(accountName: string, password: string): void {
+  async login(accountName: string, password: string): Promise<void> {
     const trimmedName = accountName.trim();
     if (!trimmedName || !password) throw new Error("請輸入帳號與密碼");
     this.disconnect();
@@ -59,8 +58,19 @@ export class BcLiteClient {
     this.manualDisconnect = false;
     this.loginAccepted = false;
     this.serverReady = false;
-    this.patch({ ...initialSnapshot(), phase: "connecting", status: "正在連線到 BC…" });
-    this.connectSocket();
+    const attempt = this.credentials;
+    this.patch({ ...initialSnapshot(), phase: "connecting", status: "正在檢查本站連線中繼…" });
+    try {
+      const response = await fetch("/api/relay-status", { cache: "no-store", signal: AbortSignal.timeout(10_000) });
+      const data = await response.json();
+      if (!response.ok || data.service !== "bc-lite-relay" || data.version !== 1) throw new Error();
+      if (this.credentials !== attempt) return;
+      this.connectSocket();
+    } catch {
+      if (this.credentials !== attempt) return;
+      this.credentials = null;
+      this.patch({ phase: "error", status: "中繼未就緒：請確認 Pages 已部署 _worker.js，並能開啟 /api/relay-status" });
+    }
   }
 
   disconnect(): void {
@@ -135,12 +145,14 @@ export class BcLiteClient {
   }
 
   private connectSocket(): void {
-    this.socket = io(SERVER_URL, {
+    this.socket = io(location.origin, {
       transports: ["websocket"], upgrade: false, reconnection: true, reconnectionAttempts: Infinity,
       reconnectionDelay: 1_000, reconnectionDelayMax: 15_000, timeout: 20_000,
     });
     this.socket.on("connect", () => {
       if (!this.credentials) return;
+      this.loginAccepted = false;
+      this.serverReady = false;
       this.patch({ phase: "authenticating", status: "連線成功，正在登入…" });
       this.socket!.emit("AccountLogin", { AccountName: this.credentials.accountName, Password: this.credentials.password });
     });
@@ -192,6 +204,10 @@ export class BcLiteClient {
     this.socket.on("ForceDisconnect", (reason: unknown) => {
       const status = reason === "ErrorDuplicatedLogin" ? "帳號已在別處登入" : `伺服器中斷：${String(reason)}`;
       this.credentials = null;
+      this.loginAccepted = false;
+      this.serverReady = false;
+      this.clearSearchTimer();
+      this.clearRoomTimer();
       this.patch({ phase: "error", status });
       this.socket?.disconnect();
     });
@@ -201,10 +217,13 @@ export class BcLiteClient {
       this.loginAccepted = false;
       this.clearSearchTimer();
       this.clearRoomTimer();
-      this.patch({ phase: "reconnecting", status: `連線中斷（${reason}），正在重試…`, room: null, characters: [] });
+      if (reason === "io server disconnect") {
+        this.credentials = null;
+        this.patch({ phase: "error", status: "伺服器終止連線，請重新登入", room: null, characters: [] });
+      } else this.patch({ phase: "reconnecting", status: `連線中斷（${reason}），正在重試…`, room: null, characters: [] });
     });
     this.socket.on("connect_error", () => {
-      if (!this.manualDisconnect) this.patch({ phase: "reconnecting", status: "無法連線，正在重試…" });
+      if (!this.manualDisconnect && this.credentials) this.patch({ phase: "reconnecting", status: "中繼 WebSocket 連線失敗，正在重試；請檢查 Network 的 /socket.io/ 狀態" });
     });
   }
 

@@ -7,13 +7,16 @@ Cloudflare Pages（HTML / CSS / JS）
             │ 第一次載入與版本更新
             ▼
        玩家瀏覽器
-            │ Socket.IO 4 / WebSocket only
-            │ AccountLogin、ChatRoomSearch、ChatRoomJoin、ChatRoomChat
+            │ 同站 /socket.io/（WebSocket only）
+            ▼
+  Pages Worker 設定上游 Origin，透明轉送
             ▼
 Bondage Club server → 按 Origin 分配 PROD / DEV
 ```
 
-Cloudflare Pages 只傳送靜態檔案。帳號、密碼、搜尋與聊天內容均由瀏覽器直接送往 BC，不經過本專案的伺服器，因為本專案根本沒有伺服器端程式。
+Relay v1 的 Cloudflare Pages 包含 `_worker.js` 伺服器端程式。帳密、搜尋和聊天封包均經過中繼；程式不解析／儲存內容，以原樣返回上游 101 回應讓 Cloudflare 自動橋接 WebSocket，避免自行實作 Engine.IO 心跳及二進位轉送。
+
+瀏覽器登入前檢查 `/api/relay-status`，確認中繼存在；環境判定仍以 LoginResponse.Environment 為準。詳見 [部署與測試](deployment-and-tests.md)。
 
 ## 登入狀態機
 
@@ -67,7 +70,7 @@ idle → connecting → authenticating → waiting-server → ready
 - 不下載或繪製角色與服裝素材。
 - 不解析完整 BC 翻譯字典、活動引擎或遊戲規則。
 - 不保存帳號密碼，不提供「記住我」。
-- 不代理 BC 流量，不建立雲端 API 或資料庫。
-- 不偽造瀏覽器無法控制的 `Origin`、`Referer` headers。
+- 不建立資料庫或紀錄 BC 帳密／聊天封包。
+- 瀏覽器不改寫 Origin；伺服器端 Worker 使用與 ShuangClient 相同的上游 Origin。
 
 若將來要支援完整 Action／Activity 文字，建議在建置階段從相同 BC 版本擷取必要翻譯鍵，產生小型靜態 JSON；不要直接載入完整遊戲資源。

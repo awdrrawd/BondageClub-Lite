@@ -12,7 +12,11 @@ test("production build contains the static shell and security headers", async ()
   assert.match(html, /<title>BC Lite<\/title>/);
   assert.match(html, /assets\/index-[\w-]+\.js/);
   assert.match(headers, /Content-Security-Policy:/);
-  assert.match(headers, /wss:\/\/bondage-club-server\.herokuapp\.com/);
+  assert.match(headers, /connect-src 'self'/);
+  const worker = await readFile(new URL('dist/_worker.js', root), 'utf8');
+  assert.match(worker, /UPSTREAM/);
+  const routes = JSON.parse(await readFile(new URL('dist/_routes.json', root), 'utf8'));
+  assert.deepEqual(routes.include, ['/socket.io/*', '/api/relay-status']);
   assert.doesNotMatch(headers, /unsafe-inline|unsafe-eval/);
 });
 

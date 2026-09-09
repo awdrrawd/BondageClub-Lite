@@ -1,0 +1,96 @@
+# Relay v1 部署與驗收
+
+## 本次改變
+
+沿用現有 Cloudflare Pages，使用進階模式的 `dist/_worker.js`。不必建立另一個 Worker 網址、修改 DNS 或提供 API token。`_routes.json` 只把 `/socket.io/*` 和 `/api/relay-status` 交給 Worker，其餘頁面和素材由 Pages 直接提供。
+
+連線現在是：瀏覽器 → 同網址 `/socket.io/` → Cloudflare Worker → BC。Worker 建立新握手並指定 `Origin: https://bondageprojects.elementfx.com`（參考 ShuangClient），不轉送瀏覽器 Cookie 或 Authorization；不解析、不記錄、不儲存帳密和聊天封包。登入後的所有聊天流量仍持續經過 Cloudflare，不是只代理登入一次。
+
+來源相同檢查只限制其他網站借用中繼，不能阻擋自訂非瀏覽器程式；上游網址固定，不能透過參數變成任意代理。先限個人測試，再依實際用量決定是否開放多人使用。未配置額外資料庫、帳密環境變數或保活排程。
+
+## 你要做的部署設定
+
+1. GitHub Desktop 選擇 BondageClub-Lite，Commit 本次變更並 Push origin。包含 `public/_worker.js`、`public/_routes.json`、src、package.json 和 lockfile；不用提交 dist/node_modules。
+2. Cloudflare 現有 Pages 專案保留：Production branch `Mater`；Build command `npm run build`；Output directory `dist`；Root directory 預設根目錄；Node 版本使用 `NODE_VERSION=22`。
+3. 不用建立獨立 Workers 專案。Pages 會識別輸出根目錄中的 `_worker.js`，部署為 Pages Functions 進階模式。這一版已經有雲端運算部分；舊文件的「純靜態、不需要 Functions」不再適用。
+4. 若曾設定 `SKIP_DEPENDENCY_INSTALL` 或只安裝 production dependencies，取消該自訂設定，以便建置 Vite/TypeScript。
+5. 不需要設定 `BC_ORIGIN`，程式有預設值。若你曾自行設定，先移除錯誤值，或將 Production 及 Preview 的該值設為 `https://bondageprojects.elementfx.com`（無 www、版本路徑或尾斜線）。它不是 BC 帳密。變更後重新部署。
+6. 等新部署成功，關掉舊 Lite 分頁，再開正式網址。清除舊頁面快取或強制重新整理，頁尾應顯示 `Relay v1`。
+
+Cloudflare 文件：[Pages 進階模式](https://developers.cloudflare.com/pages/functions/advanced-mode/)、[WebSocket](https://developers.cloudflare.com/workers/runtime-apis/websockets/)。Functions 使用 Workers 額度，不保證無限用量或永不斷線；先沿用免費方案並觀察用量，不需要先升級付費。
+
+## 測試順序與通過標準
+
+### 1. 確認 Worker 已部署（不用登入）
+
+開啟 `https://bondageclub-lite.pages.dev/api/relay-status`。應顯示 JSON，包含：
+
+```json
+{"service":"bc-lite-relay","version":1,"transport":"websocket","bcOrigin":"https://bondageprojects.elementfx.com"}
+```
+
+JSON 另有 upstream 與 note。這只證明中繼程式存在，不能證明 PROD。
+
+若顯示 Lite HTML、404 或舊頁面，表示 Worker／路由未部署；先查看建置與 Functions 部署記錄，確認輸出包含 `_worker.js` 和 `_routes.json`，不要先測帳密。
+
+### 2. 確認連線走中繼
+
+電腦瀏覽器 F12 → Network → WS，登入時應看到同網站的 `/socket.io/?EIO=4&transport=websocket`，狀態 101。瀏覽器不應再直接連 `bondage-club-server.herokuapp.com`。
+
+### 3. 正式環境登入（最重要）
+
+使用測試帳號登入，畫面必須顯示 `伺服器登入環境：PROD`。若為 DEV，停止後續測試，提供環境文字、relay-status 與部署版本；不以建立房間嘗試切換環境。首次真實驗收前，不能聲稱已成功進入 PROD。
+
+### 4. 好友在線（先不進房）
+
+用另一個已互加好友的帳號在官方 BC 查詢，手動刷新好友列表；應能看到 Lite 帳號在線。勿使用相同帳號開官方 BC，否則會踢掉 Lite。即使 Lite 未進房，也要驗證好友可見，避免誤把進房當成必要條件。
+
+### 5. 公開與隱藏房間
+
+- 混合區、語言全部、勾選滿房和鎖房，空白搜尋應回傳公開房間。分別驗證女性／男性／混合區；不能要求冷門區必定有房。
+- 用官方端建立或指定一個已知隱藏房，選相同區域、取消語言限制、填完整房名後搜尋。結果仍受封鎖與房間權限限制。
+- 加入已知公開測試房，確認房名、成員及官方端的進房通知。
+
+### 6. 建房與雙向訊息
+
+- 建立獨特名稱的公開混合房，確認進房成功；請另一個官方帳號搜尋並加入。
+- 雙向傳送普通文字、中文輸入法、`/me 測試動作`、`/w 編號 測試密語`。
+- 普通聊天/動作應雙向可見，密語只送給對象，自己的密語顯示一次。Action/Activity 的完整翻譯仍屬既有功能限制。
+- 手機點「離開」後能回搜尋頁；官方端應看到離房。
+
+### 7. 重連、維持連線與登出
+
+- 暫時斷網約 10 秒再恢復，應重新登入並確認 PROD。目前重連後回搜尋頁，需要手動回房，不承諾自動回房。
+- 在測試房保持前景 10–15 分鐘，檢查雙向訊息仍能傳送。
+- 測試另一處登入同帳號：Lite 應停止重試並顯示重複登入，而不是反覆搶登。
+- 登出後 WebSocket 應關閉，好友列表刷新後顯示離線。
+
+## 排錯回報
+
+請提供目前網址、relay-status 的 JSON、PROD/DEV 文字、狀態提示、失敗步驟及 WebSocket HTTP 狀態。
+
+| 狀態 | 排查方向 |
+|---|---|
+| relay-status 是 HTML/404 | Worker 未部署，或仍在舊部署 |
+| 403 | 請求 Origin 不符本站，或 Cloudflare Access/WAF 攔截 |
+| 400 | 握手不是 EIO=4 + websocket，或帶了未支援參數 |
+| 426 | 用普通 HTTP 打開 WebSocket 路徑；瀏覽器需 WebSocket Upgrade |
+| 502 | Worker 無法升級 BC 上游連線；查看回應錯誤碼 |
+| 101 但 DEV | 上游環境判定仍未通過，不能當正式登入 |
+| PROD 但零房間 | 再核對區域、篩選、完整房名與伺服器回應 |
+
+不要貼完整 LoginResponse、AccountLogin 或未清理的 HAR，裡面可能包含帳密、個人資料或聊天內容。中繼程式刻意不記錄這些內容。
+
+## 本機檢查
+
+本次已通過 TypeScript/Vite 建置、Worker 邊界與協定單元測試，以及 Wrangler 本機 Worker → 真實 BC 的 Socket.IO 握手與 ServerInfo 接收。握手測試未登入帳號；Cloudflare 正式部署、PROD 登入與長連線測試尚需按上方步驟驗收。
+
+`npm run dev` 只用於前端排版，沒有 Pages 中繼，登入檢查會失敗。要測完整流程：
+
+```sh
+npm run build
+npm test
+npm run dev:relay
+```
+
+開啟 http://127.0.0.1:8788 。另一個終端可執行 `node scripts/smoke-relay.mjs`，只測中繼與 BC Socket.IO 握手，不傳 AccountLogin。

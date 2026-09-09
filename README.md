@@ -1,10 +1,10 @@
 # BondageClub-Lite
 
-一個只載入登入、聊天室搜尋與純文字聊天室的 Bondage Club 非官方輕量入口。它是純靜態前端，部署後由玩家的瀏覽器直接連線 BC；不需要自架 API、WebSocket 中繼或常駐伺服器。
+一個只載入登入、聊天室搜尋與純文字聊天室的 Bondage Club 非官方輕量入口。使用 Cloudflare Pages 提供前端，搭配同站 Pages Worker 中繼 BC WebSocket，不需要自行維護常駐主機。
 
-**目前的架構限制：能驗證帳密不等於能登入 PROD。** BC 公開伺服器依 WebSocket `Origin` 比對正式來源名單；不在名單內的來源分配到 DEV。Cloudflare Pages 自訂入口若未被允許，會與正式玩家的好友／房間隔離。WebSocket-only 只解決傳輸，不解決環境分配。介面現在顯示 `LoginResponse.Environment`，請以此確認。這不是增加 AccountUpdate、等待 ServerInfo 或建立房間就能修復的問題。
+**Relay v1：** BC 依 WebSocket Origin 分配 PROD/DEV。中繼參考 ShuangClient，在伺服器端設定官方來源；瀏覽器只連同站 `/socket.io/`。登入前先檢查中繼存在，登入後以真實 `LoginResponse.Environment` 驗證 PROD，不會自動退回直連 DEV。
 
-維持純靜態且要連正式環境，需要 BC 管理者允許入口來源，或調整架構讓 Lite 在已被允許的官方頁面中執行。中繼服務是另一種架構，會改變流量與帳密信任路徑，尚未實作。
+完整部署與測試步驟見 [deployment-and-tests.md](docs/deployment-and-tests.md)。所有帳密及聊天流量會經過你的 Cloudflare 中繼，Worker 不記錄或儲存封包。實際 PROD 登入、多人互見與長連線仍需部署後驗收。
 
 ## 目前功能
 
@@ -27,20 +27,22 @@
 
 ## 本機開發
 
-需要 Node.js 20.19+ 或 22.12+。
+建置與 Worker 開發使用 Node.js 22.13+（Cloudflare 設 NODE_VERSION=22）。
 
 ```bash
 npm install
 npm run dev
 ```
 
-正式建置與檢查：
+上面的 Vite dev 只預覽 UI，不執行 Pages Worker。完整中繼測試：
 
 ```bash
 npm run build
+npm test
+npm run dev:relay
 ```
 
-輸出位於 `dist/`，可以放到任何 HTTPS 靜態網站。Socket.IO 固定使用已修補安全問題的 `4.8.3`，並強制 `websocket` transport；不要改回預設的 polling，否則跨來源請求會被 BC 伺服器的 CORS 設定擋下。BC Bot 指南使用的 4.6.2 與此版同屬 Socket.IO 4 協定。
+輸出位於 `dist/`，包含 `_worker.js` 與 `_routes.json`，需要支援 Worker 的 Cloudflare Pages 部署。純 GitHub Pages 無法執行中繼。Socket.IO 固定為 `4.8.3`，使用 WebSocket-only，Worker 透明轉送升級連線與心跳。
 
 ## 免費部署：Cloudflare Pages
 
@@ -48,16 +50,17 @@ npm run build
 2. Cloudflare Dashboard → Workers & Pages → Create → Pages → Connect to Git。
 3. 選擇 `awdrrawd/BondageClub-Lite`。
 4. Build command 填 `npm run build`，Build output directory 填 `dist`。
-5. 不要新增 Functions，也不需要設定任何帳密環境變數。
-6. 部署後先確認登入回應環境；DEV 不會看見 PROD 的好友和房間。發布成功不代表能進入正式遊戲環境。
+5. Pages 會自動部署輸出中的 `_worker.js`（Functions 進階模式）；無需另建 Worker 專案，也不需要任何帳密環境變數。
+6. 先確認 `/api/relay-status` 回傳 JSON，再登入確認 PROD；接著測試好友與房間。
 
-`public/_headers` 會隨建置複製到 `dist/_headers`。若使用 GitHub Pages，網站仍可運作，但 `_headers` 不會生效；基於帳密入口的安全考量，建議優先用 Cloudflare Pages。
+`public/_headers` 的 CSP 限制前端連線只到本站。Worker 的狀態／錯誤回應自行設定 no-store。路由只執行兩個中繼相關路徑，其餘資源不消耗 Worker 請求額度。
 
 ## 協定依據
 
 - `BC-Bot-Deploy-Guide.md`：WebSocket-only、登入時序及事件踩坑
 - Bondage Club R131 `Scripts/Messages.d.ts`、`Scripts/Server.js`、`ChatSearch.js`、`ChatRoom.js`
 - `BC-LCE`：行動版聊天室版面及斷線重連行為參考
+- [ShuangClient](https://gitgud.io/yeshuang26/shuangclient)：參考後端設定 Origin 的連線方式；未複製其 Python 程式碼。
 
 事件流程與模組界線另見 [`docs/architecture.md`](docs/architecture.md)。
 
