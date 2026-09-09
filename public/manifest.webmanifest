@@ -1,0 +1,17 @@
+{
+  "name": "Bondage Club Lite",
+  "short_name": "BC Lite",
+  "description": "低流量的 Bondage Club 純文字聊天室入口",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#100d13",
+  "theme_color": "#17131c",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

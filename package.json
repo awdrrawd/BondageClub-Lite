@@ -1,0 +1,25 @@
+{
+  "name": "bondageclub-lite",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A static, low-bandwidth Bondage Club chat client.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/awdrrawd/BondageClub-Lite.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "socket.io-client": "4.8.3"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vite": "^8.2.2"
+  }
+}

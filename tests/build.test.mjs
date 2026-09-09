@@ -1,0 +1,24 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+
+const root = new URL("../", import.meta.url);
+
+test("production build contains the static shell and security headers", async () => {
+  const [html, headers] = await Promise.all([
+    readFile(new URL("dist/index.html", root), "utf8"),
+    readFile(new URL("dist/_headers", root), "utf8"),
+  ]);
+  assert.match(html, /<title>BC Lite<\/title>/);
+  assert.match(html, /assets\/index-[\w-]+\.js/);
+  assert.match(headers, /Content-Security-Policy:/);
+  assert.match(headers, /wss:\/\/bondage-club-server\.herokuapp\.com/);
+  assert.doesNotMatch(headers, /unsafe-inline|unsafe-eval/);
+});
+
+test("client is WebSocket-only and does not persist credentials", async () => {
+  const protocol = await readFile(new URL("src/protocol.ts", root), "utf8");
+  assert.match(protocol, /transports:\s*\["websocket"\]/);
+  assert.match(protocol, /upgrade:\s*false/);
+  assert.doesNotMatch(protocol, /localStorage|sessionStorage|indexedDB|document\.cookie/);
+});
