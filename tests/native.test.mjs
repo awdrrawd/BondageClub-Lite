@@ -3,6 +3,18 @@ import assert from 'node:assert/strict';
 import { activityReason, definitions } from './native-helper.mjs';
 const character = id => ({ MemberNumber: id, Name: 'Test', AssetFamily: 'Female3DCG', Appearance: [{ Group: 'BodyUpper', Name: definitions.bodies.BodyUpper[0] }], ArousalSettings: { Active: 'Manual', Activity: 'z'.repeat(100), Zone: 'f'.repeat(30) } });
 
+test('online bundles inherit native family and explicit refusals precede inventory limitations', () => {
+  const actor = character(1), target = character(2);
+  delete actor.AssetFamily; delete target.AssetFamily;
+  assert.equal(activityReason(actor, target, 'ItemEars', 'Whisper', {}), null);
+  actor.Appearance.push({ Group: 'Cloth', Name: 'Dress' });
+  target.ArousalSettings.Zone = 'd'.repeat(30);
+  assert.equal(activityReason(actor, target, 'ItemEars', 'Whisper', {}), 'native.permission');
+  target.ArousalSettings.Zone = 'f'.repeat(30);
+  target.ArousalSettings.Active = 'Inactive';
+  assert.equal(activityReason(actor, target, 'ItemEars', 'Whisper', {}), 'native.permission');
+});
+
 test('native activity prerequisites fail closed on missing data, equipment, local effects and room restrictions', () => {
   const actor = character(1), target = character(2);
   assert.equal(activityReason(actor, target, 'ItemEars', 'Whisper', {}), null);

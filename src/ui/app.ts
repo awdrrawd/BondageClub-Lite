@@ -6,6 +6,7 @@ import { appendChatLinks, MediaConsent } from "../media/chat-links";
 import { afcLovers } from "../profile/afc";
 import { StabilityControls } from "../platform/stability";
 import { loadTextCatalog } from "../action/catalog";
+import { openActivityDialog } from "./activity-dialog";
 import type { CharacterSummary, ClientSnapshot, DisplayMessage, RoomCreateOptions, RoomSearchRequest, RoomSearchResult } from "../shared/types";
 
 const app = document.querySelector<HTMLDivElement>("#app");
@@ -355,11 +356,6 @@ class LiteApp {
       tags.querySelector(".afc-tag")?.remove();
       const lovers = this.roomLovers(room);
       if (lovers.length) { const badge = this.el("span", "tag afc-tag", t("afc.inRoom", [lovers.length])); badge.title = lovers.map(lover => `${lover.name} #${lover.memberNumber}`).join("、"); tags.append(badge); }
-    });
-    document.querySelectorAll<HTMLButtonElement>("[data-lover-room]").forEach(button => {
-      const id = Number(button.dataset.loverRoom);
-      const room = this.snapshot!.friends.find(friend => friend.MemberNumber === id)?.ChatRoomName || this.snapshot!.loverRooms?.[id]?.name;
-      button.disabled = !room; button.textContent = room ? `${t("m044")} · ${room}` : t("afc.query");
     });
     const list = document.getElementById("contact-list");
     if (list) this.fillFriendList(list);
@@ -897,11 +893,6 @@ class LiteApp {
       for (const lover of lovers) {
         const room = this.snapshot!.friends.find(friend => friend.MemberNumber === lover.memberNumber)?.ChatRoomName || this.snapshot!.loverRooms?.[lover.memberNumber]?.name;
         const row = this.el("p", "", `${lover.name || t("relation.present")} #${lover.memberNumber}${room ? ` · ${room}` : ""}`);
-        const join = this.button(room ? `${t("m044")} · ${room}` : t("afc.query"), "ghost", "button"); join.dataset.loverRoom = String(lover.memberNumber); join.disabled = !room;
-        join.addEventListener("click", () => {
-          const destination = this.snapshot!.friends.find(friend => friend.MemberNumber === lover.memberNumber)?.ChatRoomName || this.snapshot!.loverRooms?.[lover.memberNumber]?.name;
-          if (destination) { dialog.close(); dialog.remove(); this.joinRoom(destination); }
-        }); row.append(join);
         dialog.append(row);
       }
     }
@@ -910,10 +901,12 @@ class LiteApp {
     bio.addEventListener("toggle", () => { if (bio.open && bio.childElementCount === 1) bio.append(this.el("p", "profile-description", decodeBiography(character.Description))); });
     dialog.append(bio);
     const actions = this.el("div", "toolbar");
-    const close = this.button(t("m173"), "ghost", "button");
+    const close = this.button("×", "ghost dialog-close", "button");
+    close.setAttribute("aria-label", t("m173"));
     const dismiss = () => { dialog.close(); dialog.remove(); };
     close.addEventListener("click", dismiss);
     dialog.addEventListener("close", () => dialog.remove());
+    dialog.append(close);
     if (character.MemberNumber !== this.snapshot!.player?.MemberNumber) {
       const whisper = this.button(t("m174"), "secondary", "button");
       whisper.addEventListener("click", () => {
@@ -926,32 +919,14 @@ class LiteApp {
       actions.append(whisper, friend, beep);
     }
     if (this.snapshot!.characters.some(item => item.MemberNumber === character.MemberNumber)) {
-      const interact = this.el("details", "interaction-panel"); interact.append(this.el("summary", "", t("interaction.title")), this.el("p", "muted", t("native.help")));
-      const parts = this.el("div", "body-parts"), activities = this.el("div", "body-activities");
-      const activityError = this.el("p", "notice"); activityError.setAttribute("role", "status");
-      const options = bcClient.activityOptions(character.MemberNumber);
-      for (const [group, label] of new Map(options.map(option => [option.group, option.groupLabel]))) {
-        const part = this.button(label, "ghost", "button"); part.dataset.bodyGroup = group;
-        part.addEventListener("click", () => {
-          activities.replaceChildren();
-          for (const button of parts.querySelectorAll("button")) button.setAttribute("aria-pressed", String(button === part));
-          for (const option of bcClient.activityOptions(character.MemberNumber).filter(value => value.group === group)) {
-            const row = this.el("div", "activity-option");
-            const action = this.button(option.label, "secondary", "button"); action.disabled = Boolean(option.reason);
-            action.addEventListener("click", () => {
-              try { bcClient.sendActivity(character.MemberNumber, group, option.name); activityError.textContent = ""; }
-              catch (error) { activityError.textContent = error instanceof Error ? error.message : String(error); }
-            });
-            row.append(action);
-            if (option.reason) row.append(this.el("small", "muted", t(option.reason as Parameters<typeof t>[0])));
-            activities.append(row);
-          }
-        }); parts.append(part);
-      }
-      if (!options.length) parts.append(this.el("p", "muted", t("native.data")));
-      interact.append(parts, activities, activityError); dialog.append(interact);
+      const interact = this.button(t("interaction.title"), "secondary interaction-open", "button");
+      interact.addEventListener("click", () => {
+        dismiss();
+        openActivityDialog(character.Nickname || character.Name, compatibility => bcClient.activityOptions(character.MemberNumber, compatibility), (group, name, compatibility) => bcClient.sendActivity(character.MemberNumber, group, name, compatibility));
+      });
+      actions.append(interact);
     }
-    actions.append(close); dialog.append(actions); document.body.append(dialog); dialog.showModal();
+    dialog.append(actions); document.body.append(dialog); dialog.showModal();
   }
 
   private buildFooter(): HTMLElement {

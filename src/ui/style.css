@@ -362,3 +362,32 @@ summary { cursor: pointer; padding-block: .5rem; }
   .body-parts { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
 .selected-contact { outline:1px solid var(--accent); }
+
+/* Keep long-press copying in conversations and editable fields, not UI chrome. */
+button, summary, .app-header, .app-nav, .toolbar, .room-card, .member-panel, .body-picker, .field-label, .checkbox, .view-heading, .chat-room-top-menu, .app-footer {
+  -webkit-user-select:none; user-select:none;
+}
+.message-content, .message-text, .reply-preview, .profile-description, input, textarea, [contenteditable=true] {
+  -webkit-user-select:text; user-select:text;
+}
+.profile-dialog { position:fixed; overflow:auto; }
+.profile-dialog > h2 { padding-right:2.5rem; overflow-wrap:anywhere; }
+.dialog-close { position:absolute; right:.5rem; top:.5rem; min-width:44px; min-height:44px; font-size:1.5rem; line-height:1; }
+.activity-dialog { width:min(850px, calc(100vw - 1rem)); max-height:90dvh; padding:1rem; }
+.activity-layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:1rem; align-items:start; }
+.activity-body-svg { display:block; width:100%; height:330px; }
+.body-outline { fill:#9b82ad22; stroke:#9b82ad; stroke-width:5; pointer-events:none; }
+.body-zone { fill:#f399be22; stroke:#ef93b6; stroke-width:3; cursor:pointer; }
+.body-zone:hover, .body-zone:focus, .body-zone[aria-pressed=true] { fill:#f399be88; stroke:#fff; outline:none; }
+.activity-dialog .body-parts { grid-template-columns:repeat(2,minmax(0,1fr)); gap:.3rem; margin:.5rem 0; }
+.activity-dialog .body-parts .button { min-height:44px; padding:.4rem; overflow-wrap:anywhere; }
+.body-results { min-width:0; position:sticky; top:0; }
+.body-results h3 { margin:.75rem 0; }
+.body-results .notice:empty { display:none; }
+.body-results .body-activities { max-height:60dvh; overscroll-behavior:contain; }
+.body-results .button { min-height:44px; white-space:normal; overflow-wrap:anywhere; }
+@media(max-width:480px) {
+  .activity-layout { gap:.5rem; grid-template-columns:minmax(0, .9fr) minmax(0,1.1fr); }
+  .activity-body-svg { height:280px; }
+  .activity-dialog .body-parts { grid-template-columns:1fr; }
+}

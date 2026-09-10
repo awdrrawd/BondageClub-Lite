@@ -4,10 +4,20 @@ export const nativeActivities = definitions.activities;
 export function activityReason(actor: CharacterSummary, target: CharacterSummary, group: string, name: string, room: { BlockCategory?: string[]; MapType?: string }): string | null {
   const activity = nativeActivities.find(value => value.name === name);
   const self = actor.MemberNumber === target.MemberNumber;
-  if (room.BlockCategory !== undefined && !Array.isArray(room.BlockCategory)) return "native.data";
+  if (room.BlockCategory !== undefined && !Array.isArray(room.BlockCategory)) return "native.room";
   if (!activity || !(self ? activity.self : activity.target).includes(group)) return "native.target";
   if (room.BlockCategory?.includes("Arousal") || (room.MapType && room.MapType !== "Never")) return "native.room";
-  if (actor.AssetFamily !== "Female3DCG" || target.AssetFamily !== "Female3DCG") return "native.data";
+  // Check explicit refusals before limitations, so compatibility mode cannot bypass them.
+  if (target.ArousalSettings?.Active === "Inactive") return "native.permission";
+  const knownZone = (definitions.zones as Record<string, number>)[group];
+  const zoneCode = (target.ArousalSettings?.Zone?.charCodeAt(knownZone) ?? NaN) - 100;
+  if (Number.isFinite(zoneCode) && zoneCode >= 0 && zoneCode % 10 === 0) return "native.permission";
+  for (const [character, receiving] of [[actor, false], [target, true]] as const) {
+    const encoded = (character.ArousalSettings?.Activity?.charCodeAt(activity.id) ?? NaN) - 100;
+    if ((receiving ? encoded % 10 : Math.floor(encoded / 10)) === 0) return "native.permission";
+  }
+  // CharacterLoadOnline creates Female3DCG characters; raw online bundles omit this field.
+  if ((actor.AssetFamily ?? "Female3DCG") !== "Female3DCG" || (target.AssetFamily ?? "Female3DCG") !== "Female3DCG") return "native.data";
   // No guessed inventory capabilities: equipment, plugin bodies and mirrored zones need the full engine.
   const body = new Set(["BodyUpper", "BodyLower", "Height", "Eyes", "Eyes2", "Eyebrows", "Mouth", "Blush", "Fluids", "Emoticon", "HairFront", "HairBack"]);
   for (const character of [actor, target]) {

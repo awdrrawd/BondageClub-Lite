@@ -8,6 +8,8 @@ import LZString from 'lz-string';
 import { t, getLocale, setLocale } from './i18n-helper.mjs';
 import { appendChatLinks, MediaConsent } from './links-helper.mjs';
 import { afcLovers } from './community-helper.mjs';
+import { definitions } from './native-helper.mjs';
+const activitySource = stripTypeScriptTypes(readFileSync('src/ui/activity-dialog.ts', 'utf8')).replace(/^import .*;\r?\n/gm, '').replaceAll('export ', '');
 const stabilitySource = stripTypeScriptTypes(readFileSync(new URL('../src/platform/stability.ts', import.meta.url), 'utf8')).replace('import { t } from "../i18n";', '').replace('export ', '');
 
 const bioCode = stripTypeScriptTypes(readFileSync(new URL('../src/profile/biography.ts', import.meta.url), 'utf8')).replace('import LZString from "lz-string";', '').replace('import { t } from "../i18n";', '').replace('export ', '');
@@ -18,6 +20,7 @@ const source = stripTypeScriptTypes(readFileSync(new URL('../src/ui/app.ts', imp
 function setup(savedAccount) {
   setLocale('zh');
   const window = new Window({ url: 'https://lite.example', settings: { disableCSSFileLoading: true, disableJavaScriptFileLoading: true } });
+  const openActivityDialog = new Function('document', 't', 'definitions', activitySource + ';return openActivityDialog;')(window.document, t, definitions);
   const StabilityControls = new Function('document', 'window', 't', 'URL', stabilitySource + ';return StabilityControls;')(window.document, window, t, window.URL);
   window.document.body.innerHTML = '<div id="app"></div>';
   if (savedAccount) window.localStorage.setItem('bc-lite-account-v1', savedAccount);
@@ -41,7 +44,7 @@ function setup(savedAccount) {
     async login(account) { calls.push({ login: account }); },
     setFriend() {}, clearBeeps() {}, leave() {}, disconnect() {}, search() {}, join() {}, createRoom() {},
   };
-  vm.runInNewContext(source, { window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
+  vm.runInNewContext(source, { window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, openActivityDialog, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
   return { window, document: window.document, calls, state: () => current, emit(change) { if (change.friendsStatus === '查詢完成') change.friendsQueryState = 'ready'; current = { ...current, ...change }; listener(current); } };
 }
 
@@ -153,9 +156,17 @@ test('profiles show none instead of unprovided, AFC lovers, and bounded text int
   const dialog = f.document.querySelector('.profile-dialog');
   assert.match(dialog.textContent, /Extended.*77/);
   assert.doesNotMatch(dialog.textContent, /未提供/);
-  dialog.querySelector('[data-body-group="ItemHead"]').click();
-  [...dialog.querySelectorAll('button')].find(n => n.textContent === '撫摸').click();
+  assert.equal(dialog.querySelector('[data-lover-room]'), null);
+  assert.equal(dialog.querySelector('.dialog-close').textContent, '×');
+  dialog.querySelector('.toolbar .interaction-open').click();
+  assert.equal(dialog.isConnected, false);
+  const activity = f.document.querySelector('.activity-dialog');
+  assert.ok(activity.querySelector('svg .body-zone'));
+  activity.querySelector('button[data-body-group="ItemHead"]').click();
+  [...activity.querySelectorAll('button')].find(n => n.textContent === '撫摸').click();
   assert.deepEqual(f.calls.at(-1), { activity: 'Pet', group: 'ItemHead', id: 55 });
+  activity.querySelector('.dialog-close').click();
+  assert.equal(activity.isConnected, false);
   await f.window.happyDOM.close();
 });
 

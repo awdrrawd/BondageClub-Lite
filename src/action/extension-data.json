@@ -1,0 +1,2851 @@
+[
+  {
+    "key": "ChatOther-ItemTorso-躺上去",
+    "source": "echo",
+    "self": false,
+    "group": "ItemTorso",
+    "name": "躺上去"
+  },
+  {
+    "key": "ChatOther-ItemTorso-拉上床",
+    "source": "echo",
+    "self": false,
+    "group": "ItemTorso",
+    "name": "拉上床"
+  },
+  {
+    "key": "ChatOther-ItemArms-拉上床",
+    "source": "echo",
+    "self": false,
+    "group": "ItemArms",
+    "name": "拉上床"
+  },
+  {
+    "key": "ChatOther-ItemTorso-手推车",
+    "source": "echo",
+    "self": false,
+    "group": "ItemTorso",
+    "name": "手推车"
+  },
+  {
+    "key": "ChatOther-ItemTorso-扛起",
+    "source": "echo",
+    "self": false,
+    "group": "ItemTorso",
+    "name": "扛起"
+  },
+  {
+    "key": "ChatOther-ItemTorso-拉到身边",
+    "source": "echo",
+    "self": false,
+    "group": "ItemTorso",
+    "name": "拉到身边"
+  },
+  {
+    "key": "ChatOther-ItemNeckRestraints-拉到身边",
+    "source": "echo",
+    "self": false,
+    "group": "ItemNeckRestraints",
+    "name": "拉到身边"
+  },
+  {
+    "key": "ChatOther-ItemNeck-拉到身边",
+    "source": "echo",
+    "self": false,
+    "group": "ItemNeck",
+    "name": "拉到身边"
+  },
+  {
+    "key": "ChatOther-ItemTorso-躲到身后",
+    "source": "echo",
+    "self": false,
+    "group": "ItemTorso",
+    "name": "躲到身后"
+  },
+  {
+    "key": "ChatOther-ItemTorso-移动到身后",
+    "source": "echo",
+    "self": false,
+    "group": "ItemTorso",
+    "name": "移动到身后"
+  },
+  {
+    "key": "ChatOther-ItemTorso-钻进怀里",
+    "source": "echo",
+    "self": false,
+    "group": "ItemTorso",
+    "name": "钻进怀里"
+  },
+  {
+    "key": "ChatOther-ItemTorso2-钻进怀里",
+    "source": "echo",
+    "self": false,
+    "group": "ItemTorso2",
+    "name": "钻进怀里"
+  },
+  {
+    "key": "ChatOther-ItemArms-钻进怀里",
+    "source": "echo",
+    "self": false,
+    "group": "ItemArms",
+    "name": "钻进怀里"
+  },
+  {
+    "key": "ChatOther-ItemTorso-抱入怀中",
+    "source": "echo",
+    "self": false,
+    "group": "ItemTorso",
+    "name": "抱入怀中"
+  },
+  {
+    "key": "ChatOther-ItemTorso2-抱入怀中",
+    "source": "echo",
+    "self": false,
+    "group": "ItemTorso2",
+    "name": "抱入怀中"
+  },
+  {
+    "key": "ChatOther-ItemArms-抱入怀中",
+    "source": "echo",
+    "self": false,
+    "group": "ItemArms",
+    "name": "抱入怀中"
+  },
+  {
+    "key": "ChatOther-ItemTorso-驾驶马车",
+    "source": "echo",
+    "self": false,
+    "group": "ItemTorso",
+    "name": "驾驶马车"
+  },
+  {
+    "key": "ChatOther-ItemTorso-骑上去",
+    "source": "echo",
+    "self": false,
+    "group": "ItemTorso",
+    "name": "骑上去"
+  },
+  {
+    "key": "ChatOther-ItemTorso2-骑上去",
+    "source": "echo",
+    "self": false,
+    "group": "ItemTorso2",
+    "name": "骑上去"
+  },
+  {
+    "key": "ChatOther-ItemBoots-宠物服爬到脚边",
+    "source": "echo",
+    "self": false,
+    "group": "ItemBoots",
+    "name": "宠物服爬到脚边"
+  },
+  {
+    "key": "ChatOther-ItemFeet-宠物服蹭小腿",
+    "source": "echo",
+    "self": false,
+    "group": "ItemFeet",
+    "name": "宠物服蹭小腿"
+  },
+  {
+    "key": "ChatOther-ItemLegs-宠物服蹭大腿",
+    "source": "echo",
+    "self": false,
+    "group": "ItemLegs",
+    "name": "宠物服蹭大腿"
+  },
+  {
+    "key": "ChatSelf-ItemLegs-宠物服趴下",
+    "source": "echo",
+    "self": true,
+    "group": "ItemLegs",
+    "name": "宠物服趴下"
+  },
+  {
+    "key": "ChatSelf-ItemLegs-宠物服跪立",
+    "source": "echo",
+    "self": true,
+    "group": "ItemLegs",
+    "name": "宠物服跪立"
+  },
+  {
+    "key": "ChatOther-ItemArms-宠物服扑",
+    "source": "echo",
+    "self": false,
+    "group": "ItemArms",
+    "name": "宠物服扑"
+  },
+  {
+    "key": "ChatSelf-ItemButt-竖起尾巴",
+    "source": "echo",
+    "self": true,
+    "group": "ItemButt",
+    "name": "竖起尾巴"
+  },
+  {
+    "key": "ChatSelf-ItemButt-炸毛",
+    "source": "echo",
+    "self": true,
+    "group": "ItemButt",
+    "name": "炸毛"
+  },
+  {
+    "key": "ChatOther-ItemButt-舔尾巴",
+    "source": "echo",
+    "self": false,
+    "group": "ItemButt",
+    "name": "舔尾巴"
+  },
+  {
+    "key": "ChatOther-ItemButt-轻抚尾巴",
+    "source": "echo",
+    "self": false,
+    "group": "ItemButt",
+    "name": "轻抚尾巴"
+  },
+  {
+    "key": "ChatOther-ItemButt-衔尾",
+    "source": "echo",
+    "self": false,
+    "group": "ItemButt",
+    "name": "衔尾"
+  },
+  {
+    "key": "ChatOther-ItemArms-尾巴缠绕",
+    "source": "echo",
+    "self": false,
+    "group": "ItemArms",
+    "name": "尾巴缠绕"
+  },
+  {
+    "key": "ChatSelf-ItemButt-尾巴拍打地面",
+    "source": "echo",
+    "self": true,
+    "group": "ItemButt",
+    "name": "尾巴拍打地面"
+  },
+  {
+    "key": "ChatSelf-ItemButt-尾巴炸毛",
+    "source": "echo",
+    "self": true,
+    "group": "ItemButt",
+    "name": "尾巴炸毛"
+  },
+  {
+    "key": "ChatOther-ItemMouth-尾巴戳脸",
+    "source": "echo",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "尾巴戳脸"
+  },
+  {
+    "key": "ChatOther-ItemBreast-尾巴戳胸",
+    "source": "echo",
+    "self": false,
+    "group": "ItemBreast",
+    "name": "尾巴戳胸"
+  },
+  {
+    "key": "ChatOther-ItemHands-猫爪挠手",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHands",
+    "name": "猫爪挠手"
+  },
+  {
+    "key": "ChatOther-ItemArms-猫爪挠手臂",
+    "source": "echo",
+    "self": false,
+    "group": "ItemArms",
+    "name": "猫爪挠手臂"
+  },
+  {
+    "key": "ChatSelf-ItemHands-猫爪舔手",
+    "source": "echo",
+    "self": true,
+    "group": "ItemHands",
+    "name": "猫爪舔手"
+  },
+  {
+    "key": "ChatOther-ItemMouth-猫爪戳脸",
+    "source": "echo",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "猫爪戳脸"
+  },
+  {
+    "key": "ChatOther-ItemNose-猫爪戳鼻子",
+    "source": "echo",
+    "self": false,
+    "group": "ItemNose",
+    "name": "猫爪戳鼻子"
+  },
+  {
+    "key": "ChatOther-ItemMouth-猫爪揉脸",
+    "source": "echo",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "猫爪揉脸"
+  },
+  {
+    "key": "ChatOther-ItemNose-猫爪揉鼻子",
+    "source": "echo",
+    "self": false,
+    "group": "ItemNose",
+    "name": "猫爪揉鼻子"
+  },
+  {
+    "key": "ChatOther-ItemHands-猫爪拍手",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHands",
+    "name": "猫爪拍手"
+  },
+  {
+    "key": "ChatOther-ItemHead-猫爪梳毛",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHead",
+    "name": "猫爪梳毛"
+  },
+  {
+    "key": "ChatOther-ItemHead-猫爪遮眼",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHead",
+    "name": "猫爪遮眼"
+  },
+  {
+    "key": "ChatOther-ItemHands-猫爪握手",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHands",
+    "name": "猫爪握手"
+  },
+  {
+    "key": "ChatOther-ItemHead-猫爪拍头",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHead",
+    "name": "猫爪拍头"
+  },
+  {
+    "key": "ChatOther-ItemHands-猫爪按手",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHands",
+    "name": "猫爪按手"
+  },
+  {
+    "key": "ChatOther-ItemMouth-猫爪摸脸",
+    "source": "echo",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "猫爪摸脸"
+  },
+  {
+    "key": "ChatOther-ItemArms-猫爪拍肩",
+    "source": "echo",
+    "self": false,
+    "group": "ItemArms",
+    "name": "猫爪拍肩"
+  },
+  {
+    "key": "ChatOther-ItemNose-猫爪碰鼻",
+    "source": "echo",
+    "self": false,
+    "group": "ItemNose",
+    "name": "猫爪碰鼻"
+  },
+  {
+    "key": "ChatOther-ItemPelvis-猫爪拍肚",
+    "source": "echo",
+    "self": false,
+    "group": "ItemPelvis",
+    "name": "猫爪拍肚"
+  },
+  {
+    "key": "ChatOther-ItemPelvis-猫爪揉肚",
+    "source": "echo",
+    "self": false,
+    "group": "ItemPelvis",
+    "name": "猫爪揉肚"
+  },
+  {
+    "key": "ChatOther-ItemPelvis-猫爪暖腹",
+    "source": "echo",
+    "self": false,
+    "group": "ItemPelvis",
+    "name": "猫爪暖腹"
+  },
+  {
+    "key": "ChatOther-ItemPelvis-猫爪画圈",
+    "source": "echo",
+    "self": false,
+    "group": "ItemPelvis",
+    "name": "猫爪画圈"
+  },
+  {
+    "key": "ChatOther-ItemPelvis-猫爪轻按",
+    "source": "echo",
+    "self": false,
+    "group": "ItemPelvis",
+    "name": "猫爪轻按"
+  },
+  {
+    "key": "ChatOther-ItemVulva-猫爪护裆",
+    "source": "echo",
+    "self": false,
+    "group": "ItemVulva",
+    "name": "猫爪护裆"
+  },
+  {
+    "key": "ChatOther-ItemHands-捏猫爪",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHands",
+    "name": "捏猫爪"
+  },
+  {
+    "key": "ChatSelf-ItemArms-撞笼子",
+    "source": "echo",
+    "self": true,
+    "group": "ItemArms",
+    "name": "撞笼子"
+  },
+  {
+    "key": "ChatSelf-ItemMouth-咬笼子",
+    "source": "echo",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "咬笼子"
+  },
+  {
+    "key": "ChatSelf-ItemArms-摇晃笼子",
+    "source": "echo",
+    "self": true,
+    "group": "ItemArms",
+    "name": "摇晃笼子"
+  },
+  {
+    "key": "ChatSelf-ItemHands-抓挠笼子",
+    "source": "echo",
+    "self": true,
+    "group": "ItemHands",
+    "name": "抓挠笼子"
+  },
+  {
+    "key": "ChatSelf-ItemArms-推挤笼门",
+    "source": "echo",
+    "self": true,
+    "group": "ItemArms",
+    "name": "推挤笼门"
+  },
+  {
+    "key": "ChatSelf-ItemMouth-啃咬笼锁",
+    "source": "echo",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "啃咬笼锁"
+  },
+  {
+    "key": "ChatSelf-ItemTorso-蜷缩角落",
+    "source": "echo",
+    "self": true,
+    "group": "ItemTorso",
+    "name": "蜷缩角落"
+  },
+  {
+    "key": "ChatSelf-ItemVulva-摩擦笼子",
+    "source": "echo",
+    "self": true,
+    "group": "ItemVulva",
+    "name": "摩擦笼子"
+  },
+  {
+    "key": "ChatSelf-ItemArms-扇动翅膀",
+    "source": "echo",
+    "self": true,
+    "group": "ItemArms",
+    "name": "扇动翅膀"
+  },
+  {
+    "key": "ChatOther-ItemArms-翅膀轻拍",
+    "source": "echo",
+    "self": false,
+    "group": "ItemArms",
+    "name": "翅膀轻拍"
+  },
+  {
+    "key": "ChatOther-ItemArms-翅膀环绕",
+    "source": "echo",
+    "self": false,
+    "group": "ItemArms",
+    "name": "翅膀环绕"
+  },
+  {
+    "key": "ChatOther-ItemHead-翅膀扇风",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHead",
+    "name": "翅膀扇风"
+  },
+  {
+    "key": "ChatSelf-ItemArms-收拢翅膀",
+    "source": "echo",
+    "self": true,
+    "group": "ItemArms",
+    "name": "收拢翅膀"
+  },
+  {
+    "key": "ChatSelf-ItemMouth-舔触手",
+    "source": "echo",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "舔触手"
+  },
+  {
+    "key": "ChatOther-ItemHead-触手摸头",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHead",
+    "name": "触手摸头"
+  },
+  {
+    "key": "ChatOther-ItemNose-触手轻抚鼻尖",
+    "source": "echo",
+    "self": false,
+    "group": "ItemNose",
+    "name": "触手轻抚鼻尖"
+  },
+  {
+    "key": "ChatOther-ItemNose-触手揉鼻子",
+    "source": "echo",
+    "self": false,
+    "group": "ItemNose",
+    "name": "触手揉鼻子"
+  },
+  {
+    "key": "ChatOther-ItemButt-触手掀裙子",
+    "source": "echo",
+    "self": false,
+    "group": "ItemButt",
+    "name": "触手掀裙子"
+  },
+  {
+    "key": "ChatOther-ItemMouth-触手揉脸",
+    "source": "echo",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "触手揉脸"
+  },
+  {
+    "key": "ChatOther-ItemHands-触手缠绕手腕",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHands",
+    "name": "触手缠绕手腕"
+  },
+  {
+    "key": "ChatOther-ItemMouth-鱼尾揉脸",
+    "source": "echo",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "鱼尾揉脸"
+  },
+  {
+    "key": "ChatOther-ItemMouth-鱼尾戳脸",
+    "source": "echo",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "鱼尾戳脸"
+  },
+  {
+    "key": "ChatOther-ItemMouth-鱼尾抚脸",
+    "source": "echo",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "鱼尾抚脸"
+  },
+  {
+    "key": "ChatOther-ItemLegs-鱼尾担膝盖",
+    "source": "echo",
+    "self": false,
+    "group": "ItemLegs",
+    "name": "鱼尾担膝盖"
+  },
+  {
+    "key": "ChatOther-ItemBreast-鱼尾揉乳房",
+    "source": "echo",
+    "self": false,
+    "group": "ItemBreast",
+    "name": "鱼尾揉乳房"
+  },
+  {
+    "key": "ChatOther-ItemMouth-鱼尾扇风",
+    "source": "echo",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "鱼尾扇风"
+  },
+  {
+    "key": "ChatOther-ItemNipples-鱼尾戳乳头",
+    "source": "echo",
+    "self": false,
+    "group": "ItemNipples",
+    "name": "鱼尾戳乳头"
+  },
+  {
+    "key": "ChatOther-ItemHands-鱼尾碰手",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHands",
+    "name": "鱼尾碰手"
+  },
+  {
+    "key": "ChatOther-ItemLegs-鱼尾抚弄大腿",
+    "source": "echo",
+    "self": false,
+    "group": "ItemLegs",
+    "name": "鱼尾抚弄大腿"
+  },
+  {
+    "key": "ChatOther-ItemTorso-鱼尾挠肋",
+    "source": "echo",
+    "self": false,
+    "group": "ItemTorso",
+    "name": "鱼尾挠肋"
+  },
+  {
+    "key": "ChatOther-ItemNose-尾鳍骚挠鼻子",
+    "source": "echo",
+    "self": false,
+    "group": "ItemNose",
+    "name": "尾鳍骚挠鼻子"
+  },
+  {
+    "key": "ChatOther-ItemHands-鱼尾抓手",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHands",
+    "name": "鱼尾抓手"
+  },
+  {
+    "key": "ChatOther-ItemHands-鱼尾松手",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHands",
+    "name": "鱼尾松手"
+  },
+  {
+    "key": "ChatOther-ItemArms-鱼尾缠绕",
+    "source": "echo",
+    "self": false,
+    "group": "ItemArms",
+    "name": "鱼尾缠绕"
+  },
+  {
+    "key": "ChatOther-ItemArms-鱼尾松绑",
+    "source": "echo",
+    "self": false,
+    "group": "ItemArms",
+    "name": "鱼尾松绑"
+  },
+  {
+    "key": "ChatOther-ItemLegs-掰开双腿",
+    "source": "echo",
+    "self": false,
+    "group": "ItemLegs",
+    "name": "掰开双腿"
+  },
+  {
+    "key": "ChatOther-ItemLegs-合并双腿",
+    "source": "echo",
+    "self": false,
+    "group": "ItemLegs",
+    "name": "合并双腿"
+  },
+  {
+    "key": "ChatSelf-ItemLegs-跪下",
+    "source": "echo",
+    "self": true,
+    "group": "ItemLegs",
+    "name": "跪下"
+  },
+  {
+    "key": "ChatSelf-ItemLegs-站起来",
+    "source": "echo",
+    "self": true,
+    "group": "ItemLegs",
+    "name": "站起来"
+  },
+  {
+    "key": "ChatSelf-ItemLegs-跪着张开腿",
+    "source": "echo",
+    "self": true,
+    "group": "ItemLegs",
+    "name": "跪着张开腿"
+  },
+  {
+    "key": "ChatSelf-ItemLegs-跪着并拢腿",
+    "source": "echo",
+    "self": true,
+    "group": "ItemLegs",
+    "name": "跪着并拢腿"
+  },
+  {
+    "key": "ChatSelf-ItemBoots-四肢着地",
+    "source": "echo",
+    "self": true,
+    "group": "ItemBoots",
+    "name": "四肢着地"
+  },
+  {
+    "key": "ChatSelf-ItemBoots-起身跪下",
+    "source": "echo",
+    "self": true,
+    "group": "ItemBoots",
+    "name": "起身跪下"
+  },
+  {
+    "key": "ChatSelf-ItemMouth-张开嘴",
+    "source": "echo",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "张开嘴"
+  },
+  {
+    "key": "ChatSelf-ItemMouth-闭上嘴",
+    "source": "echo",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "闭上嘴"
+  },
+  {
+    "key": "ChatSelf-ItemNeck-吞咽口水",
+    "source": "echo",
+    "self": true,
+    "group": "ItemNeck",
+    "name": "吞咽口水"
+  },
+  {
+    "key": "ChatSelf-ItemMouth-流口水",
+    "source": "echo",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "流口水"
+  },
+  {
+    "key": "ChatSelf-ItemMouth-轻声喘息",
+    "source": "echo",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "轻声喘息"
+  },
+  {
+    "key": "ChatSelf-ItemMouth-打哈欠",
+    "source": "echo",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "打哈欠"
+  },
+  {
+    "key": "ChatSelf-ItemMouth-嘟囔",
+    "source": "echo",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "嘟囔"
+  },
+  {
+    "key": "ChatOther-ItemHands-舔手",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHands",
+    "name": "舔手"
+  },
+  {
+    "key": "ChatOther-ItemHands-舔手指",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHands",
+    "name": "舔手指"
+  },
+  {
+    "key": "ChatOther-ItemMouth-舔脸",
+    "source": "echo",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "舔脸"
+  },
+  {
+    "key": "ChatOther-ItemBoots-舔脚",
+    "source": "echo",
+    "self": false,
+    "group": "ItemBoots",
+    "name": "舔脚"
+  },
+  {
+    "key": "ChatOther-ItemEars-耳朵呵气",
+    "source": "echo",
+    "self": false,
+    "group": "ItemEars",
+    "name": "耳朵呵气"
+  },
+  {
+    "key": "ChatOther-ItemNipples-乳头呵气",
+    "source": "echo",
+    "self": false,
+    "group": "ItemNipples",
+    "name": "乳头呵气"
+  },
+  {
+    "key": "ChatOther-ItemHands-舔牵绳手",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHands",
+    "name": "舔牵绳手"
+  },
+  {
+    "key": "ChatOther-ItemMouth-口塞亲吻嘴唇",
+    "source": "echo",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "口塞亲吻嘴唇"
+  },
+  {
+    "key": "ChatSelf-ItemMouth-叼牵绳",
+    "source": "echo",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "叼牵绳"
+  },
+  {
+    "key": "ChatOther-ItemHands-挣脱牵绳",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHands",
+    "name": "挣脱牵绳"
+  },
+  {
+    "key": "ChatSelf-ItemNeck-歪头",
+    "source": "echo",
+    "self": true,
+    "group": "ItemNeck",
+    "name": "歪头"
+  },
+  {
+    "key": "ChatSelf-ItemHead-歪头",
+    "source": "echo",
+    "self": true,
+    "group": "ItemHead",
+    "name": "歪头"
+  },
+  {
+    "key": "ChatOther-ItemMouth-捏脸",
+    "source": "echo",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "捏脸"
+  },
+  {
+    "key": "ChatOther-ItemMouth-揉脸",
+    "source": "echo",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "揉脸"
+  },
+  {
+    "key": "ChatSelf-ItemHead-挠头",
+    "source": "echo",
+    "self": true,
+    "group": "ItemHead",
+    "name": "挠头"
+  },
+  {
+    "key": "ChatOther-ItemHands-阴部轻蹭手",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHands",
+    "name": "阴部轻蹭手"
+  },
+  {
+    "key": "ChatOther-ItemVulvaPiercings-弹阴蒂",
+    "source": "echo",
+    "self": false,
+    "group": "ItemVulvaPiercings",
+    "name": "弹阴蒂"
+  },
+  {
+    "key": "ChatOther-ItemNipples-揉搓乳头",
+    "source": "echo",
+    "self": false,
+    "group": "ItemNipples",
+    "name": "揉搓乳头"
+  },
+  {
+    "key": "ChatOther-ItemBreast-托起乳房",
+    "source": "echo",
+    "self": false,
+    "group": "ItemBreast",
+    "name": "托起乳房"
+  },
+  {
+    "key": "ChatSelf-ItemLegs-夹紧双腿",
+    "source": "echo",
+    "self": true,
+    "group": "ItemLegs",
+    "name": "夹紧双腿"
+  },
+  {
+    "key": "ChatOther-ItemVulva-手指插进阴道",
+    "source": "echo",
+    "self": false,
+    "group": "ItemVulva",
+    "name": "手指插进阴道"
+  },
+  {
+    "key": "ChatOther-ItemVulva-拔出自己的手指",
+    "source": "echo",
+    "self": false,
+    "group": "ItemVulva",
+    "name": "拔出自己的手指"
+  },
+  {
+    "key": "ChatOther-ItemVulva-蠕动手指",
+    "source": "echo",
+    "self": false,
+    "group": "ItemVulva",
+    "name": "蠕动手指"
+  },
+  {
+    "key": "ChatOther-ItemVulva-快速抽插",
+    "source": "echo",
+    "self": false,
+    "group": "ItemVulva",
+    "name": "快速抽插"
+  },
+  {
+    "key": "ChatSelf-ItemVulva-流出液体",
+    "source": "echo",
+    "self": true,
+    "group": "ItemVulva",
+    "name": "流出液体"
+  },
+  {
+    "key": "ChatSelf-ItemVulva-失禁",
+    "source": "echo",
+    "self": true,
+    "group": "ItemVulva",
+    "name": "失禁"
+  },
+  {
+    "key": "ChatOther-ItemHands-挥手致意",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHands",
+    "name": "挥手致意"
+  },
+  {
+    "key": "ChatSelf-ItemHands-伸出手",
+    "source": "echo",
+    "self": true,
+    "group": "ItemHands",
+    "name": "伸出手"
+  },
+  {
+    "key": "ChatOther-ItemNeck-轻抬下巴",
+    "source": "echo",
+    "self": false,
+    "group": "ItemNeck",
+    "name": "轻抬下巴"
+  },
+  {
+    "key": "ChatOther-ItemMouth-轻抬下巴",
+    "source": "echo",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "轻抬下巴"
+  },
+  {
+    "key": "ChatOther-ItemHead-轻弹额头",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHead",
+    "name": "轻弹额头"
+  },
+  {
+    "key": "ChatOther-ItemHead-轻拍脑袋",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHead",
+    "name": "轻拍脑袋"
+  },
+  {
+    "key": "ChatOther-ItemArms-摇晃手臂",
+    "source": "echo",
+    "self": false,
+    "group": "ItemArms",
+    "name": "摇晃手臂"
+  },
+  {
+    "key": "ChatOther-ItemTorso-轻推",
+    "source": "echo",
+    "self": false,
+    "group": "ItemTorso",
+    "name": "轻推"
+  },
+  {
+    "key": "ChatSelf-ItemHands-扭动手腕",
+    "source": "echo",
+    "self": true,
+    "group": "ItemHands",
+    "name": "扭动手腕"
+  },
+  {
+    "key": "ChatOther-ItemButt-掀开裙子",
+    "source": "echo",
+    "self": false,
+    "group": "ItemButt",
+    "name": "掀开裙子"
+  },
+  {
+    "key": "ChatOther-ItemPelvis-轻扯衣角",
+    "source": "echo",
+    "self": false,
+    "group": "ItemPelvis",
+    "name": "轻扯衣角"
+  },
+  {
+    "key": "ChatSelf-ItemHood-拨弄发丝",
+    "source": "echo",
+    "self": true,
+    "group": "ItemHood",
+    "name": "拨弄发丝"
+  },
+  {
+    "key": "ChatOther-ItemEars-盖住耳朵",
+    "source": "echo",
+    "self": false,
+    "group": "ItemEars",
+    "name": "盖住耳朵"
+  },
+  {
+    "key": "ChatOther-ItemHead-遮住眼睛",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHead",
+    "name": "遮住眼睛"
+  },
+  {
+    "key": "ChatOther-ItemNeck-拽链子",
+    "source": "echo",
+    "self": false,
+    "group": "ItemNeck",
+    "name": "拽链子"
+  },
+  {
+    "key": "ChatOther-ItemEars-耳边打响指",
+    "source": "echo",
+    "self": false,
+    "group": "ItemEars",
+    "name": "耳边打响指"
+  },
+  {
+    "key": "ChatOther-ItemHead-捂住头",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHead",
+    "name": "捂住头"
+  },
+  {
+    "key": "ChatOther-ItemVulva-捂住下体",
+    "source": "echo",
+    "self": false,
+    "group": "ItemVulva",
+    "name": "捂住下体"
+  },
+  {
+    "key": "ChatSelf-ItemBreast-捂住胸",
+    "source": "echo",
+    "self": true,
+    "group": "ItemBreast",
+    "name": "捂住胸"
+  },
+  {
+    "key": "ChatOther-ItemNeck-手臂搭在肩膀上",
+    "source": "echo",
+    "self": false,
+    "group": "ItemNeck",
+    "name": "手臂搭在肩膀上"
+  },
+  {
+    "key": "ChatOther-ItemNeck-下巴搭在肩膀上",
+    "source": "echo",
+    "self": false,
+    "group": "ItemNeck",
+    "name": "下巴搭在肩膀上"
+  },
+  {
+    "key": "ChatOther-ItemHead-玩偶拍头",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHead",
+    "name": "玩偶拍头"
+  },
+  {
+    "key": "ChatOther-ItemHands-玩偶戳戳",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHands",
+    "name": "玩偶戳戳"
+  },
+  {
+    "key": "ChatOther-ItemHands-玩偶蹭蹭",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHands",
+    "name": "玩偶蹭蹭"
+  },
+  {
+    "key": "ChatOther-ItemHead-撇眼",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHead",
+    "name": "撇眼"
+  },
+  {
+    "key": "ChatSelf-ItemNeck-环视周围",
+    "source": "echo",
+    "self": true,
+    "group": "ItemNeck",
+    "name": "环视周围"
+  },
+  {
+    "key": "ChatSelf-ItemHead-环视周围",
+    "source": "echo",
+    "self": true,
+    "group": "ItemHead",
+    "name": "环视周围"
+  },
+  {
+    "key": "ChatOther-ItemHead-上下打量",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHead",
+    "name": "上下打量"
+  },
+  {
+    "key": "ChatSelf-ItemHead-闭上眼睛",
+    "source": "echo",
+    "self": true,
+    "group": "ItemHead",
+    "name": "闭上眼睛"
+  },
+  {
+    "key": "ChatSelf-ItemHead-眼睛呆滞",
+    "source": "echo",
+    "self": true,
+    "group": "ItemHead",
+    "name": "眼睛呆滞"
+  },
+  {
+    "key": "ChatSelf-ItemHead-眼睛湿润",
+    "source": "echo",
+    "self": true,
+    "group": "ItemHead",
+    "name": "眼睛湿润"
+  },
+  {
+    "key": "ChatSelf-ItemHead-流眼泪",
+    "source": "echo",
+    "self": true,
+    "group": "ItemHead",
+    "name": "流眼泪"
+  },
+  {
+    "key": "ChatOther-ItemVulvaPiercings-钩住阴蒂环",
+    "source": "echo",
+    "self": false,
+    "group": "ItemVulvaPiercings",
+    "name": "钩住阴蒂环"
+  },
+  {
+    "key": "ChatOther-ItemVulvaPiercings-用手观察阴蒂环",
+    "source": "echo",
+    "self": false,
+    "group": "ItemVulvaPiercings",
+    "name": "用手观察阴蒂环"
+  },
+  {
+    "key": "ChatOther-ItemVulvaPiercings-拨弄阴蒂环",
+    "source": "echo",
+    "self": false,
+    "group": "ItemVulvaPiercings",
+    "name": "拨弄阴蒂环"
+  },
+  {
+    "key": "ChatOther-ItemVulvaPiercings-拉扯阴蒂环",
+    "source": "echo",
+    "self": false,
+    "group": "ItemVulvaPiercings",
+    "name": "拉扯阴蒂环"
+  },
+  {
+    "key": "ChatSelf-ItemBoots-踮起脚尖",
+    "source": "echo",
+    "self": true,
+    "group": "ItemBoots",
+    "name": "踮起脚尖"
+  },
+  {
+    "key": "ChatSelf-ItemBoots-摇晃脚踝",
+    "source": "echo",
+    "self": true,
+    "group": "ItemBoots",
+    "name": "摇晃脚踝"
+  },
+  {
+    "key": "ChatSelf-ItemBoots-伸出脚",
+    "source": "echo",
+    "self": true,
+    "group": "ItemBoots",
+    "name": "伸出脚"
+  },
+  {
+    "key": "ChatOther-ItemNeck-脚托起下巴",
+    "source": "echo",
+    "self": false,
+    "group": "ItemNeck",
+    "name": "脚托起下巴"
+  },
+  {
+    "key": "ChatOther-ItemMouth-脚托起下巴",
+    "source": "echo",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "脚托起下巴"
+  },
+  {
+    "key": "ChatSelf-ItemLegs-双腿颤抖",
+    "source": "echo",
+    "self": true,
+    "group": "ItemLegs",
+    "name": "双腿颤抖"
+  },
+  {
+    "key": "ChatSelf-ItemLegs-摇晃双腿",
+    "source": "echo",
+    "self": true,
+    "group": "ItemLegs",
+    "name": "摇晃双腿"
+  },
+  {
+    "key": "ChatSelf-ItemBoots-跺脚",
+    "source": "echo",
+    "self": true,
+    "group": "ItemBoots",
+    "name": "跺脚"
+  },
+  {
+    "key": "ChatOther-ItemBoots-爬到脚边",
+    "source": "echo",
+    "self": false,
+    "group": "ItemBoots",
+    "name": "爬到脚边"
+  },
+  {
+    "key": "ChatOther-ItemLegs-蹭大腿",
+    "source": "echo",
+    "self": false,
+    "group": "ItemLegs",
+    "name": "蹭大腿"
+  },
+  {
+    "key": "ChatOther-ItemFeet-蹭小腿",
+    "source": "echo",
+    "self": false,
+    "group": "ItemFeet",
+    "name": "蹭小腿"
+  },
+  {
+    "key": "ChatOther-ItemLegs-抱腿",
+    "source": "echo",
+    "self": false,
+    "group": "ItemLegs",
+    "name": "抱腿"
+  },
+  {
+    "key": "ChatOther-ItemBoots-托起脚",
+    "source": "echo",
+    "self": false,
+    "group": "ItemBoots",
+    "name": "托起脚"
+  },
+  {
+    "key": "ChatSelf-ItemButt-抬起屁股",
+    "source": "echo",
+    "self": true,
+    "group": "ItemButt",
+    "name": "抬起屁股"
+  },
+  {
+    "key": "ChatOther-ItemTorso-搂腰",
+    "source": "echo",
+    "self": false,
+    "group": "ItemTorso",
+    "name": "搂腰"
+  },
+  {
+    "key": "ChatSelf-ItemTorso-叉腰",
+    "source": "echo",
+    "self": true,
+    "group": "ItemTorso",
+    "name": "叉腰"
+  },
+  {
+    "key": "ChatSelf-ItemTorso-身体颤抖",
+    "source": "echo",
+    "self": true,
+    "group": "ItemTorso",
+    "name": "身体颤抖"
+  },
+  {
+    "key": "ChatSelf-ItemTorso-身体抽搐",
+    "source": "echo",
+    "self": true,
+    "group": "ItemTorso",
+    "name": "身体抽搐"
+  },
+  {
+    "key": "ChatOther-ItemVulva-贞操带互动",
+    "source": "echo",
+    "self": false,
+    "group": "ItemVulva",
+    "name": "贞操带互动"
+  },
+  {
+    "key": "ChatOther-ItemVulvaPiercings-贞操带互动",
+    "source": "echo",
+    "self": false,
+    "group": "ItemVulvaPiercings",
+    "name": "贞操带互动"
+  },
+  {
+    "key": "ChatOther-ItemHands-嗅手",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHands",
+    "name": "嗅手"
+  },
+  {
+    "key": "ChatOther-ItemNeck-剑架在脖子上",
+    "source": "echo",
+    "self": false,
+    "group": "ItemNeck",
+    "name": "剑架在脖子上"
+  },
+  {
+    "key": "ChatOther-ItemNeckRestraints-剑架在脖子上",
+    "source": "echo",
+    "self": false,
+    "group": "ItemNeckRestraints",
+    "name": "剑架在脖子上"
+  },
+  {
+    "key": "ChatOther-ItemNeckAccessories-剑架在脖子上",
+    "source": "echo",
+    "self": false,
+    "group": "ItemNeckAccessories",
+    "name": "剑架在脖子上"
+  },
+  {
+    "key": "ChatOther-ItemMouth-剑拍脸",
+    "source": "echo",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "剑拍脸"
+  },
+  {
+    "key": "ChatOther-ItemHands-用嘴脱掉手套",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHands",
+    "name": "用嘴脱掉手套"
+  },
+  {
+    "key": "ChatOther-ItemBoots-用嘴脱掉鞋子",
+    "source": "echo",
+    "self": false,
+    "group": "ItemBoots",
+    "name": "用嘴脱掉鞋子"
+  },
+  {
+    "key": "ChatOther-ItemBoots-用嘴脱掉袜子",
+    "source": "echo",
+    "self": false,
+    "group": "ItemBoots",
+    "name": "用嘴脱掉袜子"
+  },
+  {
+    "key": "ChatOther-ItemVulva-看看裙底",
+    "source": "echo",
+    "self": false,
+    "group": "ItemVulva",
+    "name": "看看裙底"
+  },
+  {
+    "key": "ChatOther-ItemVulvaPiercings-看看裙底",
+    "source": "echo",
+    "self": false,
+    "group": "ItemVulvaPiercings",
+    "name": "看看裙底"
+  },
+  {
+    "key": "ChatOther-ItemButt-看看裙底",
+    "source": "echo",
+    "self": false,
+    "group": "ItemButt",
+    "name": "看看裙底"
+  },
+  {
+    "key": "ChatOther-ItemVulva-看看裙底真空",
+    "source": "echo",
+    "self": false,
+    "group": "ItemVulva",
+    "name": "看看裙底真空"
+  },
+  {
+    "key": "ChatOther-ItemVulvaPiercings-看看裙底真空",
+    "source": "echo",
+    "self": false,
+    "group": "ItemVulvaPiercings",
+    "name": "看看裙底真空"
+  },
+  {
+    "key": "ChatOther-ItemButt-看看裙底真空",
+    "source": "echo",
+    "self": false,
+    "group": "ItemButt",
+    "name": "看看裙底真空"
+  },
+  {
+    "key": "ChatSelf-ItemHead-XSAct_眯眼",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemHead",
+    "name": "XSAct_眯眼"
+  },
+  {
+    "key": "ChatSelf-ItemHead-XSAct_眼神飘忽",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemHead",
+    "name": "XSAct_眼神飘忽"
+  },
+  {
+    "key": "ChatSelf-ItemHood-XSAct_甩头发",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemHood",
+    "name": "XSAct_甩头发"
+  },
+  {
+    "key": "ChatSelf-ItemHood-XSAct_大力甩头发",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemHood",
+    "name": "XSAct_大力甩头发"
+  },
+  {
+    "key": "ChatOther-ItemHood-XSAct_轻抚发梢",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemHood",
+    "name": "XSAct_轻抚发梢"
+  },
+  {
+    "key": "ChatSelf-ItemHood-XSAct_轻抚发梢",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemHood",
+    "name": "XSAct_轻抚发梢"
+  },
+  {
+    "key": "ChatOther-ItemHood-XSAct_叼起头发",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemHood",
+    "name": "XSAct_叼起头发"
+  },
+  {
+    "key": "ChatSelf-ItemHood-XSAct_叼起头发",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemHood",
+    "name": "XSAct_叼起头发"
+  },
+  {
+    "key": "ChatOther-ItemHood-XSAct_嗅头发",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemHood",
+    "name": "XSAct_嗅头发"
+  },
+  {
+    "key": "ChatSelf-ItemHood-XSAct_嗅头发",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemHood",
+    "name": "XSAct_嗅头发"
+  },
+  {
+    "key": "ChatOther-ItemHood-XSAct_绕头发",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemHood",
+    "name": "XSAct_绕头发"
+  },
+  {
+    "key": "ChatSelf-ItemHood-XSAct_绕头发",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemHood",
+    "name": "XSAct_绕头发"
+  },
+  {
+    "key": "ChatSelf-ItemNose-XSAct_皱鼻子",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemNose",
+    "name": "XSAct_皱鼻子"
+  },
+  {
+    "key": "ChatSelf-ItemNose-XSAct_打喷嚏",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemNose",
+    "name": "XSAct_打喷嚏"
+  },
+  {
+    "key": "ChatSelf-ItemNose-XSAct_深呼吸",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemNose",
+    "name": "XSAct_深呼吸"
+  },
+  {
+    "key": "ChatSelf-ItemHood-XSAct_低头",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemHood",
+    "name": "XSAct_低头"
+  },
+  {
+    "key": "ChatOther-ItemHead-XSAct_恳求的摇头",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemHead",
+    "name": "XSAct_恳求的摇头"
+  },
+  {
+    "key": "ChatOther-ItemHead-XSAct_恳求的看",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemHead",
+    "name": "XSAct_恳求的看"
+  },
+  {
+    "key": "ChatSelf-ItemLegs-XSAct_内八夹腿",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemLegs",
+    "name": "XSAct_内八夹腿"
+  },
+  {
+    "key": "ChatSelf-ItemMouth-XSAct_噘嘴",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "XSAct_噘嘴"
+  },
+  {
+    "key": "ChatSelf-ItemMouth2-XSAct_噘嘴",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth2",
+    "name": "XSAct_噘嘴"
+  },
+  {
+    "key": "ChatSelf-ItemMouth3-XSAct_噘嘴",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth3",
+    "name": "XSAct_噘嘴"
+  },
+  {
+    "key": "ChatSelf-ItemMouth-XSAct_抿住嘴巴",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "XSAct_抿住嘴巴"
+  },
+  {
+    "key": "ChatSelf-ItemMouth2-XSAct_抿住嘴巴",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth2",
+    "name": "XSAct_抿住嘴巴"
+  },
+  {
+    "key": "ChatSelf-ItemMouth3-XSAct_抿住嘴巴",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth3",
+    "name": "XSAct_抿住嘴巴"
+  },
+  {
+    "key": "ChatSelf-ItemMouth-XSAct_瘪嘴",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "XSAct_瘪嘴"
+  },
+  {
+    "key": "ChatSelf-ItemMouth2-XSAct_瘪嘴",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth2",
+    "name": "XSAct_瘪嘴"
+  },
+  {
+    "key": "ChatSelf-ItemMouth3-XSAct_瘪嘴",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth3",
+    "name": "XSAct_瘪嘴"
+  },
+  {
+    "key": "ChatSelf-ItemTorso-XSAct_坐直身体",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemTorso",
+    "name": "XSAct_坐直身体"
+  },
+  {
+    "key": "ChatSelf-ItemTorso2-XSAct_坐直身体",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemTorso2",
+    "name": "XSAct_坐直身体"
+  },
+  {
+    "key": "ChatSelf-ItemBreast-XSAct_挺胸收腹",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemBreast",
+    "name": "XSAct_挺胸收腹"
+  },
+  {
+    "key": "ChatSelf-ItemTorso-XSAct_站直身体",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemTorso",
+    "name": "XSAct_站直身体"
+  },
+  {
+    "key": "ChatSelf-ItemTorso2-XSAct_站直身体",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemTorso2",
+    "name": "XSAct_站直身体"
+  },
+  {
+    "key": "ChatSelf-ItemTorso-XSAct_身体一颤",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemTorso",
+    "name": "XSAct_身体一颤"
+  },
+  {
+    "key": "ChatSelf-ItemTorso2-XSAct_身体一颤",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemTorso2",
+    "name": "XSAct_身体一颤"
+  },
+  {
+    "key": "ChatSelf-ItemLegs-XSAct_活动大腿",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemLegs",
+    "name": "XSAct_活动大腿"
+  },
+  {
+    "key": "ChatSelf-ItemArms-XSAct_活动手臂",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemArms",
+    "name": "XSAct_活动手臂"
+  },
+  {
+    "key": "ChatSelf-ItemLegs-XSAct_绷紧膝盖",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemLegs",
+    "name": "XSAct_绷紧膝盖"
+  },
+  {
+    "key": "ChatSelf-ItemBoots-XSAct_绷直脚踝",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemBoots",
+    "name": "XSAct_绷直脚踝"
+  },
+  {
+    "key": "ChatSelf-ItemBoots-XSAct_蜷缩脚趾",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemBoots",
+    "name": "XSAct_蜷缩脚趾"
+  },
+  {
+    "key": "ChatSelf-ItemBoots-XSAct_踮脚",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemBoots",
+    "name": "XSAct_踮脚"
+  },
+  {
+    "key": "ChatSelf-ItemMouth-XSAct_兴奋的伸出舌头",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "XSAct_兴奋的伸出舌头"
+  },
+  {
+    "key": "ChatSelf-ItemMouth2-XSAct_兴奋的伸出舌头",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth2",
+    "name": "XSAct_兴奋的伸出舌头"
+  },
+  {
+    "key": "ChatSelf-ItemMouth3-XSAct_兴奋的伸出舌头",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth3",
+    "name": "XSAct_兴奋的伸出舌头"
+  },
+  {
+    "key": "ChatSelf-ItemTorso-XSAct_兴奋的扭动",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemTorso",
+    "name": "XSAct_兴奋的扭动"
+  },
+  {
+    "key": "ChatSelf-ItemTorso2-XSAct_兴奋的扭动",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemTorso2",
+    "name": "XSAct_兴奋的扭动"
+  },
+  {
+    "key": "ChatSelf-ItemNose-XSAct_呼吸平复",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemNose",
+    "name": "XSAct_呼吸平复"
+  },
+  {
+    "key": "ChatSelf-ItemNose-XSAct_呼吸紊乱",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemNose",
+    "name": "XSAct_呼吸紊乱"
+  },
+  {
+    "key": "ChatSelf-ItemMouth-XSAct_嘟囔着想说什么",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "XSAct_嘟囔着想说什么"
+  },
+  {
+    "key": "ChatSelf-ItemMouth2-XSAct_嘟囔着想说什么",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth2",
+    "name": "XSAct_嘟囔着想说什么"
+  },
+  {
+    "key": "ChatSelf-ItemMouth3-XSAct_嘟囔着想说什么",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth3",
+    "name": "XSAct_嘟囔着想说什么"
+  },
+  {
+    "key": "ChatSelf-ItemMouth-XSAct_失神的伸出舌头",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "XSAct_失神的伸出舌头"
+  },
+  {
+    "key": "ChatSelf-ItemMouth2-XSAct_失神的伸出舌头",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth2",
+    "name": "XSAct_失神的伸出舌头"
+  },
+  {
+    "key": "ChatSelf-ItemMouth3-XSAct_失神的伸出舌头",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth3",
+    "name": "XSAct_失神的伸出舌头"
+  },
+  {
+    "key": "ChatSelf-ItemMouth-XSAct_慢慢伸出舌头",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "XSAct_慢慢伸出舌头"
+  },
+  {
+    "key": "ChatSelf-ItemMouth2-XSAct_慢慢伸出舌头",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth2",
+    "name": "XSAct_慢慢伸出舌头"
+  },
+  {
+    "key": "ChatSelf-ItemMouth3-XSAct_慢慢伸出舌头",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth3",
+    "name": "XSAct_慢慢伸出舌头"
+  },
+  {
+    "key": "ChatSelf-ItemHead-XSAct_微微摇头",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemHead",
+    "name": "XSAct_微微摇头"
+  },
+  {
+    "key": "ChatSelf-ItemHead-XSAct_微微点头",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemHead",
+    "name": "XSAct_微微点头"
+  },
+  {
+    "key": "ChatSelf-ItemHead-XSAct_身体颤抖的摇头",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemHead",
+    "name": "XSAct_身体颤抖的摇头"
+  },
+  {
+    "key": "ChatSelf-ItemHead-XSAct_身体颤抖的点头",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemHead",
+    "name": "XSAct_身体颤抖的点头"
+  },
+  {
+    "key": "ChatSelf-ItemNeck-XSAct_歪头疑惑",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemNeck",
+    "name": "XSAct_歪头疑惑"
+  },
+  {
+    "key": "ChatSelf-ItemTorso-XSAct_扭动身体",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemTorso",
+    "name": "XSAct_扭动身体"
+  },
+  {
+    "key": "ChatSelf-ItemTorso2-XSAct_扭动身体",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemTorso2",
+    "name": "XSAct_扭动身体"
+  },
+  {
+    "key": "ChatOther-ItemHead-XSAct_看他",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemHead",
+    "name": "XSAct_看他"
+  },
+  {
+    "key": "ChatSelf-ItemNeck-XSAct_缩脖子",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemNeck",
+    "name": "XSAct_缩脖子"
+  },
+  {
+    "key": "ChatSelf-ItemMouth-XSAct_脸红喘气",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "XSAct_脸红喘气"
+  },
+  {
+    "key": "ChatSelf-ItemMouth2-XSAct_脸红喘气",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth2",
+    "name": "XSAct_脸红喘气"
+  },
+  {
+    "key": "ChatSelf-ItemMouth3-XSAct_脸红喘气",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth3",
+    "name": "XSAct_脸红喘气"
+  },
+  {
+    "key": "ChatSelf-ItemMouth-XSAct_轻声喘气",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "XSAct_轻声喘气"
+  },
+  {
+    "key": "ChatSelf-ItemMouth2-XSAct_轻声喘气",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth2",
+    "name": "XSAct_轻声喘气"
+  },
+  {
+    "key": "ChatSelf-ItemMouth3-XSAct_轻声喘气",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemMouth3",
+    "name": "XSAct_轻声喘气"
+  },
+  {
+    "key": "ChatSelf-ItemBoots-XSAct_跺脚",
+    "source": "xiaosu",
+    "self": true,
+    "group": "ItemBoots",
+    "name": "XSAct_跺脚"
+  },
+  {
+    "key": "ChatOther-ItemHead-XSAct_头蹭",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemHead",
+    "name": "XSAct_头蹭"
+  },
+  {
+    "key": "ChatOther-ItemNeck-XSAct_头蹭",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemNeck",
+    "name": "XSAct_头蹭"
+  },
+  {
+    "key": "ChatOther-ItemBreast-XSAct_头蹭",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemBreast",
+    "name": "XSAct_头蹭"
+  },
+  {
+    "key": "ChatOther-ItemArms-XSAct_头蹭",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemArms",
+    "name": "XSAct_头蹭"
+  },
+  {
+    "key": "ChatOther-ItemLegs-XSAct_头蹭",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemLegs",
+    "name": "XSAct_头蹭"
+  },
+  {
+    "key": "ChatOther-ItemFeet-XSAct_头蹭",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemFeet",
+    "name": "XSAct_头蹭"
+  },
+  {
+    "key": "ChatOther-ItemBoots-XSAct_头蹭",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemBoots",
+    "name": "XSAct_头蹭"
+  },
+  {
+    "key": "ChatOther-ItemPelvis-XSAct_头蹭",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemPelvis",
+    "name": "XSAct_头蹭"
+  },
+  {
+    "key": "ChatOther-ItemHead-XSAct_脸蹭",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemHead",
+    "name": "XSAct_脸蹭"
+  },
+  {
+    "key": "ChatOther-ItemNeck-XSAct_脸蹭",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemNeck",
+    "name": "XSAct_脸蹭"
+  },
+  {
+    "key": "ChatOther-ItemBreast-XSAct_脸蹭",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemBreast",
+    "name": "XSAct_脸蹭"
+  },
+  {
+    "key": "ChatOther-ItemArms-XSAct_脸蹭",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemArms",
+    "name": "XSAct_脸蹭"
+  },
+  {
+    "key": "ChatOther-ItemLegs-XSAct_脸蹭",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemLegs",
+    "name": "XSAct_脸蹭"
+  },
+  {
+    "key": "ChatOther-ItemFeet-XSAct_脸蹭",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemFeet",
+    "name": "XSAct_脸蹭"
+  },
+  {
+    "key": "ChatOther-ItemBoots-XSAct_脸蹭",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemBoots",
+    "name": "XSAct_脸蹭"
+  },
+  {
+    "key": "ChatOther-ItemPelvis-XSAct_脸蹭",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemPelvis",
+    "name": "XSAct_脸蹭"
+  },
+  {
+    "key": "ChatOther-ItemHead-XSAct_鼻子蹭",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemHead",
+    "name": "XSAct_鼻子蹭"
+  },
+  {
+    "key": "ChatOther-ItemNeck-XSAct_鼻子蹭",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemNeck",
+    "name": "XSAct_鼻子蹭"
+  },
+  {
+    "key": "ChatOther-ItemBreast-XSAct_鼻子蹭",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemBreast",
+    "name": "XSAct_鼻子蹭"
+  },
+  {
+    "key": "ChatOther-ItemArms-XSAct_鼻子蹭",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemArms",
+    "name": "XSAct_鼻子蹭"
+  },
+  {
+    "key": "ChatOther-ItemLegs-XSAct_鼻子蹭",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemLegs",
+    "name": "XSAct_鼻子蹭"
+  },
+  {
+    "key": "ChatOther-ItemFeet-XSAct_鼻子蹭",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemFeet",
+    "name": "XSAct_鼻子蹭"
+  },
+  {
+    "key": "ChatOther-ItemBoots-XSAct_鼻子蹭",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemBoots",
+    "name": "XSAct_鼻子蹭"
+  },
+  {
+    "key": "ChatOther-ItemPelvis-XSAct_鼻子蹭",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemPelvis",
+    "name": "XSAct_鼻子蹭"
+  },
+  {
+    "key": "ChatOther-ItemBreast-XSAct_埋怀里",
+    "source": "xiaosu",
+    "self": false,
+    "group": "ItemBreast",
+    "name": "XSAct_埋怀里"
+  },
+  {
+    "key": "ChatOther-ItemHead-LSCG_Bap",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemHead",
+    "name": "LSCG_Bap"
+  },
+  {
+    "key": "ChatOther-ItemArms-LSCG_Headbutt",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemArms",
+    "name": "LSCG_Headbutt"
+  },
+  {
+    "key": "ChatOther-ItemHead-LSCG_Nuzzle",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemHead",
+    "name": "LSCG_Nuzzle"
+  },
+  {
+    "key": "ChatOther-ItemNeck-LSCG_Nuzzle",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemNeck",
+    "name": "LSCG_Nuzzle"
+  },
+  {
+    "key": "ChatOther-ItemArms-LSCG_Nuzzle",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemArms",
+    "name": "LSCG_Nuzzle"
+  },
+  {
+    "key": "ChatOther-ItemHands-LSCG_Nuzzle",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemHands",
+    "name": "LSCG_Nuzzle"
+  },
+  {
+    "key": "ChatOther-ItemBreast-LSCG_Nuzzle",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemBreast",
+    "name": "LSCG_Nuzzle"
+  },
+  {
+    "key": "ChatOther-ItemTorso-LSCG_Nuzzle",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemTorso",
+    "name": "LSCG_Nuzzle"
+  },
+  {
+    "key": "ChatOther-ItemPelvis-LSCG_Nuzzle",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemPelvis",
+    "name": "LSCG_Nuzzle"
+  },
+  {
+    "key": "ChatOther-ItemLegs-LSCG_Nuzzle",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemLegs",
+    "name": "LSCG_Nuzzle"
+  },
+  {
+    "key": "ChatOther-ItemFeet-LSCG_Nuzzle",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemFeet",
+    "name": "LSCG_Nuzzle"
+  },
+  {
+    "key": "ChatOther-ItemBoots-LSCG_Nuzzle",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemBoots",
+    "name": "LSCG_Nuzzle"
+  },
+  {
+    "key": "ChatOther-ItemArms-LSCG_Hug",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemArms",
+    "name": "LSCG_Hug"
+  },
+  {
+    "key": "ChatSelf-ItemArms-LSCG_Hug",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemArms",
+    "name": "LSCG_Hug"
+  },
+  {
+    "key": "ChatOther-ItemArms-LSCG_Tackle",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemArms",
+    "name": "LSCG_Tackle"
+  },
+  {
+    "key": "ChatOther-ItemArms-LSCG_Flop",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemArms",
+    "name": "LSCG_Flop"
+  },
+  {
+    "key": "ChatOther-ItemHead-LSCG_KissEyes",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemHead",
+    "name": "LSCG_KissEyes"
+  },
+  {
+    "key": "ChatOther-ItemPenis-LSCG_RubPussy",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemPenis",
+    "name": "LSCG_RubPussy"
+  },
+  {
+    "key": "ChatOther-ItemHead-LSCG_SlapPenis",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemHead",
+    "name": "LSCG_SlapPenis"
+  },
+  {
+    "key": "ChatOther-ItemMouth-LSCG_SlapPenis",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "LSCG_SlapPenis"
+  },
+  {
+    "key": "ChatOther-ItemVulva-LSCG_SlapPenis",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemVulva",
+    "name": "LSCG_SlapPenis"
+  },
+  {
+    "key": "ChatOther-ItemBreast-LSCG_SlapPenis",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemBreast",
+    "name": "LSCG_SlapPenis"
+  },
+  {
+    "key": "ChatOther-ItemLegs-LSCG_SlapPenis",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemLegs",
+    "name": "LSCG_SlapPenis"
+  },
+  {
+    "key": "ChatOther-ItemFeet-LSCG_SlapPenis",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemFeet",
+    "name": "LSCG_SlapPenis"
+  },
+  {
+    "key": "ChatOther-ItemBoots-LSCG_SlapPenis",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemBoots",
+    "name": "LSCG_SlapPenis"
+  },
+  {
+    "key": "ChatOther-ItemButt-LSCG_SlapPenis",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemButt",
+    "name": "LSCG_SlapPenis"
+  },
+  {
+    "key": "ChatOther-ItemNeck-LSCG_SlapPenis",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemNeck",
+    "name": "LSCG_SlapPenis"
+  },
+  {
+    "key": "ChatOther-ItemArms-LSCG_SlapPenis",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemArms",
+    "name": "LSCG_SlapPenis"
+  },
+  {
+    "key": "ChatOther-ItemHands-LSCG_SlapPenis",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemHands",
+    "name": "LSCG_SlapPenis"
+  },
+  {
+    "key": "ChatOther-ItemPenis-LSCG_SlapPenis",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemPenis",
+    "name": "LSCG_SlapPenis"
+  },
+  {
+    "key": "ChatOther-ItemVulva-LSCG_FuckWithPussy",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemVulva",
+    "name": "LSCG_FuckWithPussy"
+  },
+  {
+    "key": "ChatOther-ItemPenis-LSCG_FuckWithPussy",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemPenis",
+    "name": "LSCG_FuckWithPussy"
+  },
+  {
+    "key": "ChatOther-ItemHead-LSCG_FuckWithPussy",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemHead",
+    "name": "LSCG_FuckWithPussy"
+  },
+  {
+    "key": "ChatOther-ItemVulva-LSCG_FuckWithAss",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemVulva",
+    "name": "LSCG_FuckWithAss"
+  },
+  {
+    "key": "ChatOther-ItemPenis-LSCG_FuckWithAss",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemPenis",
+    "name": "LSCG_FuckWithAss"
+  },
+  {
+    "key": "ChatOther-ItemHands-LSCG_Eat",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemHands",
+    "name": "LSCG_Eat"
+  },
+  {
+    "key": "ChatSelf-ItemHands-LSCG_Eat",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemHands",
+    "name": "LSCG_Eat"
+  },
+  {
+    "key": "ChatOther-ItemHands-LSCG_Chew",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemHands",
+    "name": "LSCG_Chew"
+  },
+  {
+    "key": "ChatSelf-ItemHands-LSCG_Chew",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemHands",
+    "name": "LSCG_Chew"
+  },
+  {
+    "key": "ChatOther-ItemMouth-LSCG_Chew",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "LSCG_Chew"
+  },
+  {
+    "key": "ChatSelf-ItemMouth-LSCG_Chew",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "LSCG_Chew"
+  },
+  {
+    "key": "ChatOther-ItemMouth-LSCG_GrabTongue",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "LSCG_GrabTongue"
+  },
+  {
+    "key": "ChatOther-ItemMouth-LSCG_ReleaseTongue",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "LSCG_ReleaseTongue"
+  },
+  {
+    "key": "ChatOther-ItemHands-LSCG_HoldHand",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemHands",
+    "name": "LSCG_HoldHand"
+  },
+  {
+    "key": "ChatOther-ItemHands-LSCG_ReleaseHand",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemHands",
+    "name": "LSCG_ReleaseHand"
+  },
+  {
+    "key": "ChatOther-ItemEars-LSCG_ReleaseEar",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemEars",
+    "name": "LSCG_ReleaseEar"
+  },
+  {
+    "key": "ChatSelf-ItemEars-LSCG_ReleaseEar",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemEars",
+    "name": "LSCG_ReleaseEar"
+  },
+  {
+    "key": "ChatOther-ItemHood-LSCG_Grab",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemHood",
+    "name": "LSCG_Grab"
+  },
+  {
+    "key": "ChatOther-ItemButt-LSCG_Grab",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemButt",
+    "name": "LSCG_Grab"
+  },
+  {
+    "key": "ChatOther-ItemArms-LSCG_Release",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemArms",
+    "name": "LSCG_Release"
+  },
+  {
+    "key": "ChatOther-ItemHood-LSCG_Release",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemHood",
+    "name": "LSCG_Release"
+  },
+  {
+    "key": "ChatOther-ItemButt-LSCG_Release",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemButt",
+    "name": "LSCG_Release"
+  },
+  {
+    "key": "ChatOther-ItemHead-LSCG_Release",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemHead",
+    "name": "LSCG_Release"
+  },
+  {
+    "key": "ChatOther-ItemNose-LSCG_Release",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemNose",
+    "name": "LSCG_Release"
+  },
+  {
+    "key": "ChatOther-ItemNipples-LSCG_Release",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemNipples",
+    "name": "LSCG_Release"
+  },
+  {
+    "key": "ChatOther-ItemNeck-LSCG_ReleaseNeck",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemNeck",
+    "name": "LSCG_ReleaseNeck"
+  },
+  {
+    "key": "ChatSelf-ItemNeck-LSCG_ReleaseNeck",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemNeck",
+    "name": "LSCG_ReleaseNeck"
+  },
+  {
+    "key": "ChatOther-ItemNeck-LSCG_ReleaseCollar",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemNeck",
+    "name": "LSCG_ReleaseCollar"
+  },
+  {
+    "key": "ChatSelf-ItemNeck-LSCG_ReleaseCollar",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemNeck",
+    "name": "LSCG_ReleaseCollar"
+  },
+  {
+    "key": "ChatOther-ItemMouth-LSCG_ReleaseMouth",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "LSCG_ReleaseMouth"
+  },
+  {
+    "key": "ChatSelf-ItemMouth-LSCG_ReleaseMouth",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "LSCG_ReleaseMouth"
+  },
+  {
+    "key": "ChatOther-ItemHead-LSCG_ReleaseMouth",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemHead",
+    "name": "LSCG_ReleaseMouth"
+  },
+  {
+    "key": "ChatSelf-ItemHead-LSCG_ReleaseMouth",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemHead",
+    "name": "LSCG_ReleaseMouth"
+  },
+  {
+    "key": "ChatOther-ItemMouth-LSCG_GrabTongueWithFoot",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "LSCG_GrabTongueWithFoot"
+  },
+  {
+    "key": "ChatOther-ItemMouth-LSCG_ReleaseFootGrabbedTongue",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "LSCG_ReleaseFootGrabbedTongue"
+  },
+  {
+    "key": "ChatOther-ItemPelvis-LSCG_Tug",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemPelvis",
+    "name": "LSCG_Tug"
+  },
+  {
+    "key": "ChatSelf-ItemPelvis-LSCG_Tug",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemPelvis",
+    "name": "LSCG_Tug"
+  },
+  {
+    "key": "ChatOther-ItemEars-LSCG_Flick",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemEars",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatSelf-ItemEars-LSCG_Flick",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemEars",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatOther-ItemNose-LSCG_Flick",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemNose",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatSelf-ItemNose-LSCG_Flick",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemNose",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatOther-ItemNipples-LSCG_Flick",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemNipples",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatSelf-ItemNipples-LSCG_Flick",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemNipples",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatOther-ItemButt-LSCG_Flick",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemButt",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatSelf-ItemButt-LSCG_Flick",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemButt",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatOther-ItemBoots-LSCG_Flick",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemBoots",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatSelf-ItemBoots-LSCG_Flick",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemBoots",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatOther-ItemHead-LSCG_Flick",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemHead",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatSelf-ItemHead-LSCG_Flick",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemHead",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatOther-ItemNeck-LSCG_Flick",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemNeck",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatSelf-ItemNeck-LSCG_Flick",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemNeck",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatOther-ItemLegs-LSCG_Flick",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemLegs",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatSelf-ItemLegs-LSCG_Flick",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemLegs",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatOther-ItemFeet-LSCG_Flick",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemFeet",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatSelf-ItemFeet-LSCG_Flick",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemFeet",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatOther-ItemVulvaPiercings-LSCG_Flick",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemVulvaPiercings",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatSelf-ItemVulvaPiercings-LSCG_Flick",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemVulvaPiercings",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatOther-ItemGlans-LSCG_Flick",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemGlans",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatSelf-ItemGlans-LSCG_Flick",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemGlans",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatOther-ItemVulva-LSCG_Flick",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemVulva",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatSelf-ItemVulva-LSCG_Flick",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemVulva",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatOther-ItemPenis-LSCG_Flick",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemPenis",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatSelf-ItemPenis-LSCG_Flick",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemPenis",
+    "name": "LSCG_Flick"
+  },
+  {
+    "key": "ChatOther-ItemArms-LSCG_Chomp",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemArms",
+    "name": "LSCG_Chomp"
+  },
+  {
+    "key": "ChatOther-ItemFeet-LSCG_Chomp",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemFeet",
+    "name": "LSCG_Chomp"
+  },
+  {
+    "key": "ChatOther-ItemButt-LSCG_Chomp",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemButt",
+    "name": "LSCG_Chomp"
+  },
+  {
+    "key": "ChatOther-ItemNeck-LSCG_Chomp",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemNeck",
+    "name": "LSCG_Chomp"
+  },
+  {
+    "key": "ChatOther-ItemArms-LSCG_ReleaseChomp",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemArms",
+    "name": "LSCG_ReleaseChomp"
+  },
+  {
+    "key": "ChatOther-ItemFeet-LSCG_ReleaseChomp",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemFeet",
+    "name": "LSCG_ReleaseChomp"
+  },
+  {
+    "key": "ChatOther-ItemButt-LSCG_ReleaseChomp",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemButt",
+    "name": "LSCG_ReleaseChomp"
+  },
+  {
+    "key": "ChatOther-ItemNeck-LSCG_ReleaseChomp",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemNeck",
+    "name": "LSCG_ReleaseChomp"
+  },
+  {
+    "key": "ChatOther-ItemMouth-LSCG_SwallowLoad",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "LSCG_SwallowLoad"
+  },
+  {
+    "key": "ChatSelf-ItemMouth-LSCG_SwallowLoad",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "LSCG_SwallowLoad"
+  },
+  {
+    "key": "ChatOther-ItemHands-LSCG_HighFive",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemHands",
+    "name": "LSCG_HighFive"
+  },
+  {
+    "key": "ChatSelf-ItemHands-LSCG_HighFive",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemHands",
+    "name": "LSCG_HighFive"
+  }
+]

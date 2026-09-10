@@ -1,5 +1,6 @@
 import { renderAction, dictionaryText } from './action-helper.mjs';
 import { nativeActivities, activityReason, definitions } from './native-helper.mjs';
+import { extensionActivities, extensionText } from './extensions-helper.mjs';
 import { gameCatalog } from './catalog-helper.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -25,7 +26,7 @@ async function setup(environment, relayAvailable = true, account = {}) {
     disconnect() { this.connected = false; handlers.get('disconnect')?.('io client disconnect'); return this; },
   };
   const context = {
-    io: () => socket, nativeActivities, activityReason, renderAction, dictionaryText, t, localizeStatus, validAppearance, copyAppearance, releaseAppearance, afcLovers, embeddedAction,
+    io: () => socket, nativeActivities, activityReason, extensionActivities, extensionText, renderAction, dictionaryText, t, localizeStatus, validAppearance, copyAppearance, releaseAppearance, afcLovers, embeddedAction,
     exports: {},
     require: () => ({ io: () => socket }),
     window: { setTimeout(fn) { timers.set(++timerId, fn); return timerId; }, clearTimeout(id) { timers.delete(id); } },
@@ -50,6 +51,44 @@ async function setup(environment, relayAvailable = true, account = {}) {
 }
 
 const request = { Query: '', Space: 'X', Language: '', Game: '', FullRooms: false, ShowLocked: true, SearchDescs: false };
+
+test('compatibility sends clothed online activity but never overrides explicit preferences or room restrictions', async () => {
+  const base = { Name: 'Test', Appearance: [{ Group: 'Cloth', Name: 'Dress' }], ArousalSettings: { Active: 'Automatic', Activity: 'z'.repeat(100), Zone: 'f'.repeat(30) } };
+  const f = await setup('PROD', true, base);
+  const actor = { ...base, MemberNumber: 123 }, target = { ...base, MemberNumber: 55 };
+  f.handlers.get('ChatRoomSync')({ Name: 'Room', Character: [actor, target] });
+  const option = f.client.activityOptions(55, true).find(option => option.name === 'Whisper' && option.group === 'ItemEars');
+  assert.equal(option.reason, null); assert.equal(option.warning, 'native.equipment');
+  assert.throws(() => f.client.sendActivity(55, 'ItemEars', 'Whisper'));
+  f.client.sendActivity(55, 'ItemEars', 'Whisper', true);
+  assert.equal(f.sent.at(-1).payload.Type, 'Activity');
+  target.ArousalSettings = { ...base.ArousalSettings, Activity: 'd'.repeat(100) };
+  f.handlers.get('ChatRoomSync')({ Name: 'Room', Character: [actor, target] });
+  assert.equal(f.client.activityOptions(55, true).find(option => option.name === 'Whisper').reason, 'native.permission');
+  assert.throws(() => f.client.sendActivity(55, 'ItemEars', 'Whisper', true), /偏好/);
+  f.handlers.get('ChatRoomSync')({ Name: 'Room', BlockCategory: ['Arousal'], Character: [actor, target] });
+  assert.equal(f.client.activityOptions(55, true).find(option => option.name === 'Whisper').reason, 'native.room');
+  assert.ok(!f.sent.some(packet => ['AccountUpdate', 'ChatRoomCharacterUpdate'].includes(packet.event)));
+});
+
+test('ECHO cuddle dialogue is readable without plugin effects, pairing packets or appearance writes', async () => {
+  const f = await setup('PROD');
+  f.client.setTextCatalog(gameCatalog('zh'));
+  f.handlers.get('ChatRoomSync')({ Name: 'Room', Character: [{ MemberNumber: 55, Name: 'Friend' }] });
+  const option = f.client.activityOptions(55).find(option => option.name === 'text:ChatOther-ItemTorso-钻进怀里');
+  assert.ok(option); assert.equal(option.warning, 'interaction.textOnly');
+  f.client.sendActivity(55, option.group, option.name);
+  const packet = f.sent.at(-1).payload;
+  assert.equal(packet.Type, 'Action');
+  assert.equal(packet.Content, 'BCX_PLAYER_CUSTOM_DIALOG');
+  const text = packet.Dictionary.find(entry => entry.Text)?.Text;
+  assert.match(text, /Test.*Friend/);
+  assert.doesNotMatch(text, /SourceCharacter|DestinationCharacter|TargetCharacter/);
+  assert.ok(!packet.Dictionary.some(entry => entry.ActivityName));
+  assert.ok(!f.sent.some(packet => ['AccountUpdate', 'ChatRoomCharacterUpdate'].includes(packet.event)));
+  f.handlers.get('ChatRoomSyncMemberLeave')({ SourceMemberNumber: 55 });
+  assert.throws(() => f.client.sendActivity(55, option.group, option.name));
+});
 
 test('native activity sends the BC Activity dictionary, rechecks permissions, and never writes appearance', async () => {
   const base = { Name: 'Test', AssetFamily: 'Female3DCG', Appearance: [{ Group: 'BodyUpper', Name: definitions.bodies.BodyUpper[0] }], ArousalSettings: { Active: 'Manual', Activity: 'z'.repeat(100), Zone: 'f'.repeat(30) } };

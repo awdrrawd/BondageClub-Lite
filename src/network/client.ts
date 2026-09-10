@@ -2,6 +2,7 @@ import { t, localizeStatus } from "../i18n";
 import { afcLovers } from "../profile/afc";
 import { renderAction, dictionaryText } from "../action/render";
 import { nativeActivities, activityReason } from "../action/native";
+import { extensionActivities, extensionText } from "../action/extensions";
 import { validAppearance, copyAppearance, releaseAppearance, type BundledItem } from "../safety/safeword";
 import { io, type Socket } from "socket.io-client";
 import type { CharacterSummary, ChatMessage, ClientSnapshot, DictionaryEntry, DisplayMessage, OnlineFriend, PlayerSummary, RoomCreateOptions, RoomSearchRequest, RoomSearchResult, RoomSync } from "../shared/types";
@@ -292,20 +293,38 @@ export class BcLiteClient {
     this.sendChat(`.a ${t(keys[action], [this.state.player?.Nickname || this.state.player?.Name, target.Nickname || target.Name])}`);
   }
 
-  activityOptions(memberNumber: number) {
+  activityOptions(memberNumber: number, compatibility = false) {
     const actor = { ...this.state.player!, ...this.state.characters.find(c => c.MemberNumber === this.state.player?.MemberNumber) };
     const target = this.state.characters.find(c => c.MemberNumber === memberNumber);
     if (!target || !actor.MemberNumber || !this.state.room) return [];
-    return nativeActivities.flatMap(activity => (memberNumber === actor.MemberNumber ? activity.self : activity.target).map(group => ({
+    const native = nativeActivities.flatMap(activity => (memberNumber === actor.MemberNumber ? activity.self : activity.target).map(group => ({
       group, name: activity.name, groupLabel: this.textCatalog[`Group.${group}`] || group,
       label: this.textCatalog[`Label-Chat${memberNumber === actor.MemberNumber ? "Self" : "Other"}-${group}-${activity.name}`] || activity.name,
       reason: !this.canSend() ? "native.data" : activityReason(actor, target, group, activity.name, this.state.room!),
+      warning: "", source: "BC",
     })));
+    for (const option of native) {
+      if (compatibility && this.canSend() && option.reason && ["native.data", "native.equipment", "native.unsupported", "native.actor"].includes(option.reason)) {
+        option.warning = option.reason; option.reason = null;
+      }
+    }
+    const extensions = extensionActivities.filter(entry => entry.self === (actor.MemberNumber === memberNumber) && Object.hasOwn(this.textCatalog, entry.key)).map(entry => ({
+      group: entry.group, name: `text:${entry.key}`, groupLabel: this.textCatalog[`Group.${entry.group}`] || entry.group,
+      label: entry.name === "钻进怀里" ? t("interaction.cuddleIn") : entry.name === "抱入怀中" ? t("interaction.cuddleHold") : entry.name,
+      reason: !this.canSend() ? "native.data" : this.state.room!.BlockCategory?.includes("Arousal") || target.ArousalSettings?.Active === "Inactive" ? "native.permission" : null,
+      warning: "interaction.textOnly", source: entry.source,
+    }));
+    return [...native, ...extensions];
   }
 
-  sendActivity(memberNumber: number, group: string, name: string): void {
-    const option = this.activityOptions(memberNumber).find(value => value.group === group && value.name === name);
+  sendActivity(memberNumber: number, group: string, name: string, compatibility = false): void {
+    const option = this.activityOptions(memberNumber, compatibility).find(value => value.group === group && value.name === name);
     if (!option || option.reason) throw new Error(t((option?.reason || "native.target") as Parameters<typeof t>[0]));
+    if (name.startsWith("text:")) {
+      const target = this.state.characters.find(c => c.MemberNumber === memberNumber)!;
+      this.sendChat(`.a ${extensionText(name.slice(5), group, this.state.player!, target, this.textCatalog)}`);
+      return;
+    }
     if (Date.now() - this.lastChatAt < 350) throw new Error(t("m210"));
     this.lastChatAt = Date.now();
     this.socket!.emit("ChatRoomChat", { Type: "Activity", Content: `Chat${memberNumber === this.state.player!.MemberNumber ? "Self" : "Other"}-${group}-${name}`, Dictionary: [

@@ -9,7 +9,7 @@ function literal(node) {
   if (node.type === 'ObjectExpression') return Object.fromEntries(node.properties.filter(p => p.type === 'ObjectProperty' && !p.computed).map(p => [p.key.name || p.key.value, literal(p.value)]));
 }
 const ast = parse(source, { sourceType: 'script' });
-const activities = [], zones = {}, bodies = {};
+const activities = [], zones = {}, bodies = {}, geometry = {};
 function walk(node) {
   if (!node || typeof node !== 'object') return;
   if (node.type === 'VariableDeclarator' && node.id.name === 'ActivityFemale3DCG') {
@@ -19,6 +19,7 @@ function walk(node) {
     const props = Object.fromEntries(node.properties.filter(p => p.type === 'ObjectProperty' && !p.computed).map(p => [p.key.name || p.key.value, p.value]));
     const group = literal(props.Group), id = literal(props.ArousalZoneID);
     if (typeof group === 'string' && Number.isInteger(id)) zones[group] = id;
+    if (typeof group === 'string' && Array.isArray(literal(props.Zone))) geometry[group] = literal(props.Zone);
     if (typeof group === 'string' && props.Asset?.type === 'ArrayExpression') bodies[group] = props.Asset.elements.map(node => node?.type === 'StringLiteral' ? node.value : literal(node)?.Name).filter(name => typeof name === 'string');
   }
   for (const [key, value] of Object.entries(node)) if (!['loc', 'comments', 'tokens'].includes(key)) {
@@ -27,5 +28,5 @@ function walk(node) {
 }
 walk(ast);
 const bodyGroups = ['BodyUpper', 'BodyLower', 'Height', 'Eyes', 'Eyes2', 'Eyebrows', 'Mouth', 'Blush', 'Fluids', 'Emoticon', 'HairFront', 'HairBack'];
-writeJson('src/action/native-data.json', { activities, zones, bodies: Object.fromEntries(Object.entries(bodies).filter(([group]) => bodyGroups.includes(group))) });
+writeJson('src/action/native-data.json', { activities, zones, geometry, bodies: Object.fromEntries(Object.entries(bodies).filter(([group]) => bodyGroups.includes(group))) });
 console.log(`${activities.length} native activities, ${Object.keys(zones).length} zones`);

@@ -5,9 +5,9 @@
   "type": "module",
   "description": "A static, low-bandwidth Bondage Club chat client.",
   "scripts": {
-    "catalog:compile": "node scripts/compile-action-catalogs.mjs",
+    "catalog:compile": "node scripts/compile-action-catalogs.mjs && node scripts/build-extension-data.mjs",
     "catalog:bc": "node scripts/build-text-catalog.mjs",
-    "catalog:plugins": "node scripts/build-plugin-catalog.mjs",
+    "catalog:plugins": "node scripts/build-plugin-catalog.mjs && node scripts/build-extension-data.mjs",
     "catalog:items": "node scripts/build-item-catalog.mjs",
     "catalog:native": "node scripts/build-native-activities.mjs",
     "prebuild": "npm run catalog:compile",

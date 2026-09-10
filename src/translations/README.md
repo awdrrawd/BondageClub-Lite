@@ -2,6 +2,8 @@
 
 翻譯資料集中在此；執行邏輯在 `src/i18n/`（UI）與 `src/action/`（遊戲及插件文字）。JSON 只包含文字，不放腳本、HTML 或載入網址。
 
+互動面板的擴展文字選項索引在 `src/action/extension-data.json`，由 `scripts/build-extension-data.mjs` 從 ECHO／小酥／LSCG 英文鍵生成，不要手改。`npm run catalog:compile`、build／dev 會同步更新索引；其他語言句子仍沿用同一份文字表，不複製句子到索引。新增其他插件的「可發送文字選項」還需把來源名稱加入該腳本；這不會接入插件道具或活動引擎。
+
 ## 修改哪個檔案？
 
 | 需求 | 位置 |

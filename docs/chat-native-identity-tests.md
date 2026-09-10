@@ -11,18 +11,27 @@
 
 `src/action/native-data.json` 從本機 BC `ActivityFemale3DCG` 與部位資料擷取 67 個活動定義及 18 個區域 ID，只含判定資料，不載入人物圖像。`scripts/build-native-activities.mjs` 可重新擷取。此資料沿用 BC 原作者權利，不重新宣稱為 Lite 自有文字。
 
-點個人資料「互動」→ 選部位 → 選活動。送出前 protocol 再次核對角色仍同房、活動適用對象／部位、房間 Arousal 限制、雙方活動偏好及目標區域偏好；以原生 SourceCharacter／TargetCharacter／FocusGroupName／ActivityName 字典發出 `Type: Activity`。不再由這個面板發出假裝有遊戲效果的文字 Action。
+點個人資料工具列「互動」→ 人物線框或部位名稱 → 選活動。`src/ui/activity-dialog.ts` 使用 BC AssetGroup.Zone 矩形作為熱區，不載入人物圖片。個人資料不提供房間查詢／加入按鈕，右上角 X 關閉。
 
-**目前限制非常保守：**只允許已知原生基礎身體／毛髮外觀、無額外裝備 Property、無 ActivePose 的角色，及 UseMouth／UseTongue／UseHands／UseArms／UseFeet／MoveHead 可直接判定的活動。包含衣服／道具／未知身體、地圖距離、ZoneAccessible 等複雜條件、Needs-* 道具需求、聲音懲罰／表情／刺激等本機連動時會禁用。自己必須原本就是 Manual 興奮模式；Lite 不會擅自更改偏好來解鎖按鈕。
+**相容發送預設開啟，可在面板取消：**原始線上封包缺少 AssetFamily 時比照 BC CharacterLoadOnline 使用 Female3DCG。尚未實作的裝備／姿勢／本機效果與缺少偏好資料顯示警告，而非一律鎖住。這不是完整條件驗證：相容模式可能送出完整版 BC 正常選單不會開放的活動。明確關閉的活動／區域偏好、Inactive 接收模式、房間禁止與未支援地圖距離仍然阻擋；每次送出重新檢查角色是否同房。取消相容模式恢復受限的保守判定。Lite 不會更改玩家偏好。
+
+原生項目仍以 SourceCharacter／TargetCharacter／FocusGroupName／ActivityName 字典發出 `Type: Activity`。擴展項目則分開，以可讀 Action 文字送出，並標示「文字模式」，不冒充完整插件活動。
+
+### ECHO／小酥／LSCG
+
+`src/action/extension-data.json` 收錄 407 個已擷取的「對象／部位／文字鍵」選項，不代表 407 個完整活動引擎。`scripts/build-extension-data.mjs` 只從本庫翻譯來源建立索引；`catalog:plugins` 更新擷取資料後同步索引。`extensions.ts` 代入玩家名稱與部位，透過既有自訂 Action 通道發送，不安裝插件、不調用插件 hook、不送出 ActivityName。
+
+軀幹／手臂包含「貼貼 · 鑽進懷裡」與「貼貼 · 抱入懷中」。**這兩項現在只有敘述，沒有 ECHO 貼貼的實際配對效果。**上游真正貼貼會穿戴 ItemMisc/贴贴、執行 wearAndPair 並同步角色位置；Lite 尚未實作這些操作，也不猜測配對資料或改寫外觀。其他擴展項目的道具／數值／移動效果同樣不執行。句子依既有中英文表渲染；尚無翻譯的動作名稱保留原名。
 
 對方的完整版 BC 可按自己的設定處理接收活動效果；若對方也是 Lite，沒有完整接收端興奮／表情引擎，不能保證產生相同效果。這一輪**尚未完成**自身 Automatic／Hybrid 興奮、表情計時、懲罰、道具變化、鏡像部位及所有插件活動引擎。灰色按鈕會說明原因。不要把封包送出視為接收端已成功執行的回執。
 
 ### 原生活動測試
 
-1. 先用可恢復的測試角色，確認雙方願意測試，自己使用 Manual 模式且沒有目前不支援的裝備／姿勢。在「耳朵」選擇可用的 Whisper 活動（這是 BC 活動名稱，與 `/W` 通道不同）。
+1. 一般穿衣角色開啟個人資料，確認無房間按鈕、右上角 X 可關閉。點工具列「互動」，點人物線框或「耳朵」名稱；相容模式下 Whisper 活動應可送出（這是 BC 活動名稱，與 `/W` 通道不同）。取消相容模式應顯示尚未支援的裝備等原因。
 2. 同房完整版 BC 玩家確認收到的是 Activity，而不是文字 Action；若接收端為 Automatic／Hybrid，核對原生效果。不應修改自己的 Appearance 或 OnlineSharedSettings。
-3. 關閉目標部位／該活動偏好、加入 Arousal 禁止房間、戴上束縛或切換姿勢，應看到禁用原因。先開面板再讓目標離房，送出仍須拒絕。
-4. 切换語言，核對部位、活動標籤及禁用說明。需要工具或未支援條件的動作不可只送文字冒充成功。
+3. 關閉目標部位／該活動偏好或加入 Arousal 禁止房間，相容模式仍應禁用。先開面板再讓目標離房，送出仍須拒絕。
+4. 在軀幹選 ECHO 貼貼，另一位未裝 ECHO 的玩家應看到含雙方名稱的敘述，而不是翻譯鍵。雙方外觀與位置應保持不變；不要把這當成完整貼貼配對。
+5. 切換中英文，核對部位、貼貼標籤及提示。在手機測試熱區、小部位的名稱按鈕、面板捲動；按鈕／導航不應被長按圈選，但聊天、私訊、BIO、輸入框仍能選取複製。鍵盤 Tab／Enter／空白鍵也應能選部位。
 
 ## 無版本 Lite 標記與 LCE
 
