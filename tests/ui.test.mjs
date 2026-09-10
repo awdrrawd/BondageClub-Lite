@@ -47,7 +47,7 @@ function setup(savedAccount, savedPerformance) {
     relocalize() {},
     sendBeep(id, text) { calls.push({ id, text }); },
     async login(account) { calls.push({ login: account }); },
-    setFriend() {}, clearBeeps() {}, leave() {}, disconnect() {}, search() {}, join() {}, createRoom() {},
+    setFriend() {}, clearBeeps() {}, leave() {}, disconnect() {}, search(request) { calls.push({ search:request }); }, join() {}, createRoom() {},
   };
   vm.runInNewContext(source, { window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, openActivityDialog, nameColor, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
   return { window, document: window.document, calls, state: () => current, emit(change) { if (change.friendsStatus === '查詢完成') change.friendsQueryState = 'ready'; current = { ...current, ...change }; listener(current); } };
@@ -56,6 +56,21 @@ function setup(savedAccount, savedPerformance) {
 function messages(count) {
   return Array.from({ length: count }, (_, index) => ({ id: `id-${index}`, sender: 55, senderName: 'Friend', text: `message ${index}`, time: new Date(), type: 'Chat' }));
 }
+
+test('room list loads automatically and changing region clears the keyword and searches immediately', async () => {
+  const f = setup();
+  await new Promise(resolve => setTimeout(resolve, 15));
+  assert.equal(f.calls.filter(call => call.search).length, 1);
+  assert.equal(f.calls.find(call => call.search).search.Query, '');
+  const input = f.document.getElementById('RoomQuery');
+  input.value = 'old keyword'; input.dispatchEvent(new f.window.Event('input'));
+  const region = [...f.document.querySelectorAll('select')].find(select => select.getAttribute('aria-label') === t('m090'));
+  region.value = ''; region.dispatchEvent(new f.window.Event('change'));
+  assert.equal(f.calls.at(-1).search.Space, '');
+  assert.equal(f.calls.at(-1).search.Query, '');
+  assert.equal(input.value, '');
+  await f.window.happyDOM.close();
+});
 
 test('private composer and navigation follow the compact layout, mixed channels retain direction', async () => {
   const f = setup();

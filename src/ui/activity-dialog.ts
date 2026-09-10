@@ -28,7 +28,7 @@ export function openActivityDialog(name: string, getOptions: (compatibility: boo
     selectedGroup = group; selected.textContent = label; activities.replaceChildren(); status.textContent = "";
     dialog.classList.add("show-actions");
     for (const control of body.querySelectorAll("[data-body-group]")) control.setAttribute("aria-pressed", String(control.getAttribute("data-body-group") === group));
-    for (const option of getOptions(compatibility.checked).filter(option => option.group === group)) {
+    for (const option of getOptions(compatibility.checked).filter(option => option.group === group && !["native.blocked", "native.permission", "native.target"].includes(option.reason || ""))) {
       const row = document.createElement("div"); row.className = "activity-option";
       const action = document.createElement("button"); action.type = "button"; action.className = "button secondary";
       action.textContent = `${option.source && option.source !== "BC" ? `${option.source} · ` : ""}${option.label}`; action.disabled = Boolean(option.reason);

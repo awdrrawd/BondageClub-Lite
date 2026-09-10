@@ -13,7 +13,7 @@
 
 點個人資料工具列「互動」→ 人物線框或部位名稱 → 選活動。`src/ui/activity-dialog.ts` 使用 BC AssetGroup.Zone 矩形作為熱區，不載入人物圖片。個人資料不提供房間查詢／加入按鈕，右上角 X 關閉。
 
-**相容發送預設開啟，可在面板取消：**原始線上封包缺少 AssetFamily 時比照 BC CharacterLoadOnline 使用 Female3DCG。尚未實作的裝備／姿勢／本機效果與缺少偏好資料顯示警告，而非一律鎖住。這不是完整條件驗證：相容模式可能送出完整版 BC 正常選單不會開放的活動。明確關閉的活動／區域偏好、Inactive 接收模式、房間禁止與未支援地圖距離仍然阻擋；每次送出重新檢查角色是否同房。取消相容模式恢復受限的保守判定。Lite 不會更改玩家偏好。
+**相容發送預設開啟，可在面板取消：**原始線上封包缺少 AssetFamily 時比照 BC CharacterLoadOnline 使用 Female3DCG。相容模式現在只略過自身自動效果限制，不再略過缺資料、裝備或未知前置條件。雙方 Appearance 與 Property 效果、已知偏好及部位限制共同判定；發送時重新檢查。未知插件裝備與尚未支援的裸露、需求道具、地圖等條件保守停用。Lite 不更改偏好，也不宣稱完整 BC 引擎。詳見 [目前篩選範圍與驗收](activity-search-recovery-tests.md)。
 
 原生項目仍以 SourceCharacter／TargetCharacter／FocusGroupName／ActivityName 字典發出 `Type: Activity`。一般擴展項目以可讀 Action 文字送出，標示「文字模式」；ECHO 貼貼另走明確確認的道具／配對流程。
 

@@ -1,7 +1,70 @@
 import definitions from "./native-data.json";
 import type { CharacterSummary } from "../shared/types";
 export const nativeActivities = definitions.activities;
-export function activityReason(actor: CharacterSummary, target: CharacterSummary, group: string, name: string, room: { BlockCategory?: string[]; MapType?: string }): string | null {
+type ItemRule = { Effect?: string[]; Block?: string[]; AllowActivityOn?: string[]; unknown?: boolean };
+function inventoryState(character: CharacterSummary) {
+  const effects = new Set<string>(), blocked = new Set<string>(), accessible = new Set<string>(), groups = new Set<string>();
+  let unknown = !Array.isArray(character.Appearance) || !character.Appearance.length;
+  for (const raw of Array.isArray(character.Appearance) ? character.Appearance : []) {
+    const item = raw as { Group?: string; Name?: string; Property?: ItemRule } | null;
+    if (!item || typeof item.Group !== "string" || typeof item.Name !== "string") { unknown = true; continue; }
+    groups.add(item.Group);
+    const rule = (definitions.items as Record<string, ItemRule>)[`${item.Group}/${item.Name}`];
+    if (!rule || rule.unknown) unknown = true;
+    for (const [key, result] of [["Effect", effects], ["Block", blocked], ["AllowActivityOn", accessible]] as const) {
+      for (const source of [rule, item.Property]) {
+        const values = source?.[key];
+        if (values !== undefined && (!Array.isArray(values) || values.some(value => typeof value !== "string"))) { unknown = true; continue; }
+        if (key === "Effect" || item.Group.startsWith("Item")) for (const value of values || []) result.add(value);
+      }
+    }
+  }
+  return { effects, groups, unknown, blocked: (group: string, activity = false) => blocked.has(group) && !(activity && accessible.has(group)) };
+}
+
+/** Native Appearance effects are unioned with Property effects; unknown prerequisites fail closed. */
+export function createActivityInventoryCheck(actor: CharacterSummary, target: CharacterSummary) {
+  const a = inventoryState(actor), b = inventoryState(target);
+  return (group: string, prerequisites: string[] = []): string | null => {
+  const zone = (definitions.zones as Record<string, number>)[group];
+  const code = zone === undefined ? NaN : (target.ArousalSettings?.Zone?.charCodeAt(zone) ?? NaN) - 100;
+  if (Number.isFinite(code) && code >= 0 && code % 10 === 0) return "native.permission";
+  if (actor.MemberNumber !== target.MemberNumber && (a.effects.has("Enclose") || b.effects.has("Enclose"))) return "native.blocked";
+  const walk = !["Freeze", "Tethered", "Mounted"].some(effect => a.effects.has(effect));
+  const hands = !a.effects.has("Block");
+  const arms = hands || (!a.groups.has("ItemArms") && !a.blocked("ItemArms"));
+  const gagged = [...a.effects].some(effect => /^Gag/.test(effect));
+  let unsupported = false;
+  for (const pre of prerequisites) {
+    let allowed: boolean | undefined;
+    switch (pre) {
+      case "UseMouth": allowed = !a.effects.has("BlockMouth") && !gagged; break;
+      case "UseTongue": allowed = !a.effects.has("BlockMouth"); break;
+      case "TargetMouthBlocked": allowed = b.effects.has("BlockMouth"); break;
+      case "IsGagged": allowed = gagged; break;
+      case "UseHands": allowed = hands && !a.effects.has("MergedFingers"); break;
+      case "UseArms": allowed = arms; break;
+      case "CantUseArms": allowed = !arms; break;
+      case "UseFeet": allowed = walk; break;
+      case "CantUseFeet": allowed = !walk; break;
+      case "TargetCanUseTongue": allowed = !b.effects.has("BlockMouth"); break;
+      case "TargetMouthOpen": allowed = group !== "ItemMouth" || !b.groups.has("ItemMouth") || b.effects.has("OpenMouth"); break;
+      case "MoveHead": allowed = group !== "ItemHead" || !b.effects.has("FixedHead"); break;
+      case "AssEmpty": allowed = group !== "ItemButt" || !b.effects.has("IsPlugged"); break;
+      case "ZoneAccessible": allowed = !b.blocked(group, true); break;
+      case "TargetZoneAccessible": allowed = !a.blocked(group, true); break;
+      default: unsupported = true;
+    }
+    if (allowed === false) return "native.blocked";
+  }
+  if (a.unknown || b.unknown) return "native.equipment";
+  return unsupported ? "native.unsupported" : null;
+  };
+}
+export function activityInventoryReason(actor: CharacterSummary, target: CharacterSummary, group: string, prerequisites: string[] = []): string | null {
+  return createActivityInventoryCheck(actor, target)(group, prerequisites);
+}
+export function activityReason(actor: CharacterSummary, target: CharacterSummary, group: string, name: string, room: { BlockCategory?: string[]; MapType?: string }, checkInventory = createActivityInventoryCheck(actor, target)): string | null {
   const activity = nativeActivities.find(value => value.name === name);
   const self = actor.MemberNumber === target.MemberNumber;
   if (room.BlockCategory !== undefined && !Array.isArray(room.BlockCategory)) return "native.room";
@@ -18,16 +81,10 @@ export function activityReason(actor: CharacterSummary, target: CharacterSummary
   }
   // CharacterLoadOnline creates Female3DCG characters; raw online bundles omit this field.
   if ((actor.AssetFamily ?? "Female3DCG") !== "Female3DCG" || (target.AssetFamily ?? "Female3DCG") !== "Female3DCG") return "native.data";
-  // No guessed inventory capabilities: equipment, plugin bodies and mirrored zones need the full engine.
-  const body = new Set(["BodyUpper", "BodyLower", "Height", "Eyes", "Eyes2", "Eyebrows", "Mouth", "Blush", "Fluids", "Emoticon", "HairFront", "HairBack"]);
-  for (const character of [actor, target]) {
-    if (!Array.isArray(character.Appearance) || !character.Appearance.length) return "native.data";
-    for (const raw of character.Appearance) {
-      const item = raw as { Group?: string; Name?: string; Property?: unknown };
-      if (!item || !item.Group || !body.has(item.Group) || !item.Name || !(definitions.bodies as Record<string, string[]>)[item.Group]?.includes(item.Name) || item.Property) return "native.equipment";
-    }
-  }
-  if (activity.special || activity.prerequisites.some(pre => !["UseMouth", "UseTongue", "UseHands", "UseArms", "UseFeet", "MoveHead"].includes(pre))) return "native.unsupported";
+  if (![actor, target].every(character => Array.isArray(character.Appearance) && character.Appearance.length)) return "native.data";
+  const inventoryReason = checkInventory(group, activity.prerequisites);
+  if (inventoryReason) return inventoryReason;
+  if (activity.special) return "native.unsupported";
   if (actor.ActivePose?.length || target.ActivePose?.length) return "native.equipment";
   // Automatic actor arousal, expression timers and punishment caches are not emulated.
   if (actor.ArousalSettings?.Active !== "Manual") return "native.actor";

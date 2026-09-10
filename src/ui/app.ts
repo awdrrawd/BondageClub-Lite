@@ -37,6 +37,7 @@ class LiteApp {
   private friendFilter = "all";
   private createFields = { Background: "MainHall", Admin: "", Whitelist: "", Ban: "", ImageURL: "", MusicURL: "", Game: "", Visibility: "", Access: "All", MapType: "Never", Fog: false, MapJSON: "", BlockCategory: [] as string[] };
   private roomPageSize = 40;
+  private roomSearchInitialized = false;
   private unlisted = true;
   private showFull = false;
   private showLocked = true;
@@ -111,6 +112,14 @@ class LiteApp {
     bcClient.subscribe((snapshot) => {
       const previous = this.snapshot;
       this.snapshot = snapshot;
+      if (!snapshot.player) this.roomSearchInitialized = false;
+      if (snapshot.phase === "ready" && !this.roomSearchInitialized) {
+        this.roomSearchInitialized = true;
+        const member = snapshot.player?.MemberNumber;
+        window.setTimeout(() => {
+          if (member && this.snapshot?.player?.MemberNumber === member && ["ready", "joining", "in-room"].includes(this.snapshot.phase)) this.searchRooms(true);
+        }, 0);
+      }
       if (snapshot.cuddleRequest !== previous?.cuddleRequest) this.showCuddleRequest();
       if (!snapshot.player || snapshot.phase === "error") this.stability.stop();
       if (snapshot.player && !this.catalogLoading) {
@@ -594,6 +603,17 @@ class LiteApp {
     panel.append(this.field(t("summon.members"), members), this.field(t("summon.text"), text), save); return panel;
   }
 
+  private searchRooms(all = false): void {
+    if (all) {
+      this.query = "";
+      const input = document.getElementById("RoomQuery") as HTMLInputElement | null;
+      if (input) input.value = "";
+    }
+    this.notice = ""; this.roomPageSize = 40;
+    try { bcClient.search({ Query: this.query, Language: this.language, Space: this.space, Game: "", FullRooms: this.showFull, ShowLocked: this.showLocked, SearchDescs: this.searchDescriptions }); }
+    catch (error) { this.localNotice(error instanceof Error ? error.message : t("m099")); }
+  }
+
   private joinRoom(name: string): void {
     if (name === this.snapshot!.room?.Name) { this.tab = "chat"; this.render(); return; }
     if (this.snapshot!.room) {
@@ -671,9 +691,9 @@ class LiteApp {
     const query = this.input("RoomQuery", t("m088"), "search", this.query);
     query.addEventListener("input", () => { this.query = query.value; });
     const language = this.select(t("m089"), [["", t("m020")], ["EN", "EN"], ["CN", "CN"], ["DE", "DE"], ["FR", "FR"], ["ES", "ES"], ["RU", "RU"], ["UA", "UA"]], this.language);
-    language.addEventListener("change", () => { this.language = language.value as RoomSearchRequest["Language"]; });
+    language.addEventListener("change", () => { this.language = language.value as RoomSearchRequest["Language"]; this.searchRooms(); });
     const space = this.select(t("m090"), [["X", t("m091")], ["", t("m092")], ["M", t("m093")]], this.space);
-    space.addEventListener("change", () => { this.space = space.value as RoomSearchRequest["Space"]; });
+    space.addEventListener("change", () => { this.space = space.value as RoomSearchRequest["Space"]; this.searchRooms(true); });
     form.append(this.field(t("m094"), query), this.field(t("m089"), language), this.field(t("m090"), space));
     const options = this.el("div", "search-options");
     options.append(
@@ -685,11 +705,7 @@ class LiteApp {
     form.append(options, search);
     form.addEventListener("submit", (event) => {
       event.preventDefault();
-      this.notice = "";
-      try {
-        this.roomPageSize = 40;
-        bcClient.search({ Query: this.query, Language: this.language, Space: this.space, Game: "", FullRooms: this.showFull, ShowLocked: this.showLocked, SearchDescs: this.searchDescriptions });
-      } catch (error) { this.localNotice(error instanceof Error ? error.message : t("m099")); }
+      this.searchRooms();
     });
 
     const resultHeader = this.el("div", "result-header");

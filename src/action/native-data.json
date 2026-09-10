@@ -2007,5 +2007,8692 @@
     "Emoticon": [
       "Emoticon"
     ]
+  },
+  "items": {
+    "ClothOuter/LeatherJacket": {},
+    "ClothOuter/JacketHoodie": {},
+    "ClothOuter/BusinessSuit": {},
+    "ClothOuter/AdmiralTop": {},
+    "ClothOuter/FurCoat": {},
+    "ClothOuter/Robe1": {},
+    "ClothOuter/BartenderVest": {},
+    "ClothOuter/BartenderVestM": {},
+    "ClothOuter/Hoodie": {},
+    "ClothOuter/WoolCoat": {},
+    "ClothOuter/LabCoat": {},
+    "ClothOuter/Transparentraincoat": {},
+    "ClothOuter/GhostCloak": {},
+    "ClothOuter/AllureSidecut": {},
+    "ClothOuter/Blouse1": {},
+    "ClothOuter/BondageDress1": {},
+    "ClothOuter/BondageDress2": {},
+    "ClothOuter/AdultBabyDress2": {},
+    "ClothOuter/BridesmaidDress1": {},
+    "ClothOuter/BrocadeCloudsSnowEmbroideryQipao": {},
+    "ClothOuter/CasualDroppedSuit": {},
+    "ClothOuter/ChineseDress1": {},
+    "ClothOuter/ChineseDress2": {},
+    "ClothOuter/Xmas2025": {},
+    "ClothOuter/CocktailDress": {},
+    "ClothOuter/CorsetShirt": {},
+    "ClothOuter/CrimsonCloudsInkRhymeQipaoDress": {},
+    "ClothOuter/CrossStrapDress": {},
+    "ClothOuter/DressFur": {},
+    "ClothOuter/EveningGown": {},
+    "ClothOuter/FishnetTop": {},
+    "ClothOuter/FlowerDress": {},
+    "ClothOuter/FuzzyDress": {},
+    "ClothOuter/GardenDress": {},
+    "ClothOuter/GrandMage": {},
+    "ClothOuter/HeavyLeatherDress": {},
+    "ClothOuter/Gown2Top": {},
+    "ClothOuter/Jacket": {},
+    "ClothOuter/LeatherBolero": {},
+    "ClothOuter/LeatherCropTop": {},
+    "ClothOuter/LittleFormalShirt": {},
+    "ClothOuter/LolitaShortDress": {},
+    "ClothOuter/Dress3": {},
+    "ClothOuter/LongQipaoDress": {},
+    "ClothOuter/MeshTop": {},
+    "ClothOuter/MilitaryFatigue": {},
+    "ClothOuter/Dress2": {},
+    "ClothOuter/NunRobes": {},
+    "ClothOuter/OffTheShoulderTop": {},
+    "ClothOuter/Gown1": {},
+    "ClothOuter/AdultBabyDress1": {},
+    "ClothOuter/RuffledDress": {},
+    "ClothOuter/SeethroughTop": {},
+    "ClothOuter/AdultBabyDress4": {},
+    "ClothOuter/Gown3": {},
+    "ClothOuter/ShoulderlessTop": {},
+    "ClothOuter/WeddingDress2": {},
+    "ClothOuter/SlaveRags": {},
+    "ClothOuter/ComfyTop": {},
+    "ClothOuter/SleevelessTop": {},
+    "ClothOuter/StarryOceanEveningGown": {},
+    "ClothOuter/LatexHobbleDress": {},
+    "ClothOuter/StudentOutfit1": {},
+    "ClothOuter/StudentOutfit2": {},
+    "ClothOuter/StudentOutfit3": {},
+    "ClothOuter/SummerDress": {},
+    "ClothOuter/AdultBabyDress3": {},
+    "ClothOuter/Sweater1": {},
+    "ClothOuter/TShirt1": {},
+    "ClothOuter/TeacherOutfit1": {},
+    "ClothOuter/TennisShirt1": {},
+    "ClothOuter/BodyTowel1": {},
+    "ClothOuter/MaidApron": {},
+    "ClothOuter/VirginKiller1": {},
+    "ClothOuter/WeddingDress1": {},
+    "ClothOuter/WhiteDress": {},
+    "ClothOuter/Yukata1": {},
+    "ClothOuter/YuletideVelvetWarmth": {},
+    "ClothOuter/CropTopShirt": {},
+    "ClothOuter/CheerleaderTop": {},
+    "Cloth/CollegeOutfit1": {},
+    "Cloth/MaidOutfit1": {},
+    "Cloth/MaidOutfit2": {},
+    "Cloth/StudentOutfit1": {},
+    "Cloth/StudentOutfit2": {},
+    "Cloth/StudentOutfit3": {},
+    "Cloth/BabydollDress1": {},
+    "Cloth/TeacherOutfit1": {},
+    "Cloth/ChineseDress1": {},
+    "Cloth/OffTheShoulderTop": {},
+    "Cloth/ChineseDress2": {},
+    "Cloth/TShirt1": {},
+    "Cloth/TShirt2": {},
+    "Cloth/CustomTShirt": {},
+    "Cloth/BartenderVest": {},
+    "Cloth/BartenderVestM": {},
+    "Cloth/TennisShirt1": {},
+    "Cloth/Sweater1": {},
+    "Cloth/MistressTop": {},
+    "Cloth/MilitaryFatigue": {},
+    "Cloth/AdultBabyDress1": {},
+    "Cloth/AdultBabyDress2": {},
+    "Cloth/AdultBabyDress3": {},
+    "Cloth/AdultBabyDress4": {},
+    "Cloth/NurseUniform": {},
+    "Cloth/Robe1": {},
+    "Cloth/SuspenderTop1": {},
+    "Cloth/LeatherCorsetTop1": {},
+    "Cloth/FlowerDress": {},
+    "Cloth/Dress2": {},
+    "Cloth/LaceBabydoll": {},
+    "Cloth/SleevelessTop": {},
+    "Cloth/DressFur": {},
+    "Cloth/EveningGown": {},
+    "Cloth/YuletideVelvetWarmth": {},
+    "Cloth/NunRobes": {},
+    "Cloth/BodyTowel1": {},
+    "Cloth/Yukata1": {},
+    "Cloth/SteampunkCorsetTop1": {},
+    "Cloth/BondageDress1": {},
+    "Cloth/BondageDress2": {},
+    "Cloth/ShoulderlessTop": {},
+    "Cloth/Dress3": {},
+    "Cloth/ComfyTop": {},
+    "Cloth/WeddingDress1": {},
+    "Cloth/WeddingDress2": {},
+    "Cloth/BridesmaidDress1": {},
+    "Cloth/Gown1": {},
+    "Cloth/Gown2Top": {},
+    "Cloth/Gown3": {},
+    "Cloth/HeavyLeatherDress": {},
+    "Cloth/LatexHobbleDress": {},
+    "Cloth/MaidApron1": {},
+    "Cloth/MaidApron2": {},
+    "Cloth/AdmiralTop": {},
+    "Cloth/VirginKiller1": {},
+    "Cloth/ReverseBunnySuit": {},
+    "Cloth/LeatherCropTop": {},
+    "Cloth/CorsetShirt": {},
+    "Cloth/BondageBustier1": {},
+    "Cloth/BondageBustier2": {},
+    "Cloth/LeatherBolero": {},
+    "Cloth/Bodice1": {},
+    "Cloth/SummerDress": {},
+    "Cloth/GrandMage": {},
+    "Cloth/Blouse1": {},
+    "Cloth/LatexTop": {},
+    "Cloth/LatexLacedSuit": {},
+    "Cloth/FurCoat": {},
+    "Cloth/FuzzyDress": {},
+    "Cloth/CropTop": {},
+    "Cloth/Laurel": {},
+    "Cloth/RetroGirdle": {},
+    "Cloth/SeethroughTop": {},
+    "Cloth/Jacket": {},
+    "Cloth/SlaveRags": {},
+    "Cloth/Hoodie": {},
+    "Cloth/LatexTankTop": {},
+    "Cloth/CheerleaderTop": {},
+    "Cloth/FrilledShirt": {},
+    "Cloth/FishnetTop": {},
+    "Cloth/MeshTop": {},
+    "Cloth/CorsetDress": {},
+    "Cloth/MaidLatex": {},
+    "Cloth/BusinessSuit": {},
+    "Cloth/AnimeGirl": {},
+    "Cloth/RibbonCorset": {},
+    "Cloth/MaidBikini": {},
+    "Cloth/CocktailDress": {},
+    "Cloth/MaleTankTop1": {},
+    "Cloth/ButtonShirt": {},
+    "Cloth/CropTopShirt": {},
+    "Cloth/RuffledDress": {},
+    "Cloth/MaidDress3": {},
+    "Cloth/MaidDress4": {},
+    "Cloth/Cow": {},
+    "Cloth/LolitaShortDress": {},
+    "Cloth/CrimsonCloudsInkRhymeQipaoDress": {},
+    "Cloth/GardenDress": {},
+    "Cloth/CrossStrapDress": {},
+    "Cloth/BrocadeCloudsSnowEmbroideryQipao": {},
+    "Cloth/AllureSidecut": {},
+    "Cloth/LittleFormalShirt": {},
+    "Cloth/StarryOceanEveningGown": {},
+    "Cloth/CasualDroppedSuit": {},
+    "Cloth/Xmas2025": {},
+    "Cloth/WhiteDress": {},
+    "Cloth/LaceBraNightgown": {},
+    "Cloth/LongQipaoDress": {},
+    "Cloth/MaidApron": {},
+    "Cloth/FeatherLingerie": {},
+    "Cloth/Transparentraincoat": {},
+    "Cloth/GhostCloak": {},
+    "Cloth/Plugsuit": {},
+    "Cloth/TransparentBunnyGirl": {},
+    "Cloth/BunnySuit": {},
+    "Cloth/CorsetBikini1": {},
+    "Cloth/SexyBikini1": {},
+    "Cloth/CuteBikini1": {},
+    "Cloth/DominatrixLeotard": {},
+    "Cloth/FishnetBikini1": {},
+    "Cloth/LatexBunnySuit": {},
+    "Cloth/LeatherVestSuit": {},
+    "Cloth/SexyBikini3": {},
+    "Cloth/OuvertPerl1": {},
+    "Cloth/ShinyLeotard": {},
+    "Cloth/SleevelessSlimLatexLeotard": {},
+    "Cloth/SportSwimsuit": {},
+    "Cloth/Swimsuit1": {},
+    "Cloth/Swimsuit2": {},
+    "Cloth/Swimsuit3": {},
+    "Cloth/LatexBodysuit": {},
+    "Decals/DenOfSin": {},
+    "Decals/AmberFam": {},
+    "Decals/AzureCorp": {},
+    "Decals/DemonsBar": {},
+    "Decals/Gangriels": {},
+    "Decals/LukeChill": {},
+    "Decals/Malkuth": {},
+    "Decals/MissMariasManor": {},
+    "Decals/RatAss": {},
+    "Decals/SlaveHelpline": {},
+    "Decals/VoidOrder": {},
+    "Decals/DataRoom": {},
+    "Decals/BCRules": {},
+    "Decals/BondageCollege": {},
+    "Decals/Bonk": {},
+    "Decals/BTeacher": {},
+    "Decals/BTG": {},
+    "Decals/Bullseye": {},
+    "Decals/ControlPad1": {},
+    "Decals/Dominant": {},
+    "Decals/Eclipse": {},
+    "Decals/Elite": {},
+    "Decals/Hogtied": {},
+    "Decals/HWood": {},
+    "Decals/Keys": {},
+    "Decals/RadFrog": {},
+    "Decals/Raiders": {},
+    "Decals/Shibari": {},
+    "Decals/Staff": {},
+    "Decals/WhiteMoon": {},
+    "Decals/ZamStick": {},
+    "Decals/ZamStickII": {},
+    "Decals/SkullDecal": {},
+    "Decals/CyberTechCorp": {},
+    "Decals/SpreaderBar": {},
+    "Decals/FireBite": {},
+    "Decals/CRABS": {},
+    "Decals/PirateRockRadio": {},
+    "Decals/MelodysBoutique": {},
+    "ClothAccessory/StudentOutfit3Scarf": {},
+    "ClothAccessory/StudentOutfit3Bow1": {},
+    "ClothAccessory/StudentOutfit3Bow2": {},
+    "ClothAccessory/StudentOutfit3Bow3": {},
+    "ClothAccessory/SideRuffles": {},
+    "ClothAccessory/HoodedCloak": {},
+    "ClothAccessory/Bouquet": {},
+    "ClothAccessory/FrillyApron": {},
+    "ClothAccessory/BunnyCollarCuffs": {},
+    "ClothAccessory/BowBackAccessory": {},
+    "ClothAccessory/Camera1": {},
+    "ClothAccessory/Cape": {},
+    "ClothAccessory/LeatherStraps": {},
+    "ClothAccessory/FurBolero": {},
+    "ClothAccessory/FacePaint": {},
+    "ClothAccessory/Bib": {},
+    "ClothAccessory/Scarf": {},
+    "ClothAccessory/Glitter": {},
+    "ClothAccessory/CatsuitCollar": {},
+    "ClothAccessory/Poncho": {},
+    "ClothAccessory/JewelrySet": {},
+    "ClothAccessory/KissmarkDummy": {},
+    "ClothAccessory/Kissmark": {},
+    "ClothAccessory/LargeBelt": {},
+    "ClothAccessory/LargeBeltClassic": {},
+    "ClothAccessory/ZipperBelt": {},
+    "ClothAccessory/LatexApron": {},
+    "ClothAccessory/BugLegs": {},
+    "ClothAccessory/WombTattoos": {},
+    "ClothAccessory/BodyWritings": {},
+    "ClothAccessory/FaceWritings": {},
+    "ClothAccessory/LeatherBeltCloth": {},
+    "ClothAccessory/SatinScarf": {},
+    "ClothAccessory/ComboBelt": {},
+    "ClothAccessory/RuffledCollar": {},
+    "ClothAccessory/SmallNeckFur": {},
+    "ClothAccessory/LargeNeckFur": {},
+    "ClothAccessory/SpikyNeckFur": {},
+    "ClothAccessory/FuzzyScarf": {},
+    "ClothAccessory/VampiricCloak": {},
+    "ClothAccessory/WitchShawl": {},
+    "ClothAccessory/XmasShortShawl": {},
+    "ClothAccessory/XmasLongShawl": {},
+    "ClothAccessory/BowBelt": {},
+    "ClothAccessory/ChainBelt": {},
+    "ClothAccessory/BowAccessory": {},
+    "ClothAccessory/SchoolBag": {},
+    "ClothAccessory/DollHandle": {
+      "Effect": [
+        "Leash"
+      ]
+    },
+    "ClothAccessory/Epaulet": {},
+    "ClothAccessory/ForeheadJewelry": {},
+    "ClothAccessory/TriskelionNecklace": {},
+    "Necklace/Necklace1": {},
+    "Necklace/Necklace2": {},
+    "Necklace/Necklace3": {},
+    "Necklace/Necklace4": {},
+    "Necklace/NecklaceLock": {},
+    "Necklace/NecklaceKey": {},
+    "Necklace/IDCard": {},
+    "Necklace/BlackHeart": {},
+    "Necklace/NecklaceBallGag": {},
+    "Necklace/FurScarf": {},
+    "Necklace/ElegantHeartNecklace": {},
+    "Necklace/Bandana": {},
+    "Necklace/FlowerGarland": {},
+    "Necklace/NecklaceRope": {},
+    "Necklace/ChokerTattoo": {},
+    "Necklace/CatsuitCollar": {},
+    "Necklace/NecklaceButterfly": {},
+    "Necklace/PearlNecklace1": {},
+    "Necklace/AnimeGirlNecklace": {},
+    "Necklace/SatinScarf": {},
+    "Necklace/RosePendant": {},
+    "Necklace/RuffledCollar": {},
+    "Necklace/BodyChainNecklace": {},
+    "Necklace/BeadNecklace": {},
+    "Necklace/EldritchNecklace": {},
+    "Necklace/PlantNecklace": {},
+    "Necklace/NecklaceRoseBallGag": {},
+    "Necklace/PearlNecklace2": {},
+    "Necklace/TriskelionNecklace": {},
+    "Suit/Catsuit": {},
+    "Suit/DiaperSuit": {},
+    "Suit/LatexCatsuit": {},
+    "Suit/SeamlessCatsuit": {},
+    "Suit/SleevelessCatsuit": {},
+    "Suit/PilotSuit": {},
+    "Suit/SeethroughSuit": {},
+    "Suit/SeethroughSuitZip": {},
+    "Suit/ReverseBunnySuit": {},
+    "Suit/Blouse1": {},
+    "Suit/SleevelessSlimLatexLeotard": {},
+    "Suit/FishnetTop": {},
+    "Suit/ShinyLeotard": {},
+    "Suit/BartenderVest": {},
+    "Suit/MaleSeamlessCatsuit": {},
+    "Suit/BartenderVestM": {},
+    "Suit/GlossyBodystocking": {},
+    "Suit/Plugsuit": {},
+    "Suit/TransparentBunnyGirl": {},
+    "Suit/FeatherLingerie": {},
+    "Suit/LatexBodysuit": {},
+    "Suit/BunnySuit": {},
+    "Suit/CorsetBikini1": {},
+    "Suit/SexyBikini1": {},
+    "Suit/CuteBikini1": {},
+    "Suit/DominatrixLeotard": {},
+    "Suit/FishnetBikini1": {},
+    "Suit/LatexBunnySuit": {},
+    "Suit/LeatherVestSuit": {},
+    "Suit/SexyBikini3": {},
+    "Suit/OuvertPerl1": {},
+    "Suit/SportSwimsuit": {},
+    "Suit/Swimsuit1": {},
+    "Suit/Swimsuit2": {},
+    "Suit/Swimsuit3": {},
+    "SuitLower/Catsuit": {},
+    "SuitLower/DiaperSuit": {},
+    "SuitLower/LatexCatsuit": {},
+    "SuitLower/SeamlessCatsuit": {},
+    "SuitLower/CatsuitPanties": {},
+    "SuitLower/PilotSuit": {},
+    "SuitLower/PilotPanties": {},
+    "SuitLower/SeethroughSuit": {},
+    "SuitLower/SeethroughSuitZip": {},
+    "SuitLower/ReverseBunnySuit": {},
+    "SuitLower/Pantyhose1": {},
+    "SuitLower/Pantyhose2": {},
+    "SuitLower/Stockings1": {},
+    "SuitLower/Stockings2": {},
+    "SuitLower/Stockings3": {},
+    "SuitLower/Stockings4": {},
+    "SuitLower/MaleSeamlessCatsuit": {},
+    "SuitLower/MaleCatsuitPanties": {},
+    "SuitLower/LongFishnets": {},
+    "SuitLower/RippedPantyhose": {},
+    "SuitLower/YogaPants": {},
+    "ClothLower/Skirt1": {},
+    "ClothLower/Skirt2": {},
+    "ClothLower/Skirt3": {},
+    "ClothLower/TennisSkirt1": {},
+    "ClothLower/Jeans1": {},
+    "ClothLower/SkinnyJeans": {},
+    "ClothLower/Shorts1": {},
+    "ClothLower/Pajama1": {},
+    "ClothLower/MistressBottom": {},
+    "ClothLower/Waspie1": {},
+    "ClothLower/Waspie2": {},
+    "ClothLower/Waspie3": {},
+    "ClothLower/LatexPants1": {},
+    "ClothLower/LatexSkirt1": {},
+    "ClothLower/LatexSkirt2": {},
+    "ClothLower/Tutu": {},
+    "ClothLower/ClothSkirt1": {},
+    "ClothLower/Jeans2": {},
+    "ClothLower/ChineseSkirt1": {},
+    "ClothLower/Gown2Skirt": {},
+    "ClothLower/AdmiralSkirt": {},
+    "ClothLower/HulaSkirt": {},
+    "ClothLower/JeanSkirt": {},
+    "ClothLower/LongLeatherSkirt": {},
+    "ClothLower/LongPleatedSkirt": {},
+    "ClothLower/PencilSkirt": {},
+    "ClothLower/JeansShorts": {},
+    "ClothLower/DenimShorts": {},
+    "ClothLower/Leggings1": {},
+    "ClothLower/Leggings2": {},
+    "ClothLower/PleatedSkirt": {},
+    "ClothLower/MageSkirt": {},
+    "ClothLower/LongSkirt1": {},
+    "ClothLower/ShortPencilSkirt": {},
+    "ClothLower/HaremPants": {},
+    "ClothLower/HaremPants2": {},
+    "ClothLower/ShortPlaidSkirt": {},
+    "ClothLower/CollegeSkirt": {},
+    "ClothLower/BondageSkirt": {
+      "Effect": [
+        "Slow"
+      ]
+    },
+    "ClothLower/AsymmetricSkirt": {},
+    "ClothLower/ElegantSkirt": {},
+    "ClothLower/RuffledSkirt": {},
+    "ClothLower/CrossSkirt": {},
+    "ClothLower/GymShorts": {},
+    "ClothLower/CrossSkirtLight": {},
+    "ClothLower/UtilityKilt": {},
+    "ClothLower/CheerleaderSkirt": {},
+    "ClothLower/TulleSkirt": {},
+    "ClothLower/BusinessSkirt": {},
+    "ClothLower/PantBoots": {},
+    "ClothLower/BusinessTrousers": {},
+    "ClothLower/RuffledMiniskirt": {},
+    "ClothLower/SatinSkirt": {},
+    "ClothLower/ASRubberSkirt": {},
+    "ClothLower/MidLegSkirt": {},
+    "ClothLower/PVCHobbleSkirt": {},
+    "ClothLower/BaggyJeans": {},
+    "ClothLower/OpenLeatherSkirt": {},
+    "ClothLower/YogaPants": {},
+    "ClothLower/MiniDenimHotPants": {},
+    "ClothLower/PencilSkirt2": {},
+    "ClothLower/Shapewear2": {},
+    "ClothLower/LacePants": {},
+    "ClothLower/Halfpleatedskirt": {},
+    "ClothLower/SlitColumnSkirt": {},
+    "ClothLower/WoolenHighWaistSkirt": {},
+    "ClothLower/BlackButterflySkirt": {},
+    "ClothLower/SuspenderPants": {},
+    "ClothLower/MilitaryPants": {},
+    "ClothLower/SideCutoutYogaPants": {},
+    "Bra/Bra1": {},
+    "Bra/Bra2": {},
+    "Bra/Bra7": {},
+    "Bra/Bra8": {},
+    "Bra/Bra9": {},
+    "Bra/Bandeau1": {},
+    "Bra/MaidBra1": {},
+    "Bra/Bustier1": {},
+    "Bra/Bikini1": {},
+    "Bra/SexyBikini1": {},
+    "Bra/SexyBikini2": {},
+    "Bra/SexyBikini3": {},
+    "Bra/Swimsuit1": {},
+    "Bra/Swimsuit2": {},
+    "Bra/SportSwimsuit": {},
+    "Bra/BunnySuit": {},
+    "Bra/LatexBunnySuit": {},
+    "Bra/LeatherVestSuit": {},
+    "Bra/FrameBra1": {},
+    "Bra/FrameBra2": {},
+    "Bra/BondageBra1": {},
+    "Bra/LatexBra1": {},
+    "Bra/HarnessBra1": {},
+    "Bra/HarnessBra2": {},
+    "Bra/CuteBikini1": {},
+    "Bra/CorsetBikini1": {},
+    "Bra/OuvertPerl1": {},
+    "Bra/Sarashi1": {},
+    "Bra/KittyBra1": {},
+    "Bra/FishnetBikini1": {},
+    "Bra/SexyBeachBra1": {},
+    "Bra/SexyBikiniBra1": {},
+    "Bra/StarHarnessBra": {},
+    "Bra/HeartTop": {},
+    "Bra/ChineseBra1": {},
+    "Bra/LeatherStrapBra1": {},
+    "Bra/Swimsuit3": {},
+    "Bra/ClamShell": {},
+    "Bra/CowPrintedBra": {},
+    "Bra/StuddedHarness": {},
+    "Bra/Camisole": {},
+    "Bra/Ribbons": {},
+    "Bra/LeatherBreastBinder": {},
+    "Bra/FullLatexBra": {},
+    "Bra/StrapBra": {},
+    "Bra/FullLatexBra2": {},
+    "Bra/HaremBra": {},
+    "Bra/FlowerBra": {},
+    "Bra/SportBra": {},
+    "Bra/Bra10": {},
+    "Bra/CoconutBra": {},
+    "Bra/SleevelessSlimLatexLeotard": {},
+    "Bra/DominatrixLeotard": {},
+    "Bra/MeshTop": {},
+    "Bra/ShinyLeotard": {},
+    "Bra/LeatherBunnyHollowBra": {},
+    "Bra/Bandage": {},
+    "Bra/SatinCorset": {},
+    "Bra/MaidBra": {},
+    "Bra/OrnateMetalBra": {},
+    "Bra/FeatherLingerie": {},
+    "Bra/Pasties1": {},
+    "Bra/HeartPasties": {},
+    "Bra/KittyPasties": {},
+    "Bra/Plugsuit": {},
+    "Bra/TransparentBunnyGirl": {},
+    "Bra/LatexBodysuit": {},
+    "Corset/Corset1": {},
+    "Corset/Corset2": {},
+    "Corset/Corset3": {},
+    "Corset/Corset4": {},
+    "Corset/Corset5": {},
+    "Corset/SatinCorset": {},
+    "Corset/BarrelCorset": {},
+    "Corset/LatexCorset1": {},
+    "Corset/LeatherCorsetTop1": {},
+    "Corset/Corset6": {},
+    "Corset/SteampunkCorsetTop1": {},
+    "Corset/Underbust": {},
+    "Corset/ClassicLatexCorset": {},
+    "Corset/CorsetDress": {},
+    "Corset/RibbonCorset": {},
+    "Corset/ExtremeCorset": {},
+    "Corset/TightCorset": {},
+    "Corset/HeavyLatexCorset": {},
+    "Panties/Panties1": {},
+    "Panties/Panties7": {},
+    "Panties/Panties8": {},
+    "Panties/Panties11": {},
+    "Panties/Panties12": {},
+    "Panties/Panties13": {},
+    "Panties/Panties14": {},
+    "Panties/Panties15": {},
+    "Panties/Bikini1": {},
+    "Panties/Diapers1": {},
+    "Panties/Diapers2": {},
+    "Panties/Diapers3": {},
+    "Panties/Diapers4": {},
+    "Panties/BulkyDiaper": {},
+    "Panties/PoofyDiaper": {},
+    "Panties/LatexDiaper": {},
+    "Panties/RoyalDiaper": {},
+    "Panties/UntrainersThin": {},
+    "Panties/Panties16": {},
+    "Panties/MaidPanties1": {},
+    "Panties/MaidPanties2": {},
+    "Panties/LatexPanties1": {},
+    "Panties/WrapPanties1": {},
+    "Panties/CrotchPanties1": {},
+    "Panties/LatexCrotchlessPanties": {},
+    "Panties/RedBowPanties": {},
+    "Panties/StringPanties1": {},
+    "Panties/StringPasty1": {},
+    "Panties/ZipPanties1": {},
+    "Panties/HarnessPanties1": {},
+    "Panties/HarnessPanties2": {},
+    "Panties/KittyPanties1": {},
+    "Panties/PearlPanties1": {},
+    "Panties/SunstripePanties1": {},
+    "Panties/SexyBeachPanties1": {},
+    "Panties/ChinesePanties1": {},
+    "Panties/LeatherStrapPanties1": {},
+    "Panties/CowPrintedPanties": {},
+    "Panties/LatexPanties2": {},
+    "Panties/PilotPanties": {},
+    "Panties/SportPanties": {},
+    "Panties/CatsuitPanties": {},
+    "Panties/FlowerPanties": {},
+    "Panties/FloralPanties2": {},
+    "Panties/Thong": {},
+    "Panties/StringThong": {},
+    "Panties/MicroThong": {},
+    "Panties/HipHarness": {},
+    "Panties/WaistLegHarness": {},
+    "Panties/FemPelvisHarness": {},
+    "Panties/BoxerShorts": {},
+    "Panties/MaleCatsuitPanties": {},
+    "Panties/Briefs": {},
+    "Panties/Jockstrap": {},
+    "Panties/CockSock": {},
+    "Panties/PullDownPanties": {},
+    "Panties/PearlStrapPanties": {},
+    "Socks/Socks0": {},
+    "Socks/Socks1": {},
+    "Socks/Socks2": {},
+    "Socks/Socks3": {},
+    "Socks/Socks4": {},
+    "Socks/Socks5": {},
+    "Socks/Stockings1": {},
+    "Socks/Stockings2": {},
+    "Socks/Stockings3": {},
+    "Socks/Stockings4": {},
+    "Socks/Pantyhose1": {},
+    "Socks/Socks6": {},
+    "Socks/SocksFur": {},
+    "Socks/SocksStriped1": {},
+    "Socks/LatexSocks1": {},
+    "Socks/FootlessSocks1": {},
+    "Socks/ReverseBunnySuit": {},
+    "Socks/LeatherSocks1": {},
+    "Socks/Pantyhose2": {},
+    "Socks/GradientPantyhose": {},
+    "Socks/CowPrintedSocks": {},
+    "Socks/HaremStockings": {},
+    "Socks/VSocks1": {},
+    "Socks/YuletideVelvetWarmth": {},
+    "Socks/KneePads": {},
+    "Socks/LongFishnets": {},
+    "Socks/RippedPantyhose": {},
+    "Socks/NetSocks": {},
+    "Socks/SilkStockings": {},
+    "Socks/SilkStockings2": {},
+    "Socks/SilkStockings3": {},
+    "Socks/StripedSocks": {},
+    "Socks/CuteKittenPrintedSocks": {},
+    "Socks/Ruffledsocks1": {},
+    "Socks/LegWarmers1": {},
+    "Socks/FootstepSocks": {},
+    "Socks/StirrupThighHighSocks": {},
+    "SocksRight/Socks0": {},
+    "SocksRight/Socks1": {},
+    "SocksRight/Socks2": {},
+    "SocksRight/Socks3": {},
+    "SocksRight/Socks4": {},
+    "SocksRight/Socks5": {},
+    "SocksRight/Stockings1": {},
+    "SocksRight/Stockings2": {},
+    "SocksRight/Stockings3": {},
+    "SocksRight/Stockings4": {},
+    "SocksRight/Socks6": {},
+    "SocksRight/SocksFur": {},
+    "SocksRight/SocksStriped1": {},
+    "SocksRight/LatexSocks1": {},
+    "SocksRight/FootlessSocks1": {},
+    "SocksRight/LeatherSocks1": {},
+    "SocksRight/CowPrintedSocks": {},
+    "SocksRight/HaremStockings": {},
+    "SocksRight/VSocks1": {},
+    "SocksRight/KneePads": {},
+    "SocksRight/LooseSocks": {},
+    "SocksRight/HeelBinders": {},
+    "SocksLeft/Socks0": {},
+    "SocksLeft/Socks1": {},
+    "SocksLeft/Socks2": {},
+    "SocksLeft/Socks3": {},
+    "SocksLeft/Socks4": {},
+    "SocksLeft/Socks5": {},
+    "SocksLeft/Stockings1": {},
+    "SocksLeft/Stockings2": {},
+    "SocksLeft/Stockings3": {},
+    "SocksLeft/Stockings4": {},
+    "SocksLeft/Socks6": {},
+    "SocksLeft/SocksFur": {},
+    "SocksLeft/SocksStriped1": {},
+    "SocksLeft/LatexSocks1": {},
+    "SocksLeft/FootlessSocks1": {},
+    "SocksLeft/LeatherSocks1": {},
+    "SocksLeft/CowPrintedSocks": {},
+    "SocksLeft/HaremStockings": {},
+    "SocksLeft/VSocks1": {},
+    "SocksLeft/KneePads": {},
+    "SocksLeft/LooseSocks": {},
+    "SocksLeft/HeelBinders": {},
+    "AnkletRight/BandAnklet": {},
+    "AnkletRight/Ribbon": {},
+    "AnkletRight/Ribbon1": {},
+    "AnkletRight/LegFur": {},
+    "AnkletRight/HeelBinders": {},
+    "AnkletLeft/BandAnklet": {},
+    "AnkletLeft/Ribbon": {},
+    "AnkletLeft/Ribbon1": {},
+    "AnkletLeft/LegFur": {},
+    "AnkletLeft/HeelBinders": {},
+    "Garters/GarterBelt": {},
+    "Garters/GarterBelt2": {},
+    "Garters/GarterBelt3": {},
+    "Garters/Tentacles": {},
+    "Garters/DropBag": {},
+    "Garters/HipHarness": {},
+    "Garters/WaistLegHarness": {},
+    "Garters/ComboBelt": {},
+    "Garters/FemPelvisHarness": {},
+    "Garters/ButterflyGarter": {},
+    "Garters/BowBelt": {},
+    "Garters/ChainBelt": {},
+    "Garters/LaceLegRing": {},
+    "Garters/XLegStraps": {},
+    "Garters/LaceLegStrap": {},
+    "Garters/SocksBow": {},
+    "Shoes/Shoes1": {},
+    "Shoes/Shoes2": {},
+    "Shoes/Shoes4": {},
+    "Shoes/Sneakers1": {},
+    "Shoes/Sneakers2": {},
+    "Shoes/SneakersSport": {},
+    "Shoes/Heels1": {},
+    "Shoes/Heels2": {},
+    "Shoes/Boots1": {},
+    "Shoes/AnkleBoots1": {},
+    "Shoes/MistressBoots": {},
+    "Shoes/PonyBoots": {},
+    "Shoes/Sandals": {},
+    "Shoes/SandalsRS": {},
+    "Shoes/PawBoots": {},
+    "Shoes/WoollyBootsTall": {},
+    "Shoes/ThighHighLatexHeels": {},
+    "Shoes/Heels3": {},
+    "Shoes/BarefootSandals1": {},
+    "Shoes/LatexAnkleShoes": {},
+    "Shoes/Flippers": {
+      "Effect": [
+        "MapSwim"
+      ]
+    },
+    "Shoes/DeluxeBoots": {},
+    "Shoes/AnkleStrapShoes": {},
+    "Shoes/Shoes5": {},
+    "Shoes/FuturisticHeels2": {},
+    "Shoes/FuzzyBoots": {},
+    "Shoes/LatexHeels": {},
+    "Shoes/DutyShoes": {},
+    "Shoes/SocialHeels": {},
+    "Shoes/Clogs": {},
+    "Shoes/StreetBoots": {},
+    "Shoes/BalletHeels1": {},
+    "Shoes/WesternBoots": {},
+    "Shoes/Geta": {},
+    "Shoes/TallerBoots": {},
+    "Shoes/MaryShoes": {},
+    "Shoes/ThighBoots": {},
+    "Shoes/StilettoHeels": {},
+    "Shoes/StrictPonyBoots": {},
+    "Shoes/AnimeGirlBoots": {},
+    "Shoes/CustomHeels": {},
+    "Shoes/FullLegBoots": {},
+    "Shoes/IndoorSlippers": {},
+    "Shoes/WitchShoes": {},
+    "Shoes/HeellessHoof": {},
+    "Shoes/HoofBoots": {},
+    "Shoes/CombatBoots": {},
+    "Shoes/ZipperBBoots": {
+      "Effect": [
+        "Slow"
+      ]
+    },
+    "Shoes/PumpHighHeels": {},
+    "Shoes/Slippers": {},
+    "Shoes/ZipperLeatherBoots": {},
+    "Shoes/ToeNails": {},
+    "Shoes/HoofShoe": {},
+    "Shoes/PrintedCrocs": {},
+    "Shoes/ThickSlippers": {},
+    "Shoes/MaryJaneShoes": {},
+    "Shoes/Laceupshoes": {},
+    "Shoes/PeeptoeHeels": {},
+    "Shoes/ToeRing": {},
+    "Hat/Band1": {},
+    "Hat/Band2": {},
+    "Hat/Beret1": {},
+    "Hat/MaidHairband1": {},
+    "Hat/NurseCap": {},
+    "Hat/NunVeil": {},
+    "Hat/Santa1": {},
+    "Hat/CaptainHat1": {},
+    "Hat/BunnySuccubus2": {},
+    "Hat/WitchHat1": {},
+    "Hat/PirateBandana1": {},
+    "Hat/Bandana": {},
+    "Hat/PoliceWomanHat": {},
+    "Hat/HeadTowel1": {},
+    "Hat/CollegeDunce": {},
+    "Hat/Tiara1": {},
+    "Hat/Bonnet1": {},
+    "Hat/Bonnet2": {},
+    "Hat/Crown1": {},
+    "Hat/Crown2": {},
+    "Hat/Crown3": {},
+    "Hat/Crown4": {},
+    "Hat/Crown5": {},
+    "Hat/SmallHat1": {},
+    "Hat/Veil1": {},
+    "Hat/Veil2": {},
+    "Hat/BakerBoyHat": {},
+    "Hat/ReindeerBand": {},
+    "Hat/FurHeadband": {},
+    "Hat/Gat": {},
+    "Hat/FacePaint": {},
+    "Hat/RoseCrown": {},
+    "Hat/FlowerCrown": {},
+    "Hat/PoppyCrown": {},
+    "Hat/LatexHabit": {},
+    "Hat/BallCapBack": {},
+    "Hat/BallCapFront": {},
+    "Hat/SwimCap": {},
+    "Hat/CowboyHat": {},
+    "Hat/Beanie": {},
+    "Hat/NunHabit": {},
+    "Hat/PirateHat": {},
+    "Hat/JesterHat": {},
+    "Hat/MaidLatexHairband": {},
+    "Hat/AnimeGirlTiara": {},
+    "Hat/VintageHat": {},
+    "Hat/GIBeret": {},
+    "Hat/CheapHelmet": {},
+    "Hat/FlatCap": {},
+    "Hat/NPCBalloon": {},
+    "Hat/FeatheredHeadpiece": {},
+    "Hat/WitchHat": {},
+    "HairAccessory3/Ribbons1": {},
+    "HairAccessory3/Ribbons2": {},
+    "HairAccessory3/Ribbons3": {},
+    "HairAccessory3/Ribbons4": {},
+    "HairAccessory3/GiantBow1": {},
+    "HairAccessory3/HairFlower1": {},
+    "HairAccessory3/WeddingVeil1": {},
+    "HairAccessory3/HairFeathers1": {},
+    "HairAccessory3/Halo": {},
+    "HairAccessory3/Headset1": {},
+    "HairAccessory3/EarWarmer": {},
+    "HairAccessory3/ForeheadJewelry": {},
+    "HairAccessory1/Ears1": {},
+    "HairAccessory1/Ears2": {},
+    "HairAccessory1/PonyEars1": {},
+    "HairAccessory1/Ribbons1": {},
+    "HairAccessory1/Ribbons2": {},
+    "HairAccessory1/Ribbons3": {},
+    "HairAccessory1/Ribbons4": {},
+    "HairAccessory1/GiantBow1": {},
+    "HairAccessory1/BunnyEars1": {},
+    "HairAccessory1/BunnyEars2": {},
+    "HairAccessory1/PuppyEars1": {},
+    "HairAccessory1/SuccubusHorns": {},
+    "HairAccessory1/Horns": {},
+    "HairAccessory1/Horns2": {},
+    "HairAccessory1/Horns3": {},
+    "HairAccessory1/Horns4": {},
+    "HairAccessory1/Horns5": {},
+    "HairAccessory1/CowEars": {},
+    "HairAccessory1/HairFlower1": {},
+    "HairAccessory1/FoxEars1": {},
+    "HairAccessory1/BatWings": {},
+    "HairAccessory1/KittenEars1": {},
+    "HairAccessory1/KittenEars2": {},
+    "HairAccessory1/WolfEars1": {},
+    "HairAccessory1/WolfEars2": {},
+    "HairAccessory1/FoxEars2": {},
+    "HairAccessory1/FoxEars3": {},
+    "HairAccessory1/PuppyEars2": {},
+    "HairAccessory1/RaccoonEars1": {},
+    "HairAccessory1/WeddingVeil1": {},
+    "HairAccessory1/HairFeathers1": {},
+    "HairAccessory1/MouseEars1": {},
+    "HairAccessory1/MouseEars2": {},
+    "HairAccessory1/ElfEars": {},
+    "HairAccessory1/CowHorns": {},
+    "HairAccessory1/Halo": {},
+    "HairAccessory1/Antennae": {},
+    "HairAccessory1/UnicornHorn": {},
+    "HairAccessory1/DildocornHorn": {},
+    "HairAccessory1/BigLynxEars": {},
+    "HairAccessory1/Headset1": {},
+    "HairAccessory1/EarWarmer": {},
+    "HairAccessory1/CyberneticEars1": {},
+    "HairAccessory1/CyberEars": {},
+    "HairAccessory1/FloppyBunnyEars": {},
+    "HairAccessory1/Onihorns": {},
+    "HairAccessory1/SkunkEars": {},
+    "HairAccessory1/AquaticEars": {},
+    "HairAccessory1/CustomizableFluffyEars1": {},
+    "HairAccessory1/CustomizableFluffyEars2": {},
+    "HairAccessory1/CustomizableFluffyEars3": {},
+    "HairAccessory1/CustomizableCatEars": {},
+    "HairAccessory1/CustomizableElfEars": {},
+    "HairAccessory1/CustomizableCowEars": {},
+    "HairAccessory1/Antenna": {},
+    "HairAccessory1/WingedHeadpiece": {},
+    "HairAccessory1/BlackCatEarsMirror": {},
+    "HairAccessory1/DaggerRibbon": {},
+    "HairAccessory1/TongqianHairpin": {},
+    "HairAccessory1/ForeheadJewelry": {},
+    "HairAccessory2/Ears1": {},
+    "HairAccessory2/Ears2": {},
+    "HairAccessory2/PonyEars1": {},
+    "HairAccessory2/BunnyEars1": {},
+    "HairAccessory2/BunnyEars2": {},
+    "HairAccessory2/PuppyEars1": {},
+    "HairAccessory2/SuccubusHorns": {},
+    "HairAccessory2/Horns": {},
+    "HairAccessory2/Horns2": {},
+    "HairAccessory2/Horns3": {},
+    "HairAccessory2/Horns4": {},
+    "HairAccessory2/Horns5": {},
+    "HairAccessory2/CowEars": {},
+    "HairAccessory2/FoxEars1": {},
+    "HairAccessory2/BatWings": {},
+    "HairAccessory2/KittenEars1": {},
+    "HairAccessory2/KittenEars2": {},
+    "HairAccessory2/WolfEars1": {},
+    "HairAccessory2/WolfEars2": {},
+    "HairAccessory2/FoxEars2": {},
+    "HairAccessory2/FoxEars3": {},
+    "HairAccessory2/PuppyEars2": {},
+    "HairAccessory2/RaccoonEars1": {},
+    "HairAccessory2/MouseEars1": {},
+    "HairAccessory2/MouseEars2": {},
+    "HairAccessory2/ElfEars": {},
+    "HairAccessory2/CowHorns": {},
+    "HairAccessory2/Antennae": {},
+    "HairAccessory2/UnicornHorn": {},
+    "HairAccessory2/DildocornHorn": {},
+    "HairAccessory2/Onihorns": {},
+    "HairAccessory2/SkunkEars": {},
+    "HairAccessory2/AquaticEars": {},
+    "HairAccessory2/CyberneticEars1": {},
+    "HairAccessory2/CyberEars": {},
+    "HairAccessory2/FloppyBunnyEars": {},
+    "HairAccessory2/BigLynxEars": {},
+    "HairAccessory2/CustomizableFluffyEars1": {},
+    "HairAccessory2/CustomizableFluffyEars2": {},
+    "HairAccessory2/CustomizableFluffyEars3": {},
+    "HairAccessory2/CustomizableCatEars": {},
+    "HairAccessory2/CustomizableElfEars": {},
+    "HairAccessory2/CustomizableCowEars": {},
+    "Gloves/Gloves1": {},
+    "Gloves/Gloves2": {},
+    "Gloves/Gloves3": {},
+    "Gloves/MistressGloves": {},
+    "Gloves/FingerlessGloves": {},
+    "Gloves/GlovesFur": {},
+    "Gloves/Catsuit": {},
+    "Gloves/SeethroughSuit": {},
+    "Gloves/CowPrintedGloves": {},
+    "Gloves/LatexElbowGloves": {},
+    "Gloves/LatexShortGloves": {},
+    "Gloves/FishnetGloves": {},
+    "Gloves/HaremGlove": {},
+    "Gloves/BikerGloves": {},
+    "Gloves/WarmGloves": {},
+    "Gloves/OperaGloves": {},
+    "Gloves/AnimeGirlGloves": {},
+    "Gloves/CheerleaderPomPoms": {},
+    "HandAccessoryLeft/Claws": {},
+    "HandAccessoryLeft/Fingernails": {},
+    "HandAccessoryLeft/CatsuitGloves": {},
+    "HandAccessoryLeft/Rings": {},
+    "HandAccessoryRight/Claws": {},
+    "HandAccessoryRight/Fingernails": {},
+    "HandAccessoryRight/CatsuitGloves": {},
+    "HandAccessoryRight/Rings": {},
+    "Bracelet/BowBand": {},
+    "Bracelet/KinkBracelet": {},
+    "Bracelet/LesBand": {},
+    "Bracelet/SpikeBands": {},
+    "Bracelet/Wristband": {},
+    "Bracelet/Band1": {},
+    "Bracelet/LaceBands": {},
+    "Bracelet/WristWatch": {},
+    "Bracelet/MaidBracelet": {},
+    "Glasses/Glasses1": {},
+    "Glasses/Glasses2": {},
+    "Glasses/Glasses3": {},
+    "Glasses/Glasses4": {},
+    "Glasses/Glasses5": {},
+    "Glasses/Glasses6": {},
+    "Glasses/SunGlasses1": {},
+    "Glasses/SunGlasses2": {},
+    "Glasses/SunGlassesClear": {},
+    "Glasses/EyePatch1": {},
+    "Glasses/CatGlasses": {},
+    "Glasses/Goggles": {},
+    "Glasses/VGlasses": {},
+    "Glasses/GradientSunglasses": {},
+    "Glasses/JokeGlasses": {},
+    "Glasses/StreetEyewear": {},
+    "Glasses/Pincenez": {},
+    "Glasses/RoundSunglasses": {},
+    "Glasses/VintageSunglasses": {},
+    "Glasses/ShutterSunshades": {},
+    "Glasses/Monocle": {},
+    "Glasses/HalfRimGlasses": {},
+    "Glasses/FaceCrests": {},
+    "Jewelry/JewelrySet": {},
+    "Jewelry/AnkletA": {},
+    "Jewelry/TriskelionNecklace": {},
+    "Jewelry/NavelBar1": {},
+    "Mask/VenetianMask": {},
+    "Mask/DominoMask": {},
+    "Mask/ButterflyMask": {},
+    "Mask/ShinobiMask": {},
+    "Mask/FoxMask": {},
+    "Mask/BunnyMask1": {},
+    "Mask/BunnyMask2": {},
+    "Mask/BunnyMask3": {},
+    "Mask/KittyMask1": {},
+    "Mask/KittyMask2": {},
+    "Mask/KittyMask3": {},
+    "Mask/LaceMask1": {},
+    "Mask/LaceMask2": {},
+    "Mask/FuturisticVisor": {},
+    "Mask/OpenFaceHood": {},
+    "Mask/FaceVeil": {},
+    "Mask/FacePaint": {},
+    "Mask/PetNose": {},
+    "Mask/Glitter": {},
+    "Mask/HeadHarness": {},
+    "Mask/CybertechMask": {},
+    "Mask/FestivalFoxMask": {},
+    "Mask/Kissmark": {},
+    "Mask/SwimCap": {},
+    "Mask/DroneMask": {},
+    "Mask/MedicalMask": {},
+    "Mask/AnimeLenses": {},
+    "Mask/LatexMuzzleMask": {},
+    "Mask/RubberMask": {},
+    "Mask/FaceScars": {},
+    "Mask/Splatters": {},
+    "Mask/AnimalNoses": {},
+    "Mask/EldritchMask": {},
+    "Mask/DemonMask": {},
+    "Mask/AngelMask": {},
+    "Mask/NecromancerHelmet": {},
+    "Mask/Kigu2Hood": {},
+    "Mask/KirugumiMask": {},
+    "Mask/ForeheadJewelry": {},
+    "Mask/FeatheredHeadpiece": {},
+    "TailStraps/TailStrap": {},
+    "TailStraps/HorseTailStrap": {},
+    "TailStraps/HorseTailStrap1": {},
+    "TailStraps/FoxTailsStrap": {},
+    "TailStraps/PuppyTailStrap": {},
+    "TailStraps/SuccubusTailStrap": {},
+    "TailStraps/SuccubusHeartTailStrap": {},
+    "TailStraps/RaccoonStrap": {},
+    "TailStraps/RaccoonTailStrap": {},
+    "TailStraps/PuppyTailStrap1": {},
+    "TailStraps/KittenTailStrap1": {},
+    "TailStraps/KittenTailStrap2": {},
+    "TailStraps/FoxTailStrap": {},
+    "TailStraps/WolfTailStrap1": {},
+    "TailStraps/WolfTailStrap2": {},
+    "TailStraps/WolfTailStrap3": {},
+    "TailStraps/DemonPlug": {},
+    "TailStraps/MouseTailStrap1": {},
+    "TailStraps/MouseTailStrap2": {},
+    "TailStraps/CowtailStrap": {},
+    "TailStraps/BunnyTailStrap": {},
+    "TailStraps/DragonTailStrap1": {},
+    "TailStraps/DragonsTail": {},
+    "TailStraps/DragonTailStrap2Left": {},
+    "TailStraps/DragonTailStrap2Right": {},
+    "TailStraps/Tentacles": {},
+    "TailStraps/LionTailStrap": {},
+    "TailStraps/LatexFoxTail": {},
+    "TailStraps/KitsuneTailStraps": {},
+    "TailStraps/SkunkTail": {},
+    "TailStraps/LargeBushyTail": {},
+    "Wings/SuccubusFeather": {},
+    "Wings/SuccubusWings": {},
+    "Wings/AngelFeather": {},
+    "Wings/DevilWings": {},
+    "Wings/FallenAngelWings": {},
+    "Wings/AngelWings": {},
+    "Wings/BatWings": {},
+    "Wings/FairyWings": {},
+    "Wings/SteampunkWings": {},
+    "Wings/BeeWings": {},
+    "Wings/CyberWings": {},
+    "Wings/PixieWings": {},
+    "Wings/DragonWings": {},
+    "Wings/Wing1": {},
+    "Wings/BotEnergyWings": {},
+    "Wings/SeraphWings": {},
+    "Wings/Spider": {},
+    "BodyMarkings/WombTattoos": {},
+    "BodyMarkings/BabyPowderDust": {},
+    "BodyMarkings/BodyWritings": {},
+    "BodyMarkings/FaceScars": {},
+    "BodyMarkings/Splatters": {},
+    "BodyMarkings/FacePaints": {},
+    "BodyMarkings/FaceCrests": {},
+    "BodyMarkings/NavelBar1": {},
+    "FaceMarkings/FaceWritings": {},
+    "FaceMarkings/FaceScars": {},
+    "FaceMarkings/Splatters": {},
+    "FaceMarkings/FacePaint": {},
+    "FaceMarkings/AnimalNoses": {},
+    "FaceMarkings/FaceCrests": {},
+    "Height/H0950": {},
+    "Height/H0960": {},
+    "Height/H0970": {},
+    "Height/H0980": {},
+    "Height/H0990": {},
+    "Height/H1000": {},
+    "Height/H0900": {},
+    "Height/H0910": {},
+    "Height/H0920": {},
+    "Height/H0930": {},
+    "Height/H0940": {},
+    "BodyStyle/Original": {},
+    "BodyStyle/EchoV1": {},
+    "BodyStyle/EchoV2": {},
+    "BodyUpper/Small": {},
+    "BodyUpper/Normal": {},
+    "BodyUpper/Large": {},
+    "BodyUpper/XLarge": {},
+    "BodyUpper/FlatSmall": {},
+    "BodyUpper/FlatMedium": {},
+    "BodyLower/Small": {},
+    "BodyLower/Normal": {},
+    "BodyLower/Large": {},
+    "BodyLower/XLarge": {},
+    "HairFront/HairFront1": {},
+    "HairFront/HairFront1b": {},
+    "HairFront/HairFront2": {},
+    "HairFront/HairFront2b": {},
+    "HairFront/HairFront3": {},
+    "HairFront/HairFront3b": {},
+    "HairFront/HairFront4": {},
+    "HairFront/HairFront4b": {},
+    "HairFront/HairFront5": {},
+    "HairFront/HairFront5b": {},
+    "HairFront/HairFront6": {},
+    "HairFront/HairFront6b": {},
+    "HairFront/HairFront7": {},
+    "HairFront/HairFront7b": {},
+    "HairFront/HairFront8": {},
+    "HairFront/HairFront8b": {},
+    "HairFront/HairFront9": {},
+    "HairFront/HairFront9b": {},
+    "HairFront/HairFront10": {},
+    "HairFront/HairFront10b": {},
+    "HairFront/HairFront11": {},
+    "HairFront/HairFront11b": {},
+    "HairFront/HairFront12": {},
+    "HairFront/HairFront12b": {},
+    "HairFront/HairFront13": {},
+    "HairFront/HairFront13b": {},
+    "HairFront/HairFront14": {},
+    "HairFront/HairFront14b": {},
+    "HairFront/HairFront15": {},
+    "HairFront/HairFront16": {},
+    "HairFront/HairFront17": {},
+    "HairFront/HairFront17b": {},
+    "HairFront/HairFront18": {},
+    "HairFront/HairFront19": {},
+    "HairFront/HairFront20": {},
+    "HairFront/HairFront21": {},
+    "HairFront/HairFront22": {},
+    "HairFront/HairFront22b": {},
+    "HairFront/HairFront23": {},
+    "HairFront/HairFront23b": {},
+    "HairFront/HairFront24": {},
+    "HairFront/HairFront25": {},
+    "HairFront/HairFront26": {},
+    "HairFront/HairFront27": {},
+    "HairFront/HairFront28": {},
+    "HairFront/HairFront28b": {},
+    "HairFront/HairFront29": {},
+    "HairFront/HairFront29b": {},
+    "HairFront/HairFront30": {},
+    "HairFront/HairFront31": {},
+    "HairFront/HairFront32": {},
+    "HairFront/HairFront33": {},
+    "HairFront/HairFront33b": {},
+    "HairFront/HairFront34": {},
+    "HairFront/HairFront35": {},
+    "HairFront/HairFront36": {},
+    "HairFront/HairFront37": {},
+    "HairFront/HairFront37b": {},
+    "HairFront/HairFront38": {},
+    "HairFront/HairFront38b": {},
+    "HairFront/HairFront39": {},
+    "HairFront/HairFront39b": {},
+    "HairFront/HairFront40": {},
+    "HairFront/HairFront40b": {},
+    "HairFront/HairFront41": {},
+    "HairFront/HairFront41b": {},
+    "HairFront/HairFront42": {},
+    "HairFront/HairFront42b": {},
+    "HairFront/HairFront43": {},
+    "HairFront/HairFront43b": {},
+    "HairFront/HairFront44": {},
+    "HairFront/HairFront44b": {},
+    "HairFront/HairFront45": {},
+    "HairFront/HairFront45b": {},
+    "HairFront/HairFront46": {},
+    "HairFront/HairFront46b": {},
+    "HairFront/HairFront47": {},
+    "HairFront/HairFront47b": {},
+    "HairFront/HairFront48": {},
+    "HairFront/HairFront48b": {},
+    "HairFront/HairFront49": {},
+    "HairFront/HairFront50": {},
+    "HairFront/HairFront51": {},
+    "HairFront/HairFront51b": {},
+    "HairFront/HairFront52": {},
+    "HairFront/HairFront52b": {},
+    "HairFront/HairFront53": {},
+    "HairFront/HairFront54": {},
+    "HairFront/HairFront55": {},
+    "HairFront/HairFront56": {},
+    "HairFront/HairFront56b": {},
+    "HairFront/HairFront57": {},
+    "HairFront/HairFront58": {},
+    "HairFront/HairFront59": {},
+    "HairFront/HairFront60": {},
+    "HairFront/HairFront61": {},
+    "HairFront/ScalyHair": {},
+    "HairFront/HairFront62a": {},
+    "HairFront/HairFront62b": {},
+    "HairFront/HairFront63": {},
+    "HairFront/HairFront64": {},
+    "HairFront/HairFront64b": {},
+    "HairFront/HairFront65": {},
+    "HairFront/HairFront66": {},
+    "HairFront/HairFront67": {},
+    "HairFront/HairFront68": {},
+    "HairFront/HairFront69": {},
+    "HairFront/HairFront70": {},
+    "HairFront/HairFront71": {},
+    "HairFront/HairFront72": {},
+    "HairFront/HairFront73": {},
+    "HairFront/HairFront74": {},
+    "HairFront/HairFront75": {},
+    "HairFront/HairFront76a": {},
+    "HairFront/HairFront76b": {},
+    "HairBack/HairNone": {},
+    "HairBack/HairBack1": {},
+    "HairBack/HairBack1b": {},
+    "HairBack/HairBack2": {},
+    "HairBack/HairBack2b": {},
+    "HairBack/HairBack4": {},
+    "HairBack/HairBack4b": {},
+    "HairBack/HairBack5": {},
+    "HairBack/HairBack5b": {},
+    "HairBack/HairBack6": {},
+    "HairBack/HairBack6b": {},
+    "HairBack/HairBack7": {},
+    "HairBack/HairBack7b": {},
+    "HairBack/HairBack7c": {},
+    "HairBack/HairBack8": {},
+    "HairBack/HairBack9": {},
+    "HairBack/HairBack9b": {},
+    "HairBack/HairBack10": {},
+    "HairBack/HairBack10b": {},
+    "HairBack/HairBack11": {},
+    "HairBack/HairBack12": {},
+    "HairBack/HairBack12b": {},
+    "HairBack/HairBack13": {},
+    "HairBack/HairBack13b": {},
+    "HairBack/HairBack14": {},
+    "HairBack/HairBack15": {},
+    "HairBack/HairBack15b": {},
+    "HairBack/HairBack16": {},
+    "HairBack/HairBack17": {},
+    "HairBack/HairBack18": {},
+    "HairBack/HairBack18b": {},
+    "HairBack/HairBack19": {},
+    "HairBack/HairBack19b": {},
+    "HairBack/HairBack20": {},
+    "HairBack/HairBack20b": {},
+    "HairBack/HairBack21": {},
+    "HairBack/HairBack22": {},
+    "HairBack/HairBack23": {},
+    "HairBack/HairBack24": {},
+    "HairBack/HairBack25": {},
+    "HairBack/HairBack26": {},
+    "HairBack/HairBack27": {},
+    "HairBack/HairBack28": {},
+    "HairBack/HairBack29": {},
+    "HairBack/HairBack30": {},
+    "HairBack/HairBack31": {},
+    "HairBack/HairBack32": {},
+    "HairBack/HairBack33": {},
+    "HairBack/HairBack34": {},
+    "HairBack/HairBack35": {},
+    "HairBack/HairBack36": {},
+    "HairBack/HairBack37": {},
+    "HairBack/HairBack38": {},
+    "HairBack/HairBack39": {},
+    "HairBack/HairBack40": {},
+    "HairBack/HairBack41": {},
+    "HairBack/HairBack42": {},
+    "HairBack/HairBack43": {},
+    "HairBack/HairBack44": {},
+    "HairBack/HairBack45": {},
+    "HairBack/HairBack46": {},
+    "HairBack/HairBack47": {},
+    "HairBack/HairBack48": {},
+    "HairBack/HairBack49": {},
+    "HairBack/HairBack50": {},
+    "HairBack/HairBack51": {},
+    "HairBack/HairBack52": {},
+    "HairBack/HairBack53": {},
+    "HairBack/HairBack54": {},
+    "HairBack/HairBack54b": {},
+    "HairBack/HairBack55": {},
+    "HairBack/HairBack55b": {},
+    "HairBack/HairBack56": {},
+    "HairBack/HairBack56b": {},
+    "HairBack/HairBack57": {},
+    "HairBack/HairBack57b": {},
+    "HairBack/HairBack57c": {},
+    "HairBack/HairBack57d": {},
+    "HairBack/HairBack58": {},
+    "HairBack/HairBack58b": {},
+    "HairBack/HairBack59": {},
+    "HairBack/HairBack60": {},
+    "HairBack/HairBack61": {},
+    "HairBack/HairBack61b": {},
+    "HairBack/HairBack62": {},
+    "HairBack/HairBack63": {},
+    "HairBack/ScalyBackHair": {},
+    "HairBack/HairBack64": {},
+    "HairBack/HairBack65": {},
+    "HairBack/HairBack65b": {},
+    "HairBack/HairBack66": {},
+    "HairBack/HairBack67": {},
+    "HairBack/HairBack68": {},
+    "HairBack/HairBack69": {},
+    "HairBack/HairBack69b": {},
+    "HairBack/HairBack70": {},
+    "HairBack/HairBack70b": {},
+    "HairBack/HairBack71": {},
+    "HairBack/HairBack72": {},
+    "HairBack/HairBack73": {},
+    "HairBack/HairBack74": {},
+    "HairBack/HairBack75": {},
+    "HairBack/HairBack76": {},
+    "HairBack/HairBack76b": {},
+    "HairBack/HairBack77": {},
+    "HairBack/HairBack77b": {},
+    "HairBack/HairBack77c": {},
+    "HairBack/HairBack78": {},
+    "HairBack/HairBack78b": {},
+    "HairBack/HairBack78c": {},
+    "HairBack/HairBack79": {},
+    "HairBack/HairBack80": {},
+    "HairBack/HairBack81": {},
+    "HairBack/HairBack82": {},
+    "HairBack/HairBack83": {},
+    "HairBack/HairBack84": {},
+    "HairBack/HairBack85": {},
+    "FacialHair/Goatee": {},
+    "FacialHair/BigBeard": {},
+    "FacialHair/MediumBeard": {},
+    "FacialHair/Moustache": {},
+    "FacialHair/MoustacheBeard": {},
+    "FacialHair/ChinstrapBeard": {},
+    "FacialHair/XLBeard": {},
+    "FacialHair/XXLBeard": {},
+    "FacialHair/MuttonChops": {},
+    "FacialHair/XLMoustache": {},
+    "FacialHair/XLGoatie": {},
+    "FacialHair/Handlebar": {},
+    "FacialHair/XXLBeardHandlebar": {},
+    "FacialHair/XXLBeardXLStache": {},
+    "FacialHair/VanDyke": {},
+    "FacialHair/VanDykeHandlebar": {},
+    "FacialHair/LargeBeard": {},
+    "FacialHair/LargeGoatee": {},
+    "Eyebrows/Eyebrows1": {},
+    "Eyebrows/Eyebrows2": {},
+    "Eyebrows/Eyebrows7": {},
+    "Eyebrows/Eyebrows8": {},
+    "Eyes/Eyes1": {},
+    "Eyes/Eyes2": {},
+    "Eyes/Eyes3": {},
+    "Eyes/Eyes4": {},
+    "Eyes/Eyes5": {},
+    "Eyes/Eyes6": {},
+    "Eyes/Eyes7": {},
+    "Eyes/Eyes8": {},
+    "Eyes/Eyes9": {},
+    "Eyes/Eyes10": {},
+    "Eyes/Eyes11": {},
+    "Eyes/Eyes12": {},
+    "Eyes/Eyes13": {},
+    "Eyes/Eyes14": {},
+    "Eyes/Eyes15": {},
+    "Eyes2/Eyes1": {},
+    "Eyes2/Eyes2": {},
+    "Eyes2/Eyes3": {},
+    "Eyes2/Eyes4": {},
+    "Eyes2/Eyes5": {},
+    "Eyes2/Eyes6": {},
+    "Eyes2/Eyes7": {},
+    "Eyes2/Eyes8": {},
+    "Eyes2/Eyes9": {},
+    "Eyes2/Eyes10": {},
+    "Eyes2/Eyes11": {},
+    "Eyes2/Eyes12": {},
+    "Eyes2/Eyes13": {},
+    "Eyes2/Eyes14": {},
+    "Eyes2/Eyes15": {},
+    "EyeShadow/CatEye": {},
+    "EyeShadow/CatEye2": {},
+    "EyeShadow/LargeBlurred": {},
+    "EyeShadow/LargeSolid": {},
+    "EyeShadow/SmallBlurred": {},
+    "EyeShadow/SmallSolid": {},
+    "EyeShadow/SuperstarBlurred": {},
+    "EyeShadow/SuperstarSolid": {},
+    "EyeShadow/Tanuki": {},
+    "EyeShadow/UndershadowedBlurred": {},
+    "EyeShadow/UndershadowedSolid": {},
+    "EyeShadow/Wings": {},
+    "EyeShadow/Running": {},
+    "Mouth/Regular": {},
+    "Mouth/Discreet": {},
+    "Mouth/Full": {},
+    "Nipples/Nipples1": {},
+    "Nipples/Nipples2": {},
+    "Nipples/Nipples3": {},
+    "Pussy/Pussy1": {},
+    "Pussy/Pussy2": {},
+    "Pussy/Pussy3": {},
+    "Pussy/Penis": {},
+    "Pronouns/SheHer": {},
+    "Pronouns/HeHim": {},
+    "Pronouns/TheyThem": {},
+    "Pronouns/ItIt": {},
+    "Head/Default": {},
+    "Head/SmallEars": {},
+    "Head/NoEars": {},
+    "Blush/Blush": {},
+    "Fluids/Fluids": {},
+    "Emoticon/Emoticon": {},
+    "ItemFeet/NylonRope": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemFeet/HempRope": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemFeet/LeatherBelt": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemFeet/SturdyLeatherBelts": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemFeet/Irish8Cuffs": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemFeet/HeavyAnkleCuffs": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemFeet/DuctTape": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemFeet/LeatherAnkleCuffs": {
+      "Effect": [
+        "CuffedFeet"
+      ]
+    },
+    "ItemFeet/LeatherDeluxeAnkleCuffs": {
+      "Effect": [
+        "CuffedFeet"
+      ]
+    },
+    "ItemFeet/FloorShackles": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe",
+        "MapImmobile"
+      ],
+      "AllowActivityOn": [
+        "ItemLegs",
+        "ItemBoots"
+      ]
+    },
+    "ItemFeet/SteelAnkleCuffs": {
+      "Effect": [
+        "CuffedFeet"
+      ]
+    },
+    "ItemFeet/EscortAnkleCuffs": {
+      "Effect": [
+        "CuffedFeet",
+        "Lock",
+        "Slow"
+      ]
+    },
+    "ItemFeet/FuturisticAnkleCuffs": {
+      "Effect": [
+        "CuffedFeet"
+      ]
+    },
+    "ItemFeet/OrnateAnkleCuffs": {
+      "Effect": [
+        "CuffedFeet"
+      ]
+    },
+    "ItemFeet/HighStyleSteelAnkleCuffs": {
+      "Effect": [
+        "CuffedFeet"
+      ]
+    },
+    "ItemFeet/SpreaderMetal": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe"
+      ],
+      "AllowActivityOn": [
+        "ItemLegs"
+      ]
+    },
+    "ItemFeet/HeavySpreaderMetal": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe"
+      ],
+      "AllowActivityOn": [
+        "ItemLegs"
+      ]
+    },
+    "ItemFeet/BallChain": {
+      "Effect": [
+        "Slow"
+      ]
+    },
+    "ItemFeet/AnkleShackles": {
+      "Effect": [
+        "BlockWardrobe",
+        "Slow"
+      ]
+    },
+    "ItemFeet/PlasticWrap": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemFeet/Zipties": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemFeet/Chains": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemFeet/SpreaderDildoBar": {
+      "Effect": [
+        "FillVulva",
+        "Freeze",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemPelvis",
+        "ItemVulva"
+      ],
+      "AllowActivityOn": [
+        "ItemPelvis"
+      ]
+    },
+    "ItemFeet/SpreaderVibratingDildoBar": {
+      "Effect": [
+        "FillVulva",
+        "Freeze",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemPelvis",
+        "ItemVulva"
+      ],
+      "AllowActivityOn": [
+        "ItemPelvis"
+      ]
+    },
+    "ItemFeet/WoodenCuffs": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemFeet/MedicalBedRestraints": {
+      "Effect": [
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemDevices"
+      ]
+    },
+    "ItemFeet/SuspensionCuffs": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Freeze"
+      ]
+    },
+    "ItemFeet/Tentacles": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemFeet/Slime": {
+      "Effect": [
+        "Freeze"
+      ]
+    },
+    "ItemFeet/MassiveAnkleCuffs": {
+      "Effect": [
+        "CuffedFeet",
+        "Slow"
+      ]
+    },
+    "ItemFeet/HeelBinders": {
+      "Effect": [
+        "CuffedFeet"
+      ],
+      "Block": [
+        "ItemBoots"
+      ]
+    },
+    "ItemFeet/KneeOvernighter": {
+      "Effect": [
+        "Slow",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemBoots"
+      ]
+    },
+    "ItemLegs/NylonRope": {
+      "Effect": [
+        "BlockWardrobe",
+        "Slow"
+      ]
+    },
+    "ItemLegs/HempRope": {
+      "Effect": [
+        "BlockWardrobe",
+        "Slow"
+      ]
+    },
+    "ItemLegs/LeatherBelt": {
+      "Effect": [
+        "BlockWardrobe",
+        "Slow"
+      ]
+    },
+    "ItemLegs/SturdyLeatherBelts": {
+      "Effect": [
+        "BlockWardrobe",
+        "Slow"
+      ]
+    },
+    "ItemLegs/DuctTape": {
+      "Effect": [
+        "BlockWardrobe",
+        "Slow"
+      ]
+    },
+    "ItemLegs/LeatherLegCuffs": {
+      "Effect": [
+        "CuffedLegs"
+      ]
+    },
+    "ItemLegs/LeatherDeluxeLegCuffs": {
+      "Effect": [
+        "CuffedLegs"
+      ]
+    },
+    "ItemLegs/FuturisticLegCuffs": {
+      "Effect": [
+        "CuffedLegs"
+      ]
+    },
+    "ItemLegs/OrnateLegCuffs": {
+      "Effect": [
+        "CuffedLegs"
+      ]
+    },
+    "ItemLegs/LegBinder": {
+      "Effect": [
+        "BlockWardrobe",
+        "Slow"
+      ],
+      "Block": [
+        "ItemFeet"
+      ]
+    },
+    "ItemLegs/ShinyLegBinder": {
+      "Effect": [
+        "BlockWardrobe",
+        "Slow"
+      ],
+      "Block": [
+        "ItemFeet"
+      ]
+    },
+    "ItemLegs/HobbleSkirt": {
+      "Effect": [
+        "BlockWardrobe",
+        "Slow"
+      ],
+      "Block": [
+        "ItemPelvis",
+        "ItemFeet",
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemButt"
+      ]
+    },
+    "ItemLegs/SeamlessLegBinder": {
+      "Effect": [
+        "BlockWardrobe",
+        "Slow"
+      ],
+      "Block": [
+        "ItemFeet"
+      ]
+    },
+    "ItemLegs/SeamlessHobbleSkirt": {
+      "Effect": [
+        "BlockWardrobe",
+        "Slow"
+      ],
+      "Block": [
+        "ItemPelvis",
+        "ItemFeet",
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemButt"
+      ]
+    },
+    "ItemLegs/Zipties": {
+      "Effect": [
+        "BlockWardrobe",
+        "Slow"
+      ]
+    },
+    "ItemLegs/Chains": {
+      "Effect": [
+        "BlockWardrobe",
+        "Slow"
+      ]
+    },
+    "ItemLegs/PlasticWrap": {
+      "Effect": [
+        "BlockWardrobe",
+        "Slow"
+      ]
+    },
+    "ItemLegs/FrogtieStraps": {
+      "Effect": [
+        "Slow"
+      ]
+    },
+    "ItemLegs/MermaidTail": {
+      "Effect": [
+        "BlockWardrobe",
+        "Freeze",
+        "FillVulva",
+        "UseRemote",
+        "MapSwim"
+      ],
+      "Block": [
+        "ItemFeet",
+        "ItemBoots",
+        "ItemPelvis",
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemButt"
+      ]
+    },
+    "ItemLegs/MedicalBedRestraints": {
+      "Effect": [
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemDevices"
+      ]
+    },
+    "ItemLegs/Ribbons": {
+      "Effect": [
+        "BlockWardrobe",
+        "Slow"
+      ]
+    },
+    "ItemLegs/Tentacles": {
+      "Effect": [
+        "BlockWardrobe",
+        "Slow"
+      ]
+    },
+    "ItemLegs/Slime": {
+      "Effect": [
+        "Slow"
+      ],
+      "Block": [
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemButt",
+        "ItemPelvis"
+      ]
+    },
+    "ItemLegs/FrogtieMetalCuffs": {
+      "Effect": [
+        "Slow"
+      ]
+    },
+    "ItemLegs/BarrelCorset": {
+      "Effect": [
+        "Slow"
+      ],
+      "Block": [
+        "ItemPelvis",
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemButt"
+      ]
+    },
+    "ItemLegs/StrappedPetsuitLegs": {
+      "Effect": [
+        "Slow"
+      ]
+    },
+    "ItemLegs/PawPaddedPetsuitLegs": {
+      "Effect": [
+        "Slow"
+      ]
+    },
+    "ItemVulva/VibratingEgg": {
+      "Effect": [
+        "UseRemote"
+      ]
+    },
+    "ItemVulva/VibratorRemote": {
+      "Effect": [
+        "Remote"
+      ]
+    },
+    "ItemVulva/VibratingLatexPanties": {
+      "Effect": [
+        "Chaste",
+        "UseRemote"
+      ],
+      "Block": [
+        "ItemButt"
+      ]
+    },
+    "ItemVulva/WandBelt": {
+      "Block": [
+        "ItemPelvis"
+      ]
+    },
+    "ItemVulva/PenisDildo": {
+      "Effect": [
+        "FillVulva"
+      ]
+    },
+    "ItemVulva/ShockDildo": {
+      "Effect": [
+        "FillVulva"
+      ]
+    },
+    "ItemVulva/VibratingDildo": {
+      "Effect": [
+        "FillVulva",
+        "UseRemote"
+      ]
+    },
+    "ItemVulva/FuturisticVibrator": {
+      "Effect": [
+        "UseRemote",
+        "FillVulva"
+      ]
+    },
+    "ItemVulva/InflatableVibeDildo": {
+      "Effect": [
+        "UseRemote",
+        "FillVulva"
+      ]
+    },
+    "ItemVulva/InflatableVibratingPanties": {
+      "Effect": [
+        "UseRemote",
+        "Egged",
+        "FillVulva",
+        "Wiggling"
+      ]
+    },
+    "ItemVulva/ClitoralStimulator": {
+      "Effect": [
+        "UseRemote"
+      ]
+    },
+    "ItemVulva/ClitSuctionCup": {},
+    "ItemVulva/TapeStrips": {},
+    "ItemVulva/BenWaBalls": {},
+    "ItemVulva/HeavyWeightClamp": {},
+    "ItemVulva/FullLatexSuitWand": {
+      "Effect": [
+        "UseRemote"
+      ],
+      "Block": [
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemVulva/ClitAndDildoVibratorbelt": {
+      "Effect": [
+        "Egged",
+        "UseRemote",
+        "FillVulva"
+      ],
+      "Block": [
+        "ItemPelvis"
+      ]
+    },
+    "ItemVulva/HempRopeBelt": {
+      "Block": [
+        "ItemPelvis"
+      ]
+    },
+    "ItemVulva/WiredEgg": {
+      "Effect": [
+        "UseRemote"
+      ]
+    },
+    "ItemVulva/LoversVibrator": {
+      "Effect": [
+        "UseRemote",
+        "FillVulva"
+      ]
+    },
+    "ItemVulva/LoversVibratorRemote": {
+      "Effect": [
+        "Remote"
+      ]
+    },
+    "ItemVulva/DoubleEndDildo": {
+      "Effect": [
+        "FillVulva"
+      ]
+    },
+    "ItemVulva/Stitches": {
+      "Effect": [
+        "Chaste"
+      ]
+    },
+    "ItemVulva/BasicCockring": {
+      "Effect": [
+        "CanEdge"
+      ]
+    },
+    "ItemVulva/LockingCockring": {
+      "Effect": [
+        "CanEdge"
+      ]
+    },
+    "ItemVulva/PlasticChastityCage1": {
+      "Effect": [
+        "Chaste"
+      ],
+      "Block": [
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemVulva/VibeEggPenisBase": {
+      "Effect": [
+        "UseRemote"
+      ]
+    },
+    "ItemVulva/PlasticChastityCage2": {
+      "Effect": [
+        "Chaste"
+      ],
+      "Block": [
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemVulva/TechnoChastityCage": {
+      "Effect": [
+        "UseRemote",
+        "CanEdge",
+        "Chaste"
+      ],
+      "Block": [
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemVulva/FlatChastityCage": {
+      "Effect": [
+        "Chaste"
+      ],
+      "Block": [
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemVulva/Ballspreader": {
+      "Effect": [
+        "Chaste"
+      ],
+      "Block": [
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemVulva/ChastityPouch": {
+      "Effect": [
+        "Chaste"
+      ],
+      "Block": [
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemVulva/FullCasingCage": {
+      "Effect": [
+        "Chaste"
+      ],
+      "Block": [
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemVulva/LatexNulge": {
+      "Effect": [
+        "Chaste",
+        "UseRemote"
+      ],
+      "Block": [
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemVulva/MysteryBox": {},
+    "ItemVulva/UsedCondom": {},
+    "ItemVulvaPiercings/StraightClitPiercing": {},
+    "ItemVulvaPiercings/RoundClitPiercing": {},
+    "ItemVulvaPiercings/BarbellClitPiercing": {},
+    "ItemVulvaPiercings/Catheter": {},
+    "ItemVulvaPiercings/ChastityClitPiercing": {
+      "Effect": [
+        "Chaste"
+      ],
+      "Block": [
+        "ItemVulva"
+      ]
+    },
+    "ItemVulvaPiercings/ChastityClitShield": {
+      "Effect": [
+        "Chaste"
+      ],
+      "Block": [
+        "ItemVulva"
+      ]
+    },
+    "ItemVulvaPiercings/HighSecurityVulvaShield": {
+      "Effect": [
+        "Chaste"
+      ],
+      "Block": [
+        "ItemVulva"
+      ]
+    },
+    "ItemVulvaPiercings/JewelClitPiercing": {},
+    "ItemVulvaPiercings/AdornedClitPiercing": {},
+    "ItemVulvaPiercings/VibeHeartClitPiercing": {
+      "Effect": [
+        "UseRemote"
+      ]
+    },
+    "ItemVulvaPiercings/ClitRing": {},
+    "ItemVulvaPiercings/TapedClitEgg": {
+      "Effect": [
+        "UseRemote"
+      ]
+    },
+    "ItemVulvaPiercings/VibeEggGlans": {
+      "Effect": [
+        "UseRemote"
+      ]
+    },
+    "ItemVulvaPiercings/UrethralSound": {
+      "Effect": [
+        "ForcedErection"
+      ]
+    },
+    "ItemVulvaPiercings/CockRingLeash": {
+      "Effect": [
+        "Leash",
+        "CanEdge"
+      ]
+    },
+    "ItemVulvaPiercings/ModularVulvaPiercings": {},
+    "ItemButt/BlackButtPlug": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/PenisPlug": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/TailButtPlug": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/HorsetailPlug": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/HorsetailPlug1": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/PuppyTailPlug": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/PuppyTailPlug1": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/SuccubusButtPlug": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/SuccubusHeartButtPlug": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/FoxTails": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/RaccoonButtPlug": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/RaccoonTailPlug": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/AnalBeads": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/AnalBeads2": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/ButtPump": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/VibratingButtplug": {
+      "Effect": [
+        "IsPlugged",
+        "UseRemote"
+      ]
+    },
+    "ItemButt/InflVibeButtPlug": {
+      "Effect": [
+        "IsPlugged",
+        "UseRemote"
+      ]
+    },
+    "ItemButt/AnalHook": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/ButtPlugLock": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/KittenTail1": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/KittenTail2": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/FoxTail": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/WolfTail1": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/WolfTail2": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/WolfTail3": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/DemonPlug": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/MouseTail1": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/MouseTail2": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/VibratingDildoPlug": {
+      "Effect": [
+        "IsPlugged",
+        "UseRemote"
+      ]
+    },
+    "ItemButt/BunnyTailPlug1": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/BunnyTailPlug2": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/BunnyTailVibePlug": {
+      "Effect": [
+        "IsPlugged",
+        "UseRemote"
+      ]
+    },
+    "ItemButt/EggVibePlugXXL": {
+      "Effect": [
+        "IsPlugged",
+        "UseRemote"
+      ]
+    },
+    "ItemButt/LockingVibePlug": {
+      "Effect": [
+        "IsPlugged",
+        "UseRemote"
+      ]
+    },
+    "ItemButt/ShockPlug": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/Cowtail": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/HollowButtPlug": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/Tentacles": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/Stitches": {
+      "Effect": [
+        "IsPlugged"
+      ]
+    },
+    "ItemButt/FuckPlug": {
+      "Effect": [
+        "UseRemote"
+      ]
+    },
+    "ItemPelvis/StraponPanties": {
+      "Effect": [
+        "Chaste"
+      ],
+      "Block": [
+        "ItemVulva",
+        "ItemButt",
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemPelvis/LeatherChastityBelt": {
+      "Effect": [
+        "Chaste"
+      ],
+      "Block": [
+        "ItemVulva",
+        "ItemButt",
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemPelvis/SleekLeatherChastityBelt": {
+      "Effect": [
+        "Chaste"
+      ],
+      "Block": [
+        "ItemVulva",
+        "ItemButt",
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemPelvis/StuddedChastityBelt": {
+      "Effect": [
+        "Chaste"
+      ],
+      "Block": [
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemPelvis/MetalChastityBelt": {
+      "Effect": [
+        "Chaste"
+      ],
+      "Block": [
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemPelvis/ForbiddenChastityBelt": {
+      "Effect": [
+        "CanEdge"
+      ]
+    },
+    "ItemPelvis/PolishedChastityBelt": {
+      "Effect": [
+        "Chaste"
+      ],
+      "Block": [
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemPelvis/FuturisticChastityBelt": {
+      "Effect": [
+        "UseRemote",
+        "CanEdge"
+      ]
+    },
+    "ItemPelvis/FuturisticTrainingBelt": {
+      "Effect": [
+        "FillVulva",
+        "UseRemote",
+        "UseRemote",
+        "Chaste",
+        "Edged"
+      ],
+      "Block": [
+        "ItemVulvaPiercings",
+        "ItemButt",
+        "ItemVulva"
+      ]
+    },
+    "ItemPelvis/SciFiPleasurePanties": {
+      "Effect": [
+        "UseRemote",
+        "Egged",
+        "UseRemote"
+      ]
+    },
+    "ItemPelvis/OrnateChastityBelt": {
+      "Effect": [
+        "Chaste"
+      ],
+      "Block": [
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemPelvis/SteelChastityPanties": {
+      "Effect": [
+        "Chaste"
+      ],
+      "Block": [
+        "ItemVulva",
+        "ItemButt",
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemPelvis/HarnessPanties1": {},
+    "ItemPelvis/HarnessPanties2": {},
+    "ItemPelvis/LeatherStrapPanties1": {
+      "Effect": [
+        "Chaste"
+      ],
+      "Block": [
+        "ItemVulva",
+        "ItemButt",
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemPelvis/LoveChastityBelt": {
+      "Effect": [
+        "Lock"
+      ]
+    },
+    "ItemPelvis/HempRope": {},
+    "ItemPelvis/DiaperHarness": {
+      "Effect": [
+        "Chaste"
+      ],
+      "Block": [
+        "ItemVulva",
+        "ItemButt",
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemPelvis/PelvisChainLeash": {
+      "Effect": [
+        "Leash"
+      ]
+    },
+    "ItemPelvis/Ribbons": {},
+    "ItemPelvis/BulkyDiaper": {
+      "Effect": [
+        "Chaste"
+      ],
+      "Block": [
+        "ItemVulva",
+        "ItemButt",
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemPelvis/PoofyDiaper": {
+      "Effect": [
+        "Chaste"
+      ],
+      "Block": [
+        "ItemVulva",
+        "ItemButt",
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemPelvis/LatexDiaper": {
+      "Effect": [
+        "Chaste"
+      ],
+      "Block": [
+        "ItemVulva",
+        "ItemButt",
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemPelvis/UntrainersThin": {},
+    "ItemPelvis/HybridChastityBelt": {
+      "Effect": [
+        "Chaste"
+      ],
+      "Block": [
+        "ItemVulva",
+        "ItemButt",
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemPelvis/ObedienceBelt": {
+      "Effect": [
+        "CanEdge"
+      ]
+    },
+    "ItemPelvis/PortalPanties": {
+      "Effect": [
+        "CanEdge"
+      ]
+    },
+    "ItemPelvis/HeavyDutyBelt": {
+      "Effect": [
+        "UseRemote",
+        "CanEdge"
+      ]
+    },
+    "ItemPelvis/ModularChastityBelt": {
+      "Effect": [
+        "UseRemote",
+        "CanEdge"
+      ]
+    },
+    "ItemPelvis/HipHarness": {
+      "Block": [
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemButt"
+      ]
+    },
+    "ItemPelvis/WaistLegHarness": {},
+    "ItemPelvis/FemPelvisHarness": {
+      "Block": [
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemButt"
+      ]
+    },
+    "ItemPelvis/WombTattoos": {},
+    "ItemTorso/NylonRopeHarness": {},
+    "ItemTorso/HempRopeHarness": {},
+    "ItemTorso/LeatherHarness": {},
+    "ItemTorso/LeatherStrapHarness": {},
+    "ItemTorso/AdultBabyHarness": {},
+    "ItemTorso/HarnessBra1": {},
+    "ItemTorso/HarnessBra2": {},
+    "ItemTorso/Corset2": {},
+    "ItemTorso/FuturisticHarness": {},
+    "ItemTorso/HighSecurityHarness": {},
+    "ItemTorso/Corset3": {},
+    "ItemTorso/Corset4": {},
+    "ItemTorso/Corset5": {},
+    "ItemTorso/LeatherBreastBinder": {},
+    "ItemTorso/LatexCorset1": {},
+    "ItemTorso/LeatherStrapBra1": {},
+    "ItemTorso/CrotchChain": {
+      "Effect": [
+        "CrotchRope"
+      ]
+    },
+    "ItemTorso/StuddedHarness": {},
+    "ItemTorso/ClassicLatexCorset": {},
+    "ItemTorso/Ribbons": {},
+    "ItemTorso/ThinLeatherStraps": {},
+    "ItemTorso/LockingSwimsuit": {},
+    "ItemTorso/LockingSwimsuit2": {},
+    "ItemTorso/Underbust": {},
+    "ItemTorso/HipHarness": {
+      "Block": [
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemButt"
+      ]
+    },
+    "ItemTorso/RibbonCorset": {},
+    "ItemTorso/FemPelvisHarness": {
+      "Block": [
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemButt"
+      ]
+    },
+    "ItemTorso/LeatherChestHarness1": {},
+    "ItemTorso/NavelBar1": {},
+    "ItemTorso/TightCorset": {},
+    "ItemTorso/ShinyLeotardLock": {},
+    "ItemTorso/SteelBelt": {},
+    "ItemTorso/ExtremeCorset": {},
+    "ItemTorso/BarrelCorset": {
+      "Effect": [
+        "Slow"
+      ],
+      "Block": [
+        "ItemPelvis",
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemButt"
+      ]
+    },
+    "ItemTorso/FullBodyStraps": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Slow"
+      ]
+    },
+    "ItemTorso/HeavyLatexCorset": {},
+    "ItemTorso2/LeatherStrapHarness": {},
+    "ItemTorso2/LeatherHarness": {},
+    "ItemTorso2/NylonRopeHarness": {},
+    "ItemTorso2/HempRopeHarness": {},
+    "ItemTorso2/AdultBabyHarness": {},
+    "ItemTorso2/HarnessBra1": {},
+    "ItemTorso2/HarnessBra2": {},
+    "ItemTorso2/Corset2": {},
+    "ItemTorso2/FuturisticHarness": {},
+    "ItemTorso2/HighSecurityHarness": {},
+    "ItemTorso2/Corset3": {},
+    "ItemTorso2/Corset4": {},
+    "ItemTorso2/Corset5": {},
+    "ItemTorso2/LeatherBreastBinder": {},
+    "ItemTorso2/LatexCorset1": {},
+    "ItemTorso2/LeatherStrapBra1": {},
+    "ItemTorso2/CrotchChain": {},
+    "ItemTorso2/StuddedHarness": {},
+    "ItemTorso2/HeavyLatexCorset": {},
+    "ItemTorso2/ClassicLatexCorset": {},
+    "ItemTorso2/Ribbons": {},
+    "ItemTorso2/ThinLeatherStraps": {},
+    "ItemTorso2/LockingSwimsuit": {},
+    "ItemTorso2/LockingSwimsuit2": {},
+    "ItemTorso2/Underbust": {},
+    "ItemTorso2/HipHarness": {},
+    "ItemTorso2/RibbonCorset": {},
+    "ItemTorso2/FemPelvisHarness": {},
+    "ItemTorso2/LeatherChestHarness1": {},
+    "ItemTorso2/NavelBar1": {},
+    "ItemTorso2/TightCorset": {},
+    "ItemTorso2/ShinyLeotardLock": {},
+    "ItemTorso2/SteelBelt": {},
+    "ItemTorso2/ExtremeCorset": {},
+    "ItemTorso2/BarrelCorset": {},
+    "ItemTorso2/FullBodyStraps": {},
+    "ItemNipples/NippleClamp": {},
+    "ItemNipples/VibeNippleClamp": {
+      "Effect": [
+        "Wiggling",
+        "UseRemote"
+      ]
+    },
+    "ItemNipples/VibratorRemote": {
+      "Effect": [
+        "Remote"
+      ]
+    },
+    "ItemNipples/ChainClamp": {
+      "Effect": [
+        "Wiggling"
+      ]
+    },
+    "ItemNipples/ScrewClamps": {},
+    "ItemNipples/ChainTassles": {},
+    "ItemNipples/TapedVibeEggs": {
+      "Effect": [
+        "UseRemote"
+      ]
+    },
+    "ItemNipples/NippleSuctionCups": {
+      "Effect": [
+        "Wiggling"
+      ]
+    },
+    "ItemNipples/NippleTape": {},
+    "ItemNipples/ChopStickNippleClamps": {
+      "Effect": [
+        "Wiggling"
+      ]
+    },
+    "ItemNipples/Clothespins": {},
+    "ItemNipples/NippleWeightClamps": {
+      "Effect": [
+        "Wiggling"
+      ]
+    },
+    "ItemNipples/BellClamps": {
+      "Effect": [
+        "Wiggling"
+      ]
+    },
+    "ItemNipples/NippleVibe": {
+      "Effect": [
+        "UseRemote",
+        "Wiggling"
+      ]
+    },
+    "ItemNipples/LactationPump": {
+      "Block": [
+        "ItemNipplesPiercings",
+        "ItemBreast"
+      ]
+    },
+    "ItemNipples/ShockClamps": {},
+    "ItemNipples/PlateClamps": {},
+    "ItemNipples/StretchClovers": {},
+    "ItemNipples/NippleClamps2": {},
+    "ItemNipples/XmasBell": {
+      "Effect": [
+        "Wiggling"
+      ]
+    },
+    "ItemNipples/HeartPasties": {},
+    "ItemNipples/KittyPasties": {},
+    "ItemNipplesPiercings/StraightPiercing": {},
+    "ItemNipplesPiercings/RoundPiercing": {},
+    "ItemNipplesPiercings/NecklacePiercingChain": {},
+    "ItemNipplesPiercings/NippleAccessory1": {},
+    "ItemNipplesPiercings/NippleAccessory2": {},
+    "ItemNipplesPiercings/NippleAccessory3": {},
+    "ItemNipplesPiercings/BarbellPiercing": {},
+    "ItemNipplesPiercings/NippleChastityPiercing1": {
+      "Effect": [
+        "BreastChaste"
+      ],
+      "Block": [
+        "ItemNipples"
+      ]
+    },
+    "ItemNipplesPiercings/NippleChastityPiercing2": {
+      "Effect": [
+        "BreastChaste"
+      ],
+      "Block": [
+        "ItemNipples"
+      ]
+    },
+    "ItemNipplesPiercings/VibeHeartPiercings": {
+      "Effect": [
+        "UseRemote",
+        "Wiggling"
+      ]
+    },
+    "ItemNipplesPiercings/BellPiercing": {},
+    "ItemNipplesPiercings/CrossedStraightPiercing": {},
+    "ItemNipplesPiercings/PiercingNameBadge": {},
+    "ItemBreast/MetalChastityBra": {
+      "Effect": [
+        "BreastChaste"
+      ],
+      "Block": [
+        "ItemNipples",
+        "ItemNipplesPiercings"
+      ]
+    },
+    "ItemBreast/PolishedChastityBra": {
+      "Effect": [
+        "BreastChaste"
+      ],
+      "Block": [
+        "ItemNipples",
+        "ItemNipplesPiercings"
+      ]
+    },
+    "ItemBreast/FuturisticBra": {
+      "Effect": [
+        "BreastChaste",
+        "UseRemote"
+      ],
+      "Block": [
+        "ItemNipples",
+        "ItemNipplesPiercings"
+      ]
+    },
+    "ItemBreast/FuturisticBra2": {
+      "Effect": [
+        "BreastChaste",
+        "UseRemote"
+      ],
+      "Block": [
+        "ItemNipples",
+        "ItemNipplesPiercings"
+      ]
+    },
+    "ItemBreast/OrnateChastityBra": {
+      "Effect": [
+        "BreastChaste"
+      ],
+      "Block": [
+        "ItemNipples",
+        "ItemNipplesPiercings"
+      ]
+    },
+    "ItemBreast/ForbiddenChastityBra": {
+      "Effect": [
+        "BreastChaste"
+      ],
+      "Block": [
+        "ItemNipples",
+        "ItemNipplesPiercings"
+      ]
+    },
+    "ItemBreast/Ribbons": {},
+    "ItemBreast/LeatherBreastBinder": {},
+    "ItemBreast/TickleBra": {
+      "Effect": [
+        "BreastChaste",
+        "UseRemote",
+        "UseRemote"
+      ],
+      "Block": [
+        "ItemNipples",
+        "ItemNipplesPiercings"
+      ]
+    },
+    "ItemBreast/ChastityPlate": {
+      "Effect": [
+        "BreastChaste"
+      ],
+      "Block": [
+        "ItemNipples",
+        "ItemNipplesPiercings"
+      ]
+    },
+    "ItemBreast/LeatherStrapBra1": {},
+    "ItemArms/NylonRope": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemArms/HempRope": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemArms/MetalCuffs": {
+      "Effect": [
+        "Lock",
+        "Block",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemArms/SturdyLeatherBelts": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "NotSelfPickable"
+      ]
+    },
+    "ItemArms/LeatherArmbinder": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemArms/ArmbinderJacket": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemArms/LeatherCuffs": {
+      "Effect": [
+        "CuffedArms"
+      ]
+    },
+    "ItemArms/LeatherDeluxeCuffs": {
+      "Effect": [
+        "CuffedArms"
+      ]
+    },
+    "ItemArms/CeilingShackles": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Freeze",
+        "NotSelfPickable",
+        "MapImmobile"
+      ]
+    },
+    "ItemArms/SteelCuffs": {
+      "Effect": [
+        "CuffedArms"
+      ]
+    },
+    "ItemArms/FuturisticCuffs": {
+      "Effect": [
+        "CuffedArms"
+      ]
+    },
+    "ItemArms/OrnateCuffs": {
+      "Effect": [
+        "CuffedArms"
+      ]
+    },
+    "ItemArms/HighStyleSteelCuffs": {
+      "Effect": [
+        "CuffedArms"
+      ]
+    },
+    "ItemArms/FourLimbsShackles": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Lock"
+      ]
+    },
+    "ItemArms/Manacles": {
+      "Effect": [
+        "Block",
+        "Freeze",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemFeet"
+      ],
+      "AllowActivityOn": [
+        "ItemFeet"
+      ]
+    },
+    "ItemArms/FullBodyShackles": {
+      "Effect": [
+        "BlockWardrobe",
+        "Shackled",
+        "Block"
+      ],
+      "Block": [
+        "ItemFeet"
+      ],
+      "AllowActivityOn": [
+        "ItemFeet"
+      ]
+    },
+    "ItemArms/WristShackles": {
+      "Effect": [
+        "BlockWardrobe",
+        "Block"
+      ]
+    },
+    "ItemArms/StraitLeotard": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemArms/FuturisticStraitjacket": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemButt",
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemArms/StraitJacket": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemBreast",
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemArms/CollarCuffs": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemHands",
+        "ItemNeck"
+      ]
+    },
+    "ItemArms/LeatherStraitJacket": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemBreast",
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemArms/FurStraitJacket": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemBreast",
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemArms/Bolero": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemArms/DuctTape": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemArms/BitchSuit": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Slow"
+      ],
+      "AllowActivityOn": [
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemBreast",
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemArms/ShinyPetSuit": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Slow"
+      ],
+      "AllowActivityOn": [
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemBreast",
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemArms/ShinyStraitjacket": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemArms/StraitDress": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Slow"
+      ],
+      "Block": [
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemBreast",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemFeet",
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemLegs",
+        "ItemButt"
+      ]
+    },
+    "ItemArms/StraitDressOpen": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Slow"
+      ],
+      "Block": [
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemBreast",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemFeet",
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemLegs"
+      ]
+    },
+    "ItemArms/SeamlessStraitDress": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Slow"
+      ],
+      "Block": [
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemBreast",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemFeet",
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemLegs",
+        "ItemButt"
+      ]
+    },
+    "ItemArms/SeamlessStraitDressOpen": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Slow"
+      ],
+      "Block": [
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemBreast",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemFeet",
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemLegs"
+      ]
+    },
+    "ItemArms/Yoke": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "NotSelfPickable"
+      ]
+    },
+    "ItemArms/HeavyYoke": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "NotSelfPickable"
+      ]
+    },
+    "ItemArms/Pillory": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "NotSelfPickable"
+      ]
+    },
+    "ItemArms/FullLatexSuit": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Freeze",
+        "Slow"
+      ],
+      "Block": [
+        "ItemBoots",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemLegs",
+        "ItemFeet"
+      ]
+    },
+    "ItemArms/Zipties": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemArms/BoxTieArmbinder": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemArms/BondageBouquet": {
+      "Effect": [
+        "BlockWardrobe",
+        "Block"
+      ]
+    },
+    "ItemArms/Chains": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemArms/PetCrawler": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemDevices"
+      ]
+    },
+    "ItemArms/MermaidSuit": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Freeze",
+        "MapSwim"
+      ],
+      "Block": [
+        "ItemBoots",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemLegs",
+        "ItemFeet"
+      ]
+    },
+    "ItemArms/Web": {
+      "Effect": [
+        "Block",
+        "Freeze",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemLegs",
+        "ItemFeet",
+        "ItemBoots"
+      ]
+    },
+    "ItemArms/LatexArmbinder": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemArms/FuturisticArmbinder": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemArms/ShinyArmbinder": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemArms/SeamlessLatexArmbinder": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemHands"
+      ]
+    },
+    "ItemArms/FullBodyLeatherHarness": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Slow"
+      ]
+    },
+    "ItemArms/UnderBedBondageCuffs": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Freeze"
+      ],
+      "Block": [
+        "ItemDevices",
+        "ItemLegs",
+        "ItemFeet",
+        "ItemBoots"
+      ],
+      "AllowActivityOn": [
+        "ItemLegs",
+        "ItemFeet",
+        "ItemBoots"
+      ]
+    },
+    "ItemArms/TightJacket": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemBreast",
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemArms/LatexSleevelessLeotard": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemArms/LatexBoxtieLeotard": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemArms/LatexButterflyLeotard": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemArms/PrisonLockdownSuit": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Slow"
+      ],
+      "Block": [
+        "ItemBreast",
+        "ItemNipplesPiercings",
+        "ItemNipples",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemPelvis",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemButt",
+        "ItemLegs",
+        "ItemFeet",
+        "ItemBoots"
+      ]
+    },
+    "ItemArms/LeatherArmSplints": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemArms/TightJacketCrotch": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemBreast",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemVulva",
+        "ItemButt",
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemArms/HighSecurityStraitJacket": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemBreast",
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemArms/PantyhoseBody": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Slow"
+      ],
+      "Block": [
+        "ItemHands",
+        "ItemHandheld",
+        "ItemVulva",
+        "ItemButt",
+        "ItemVulvaPiercings",
+        "ItemNipplesPiercings"
+      ]
+    },
+    "ItemArms/PantyhoseBodyOpen": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Slow"
+      ],
+      "Block": [
+        "ItemHands",
+        "ItemHandheld",
+        "ItemNipplesPiercings"
+      ]
+    },
+    "ItemArms/WoodenCuffs": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemArms/InflatableStraightLeotard": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemBreast",
+        "ItemButt",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemArms/StrictLeatherPetCrawler": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemArms/MedicalBedRestraints": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemButt",
+        "ItemDevices"
+      ]
+    },
+    "ItemArms/TransportJacket": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemBreast",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemPelvis"
+      ]
+    },
+    "ItemArms/PlasticWrap": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemBreast",
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemTorso",
+        "ItemTorso2"
+      ]
+    },
+    "ItemArms/WrappedBlanket": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemBreast",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemFeet",
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemLegs",
+        "ItemButt"
+      ]
+    },
+    "ItemArms/Ribbons": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemArms/ThinLeatherStraps": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemArms/Tentacles": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemArms/Slime": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemHands",
+        "ItemHandheld",
+        "ItemBreast",
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemTorso",
+        "ItemTorso2"
+      ]
+    },
+    "ItemArms/BondageBra": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemArms/SleepSac": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Slow"
+      ],
+      "Block": [
+        "ItemBreast",
+        "ItemButt",
+        "ItemFeet",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemLegs",
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemBoots"
+      ]
+    },
+    "ItemArms/PrisonSJ": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Slow"
+      ],
+      "Block": [
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemButt",
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemArms/InflatableDress": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Slow"
+      ],
+      "Block": [
+        "ItemNeck",
+        "ItemNeckAccessories",
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemBreast",
+        "ItemPelvis",
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemButt",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemLegs"
+      ]
+    },
+    "ItemArms/SmoothLeatherArmbinder1": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemHands"
+      ]
+    },
+    "ItemArms/CanvasStraitjacket1": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemArms/CollarMetalcuffs": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemHands",
+        "ItemNeck"
+      ]
+    },
+    "ItemArms/ArmbinderSuit": {
+      "Effect": [
+        "MergedFingers",
+        "BlockWardrobe",
+        "Block"
+      ],
+      "Block": [
+        "ItemHandheld",
+        "ItemHands"
+      ]
+    },
+    "ItemArms/BedMetalCuffs": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Freeze"
+      ],
+      "Block": [
+        "ItemDevices"
+      ]
+    },
+    "ItemArms/SteelBelt": {},
+    "ItemArms/PawPaddedPetsuitArms": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemArms/StrappedPetsuitArms": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemHands/PaddedMittens": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "MergedFingers"
+      ],
+      "Block": [
+        "ItemHandheld"
+      ]
+    },
+    "ItemHands/PawMittens": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "MergedFingers"
+      ],
+      "Block": [
+        "ItemHandheld"
+      ]
+    },
+    "ItemHands/LeatherMittens": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "MergedFingers"
+      ],
+      "Block": [
+        "ItemHandheld"
+      ]
+    },
+    "ItemHands/FuturisticMittens": {
+      "Effect": [
+        "UseRemote"
+      ]
+    },
+    "ItemHands/PaddedLeatherMittens": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "MergedFingers"
+      ],
+      "Block": [
+        "ItemHandheld"
+      ]
+    },
+    "ItemHands/PolishedMittens": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "MergedFingers"
+      ],
+      "Block": [
+        "ItemHandheld"
+      ]
+    },
+    "ItemHands/DuctTape": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "MergedFingers"
+      ],
+      "Block": [
+        "ItemHandheld"
+      ]
+    },
+    "ItemHands/HoofMittens": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "MergedFingers"
+      ],
+      "Block": [
+        "ItemHandheld"
+      ]
+    },
+    "ItemHands/SmoothLeatherMittens1": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "MergedFingers"
+      ],
+      "Block": [
+        "ItemHandheld"
+      ]
+    },
+    "ItemHands/CheerleaderPomPoms": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "MergedFingers"
+      ],
+      "Block": [
+        "ItemHandheld"
+      ]
+    },
+    "ItemHands/PonyMittensBinder": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "MergedFingers"
+      ],
+      "Block": [
+        "ItemHandheld"
+      ]
+    },
+    "ItemHands/ElbowLengthMittens": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "MergedFingers"
+      ],
+      "Block": [
+        "ItemHandheld"
+      ]
+    },
+    "ItemHands/GlueMittens": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "MergedFingers"
+      ],
+      "Block": [
+        "ItemHandheld"
+      ]
+    },
+    "ItemHands/HempRopeCuffs": {},
+    "ItemHands/FullMittens": {
+      "Effect": [
+        "MergedFingers",
+        "CuffedArms"
+      ],
+      "Block": [
+        "ItemHandheld"
+      ]
+    },
+    "ItemHands/LatexBondageMitts": {
+      "Effect": [
+        "Block",
+        "MergedFingers"
+      ],
+      "Block": [
+        "ItemHandheld"
+      ]
+    },
+    "ItemHands/FoamMittens": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "MergedFingers"
+      ],
+      "Block": [
+        "ItemHandheld"
+      ]
+    },
+    "ItemHands/BalletBootsMittens": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "MergedFingers"
+      ],
+      "Block": [
+        "ItemHandheld"
+      ]
+    },
+    "ItemHandheld/KeyProp": {},
+    "ItemHandheld/MedicalInjector": {},
+    "ItemHandheld/Crop": {},
+    "ItemHandheld/Flogger": {},
+    "ItemHandheld/Cane": {},
+    "ItemHandheld/HeartCrop": {},
+    "ItemHandheld/Paddle": {},
+    "ItemHandheld/CustomPaddle": {},
+    "ItemHandheld/WhipPaddle": {},
+    "ItemHandheld/Whip": {},
+    "ItemHandheld/CattleProd": {},
+    "ItemHandheld/TennisRacket": {},
+    "ItemHandheld/ForSaleSign": {},
+    "ItemHandheld/RainbowWand": {},
+    "ItemHandheld/Gavel": {},
+    "ItemHandheld/Feather": {},
+    "ItemHandheld/FeatherDuster": {},
+    "ItemHandheld/LongDuster": {},
+    "ItemHandheld/IceCube": {},
+    "ItemHandheld/Diaper": {},
+    "ItemHandheld/BabyPowder": {},
+    "ItemHandheld/Wipes": {},
+    "ItemHandheld/WartenbergWheel": {},
+    "ItemHandheld/VibratingWand": {},
+    "ItemHandheld/SmallVibratingWand": {},
+    "ItemHandheld/CandleWax": {},
+    "ItemHandheld/LargeDildo": {},
+    "ItemHandheld/PetToy": {},
+    "ItemHandheld/Vibrator": {},
+    "ItemHandheld/Belt": {},
+    "ItemHandheld/Hairbrush": {},
+    "ItemHandheld/SmallDildo": {},
+    "ItemHandheld/ElectricToothbrush": {},
+    "ItemHandheld/Toothbrush": {},
+    "ItemHandheld/ShockWand": {},
+    "ItemHandheld/Lotion": {},
+    "ItemHandheld/Ruler": {},
+    "ItemHandheld/Sword": {},
+    "ItemHandheld/VibeRemote": {},
+    "ItemHandheld/ShockRemote": {
+      "Effect": [
+        "TriggerShock"
+      ]
+    },
+    "ItemHandheld/Towel": {},
+    "ItemHandheld/RopeCoilLong": {},
+    "ItemHandheld/RopeCoilShort": {},
+    "ItemHandheld/Ballgag": {},
+    "ItemHandheld/LongSock": {},
+    "ItemHandheld/Baguette": {},
+    "ItemHandheld/Panties": {},
+    "ItemHandheld/TapeRoll": {},
+    "ItemHandheld/Spatula": {},
+    "ItemHandheld/Broom": {},
+    "ItemHandheld/Phone1": {},
+    "ItemHandheld/Phone2": {},
+    "ItemHandheld/Scissors": {},
+    "ItemHandheld/PlasticWrap": {},
+    "ItemHandheld/GlassEmpty": {},
+    "ItemHandheld/GlassFilled": {},
+    "ItemHandheld/PotionBottle": {},
+    "ItemHandheld/Mug": {},
+    "ItemHandheld/Popcorn": {},
+    "ItemHandheld/PortalTablet": {},
+    "ItemHandheld/Shark": {},
+    "ItemHandheld/BunPlush": {},
+    "ItemHandheld/FoxPlush": {},
+    "ItemHandheld/Karl": {},
+    "ItemHandheld/PetPotato": {},
+    "ItemHandheld/Smartphone": {},
+    "ItemHandheld/GlueTube": {},
+    "ItemHandheld/AnimeGirlWand": {},
+    "ItemHandheld/Brick": {},
+    "ItemHandheld/Trowel": {},
+    "ItemHandheld/Kyosensu": {},
+    "ItemHandheld/Uchiwa": {},
+    "ItemHandheld/Plushie": {},
+    "ItemHandheld/Cigarette": {},
+    "ItemHandheld/FoamRoll": {},
+    "ItemHandheld/MiniDolls": {},
+    "ItemHandheld/GiftBox": {},
+    "ItemHandheld/DragonPlush": {},
+    "ItemHandheld/Chocolate": {},
+    "ItemHandheld/ElectricGuitar": {},
+    "ItemHandheld/Laptop": {},
+    "ItemHandheld/R18Baton": {},
+    "ItemHandheld/CandyCane": {},
+    "ItemHandheld/GrilledSausage": {},
+    "ItemHandheld/Foldingfan": {},
+    "ItemHandheld/Oilpaperumbrella": {},
+    "ItemNeck/LeatherCollar": {},
+    "ItemNeck/LeatherCollarBell": {},
+    "ItemNeck/LeatherCollarBow": {},
+    "ItemNeck/SlaveCollar": {
+      "Effect": [
+        "Lock"
+      ]
+    },
+    "ItemNeck/ClubSlaveCollar": {
+      "Effect": [
+        "Lock"
+      ]
+    },
+    "ItemNeck/ShockCollar": {
+      "Effect": [
+        "ReceiveShock",
+        "UseRemote"
+      ]
+    },
+    "ItemNeck/AutoShockCollar": {
+      "Effect": [
+        "ReceiveShock",
+        "UseRemote"
+      ]
+    },
+    "ItemNeck/PetSuitShockCollar": {
+      "Effect": [
+        "ReceiveShock",
+        "UseRemote"
+      ]
+    },
+    "ItemNeck/BatCollar": {},
+    "ItemNeck/PostureCollar": {
+      "Effect": [
+        "FixedHead"
+      ]
+    },
+    "ItemNeck/SteelPostureCollar": {
+      "Effect": [
+        "FixedHead"
+      ]
+    },
+    "ItemNeck/DogCollar": {},
+    "ItemNeck/SpikeCollar": {},
+    "ItemNeck/HighCollar": {},
+    "ItemNeck/FuturisticCollar": {},
+    "ItemNeck/LeatherChoker": {},
+    "ItemNeck/LeatherDeluxeCollar": {},
+    "ItemNeck/PetCollar": {},
+    "ItemNeck/MaidCollar": {},
+    "ItemNeck/BordelleCollar": {},
+    "ItemNeck/LoveLeatherCollar": {},
+    "ItemNeck/NobleCorsetCollar": {},
+    "ItemNeck/StrictPostureCollar": {
+      "Effect": [
+        "FixedHead"
+      ]
+    },
+    "ItemNeck/HeartCollar": {},
+    "ItemNeck/LeatherCorsetCollar": {
+      "Effect": [
+        "GagNormal"
+      ]
+    },
+    "ItemNeck/LatexPostureCollar": {
+      "Effect": [
+        "GagNormal",
+        "FixedHead"
+      ]
+    },
+    "ItemNeck/HighSecurityCollar": {},
+    "ItemNeck/OrnateCollar": {},
+    "ItemNeck/HighStyleSteelCollar": {},
+    "ItemNeck/SlenderSteelCollar": {},
+    "ItemNeck/ShinySteelCollar": {},
+    "ItemNeck/HeartLinkChoker": {},
+    "ItemNeck/NeckRope": {},
+    "ItemNeck/NylonCollar": {},
+    "ItemNeck/GothicCollar": {},
+    "ItemNeck/LatexCollar1": {
+      "Effect": [
+        "FixedHead"
+      ]
+    },
+    "ItemNeck/LatexCollar2": {},
+    "ItemNeck/TechnoCollar": {},
+    "ItemNeck/ComboHarness": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium",
+        "BlindNormal",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemHead",
+        "ItemMouth"
+      ],
+      "AllowActivityOn": [
+        "ItemHead"
+      ]
+    },
+    "ItemNeck/BonedNeckCorset": {
+      "Effect": [
+        "FixedHead"
+      ]
+    },
+    "ItemNeck/ExtendablePostureCollar": {
+      "Effect": [
+        "FixedHead"
+      ]
+    },
+    "ItemNeck/LatexRingCollar": {},
+    "ItemNeck/SpikedChoker": {},
+    "ItemNeck/PaddedBeltCollar": {},
+    "ItemNeck/MoonCollar": {},
+    "ItemNeck/SunCollar": {},
+    "ItemNeck/AsylumCollar": {},
+    "ItemNeck/ChainCollar": {},
+    "ItemNeck/SteampunkCollar": {},
+    "ItemNeck/SSpikedCollar": {},
+    "ItemNeck/RibbonCollar": {},
+    "ItemNeckAccessories/CustomCollarTag": {},
+    "ItemNeckAccessories/ElectronicTag": {},
+    "ItemNeckAccessories/CollarBell": {},
+    "ItemNeckAccessories/CollarBow": {},
+    "ItemNeckAccessories/CollarShockUnit": {
+      "Effect": [
+        "ReceiveShock",
+        "UseRemote"
+      ]
+    },
+    "ItemNeckAccessories/CollarAutoShockUnit": {
+      "Effect": [
+        "ReceiveShock",
+        "UseRemote"
+      ]
+    },
+    "ItemNeckAccessories/Key": {},
+    "ItemNeckAccessories/CollarNameTag": {},
+    "ItemNeckAccessories/CollarNameTagOval": {},
+    "ItemNeckAccessories/CollarNameTagPet": {},
+    "ItemNeckAccessories/CollarNameTagLover": {},
+    "ItemNeckAccessories/CollarNameTagLivestock": {},
+    "ItemNeckAccessories/CollarMoon": {},
+    "ItemNeckAccessories/CollarSun": {},
+    "ItemNeckAccessories/CollarLapis": {},
+    "ItemNeckAccessories/CollarButterfly": {},
+    "ItemNeckAccessories/CollarPentagram": {},
+    "ItemNeckAccessories/CollarFlower": {},
+    "ItemNeckAccessories/CollarRose": {},
+    "ItemNeckAccessories/CollarCowBell": {},
+    "ItemNeckAccessories/CollarPupBone": {},
+    "ItemNeckAccessories/CollarRoseAmulet": {},
+    "ItemNeckRestraints/CollarChainLong": {
+      "Effect": [
+        "Tethered",
+        "IsChained",
+        "MapImmobile"
+      ]
+    },
+    "ItemNeckRestraints/CollarChainShort": {
+      "Effect": [
+        "Freeze",
+        "IsChained",
+        "MapImmobile"
+      ]
+    },
+    "ItemNeckRestraints/Post": {
+      "Effect": [
+        "Freeze",
+        "IsChained",
+        "MapImmobile"
+      ]
+    },
+    "ItemNeckRestraints/CollarLeash": {
+      "Effect": [
+        "Leash"
+      ]
+    },
+    "ItemNeckRestraints/ChainLeash": {
+      "Effect": [
+        "Leash"
+      ]
+    },
+    "ItemNeckRestraints/CollarChainMedium": {
+      "Effect": [
+        "Tethered",
+        "IsChained",
+        "MapImmobile"
+      ]
+    },
+    "ItemNeckRestraints/CollarRopeLong": {
+      "Effect": [
+        "Tethered",
+        "IsChained",
+        "MapImmobile"
+      ]
+    },
+    "ItemNeckRestraints/CollarRopeShort": {
+      "Effect": [
+        "Freeze",
+        "IsChained",
+        "MapImmobile"
+      ]
+    },
+    "ItemNeckRestraints/CollarRopeMedium": {
+      "Effect": [
+        "Tethered",
+        "IsChained",
+        "MapImmobile"
+      ]
+    },
+    "ItemNeckRestraints/PetPost": {
+      "Effect": [
+        "IsChained",
+        "Tethered",
+        "MapImmobile"
+      ]
+    },
+    "ItemNeckRestraints/Bedchain": {
+      "Effect": [
+        "IsChained",
+        "MapImmobile"
+      ],
+      "Block": [
+        "ItemDevices"
+      ]
+    },
+    "ItemNeckRestraints/ChokeChain": {
+      "Effect": [
+        "Leash"
+      ]
+    },
+    "ItemNeckRestraints/MCuffCollar": {},
+    "ItemMouth/ClothGag": {
+      "Effect": [
+        "BlockMouth"
+      ]
+    },
+    "ItemMouth/WiffleGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ]
+    },
+    "ItemMouth/HarnessBallGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium"
+      ]
+    },
+    "ItemMouth/Ball": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium"
+      ]
+    },
+    "ItemMouth/HarnessPanelGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagEasy"
+      ]
+    },
+    "ItemMouth/RingGag": {
+      "Effect": [
+        "GagEasy",
+        "OpenMouth"
+      ]
+    },
+    "ItemMouth/DuctTape": {
+      "Effect": [
+        "BlockMouth"
+      ]
+    },
+    "ItemMouth/PacifierGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagVeryLight"
+      ]
+    },
+    "ItemMouth/PacifierClip": {
+      "Effect": [
+        "BlockMouth"
+      ]
+    },
+    "ItemMouth/HarnessPacifierGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight"
+      ]
+    },
+    "ItemMouth/DusterGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagEasy"
+      ],
+      "Block": [
+        "ItemMouth2",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth/CupholderGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagEasy",
+        "ProtrudingMouth"
+      ],
+      "Block": [
+        "ItemMouth2",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth/HarnessPonyBits": {},
+    "ItemMouth/PumpGag": {
+      "Effect": [
+        "BlockMouth"
+      ]
+    },
+    "ItemMouth/KittyGag": {
+      "Effect": [
+        "BlockMouth"
+      ]
+    },
+    "ItemMouth/KittyHarnessPanelGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagEasy"
+      ]
+    },
+    "ItemMouth/KittyMuzzleGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ]
+    },
+    "ItemMouth/CarrotGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium"
+      ]
+    },
+    "ItemMouth/MuzzleGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ]
+    },
+    "ItemMouth/FuturisticPanelGag": {
+      "Effect": [
+        "BlockMouth",
+        "UseRemote"
+      ]
+    },
+    "ItemMouth/FuturisticHarnessPanelGag": {
+      "Effect": [
+        "BlockMouth",
+        "UseRemote"
+      ]
+    },
+    "ItemMouth/FuturisticHarnessBallGag": {
+      "Effect": [
+        "BlockMouth",
+        "UseRemote"
+      ]
+    },
+    "ItemMouth/RegularSleepingPill": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ]
+    },
+    "ItemMouth/PantiesMask": {
+      "Effect": [
+        "BlockMouth",
+        "GagVeryLight"
+      ]
+    },
+    "ItemMouth/PlugGag": {},
+    "ItemMouth/DildoGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium",
+        "ProtrudingMouth"
+      ],
+      "Block": [
+        "ItemMouth2",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth/BoneGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight"
+      ]
+    },
+    "ItemMouth/ChopstickGag": {
+      "Effect": [
+        "GagNormal",
+        "ProtrudingMouth"
+      ],
+      "Block": [
+        "ItemMouth2",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth/BambooGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal",
+        "ProtrudingMouth"
+      ]
+    },
+    "ItemMouth/HarnessBallGag1": {
+      "Effect": [
+        "BlockMouth",
+        "GagHeavy"
+      ]
+    },
+    "ItemMouth/PumpkinGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagEasy"
+      ]
+    },
+    "ItemMouth/PumpkinHarnessGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium"
+      ]
+    },
+    "ItemMouth/LipGag": {
+      "Effect": [
+        "GagLight",
+        "OpenMouth"
+      ]
+    },
+    "ItemMouth/SpiderGag": {
+      "Effect": [
+        "GagEasy",
+        "OpenMouth"
+      ]
+    },
+    "ItemMouth/ClothStuffing": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight"
+      ]
+    },
+    "ItemMouth/PantyStuffing": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight"
+      ]
+    },
+    "ItemMouth/LargeDildo": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ]
+    },
+    "ItemMouth/ChloroformCloth": {
+      "Effect": [
+        "BlockMouth",
+        "GagVeryLight"
+      ]
+    },
+    "ItemMouth/ScarfGag": {
+      "Effect": [
+        "BlockMouth"
+      ]
+    },
+    "ItemMouth/LewdGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight"
+      ]
+    },
+    "ItemMouth/DeepthroatGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagHeavy"
+      ]
+    },
+    "ItemMouth/LeatherCorsetCollar": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemNeck"
+      ]
+    },
+    "ItemMouth/LatexPostureCollar": {
+      "Effect": [
+        "FixedHead",
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemNeck"
+      ]
+    },
+    "ItemMouth/BitGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ]
+    },
+    "ItemMouth/XLBoneGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ]
+    },
+    "ItemMouth/DogMuzzleExposed": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal",
+        "ProtrudingMouth"
+      ],
+      "Block": [
+        "ItemMouth2",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth/FoxyHarnessPanelGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagEasy"
+      ]
+    },
+    "ItemMouth/BallGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium"
+      ]
+    },
+    "ItemMouth/TongueStrapGag": {
+      "Effect": [
+        "GagEasy",
+        "OpenMouth",
+        "ProtrudingMouth"
+      ]
+    },
+    "ItemMouth/BallGagMask": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium"
+      ]
+    },
+    "ItemMouth/HookGagMask": {
+      "Effect": [
+        "GagEasy",
+        "OpenMouth"
+      ]
+    },
+    "ItemMouth/DildoPlugGag": {},
+    "ItemMouth/SteelMuzzleGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ]
+    },
+    "ItemMouth/StitchedMuzzleGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagEasy"
+      ]
+    },
+    "ItemMouth/LatexBallMuzzleGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium"
+      ]
+    },
+    "ItemMouth/SockStuffing": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight"
+      ]
+    },
+    "ItemMouth/GasMaskGag": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth2",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth/WebGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagEasy"
+      ]
+    },
+    "ItemMouth/RopeGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight"
+      ]
+    },
+    "ItemMouth/RopeBallGag": {
+      "Effect": [
+        "BlockMouth"
+      ]
+    },
+    "ItemMouth/MilkBottle": {
+      "Effect": [
+        "GagVeryLight",
+        "ProtrudingMouth"
+      ],
+      "Block": [
+        "ItemMouth2",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth/MedicalMask": {
+      "Effect": [
+        "BlockMouth"
+      ]
+    },
+    "ItemMouth/RegressedMilk": {
+      "Effect": [
+        "RegressedTalk"
+      ]
+    },
+    "ItemMouth/PrisonLockdownGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ]
+    },
+    "ItemMouth/ShoeGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium",
+        "ProtrudingMouth"
+      ],
+      "Block": [
+        "ItemMouth2",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth/FunnelGag": {
+      "Effect": [
+        "GagMedium"
+      ]
+    },
+    "ItemMouth/PlasticWrap": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight"
+      ]
+    },
+    "ItemMouth/BigMouth": {
+      "Effect": [
+        "GagLight"
+      ]
+    },
+    "ItemMouth/FuturisticMuzzle": {
+      "Effect": [
+        "BlockMouth"
+      ]
+    },
+    "ItemMouth/CageMuzzle": {
+      "Effect": [
+        "BlockMouth",
+        "ProtrudingMouth"
+      ],
+      "Block": [
+        "ItemMouth2",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth/DentalGag": {
+      "Block": [
+        "ItemMouth2",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth/Ribbons": {
+      "Effect": [
+        "BlockMouth"
+      ]
+    },
+    "ItemMouth/CropGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight",
+        "ProtrudingMouth"
+      ],
+      "Block": [
+        "ItemMouth2",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth/CaneGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight",
+        "ProtrudingMouth"
+      ],
+      "Block": [
+        "ItemMouth2",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth/PaciGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight"
+      ]
+    },
+    "ItemMouth/Tentacles": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium",
+        "ProtrudingMouth"
+      ]
+    },
+    "ItemMouth/OTNPlugGag": {},
+    "ItemMouth/TechnoGag": {
+      "Effect": [
+        "OpenMouth"
+      ]
+    },
+    "ItemMouth/PonyGag": {},
+    "ItemMouth/LatexSheathGag": {
+      "Effect": [
+        "OpenMouth"
+      ]
+    },
+    "ItemMouth/Slime": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium"
+      ]
+    },
+    "ItemMouth/FurScarf": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight"
+      ]
+    },
+    "ItemMouth/LatexMuzzleMask": {
+      "Effect": [
+        "BlockMouth"
+      ]
+    },
+    "ItemMouth/ModularGag": {},
+    "ItemMouth/TonguePiercingGag": {
+      "Effect": [
+        "GagNormal",
+        "OpenMouth",
+        "ProtrudingMouth"
+      ],
+      "Block": [
+        "ItemMouth2",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth/Stitches": {
+      "Effect": [
+        "GagHeavy"
+      ]
+    },
+    "ItemMouth/PaddedFaceMask": {
+      "Effect": [
+        "BlockMouth"
+      ]
+    },
+    "ItemMouth/MouthFeatureGag": {
+      "Effect": [
+        "GagVeryLight",
+        "OpenMouth"
+      ]
+    },
+    "ItemMouth/LatexRespirator": {
+      "Block": [
+        "ItemNose"
+      ]
+    },
+    "ItemMouth/Kissmark": {},
+    "ItemMouth/GlueGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagHeavy"
+      ]
+    },
+    "ItemMouth/QualityHarnessGag": {
+      "Effect": [
+        "GagMedium"
+      ]
+    },
+    "ItemMouth/GenitalGag": {
+      "Effect": [
+        "BlockMouth",
+        "OpenMouth"
+      ]
+    },
+    "ItemMouth/PremiumMuzzle": {
+      "Effect": [
+        "BlockMouth"
+      ]
+    },
+    "ItemMouth/OverfilledGag": {
+      "Effect": [
+        "BlockMouth"
+      ]
+    },
+    "ItemMouth/XmasStickerGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagEasy"
+      ]
+    },
+    "ItemMouth/AOMGag": {
+      "Effect": [
+        "OpenMouth",
+        "GagNormal"
+      ]
+    },
+    "ItemMouth/HorrorMuzzle": {
+      "Effect": [
+        "BlockMouth",
+        "GagHeavy"
+      ]
+    },
+    "ItemMouth/AsylumMuzzle": {
+      "Effect": [
+        "BlockMouth"
+      ]
+    },
+    "ItemMouth/Cigarette": {},
+    "ItemMouth/CompGag": {
+      "Effect": [
+        "BlockMouth",
+        "OpenMouth"
+      ]
+    },
+    "ItemMouth/RoseBallGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium"
+      ]
+    },
+    "ItemMouth/BishopGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagHeavy"
+      ]
+    },
+    "ItemMouth/BallGag2": {
+      "Effect": [
+        "BlockMouth"
+      ]
+    },
+    "ItemMouth/ShapedMouthCage": {
+      "Effect": [
+        "BlockMouth",
+        "ProtrudingMouth"
+      ]
+    },
+    "ItemMouth2/ClothGag": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/WiffleGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/HarnessBallGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/HarnessPanelGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagEasy"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/RingGag": {
+      "Effect": [
+        "GagEasy"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/DuctTape": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/HarnessPacifierGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/PacifierClip": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/DusterGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagEasy"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth2/CupholderGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagEasy",
+        "ProtrudingMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth2/HarnessPonyBits": {
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/KittyGag": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/KittyHarnessPanelGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagEasy"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/KittyMuzzleGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/CarrotGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/MuzzleGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/PantiesMask": {
+      "Effect": [
+        "BlockMouth",
+        "GagVeryLight"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/DildoGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium",
+        "ProtrudingMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth2/BoneGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/HarnessBallGag1": {
+      "Effect": [
+        "BlockMouth",
+        "GagHeavy"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/PumpkinGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagEasy"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/PumpkinHarnessGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/LipGag": {
+      "Effect": [
+        "GagLight",
+        "OpenMouth"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/SpiderGag": {
+      "Effect": [
+        "GagEasy",
+        "OpenMouth"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/ChloroformCloth": {
+      "Effect": [
+        "BlockMouth",
+        "GagVeryLight"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/ScarfGag": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/LewdGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/LeatherCorsetCollar": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemNeck",
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/LatexPostureCollar": {
+      "Effect": [
+        "FixedHead",
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemNeck",
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/BitGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/XLBoneGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/FoxyHarnessPanelGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagEasy"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/BallGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/BallGagMask": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/SteelMuzzleGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/StitchedMuzzleGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagEasy"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/LatexBallMuzzleGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/GasMaskGag": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth2/WebGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/RopeGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/RopeBallGag": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/MedicalMask": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/RegressedMilk": {
+      "Effect": [
+        "RegressedTalk"
+      ]
+    },
+    "ItemMouth2/PrisonLockdownGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/ShoeGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium",
+        "ProtrudingMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth2/PlasticWrap": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/FuturisticHarnessPanelGag": {
+      "Effect": [
+        "BlockMouth",
+        "UseRemote"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/FuturisticPanelGag": {
+      "Effect": [
+        "BlockMouth",
+        "UseRemote"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/FuturisticHarnessBallGag": {
+      "Effect": [
+        "BlockMouth",
+        "UseRemote"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/FuturisticMuzzle": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/CageMuzzle": {
+      "Effect": [
+        "BlockMouth",
+        "ProtrudingMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth2/Ribbons": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/PaciGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/Tentacles": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium",
+        "ProtrudingMouth"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/PonyGag": {
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/MouthFeatureGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/Slime": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/FurScarf": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/LatexMuzzleMask": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/ModularGag": {
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/Stitches": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/PaddedFaceMask": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/LatexRespirator": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemNose",
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/Kissmark": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/PacifierGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/Ball": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/BambooGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/CaneGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth2/ChopstickGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth2/ClothStuffing": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/CropGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth2/DeepthroatGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/DentalGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth2/BigMouth": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/DildoPlugGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/DogMuzzleExposed": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth2/FunnelGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/HookGagMask": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/LargeDildo": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/LatexSheathGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/MilkBottle": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth2/OTNPlugGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/PantyStuffing": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/PlugGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/PumpGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/RegularSleepingPill": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/SockStuffing": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/TechnoGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/TonguePiercingGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth2/TongueStrapGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/GlueGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/QualityHarnessGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/GenitalGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/PremiumMuzzle": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/OverfilledGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/XmasStickerGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/AOMGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/HorrorMuzzle": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/AsylumMuzzle": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/CompGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/RoseBallGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/BishopGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth2/BallGag2": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth"
+      ]
+    },
+    "ItemMouth3/ClothGag": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/WiffleGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/HarnessBallGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/HarnessPanelGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagEasy"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/PacifierClip": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/RingGag": {
+      "Effect": [
+        "GagEasy"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/DuctTape": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/HarnessPacifierGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/DusterGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagEasy"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/CupholderGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagEasy",
+        "ProtrudingMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/HarnessPonyBits": {
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/KittyGag": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/KittyHarnessPanelGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagEasy"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/KittyMuzzleGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/CarrotGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/MuzzleGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/PantiesMask": {
+      "Effect": [
+        "BlockMouth",
+        "GagVeryLight"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/DildoGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium",
+        "ProtrudingMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/BoneGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/HarnessBallGag1": {
+      "Effect": [
+        "BlockMouth",
+        "GagHeavy"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/PumpkinGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagEasy"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/PumpkinHarnessGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/LipGag": {
+      "Effect": [
+        "GagLight",
+        "OpenMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/SpiderGag": {
+      "Effect": [
+        "GagEasy",
+        "OpenMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/ChloroformCloth": {
+      "Effect": [
+        "BlockMouth",
+        "GagVeryLight"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/ScarfGag": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/LewdGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/LeatherCorsetCollar": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemNeck",
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/LatexPostureCollar": {
+      "Effect": [
+        "FixedHead",
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemNeck",
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/BitGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/XLBoneGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/FoxyHarnessPanelGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagEasy"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/BallGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/BallGagMask": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/SteelMuzzleGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/StitchedMuzzleGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagEasy"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/LatexBallMuzzleGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/GasMaskGag": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/WebGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/RopeGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/RopeBallGag": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/MedicalMask": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/RegressedMilk": {
+      "Effect": [
+        "RegressedTalk"
+      ]
+    },
+    "ItemMouth3/PrisonLockdownGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/ShoeGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium",
+        "ProtrudingMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/FuturisticMuzzle": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/CageMuzzle": {
+      "Effect": [
+        "BlockMouth",
+        "ProtrudingMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/PlasticWrap": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/Ribbons": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/PaciGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/Tentacles": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium",
+        "ProtrudingMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/PonyGag": {
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/Stitches": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/Slime": {
+      "Effect": [
+        "BlockMouth",
+        "GagMedium"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/FurScarf": {
+      "Effect": [
+        "BlockMouth",
+        "GagLight"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/LatexRespirator": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemNose",
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/Kissmark": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/PaddedFaceMask": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/LatexMuzzleMask": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/ModularGag": {
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/FuturisticHarnessPanelGag": {
+      "Effect": [
+        "BlockMouth",
+        "UseRemote"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/FuturisticPanelGag": {
+      "Effect": [
+        "BlockMouth",
+        "UseRemote"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/FuturisticHarnessBallGag": {
+      "Effect": [
+        "BlockMouth",
+        "UseRemote"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/MouthFeatureGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/XmasStickerGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagEasy"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/HorrorMuzzle": {
+      "Effect": [
+        "BlockMouth",
+        "GagHeavy"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/AsylumMuzzle": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/PacifierGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/Ball": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/BambooGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/CaneGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/ChopstickGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/ClothStuffing": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/CropGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/DeepthroatGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/DentalGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/BigMouth": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/DildoPlugGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/DogMuzzleExposed": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/FunnelGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/HookGagMask": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/LargeDildo": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/LatexSheathGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/MilkBottle": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/OTNPlugGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/PantyStuffing": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/PlugGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/PumpGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/RegularSleepingPill": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/SockStuffing": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/TechnoGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/TonguePiercingGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/TongueStrapGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/QualityHarnessGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/PremiumMuzzle": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/OverfilledGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/AOMGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/RoseBallGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/BishopGag": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemMouth3/BallGag2": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
+    "ItemHead/ClothBlindfold": {
+      "Effect": [
+        "BlindLight",
+        "BlockWardrobe",
+        "BlurLight"
+      ]
+    },
+    "ItemHead/ScarfBlindfold": {
+      "Effect": [
+        "BlindLight",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemHead/LeatherBlindfold": {
+      "Effect": [
+        "BlindNormal",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemHead/PaddedBlindfold": {
+      "Effect": [
+        "BlindHeavy",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemHead/InteractiveVisor": {
+      "Effect": [
+        "UseRemote"
+      ]
+    },
+    "ItemHead/FuturisticMask": {
+      "Effect": [
+        "UseRemote",
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemEars",
+        "ItemNose"
+      ]
+    },
+    "ItemHead/InteractiveVRHeadset": {
+      "Effect": [
+        "VR"
+      ]
+    },
+    "ItemHead/HypnoticVisor": {},
+    "ItemHead/CybertechMask": {},
+    "ItemHead/LeatherSlimMask": {
+      "Effect": [
+        "BlindHeavy",
+        "BlockWardrobe",
+        "GagLight",
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemEars",
+        "ItemNose"
+      ]
+    },
+    "ItemHead/LeatherSlimMaskOpenMouth": {
+      "Effect": [
+        "BlindHeavy",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemEars",
+        "ItemNose"
+      ]
+    },
+    "ItemHead/LeatherSlimMaskOpenEyes": {
+      "Effect": [
+        "GagLight",
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemEars",
+        "ItemNose"
+      ]
+    },
+    "ItemHead/StuddedBlindfold": {
+      "Effect": [
+        "BlindNormal",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemHead/KittyBlindfold": {
+      "Effect": [
+        "BlindLight",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemHead/DuctTape": {},
+    "ItemHead/SmallBlindfold": {
+      "Effect": [
+        "BlindLight",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemHead/FullBlindfold": {
+      "Effect": [
+        "BlindHeavy",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemHead/LewdBlindfold": {
+      "Effect": [
+        "BlindLight",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemHead/LatexBlindfold": {
+      "Effect": [
+        "BlindNormal",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemHead/FrilledSleepMask": {
+      "Effect": [
+        "BlindLight",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemHead/BlackoutLenses": {
+      "Effect": [
+        "BlindHeavy",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemHead/AnimeLenses": {
+      "Effect": [
+        "BlindLight"
+      ]
+    },
+    "ItemHead/WebBlindfold": {
+      "Effect": [
+        "BlockWardrobe"
+      ]
+    },
+    "ItemHead/RopeBlindfold": {
+      "Effect": [
+        "BlindLight",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemHead/SleepMask": {
+      "Effect": [
+        "BlindLight",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemHead/PrisonLockdownBlindfold": {
+      "Effect": [
+        "BlindNormal",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemHead/Pantyhose": {
+      "Effect": [
+        "BlindLight",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemNose"
+      ]
+    },
+    "ItemHead/Snorkel": {},
+    "ItemHead/Ribbons": {
+      "Effect": [
+        "BlockWardrobe"
+      ]
+    },
+    "ItemHead/Tentacles": {
+      "Effect": [
+        "BlindNormal",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemHead/MedicalPatch": {},
+    "ItemHead/DroneMask": {
+      "Block": [
+        "ItemNose"
+      ]
+    },
+    "ItemHead/Slime": {
+      "Effect": [
+        "BlindLight",
+        "BlockWardrobe",
+        "BlurNormal"
+      ]
+    },
+    "ItemHead/FurScarf": {
+      "Effect": [
+        "BlindLight",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemHead/Stitches": {},
+    "ItemHead/BigMouthHood": {},
+    "ItemHead/Kigu2Hood": {
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemNose"
+      ]
+    },
+    "ItemHead/AsylumBlindfold": {},
+    "ItemNose/ClownNose": {},
+    "ItemNose/NoseHook": {},
+    "ItemNose/PigNose": {},
+    "ItemNose/NoseRing": {},
+    "ItemNose/NoseShackle": {},
+    "ItemNose/DuctTape": {},
+    "ItemNose/NosePlugs": {},
+    "ItemNose/BarbelPiercing": {},
+    "ItemNose/PigNoseHook": {},
+    "ItemNose/GlueNose": {},
+    "ItemNose/NoseClip": {},
+    "ItemHood/LeatherHoodSealed": {
+      "Effect": [
+        "BlindHeavy",
+        "BlockWardrobe",
+        "GagLight",
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemEars",
+        "ItemNeck",
+        "ItemHead",
+        "ItemNose"
+      ]
+    },
+    "ItemHood/BlanketHood": {
+      "Effect": [
+        "BlindNormal",
+        "BlockWardrobe",
+        "GagLight",
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemEars",
+        "ItemNeck",
+        "ItemHead",
+        "ItemNose"
+      ]
+    },
+    "ItemHood/PolishedSteelHood": {
+      "Effect": [
+        "BlindHeavy",
+        "DeafLight",
+        "BlockWardrobe",
+        "GagHeavy",
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemNeck",
+        "ItemHead",
+        "ItemNose",
+        "ItemEars"
+      ]
+    },
+    "ItemHood/Paperbag": {
+      "Block": [
+        "ItemHead",
+        "ItemNose",
+        "ItemEars"
+      ]
+    },
+    "ItemHood/Fu": {
+      "Block": [
+        "ItemHead",
+        "ItemNose",
+        "ItemEars"
+      ]
+    },
+    "ItemHood/InflatedBallHood": {
+      "Effect": [
+        "BlindHeavy",
+        "DeafLight",
+        "BlockWardrobe",
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemNeck",
+        "ItemHead",
+        "ItemNose",
+        "ItemEars"
+      ]
+    },
+    "ItemHood/OldGasMask": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemNeck",
+        "ItemHead",
+        "ItemNose",
+        "ItemEars"
+      ]
+    },
+    "ItemHood/CybertechMask": {
+      "Block": [
+        "ItemHead",
+        "ItemNose",
+        "ItemEars"
+      ]
+    },
+    "ItemHood/KirugumiMask": {},
+    "ItemHood/PumpkinHead": {
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemNeck",
+        "ItemHead",
+        "ItemNose",
+        "ItemEars"
+      ]
+    },
+    "ItemHood/SackHood": {
+      "Effect": [
+        "BlockWardrobe",
+        "BlindHeavy",
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemEars",
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemHead",
+        "ItemNose"
+      ]
+    },
+    "ItemHood/LeatherHoodSensDep": {
+      "Effect": [
+        "BlindHeavy",
+        "DeafHeavy",
+        "BlockWardrobe",
+        "GagHeavy",
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemEars",
+        "ItemNeck",
+        "ItemHead",
+        "ItemNose"
+      ]
+    },
+    "ItemHood/LatexHoodOpenHair": {
+      "Block": [
+        "ItemEars",
+        "ItemHead",
+        "ItemNose"
+      ]
+    },
+    "ItemHood/LeatherHood": {
+      "Effect": [
+        "BlindHeavy",
+        "DeafLight",
+        "BlockWardrobe",
+        "GagNormal",
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemEars",
+        "ItemNeck",
+        "ItemHead",
+        "ItemNose"
+      ]
+    },
+    "ItemHood/LeatherHoodOpenEyes": {
+      "Effect": [
+        "GagLight",
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemHead",
+        "ItemNose",
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemEars",
+        "ItemNeck"
+      ]
+    },
+    "ItemHood/GasMask": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemEars",
+        "ItemNeck",
+        "ItemHead",
+        "ItemNose"
+      ]
+    },
+    "ItemHood/DogHood": {
+      "Effect": [
+        "GagNormal",
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemEars",
+        "ItemHead",
+        "ItemNose"
+      ]
+    },
+    "ItemHood/FoxyMask": {
+      "Effect": [
+        "GagLight",
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemHead",
+        "ItemNose"
+      ]
+    },
+    "ItemHood/PonyHood": {
+      "Effect": [
+        "BlindLight",
+        "GagNormal",
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemEars",
+        "ItemNeck",
+        "ItemHead",
+        "ItemNose"
+      ]
+    },
+    "ItemHood/LeatherHoodOpenMouth": {
+      "Effect": [
+        "BlockWardrobe",
+        "BlindHeavy"
+      ],
+      "Block": [
+        "ItemEars",
+        "ItemHead",
+        "ItemNose"
+      ]
+    },
+    "ItemHood/CanvasHood": {
+      "Effect": [
+        "BlockWardrobe",
+        "BlindHeavy",
+        "GagHeavy",
+        "BlockMouth",
+        "DeafLight"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemEars",
+        "ItemNose",
+        "ItemHead"
+      ]
+    },
+    "ItemHood/Pantyhose": {
+      "Effect": [
+        "BlindLight",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemNose",
+        "ItemHead"
+      ]
+    },
+    "ItemHood/PantyHood": {
+      "Effect": [
+        "BlindLight",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemNose",
+        "ItemHead"
+      ]
+    },
+    "ItemHood/GP9GasMask": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemHead",
+        "ItemNose"
+      ]
+    },
+    "ItemHood/OpenFaceHood": {
+      "Block": [
+        "ItemEars"
+      ]
+    },
+    "ItemHood/GwenHood": {
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemEars"
+      ]
+    },
+    "ItemHood/DobermanMask": {
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3"
+      ]
+    },
+    "ItemHood/TechnoHelmet1": {
+      "Block": [
+        "ItemHead",
+        "ItemNose",
+        "ItemEars"
+      ]
+    },
+    "ItemHood/FuturisticHelmet": {
+      "Block": [
+        "ItemHead",
+        "ItemNose",
+        "ItemEars"
+      ]
+    },
+    "ItemHood/GGTSHelmet": {
+      "Block": [
+        "ItemHead",
+        "ItemNose",
+        "ItemEars"
+      ]
+    },
+    "ItemHood/LampHeadHood": {
+      "Effect": [
+        "BlindLight"
+      ],
+      "Block": [
+        "ItemHead"
+      ]
+    },
+    "ItemHood/AccentHood": {
+      "Block": [
+        "ItemHead",
+        "ItemNose",
+        "ItemEars"
+      ]
+    },
+    "ItemHood/CollarHood": {
+      "Block": [
+        "ItemHead",
+        "ItemNose",
+        "ItemEars"
+      ]
+    },
+    "ItemHood/ZipperHood": {
+      "Block": [
+        "ItemHead",
+        "ItemNose",
+        "ItemEars"
+      ]
+    },
+    "ItemHood/LatexHabit": {
+      "Block": [
+        "ItemEars"
+      ]
+    },
+    "ItemHood/CowHood": {
+      "Effect": [
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemEars",
+        "ItemNeck",
+        "ItemHead",
+        "ItemNose"
+      ]
+    },
+    "ItemHood/HeadboxSeethrough": {
+      "Effect": [
+        "BlindHeavy"
+      ],
+      "Block": [
+        "ItemHead",
+        "ItemNose",
+        "ItemEars",
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3"
+      ]
+    },
+    "ItemHood/Slime": {
+      "Effect": [
+        "BlindLight",
+        "BlockWardrobe",
+        "DeafHeavy",
+        "BlockMouth",
+        "GagHeavy",
+        "BlurHeavy"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemEars",
+        "ItemNeck",
+        "ItemHead",
+        "ItemNose"
+      ]
+    },
+    "ItemHood/KittyHood": {
+      "Block": [
+        "ItemHead",
+        "ItemNose",
+        "ItemEars"
+      ]
+    },
+    "ItemHood/LatexDogHood": {
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemNose"
+      ]
+    },
+    "ItemHood/OpenMouthPlugHood": {
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3"
+      ]
+    },
+    "ItemHood/DroneMask": {
+      "Block": [
+        "ItemNose"
+      ]
+    },
+    "ItemHood/CustomLatexHood": {
+      "Block": [
+        "ItemEars"
+      ]
+    },
+    "ItemHood/HarnessCatMask": {},
+    "ItemHood/FestivalFoxMask": {
+      "Block": [
+        "ItemHead",
+        "ItemNose",
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3"
+      ]
+    },
+    "ItemHood/InflatableGagMask": {
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemHead",
+        "ItemNose",
+        "ItemEars"
+      ]
+    },
+    "ItemHood/LatexDogMask": {
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemNose"
+      ]
+    },
+    "ItemHood/LatexBunny": {
+      "Effect": [
+        "BlockWardrobe",
+        "GagHeavy",
+        "BlockMouth",
+        "DeafLight"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemNose"
+      ]
+    },
+    "ItemHood/FoxHood": {
+      "Effect": [
+        "BlockWardrobe",
+        "GagHeavy",
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemNose"
+      ]
+    },
+    "ItemHood/VacHood": {
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemNose"
+      ]
+    },
+    "ItemHood/SensoryDeprivationHood": {
+      "Effect": [
+        "DeafTotal",
+        "BlindHeavy",
+        "BlockMouth",
+        "GagVeryHeavy"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemNose"
+      ]
+    },
+    "ItemHood/CorsetHood": {
+      "Effect": [
+        "BlockMouth",
+        "GagVeryHeavy"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemNose"
+      ]
+    },
+    "ItemHood/SpaceMask": {
+      "Block": [
+        "ItemNose"
+      ]
+    },
+    "ItemHood/BigMouthHood": {},
+    "ItemHood/RubberMask": {},
+    "ItemHood/CustomBallHood": {
+      "Effect": [
+        "BlindHeavy",
+        "DeafLight",
+        "BlockWardrobe",
+        "BlockMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemHead",
+        "ItemNose",
+        "ItemEars"
+      ]
+    },
+    "ItemHood/Balloon": {
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemNose",
+        "ItemHead",
+        "ItemEars"
+      ]
+    },
+    "ItemHood/Kigu2Hood": {
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemNose",
+        "ItemEars",
+        "ItemHead"
+      ]
+    },
+    "ItemHood/CreepyIronMask": {
+      "Effect": [
+        "FixedHead"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemEars",
+        "ItemHead"
+      ]
+    },
+    "ItemHood/HalloIII": {
+      "Block": [
+        "ItemEars"
+      ]
+    },
+    "ItemHood/TransparentLatexHood": {
+      "Effect": [
+        "BlindLight"
+      ]
+    },
+    "ItemEars/LightDutyEarPlugs": {
+      "Effect": [
+        "DeafLight"
+      ]
+    },
+    "ItemEars/HeavyDutyEarPlugs": {
+      "Effect": [
+        "DeafHeavy"
+      ]
+    },
+    "ItemEars/HeadphoneEarPlugs": {},
+    "ItemEars/BluetoothEarbuds": {},
+    "ItemEars/FuturisticEarphones": {
+      "Effect": [
+        "UseRemote"
+      ]
+    },
+    "ItemEars/CTHeadset": {},
+    "ItemEars/Headphones": {},
+    "ItemEars/CustomizableFluffyEars1": {},
+    "ItemEars/CustomizableFluffyEars2": {},
+    "ItemEars/CustomizableFluffyEars3": {},
+    "ItemEars/CustomizableCatEars": {},
+    "ItemEars/CustomizableElfEars": {},
+    "ItemEars/CustomizableCowEars": {},
+    "ItemMisc/MetalPadlock": {},
+    "ItemMisc/IntricatePadlock": {},
+    "ItemMisc/HighSecurityPadlock": {},
+    "ItemMisc/TimerPadlock": {},
+    "ItemMisc/CombinationPadlock": {},
+    "ItemMisc/PasswordPadlock": {},
+    "ItemMisc/TimerPasswordPadlock": {},
+    "ItemMisc/OwnerPadlock": {},
+    "ItemMisc/OwnerTimerPadlock": {},
+    "ItemMisc/LoversPadlock": {},
+    "ItemMisc/LoversTimerPadlock": {},
+    "ItemMisc/FamilyPadlock": {},
+    "ItemMisc/MistressPadlock": {},
+    "ItemMisc/MistressTimerPadlock": {},
+    "ItemMisc/PandoraPadlock": {},
+    "ItemMisc/ExclusivePadlock": {},
+    "ItemMisc/SafewordPadlock": {},
+    "ItemMisc/PortalLinkPadlock": {},
+    "ItemMisc/MetalPadlockKey": {
+      "Effect": [
+        "UnlockMetalPadlock"
+      ]
+    },
+    "ItemMisc/OwnerPadlockKey": {
+      "Effect": [
+        "UnlockOwnerPadlock",
+        "UnlockOwnerTimerPadlock"
+      ]
+    },
+    "ItemMisc/LoversPadlockKey": {
+      "Effect": [
+        "UnlockLoversPadlock",
+        "UnlockLoversTimerPadlock"
+      ]
+    },
+    "ItemMisc/FamilyPadlockKey": {
+      "Effect": [
+        "UnlockFamilyPadlock"
+      ]
+    },
+    "ItemMisc/MistressPadlockKey": {
+      "Effect": [
+        "UnlockMistressPadlock",
+        "UnlockMistressTimerPadlock"
+      ]
+    },
+    "ItemMisc/PandoraPadlockKey": {
+      "Effect": [
+        "UnlockPandoraPadlock"
+      ]
+    },
+    "ItemMisc/MetalCuffsKey": {
+      "Effect": [
+        "UnlockMetalCuffs",
+        "UnlockEscortAnkleCuffs"
+      ]
+    },
+    "ItemMisc/Lockpicks": {},
+    "ItemMisc/WoodenMaidTray": {},
+    "ItemMisc/WoodenMaidTrayFull": {},
+    "ItemMisc/BountySuitcase": {},
+    "ItemMisc/BountySuitcaseEmpty": {},
+    "ItemMisc/WoodenPaddle": {},
+    "ItemMisc/WoodenSign": {},
+    "ItemMisc/ServingTray": {},
+    "ItemMisc/TeddyBear": {},
+    "ItemMisc/PetPost": {},
+    "ItemMisc/BunPlush": {},
+    "ItemMisc/FoxPlush": {},
+    "ItemMisc/Karl": {},
+    "ItemMisc/PetPotato": {},
+    "ItemMisc/Plushie": {},
+    "ItemMisc/MiniDolls": {},
+    "ItemDevices/WoodenBox": {
+      "Effect": [
+        "BlockWardrobe",
+        "Enclose",
+        "Freeze"
+      ],
+      "Block": [
+        "ItemAddon"
+      ]
+    },
+    "ItemDevices/SmallWoodenBox": {
+      "Effect": [
+        "BlockWardrobe",
+        "Enclose",
+        "BlindNormal",
+        "GagLight",
+        "Freeze"
+      ],
+      "Block": [
+        "ItemAddon"
+      ]
+    },
+    "ItemDevices/MilkCan": {
+      "Effect": [
+        "BlindHeavy",
+        "BlockWardrobe",
+        "Enclose",
+        "GagHeavy",
+        "Freeze"
+      ]
+    },
+    "ItemDevices/WaterCell": {
+      "Effect": [
+        "BlockWardrobe",
+        "Enclose",
+        "GagMedium",
+        "Freeze"
+      ],
+      "Block": [
+        "ItemFeet"
+      ]
+    },
+    "ItemDevices/Cage": {
+      "Effect": [
+        "BlockWardrobe",
+        "Enclose",
+        "Freeze"
+      ],
+      "Block": [
+        "ItemAddon"
+      ]
+    },
+    "ItemDevices/LowCage": {
+      "Effect": [
+        "BlockWardrobe",
+        "Enclose",
+        "Freeze"
+      ],
+      "Block": [
+        "ItemAddon"
+      ]
+    },
+    "ItemDevices/SaddleStand": {
+      "Effect": [
+        "BlockWardrobe",
+        "Freeze",
+        "Mounted"
+      ],
+      "Block": [
+        "ItemPelvis"
+      ],
+      "AllowActivityOn": [
+        "ItemPelvis"
+      ]
+    },
+    "ItemDevices/BurlapSack": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Freeze"
+      ],
+      "Block": [
+        "ItemArms",
+        "ItemBreast",
+        "ItemButt",
+        "ItemFeet",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemLegs",
+        "ItemMisc",
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemBoots"
+      ]
+    },
+    "ItemDevices/InflatableBodyBag": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Freeze"
+      ],
+      "Block": [
+        "ItemArms",
+        "ItemBreast",
+        "ItemButt",
+        "ItemFeet",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemLegs",
+        "ItemMisc",
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemBoots"
+      ]
+    },
+    "ItemDevices/FurBlanketWrap": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Freeze"
+      ],
+      "Block": [
+        "ItemArms",
+        "ItemBreast",
+        "ItemButt",
+        "ItemFeet",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemLegs",
+        "ItemMisc",
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemDevices/BondageBench": {
+      "Effect": [
+        "Mounted"
+      ]
+    },
+    "ItemDevices/BBQ": {},
+    "ItemDevices/WetFloor": {},
+    "ItemDevices/LittleMonster": {},
+    "ItemDevices/Familiar": {},
+    "ItemDevices/Coffin": {
+      "Block": [
+        "ItemAddon"
+      ]
+    },
+    "ItemDevices/CryoCapsule": {
+      "Block": [
+        "ItemAddon"
+      ]
+    },
+    "ItemDevices/OneBarPrison": {
+      "Effect": [
+        "FillVulva",
+        "BlockWardrobe",
+        "Freeze",
+        "Mounted",
+        "VulvaShaft"
+      ],
+      "Block": [
+        "ItemVulva"
+      ]
+    },
+    "ItemDevices/PersonalCage": {
+      "Effect": [
+        "Freeze",
+        "MapImmobile"
+      ],
+      "Block": [
+        "ItemAddon"
+      ]
+    },
+    "ItemDevices/LeatherCage": {
+      "Effect": [
+        "Freeze",
+        "MapImmobile"
+      ],
+      "Block": [
+        "ItemAddon"
+      ]
+    },
+    "ItemDevices/TheDisplayFrame": {
+      "Effect": [
+        "BlockWardrobe",
+        "Freeze",
+        "Block",
+        "Mounted"
+      ],
+      "Block": [
+        "ItemArms",
+        "ItemLegs",
+        "ItemFeet",
+        "ItemBoots",
+        "ItemNeckAccessories"
+      ]
+    },
+    "ItemDevices/TheHangingFrame": {
+      "Effect": [
+        "BlockWardrobe",
+        "Freeze",
+        "Block",
+        "Mounted"
+      ],
+      "Block": [
+        "ItemArms",
+        "ItemFeet",
+        "ItemBoots",
+        "ItemNeckAccessories"
+      ]
+    },
+    "ItemDevices/Sybian": {
+      "Effect": [
+        "FillVulva",
+        "Freeze",
+        "Mounted"
+      ],
+      "Block": [
+        "ItemPelvis",
+        "ItemButt",
+        "ItemVulva"
+      ],
+      "AllowActivityOn": [
+        "ItemBoots",
+        "ItemPelvis"
+      ]
+    },
+    "ItemDevices/StrapOnSmooth": {},
+    "ItemDevices/StrapOnStuds": {},
+    "ItemDevices/Potty": {},
+    "ItemDevices/DisplayCase": {
+      "Effect": [
+        "BlockWardrobe",
+        "Enclose",
+        "DeafLight",
+        "GagLight",
+        "Freeze"
+      ],
+      "Block": [
+        "ItemAddon"
+      ]
+    },
+    "ItemDevices/SmallDisplayCase": {
+      "Effect": [
+        "BlockWardrobe",
+        "Enclose",
+        "DeafLight",
+        "GagLight",
+        "Freeze"
+      ],
+      "Block": [
+        "ItemAddon"
+      ]
+    },
+    "ItemDevices/FuturisticCrate": {
+      "Effect": [
+        "Tethered",
+        "MapImmobile"
+      ],
+      "Block": [
+        "ItemAddon"
+      ]
+    },
+    "ItemDevices/DollBox": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe",
+        "Enclose"
+      ],
+      "Block": [
+        "ItemAddon"
+      ]
+    },
+    "ItemDevices/WoodenBoxOpenHead": {
+      "Effect": [
+        "BlockWardrobe",
+        "Freeze",
+        "Block"
+      ],
+      "Block": [
+        "ItemAddon",
+        "ItemArms",
+        "ItemBreast",
+        "ItemButt",
+        "ItemFeet",
+        "ItemLegs",
+        "ItemMisc",
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemBoots",
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemDevices/SmallWoodenBoxOpenHead": {
+      "Effect": [
+        "BlockWardrobe",
+        "Freeze",
+        "Block"
+      ],
+      "Block": [
+        "ItemArms",
+        "ItemAddon",
+        "ItemBreast",
+        "ItemButt",
+        "ItemFeet",
+        "ItemLegs",
+        "ItemMisc",
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemBoots",
+        "ItemHands",
+        "ItemHandheld"
+      ]
+    },
+    "ItemDevices/WoodenStocks": {
+      "Effect": [
+        "BlockWardrobe",
+        "Freeze",
+        "Block",
+        "Mounted"
+      ],
+      "Block": [
+        "ItemArms",
+        "ItemFeet"
+      ],
+      "AllowActivityOn": [
+        "ItemArms",
+        "ItemFeet"
+      ]
+    },
+    "ItemDevices/Vacbed": {
+      "Effect": [
+        "BlockWardrobe",
+        "Freeze",
+        "Block",
+        "Mounted",
+        "Chaste",
+        "ButtChaste"
+      ],
+      "Block": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemButt",
+        "ItemFeet",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemLegs",
+        "ItemMisc",
+        "ItemAddon",
+        "ItemNeck",
+        "ItemNeckAccessories",
+        "ItemNeckRestraints",
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ],
+      "AllowActivityOn": [
+        "ItemNeck",
+        "ItemArms",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemBreast",
+        "ItemNipples",
+        "ItemPelvis",
+        "ItemLegs",
+        "ItemFeet",
+        "ItemBoots",
+        "ItemButt",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemDevices/VacBedDeluxe": {
+      "Effect": [
+        "BlockWardrobe",
+        "Freeze",
+        "Block",
+        "Mounted"
+      ],
+      "Block": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemButt",
+        "ItemFeet",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemLegs",
+        "ItemMisc",
+        "ItemNeck",
+        "ItemNeckAccessories",
+        "ItemNeckRestraints",
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ],
+      "AllowActivityOn": [
+        "ItemArms",
+        "ItemFeet",
+        "ItemLegs",
+        "ItemBoots"
+      ]
+    },
+    "ItemDevices/VacbedClear": {
+      "Effect": [
+        "BlockWardrobe",
+        "Freeze",
+        "Block",
+        "Mounted",
+        "Chaste",
+        "ButtChaste"
+      ],
+      "Block": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemButt",
+        "ItemFeet",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemLegs",
+        "ItemMisc",
+        "ItemAddon",
+        "ItemNeck",
+        "ItemNeckAccessories",
+        "ItemNeckRestraints",
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ],
+      "AllowActivityOn": [
+        "ItemNeck",
+        "ItemArms",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemBreast",
+        "ItemNipples",
+        "ItemPelvis",
+        "ItemLegs",
+        "ItemFeet",
+        "ItemBoots",
+        "ItemButt",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemDevices/Crib": {
+      "Effect": [
+        "Freeze",
+        "Leash",
+        "OnBed"
+      ]
+    },
+    "ItemDevices/Enema": {},
+    "ItemDevices/Bed": {
+      "Effect": [
+        "Mounted",
+        "OnBed"
+      ]
+    },
+    "ItemDevices/X-Cross": {
+      "Effect": [
+        "BlockWardrobe",
+        "Freeze",
+        "Block",
+        "Mounted"
+      ],
+      "Block": [
+        "ItemArms",
+        "ItemFeet"
+      ],
+      "AllowActivityOn": [
+        "ItemArms",
+        "ItemFeet"
+      ]
+    },
+    "ItemDevices/ChangingTable": {
+      "Effect": [
+        "Freeze",
+        "OnBed"
+      ]
+    },
+    "ItemDevices/Locker": {
+      "Effect": [
+        "BlockWardrobe",
+        "Enclose",
+        "Freeze"
+      ],
+      "Block": [
+        "ItemAddon"
+      ]
+    },
+    "ItemDevices/SmallLocker": {
+      "Effect": [
+        "BlockWardrobe",
+        "Enclose",
+        "Freeze"
+      ],
+      "Block": [
+        "ItemAddon"
+      ]
+    },
+    "ItemDevices/ConcealingCloak": {
+      "Effect": [
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemArms",
+        "ItemBreast",
+        "ItemButt",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemLegs",
+        "ItemMisc",
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ]
+    },
+    "ItemDevices/Kennel": {
+      "Effect": [
+        "Tethered",
+        "MapImmobile"
+      ],
+      "Block": [
+        "ItemAddon"
+      ]
+    },
+    "ItemDevices/PetBed": {
+      "Effect": [
+        "Tethered",
+        "MapImmobile"
+      ]
+    },
+    "ItemDevices/Stroller": {
+      "Effect": [
+        "Freeze",
+        "Leash"
+      ]
+    },
+    "ItemDevices/TransportWoodenBox": {
+      "Effect": [
+        "BlockWardrobe",
+        "Enclose",
+        "Freeze",
+        "Leash"
+      ],
+      "Block": [
+        "ItemAddon"
+      ]
+    },
+    "ItemDevices/VacCube": {
+      "Effect": [
+        "BlockWardrobe",
+        "Freeze",
+        "Block"
+      ],
+      "Block": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemButt",
+        "ItemFeet",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemLegs",
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemAddon"
+      ],
+      "AllowActivityOn": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemFeet",
+        "ItemLegs",
+        "ItemNipples",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2"
+      ]
+    },
+    "ItemDevices/PetBowl": {},
+    "ItemDevices/Pole": {
+      "Effect": [
+        "Mounted"
+      ]
+    },
+    "ItemDevices/Cushion": {},
+    "ItemDevices/FuckMachine": {
+      "Effect": [
+        "Mounted",
+        "Freeze"
+      ],
+      "Block": [
+        "ItemVulva",
+        "ItemPelvis",
+        "ItemVulvaPiercings"
+      ],
+      "AllowActivityOn": [
+        "ItemFeet",
+        "ItemLegs",
+        "ItemBoots"
+      ]
+    },
+    "ItemDevices/Net": {
+      "Effect": [
+        "Freeze",
+        "Block",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemDevices/Snowman": {
+      "Effect": [
+        "Freeze",
+        "Block",
+        "BlockWardrobe"
+      ],
+      "Block": [
+        "ItemFeet",
+        "ItemLegs",
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemButt",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemNipples",
+        "ItemNipplesPiercings",
+        "ItemBreast",
+        "ItemArms",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemBoots"
+      ]
+    },
+    "ItemDevices/MedicalBed": {
+      "Effect": [
+        "Freeze",
+        "Mounted",
+        "OnBed",
+        "Leash"
+      ]
+    },
+    "ItemDevices/WoodenRack": {
+      "Effect": [
+        "Freeze",
+        "Mounted",
+        "OnBed"
+      ]
+    },
+    "ItemDevices/WoodenHorse": {
+      "Effect": [
+        "BlockWardrobe",
+        "Freeze",
+        "Mounted"
+      ]
+    },
+    "ItemDevices/LuckyWheel": {},
+    "ItemDevices/WheelFortune": {},
+    "ItemDevices/FoldingScreen": {},
+    "ItemDevices/KabeshiriWall": {
+      "Effect": [
+        "Block",
+        "Tethered",
+        "BlockWardrobe",
+        "Freeze",
+        "MapImmobile"
+      ],
+      "Block": [
+        "ItemArms",
+        "ItemFeet",
+        "ItemLegs",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemPelvis",
+        "ItemNipples",
+        "ItemBreast",
+        "ItemNipplesPiercings",
+        "ItemMouth",
+        "ItemMouth2",
+        "ItemMouth3",
+        "ItemHead",
+        "ItemEars",
+        "ItemHood",
+        "ItemHandheld",
+        "ItemNeck",
+        "ItemNeckRestraints",
+        "ItemNeckRestraints",
+        "ItemAddon"
+      ]
+    },
+    "ItemDevices/Trolley": {
+      "Effect": [
+        "BlockWardrobe",
+        "Freeze",
+        "Leash",
+        "Mounted"
+      ]
+    },
+    "ItemDevices/OneBarGirl": {
+      "Effect": [
+        "FillVulva",
+        "BlockWardrobe",
+        "Freeze",
+        "Mounted",
+        "VulvaShaft"
+      ],
+      "Block": [
+        "ItemLegs",
+        "ItemVulva",
+        "ItemFeet"
+      ],
+      "AllowActivityOn": [
+        "ItemLegs",
+        "ItemFeet"
+      ]
+    },
+    "ItemDevices/GlueFloor": {
+      "Effect": [
+        "BlockWardrobe",
+        "Freeze",
+        "MapImmobile"
+      ],
+      "Block": [
+        "ItemBoots",
+        "ItemAddon"
+      ]
+    },
+    "ItemDevices/Cement": {
+      "Block": [
+        "ItemBoots",
+        "ItemFeet",
+        "ItemAddon"
+      ]
+    },
+    "ItemDevices/BrickWall": {
+      "Effect": [
+        "Freeze",
+        "Tethered",
+        "MapImmobile"
+      ],
+      "Block": [
+        "ItemAddon"
+      ]
+    },
+    "ItemDevices/PogoBall": {
+      "Block": [
+        "ItemBoots"
+      ]
+    },
+    "ItemDevices/Throne": {
+      "Effect": [
+        "Mounted",
+        "MapImmobile"
+      ]
+    },
+    "ItemDevices/ExclusiveWaitress": {
+      "Effect": [
+        "UseRemote",
+        "OneWayEnclose"
+      ]
+    },
+    "ItemDevices/Highchair": {
+      "Effect": [
+        "Freeze",
+        "MapImmobile"
+      ]
+    },
+    "ItemDevices/SingleBalletBoot": {
+      "Block": [
+        "ItemBoots"
+      ]
+    },
+    "ItemDevices/Microphone": {},
+    "ItemDevices/GiftBox": {
+      "Effect": [
+        "Tethered",
+        "MapImmobile"
+      ]
+    },
+    "ItemDevices/XFrame": {},
+    "ItemDevices/InflatableRestraintBag": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe",
+        "Block",
+        "Mounted",
+        "MapImmobile",
+        "OnBed",
+        "OneWayEnclose"
+      ]
+    },
+    "ItemDevices/LongBag": {},
+    "ItemAddon/Covers": {},
+    "ItemAddon/BedRopes": {
+      "Block": [
+        "ItemDevices"
+      ]
+    },
+    "ItemAddon/BedStraps": {
+      "Block": [
+        "ItemDevices"
+      ]
+    },
+    "ItemAddon/BedTape": {
+      "Block": [
+        "ItemDevices"
+      ]
+    },
+    "ItemAddon/BedChains": {
+      "Block": [
+        "ItemDevices"
+      ]
+    },
+    "ItemAddon/CeilingRope": {
+      "Effect": [
+        "Freeze",
+        "MapImmobile"
+      ]
+    },
+    "ItemAddon/CeilingChain": {
+      "Effect": [
+        "Freeze",
+        "MapImmobile"
+      ]
+    },
+    "ItemAddon/CeilingNeckCuff": {
+      "Effect": [
+        "Freeze",
+        "MapImmobile"
+      ]
+    },
+    "ItemBoots/PonyBoots": {},
+    "ItemBoots/BalletHeels": {},
+    "ItemBoots/BalletHeels1": {},
+    "ItemBoots/MetalBallet": {
+      "Effect": [
+        "Slow"
+      ]
+    },
+    "ItemBoots/TormentHeels": {
+      "Effect": [
+        "UseRemote",
+        "Slow"
+      ]
+    },
+    "ItemBoots/BalletWedges": {},
+    "ItemBoots/ToeCuffs": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemBoots/LeatherToeCuffs": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemBoots/ToeTie": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemBoots/ThighHighLatexHeels": {},
+    "ItemBoots/LockingHeels": {},
+    "ItemBoots/LockingHeels2": {},
+    "ItemBoots/LockingShoes1": {},
+    "ItemBoots/LockingShoes2": {},
+    "ItemBoots/FuturisticHeels": {},
+    "ItemBoots/FuturisticHeels2": {},
+    "ItemBoots/LockingBoots1": {},
+    "ItemBoots/LeatherFootMitts1": {},
+    "ItemBoots/ToeTape": {},
+    "ItemBoots/Zipties": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemBoots/HighThighBoots": {},
+    "ItemBoots/Slime": {
+      "Effect": [
+        "Freeze"
+      ]
+    },
+    "ItemBoots/MonoHeel": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe"
+      ]
+    },
+    "ItemBoots/ShortPonyBoots": {},
+    "ItemBoots/StrictPonyBoots": {},
+    "ItemBoots/BalletMittens": {
+      "Effect": [
+        "Slow"
+      ]
+    },
+    "ItemBoots/HeellessHoof": {},
+    "ItemBoots/HoofBoots": {},
+    "ItemBoots/ZipperBBoots": {
+      "Effect": [
+        "Slow"
+      ]
+    },
+    "ItemBoots/SingleBalletBoot": {},
+    "ItemScript/Script": {}
   }
 }

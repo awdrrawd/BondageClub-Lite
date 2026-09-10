@@ -324,8 +324,8 @@
   "summon.expired": "Summon expired or is no longer permitted.",
   "private.contacts": "Contacts: room / friends / recent",
   "afc.inRoom": "Extended lovers {0}",
-  "native.help": "Choose a body part and action. Compatibility sending skips unimplemented local checks but respects known preference refusals. Extensions are usually text-only; ECHO cuddle is an explicit exception, wearing your own item and syncing pairing after confirmation.",
-  "interaction.compatibility": "Compatibility sending (skip unimplemented checks)",
+  "native.help": "Actions check both appearances, effects, zones and preferences. Compatibility skips only local automatic effects, never equipment or unknown prerequisites. Extensions remain text-only, not a complete plugin engine; ECHO cuddle requires confirmation.",
+  "interaction.compatibility": "Compatibility sending (skip own automatic effects only)",
   "interaction.body": "Body part selection diagram",
   "interaction.choosePart": "Choose a body part",
   "interaction.back": "← Body parts",
@@ -357,5 +357,7 @@
   "native.equipment": "Equipment or pose conditions are not supported",
   "native.unsupported": "Activity needs unsupported conditions or local effects",
   "native.actor": "Local automatic effects are not implemented; strict checks require Manual mode",
-  "native.permission": "Activity or zone disabled in preferences"
+  "native.permission": "Activity or zone disabled in preferences",
+  "native.blocked": "Current equipment effects or body-zone restrictions prevent this activity",
+  "stability.gap": "Connection interrupted: messages may be missing. Reconnecting does not restore missed history."
 }

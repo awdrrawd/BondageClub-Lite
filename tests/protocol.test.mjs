@@ -1,5 +1,5 @@
 import { renderAction, dictionaryText } from './action-helper.mjs';
-import { nativeActivities, activityReason, definitions } from './native-helper.mjs';
+import { nativeActivities, activityReason, createActivityInventoryCheck, definitions } from './native-helper.mjs';
 import { extensionActivities, extensionText } from './extensions-helper.mjs';
 import { hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState } from './activity-helper.mjs';
 import { gameCatalog } from './catalog-helper.mjs';
@@ -21,6 +21,7 @@ async function setup(environment, relayAvailable = true, account = {}, storage =
   const socket = {
     connected: true,
     on(event, callback) { handlers.set(event, callback); },
+    onAny(callback) { handlers.set('any', callback); },
     emit(event, payload) { sent.push({ event, payload }); },
     removeAllListeners() { handlers.clear(); },
     connect() { this.connected = true; handlers.get('connect')?.(); return this; },
@@ -29,7 +30,7 @@ async function setup(environment, relayAvailable = true, account = {}, storage =
   const context = {
     hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState,
     localStorage: { getItem(key) { return storage.get(key) ?? null; }, setItem(key, value) { storage.set(key, value); } },
-    io: () => socket, nativeActivities, activityReason, extensionActivities, extensionText, renderAction, dictionaryText, t, localizeStatus, validAppearance, copyAppearance, releaseAppearance, afcLovers, embeddedAction,
+    io: () => socket, nativeActivities, activityReason, createActivityInventoryCheck, extensionActivities, extensionText, renderAction, dictionaryText, t, localizeStatus, validAppearance, copyAppearance, releaseAppearance, afcLovers, embeddedAction,
     exports: {},
     require: () => ({ io: () => socket }),
     window: { setTimeout(fn) { timers.set(++timerId, fn); return timerId; }, clearTimeout(id) { timers.delete(id); } },
@@ -163,15 +164,21 @@ test('membership sync does not duplicate native presence, and departed nickname/
 });
 
 test('compatibility sends clothed online activity but never overrides explicit preferences or room restrictions', async () => {
-  const base = { Name: 'Test', Appearance: [{ Group: 'Cloth', Name: 'Dress' }], ArousalSettings: { Active: 'Automatic', Activity: 'z'.repeat(100), Zone: 'f'.repeat(30) } };
+  const clothing = Object.keys(definitions.items).find(key => key.startsWith('Cloth/') && Object.keys(definitions.items[key]).length === 0).split('/');
+  const base = { Name: 'Test', Appearance: [{ Group: clothing[0], Name: clothing[1] }], ArousalSettings: { Active: 'Automatic', Activity: 'z'.repeat(100), Zone: 'f'.repeat(30) } };
   const f = await setup('PROD', true, base);
   const actor = { ...base, MemberNumber: 123 }, target = { ...base, MemberNumber: 55 };
   f.handlers.get('ChatRoomSync')({ Name: 'Room', Character: [actor, target] });
   const option = f.client.activityOptions(55, true).find(option => option.name === 'Whisper' && option.group === 'ItemEars');
-  assert.equal(option.reason, null); assert.equal(option.warning, 'native.equipment');
+  assert.equal(option.reason, null); assert.equal(option.warning, 'native.actor');
   assert.throws(() => f.client.sendActivity(55, 'ItemEars', 'Whisper'));
   f.client.sendActivity(55, 'ItemEars', 'Whisper', true);
   assert.equal(f.sent.at(-1).payload.Type, 'Activity');
+  actor.Appearance.push({ Group:'ItemMouth', Name:'BallGag', Property:{ Effect:[] } });
+  f.handlers.get('ChatRoomSync')({ Name:'Room', Character:[actor, target] });
+  assert.equal(f.client.activityOptions(55, true).find(value => value.name === 'Whisper').reason, 'native.blocked');
+  assert.throws(() => f.client.sendActivity(55, 'ItemEars', 'Whisper', true));
+  actor.Appearance.pop();
   target.ArousalSettings = { ...base.ArousalSettings, Activity: 'd'.repeat(100) };
   f.handlers.get('ChatRoomSync')({ Name: 'Room', Character: [actor, target] });
   assert.equal(f.client.activityOptions(55, true).find(option => option.name === 'Whisper').reason, 'native.permission');
@@ -357,6 +364,14 @@ test('resume checks use one bounded native query; backgrounding cancels the watc
   assert.equal(f.sent.filter(p => p.event === 'AccountLogin').length, 0);
 });
 
+test('normal server traffic satisfies a foreground liveness probe without a friends reply', async () => {
+  const f = await setup('PROD');
+  f.client.resumeConnection();
+  f.handlers.get('any')('ChatRoomMessage', {});
+  for (const callback of [...f.timers.values()]) callback();
+  assert.equal(f.sent.filter(packet => packet.event === 'AccountLogin').length, 0);
+});
+
 test('a foreground probe response avoids reconnect; a missing response restarts transport', async () => {
   const good = await setup('PROD');
   good.client.resumeConnection();
@@ -511,12 +526,32 @@ test('login environment is preserved and DEV never claims production login', asy
   assert.match((await setup()).state().status, /正式環境尚未確認/);
 });
 
-test('timed-out room search can be retried', async () => {
+test('rapid region changes coalesce and discard the previous region response', async () => {
+  const f = await setup('PROD');
+  f.client.search(request);
+  f.client.search({ ...request, Space:'M' });
+  f.client.search({ ...request, Space:'' });
+  assert.equal(f.sent.filter(p => p.event === 'ChatRoomSearch').length, 1);
+  f.handlers.get('ChatRoomSearchResult')([{ Name:'Female', Space:'X' }]);
+  assert.equal(f.state().rooms.length, 0);
+  assert.equal(f.sent.at(-1).payload.Space, '');
+  f.handlers.get('ChatRoomSearchResult')([{ Name:'Mixed', Space:'' }]);
+  assert.equal(f.state().rooms[0].Name, 'Mixed');
+});
+
+test('timed-out searches retry on a fresh authenticated transport', async () => {
   const fixture = await setup();
   fixture.client.search(request);
   [...fixture.timers.values()][0]();
   fixture.client.search(request);
+  assert.equal(fixture.sent.filter(item => item.event === 'ChatRoomSearch').length, 1);
+  fixture.handlers.get('ChatRoomSearchResult')([{ Name:'Old room', Space:'X' }]);
+  assert.equal(fixture.state().rooms.length, 0);
+  assert.equal(fixture.sent.filter(item => item.event === 'AccountLogin').length, 1);
+  fixture.handlers.get('LoginResponse')({ AccountName:'test', Name:'Test', ID:'new', MemberNumber:123 });
+  fixture.handlers.get('ServerInfo')({ OnlinePlayers:1 });
   assert.equal(fixture.sent.filter(item => item.event === 'ChatRoomSearch').length, 2);
+  assert.equal(fixture.state().rooms.length, 0);
   fixture.handlers.get('ChatRoomSearchResult')([]);
   assert.equal(fixture.state().status, '找到 0 個房間');
 });
