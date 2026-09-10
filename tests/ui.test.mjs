@@ -10,6 +10,7 @@ import { appendChatLinks, MediaConsent } from './links-helper.mjs';
 import { afcLovers } from './community-helper.mjs';
 import { definitions } from './native-helper.mjs';
 const activitySource = stripTypeScriptTypes(readFileSync('src/ui/activity-dialog.ts', 'utf8')).replace(/^import .*;\r?\n/gm, '').replaceAll('export ', '');
+const nameColor = new Function(stripTypeScriptTypes(readFileSync('src/ui/name-color.ts', 'utf8')).replaceAll('export ', '') + ';return nameColor;')();
 const stabilitySource = stripTypeScriptTypes(readFileSync(new URL('../src/platform/stability.ts', import.meta.url), 'utf8')).replace('import { t } from "../i18n";', '').replace('export ', '');
 
 const bioCode = stripTypeScriptTypes(readFileSync(new URL('../src/profile/biography.ts', import.meta.url), 'utf8')).replace('import LZString from "lz-string";', '').replace('import { t } from "../i18n";', '').replace('export ', '');
@@ -17,13 +18,14 @@ const decodeBiography = new Function('LZString', 't', bioCode + '; return decode
 
 const source = stripTypeScriptTypes(readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8')).replace(/^import .*;\r?\n/gm, '');
 
-function setup(savedAccount) {
+function setup(savedAccount, savedPerformance) {
   setLocale('zh');
   const window = new Window({ url: 'https://lite.example', settings: { disableCSSFileLoading: true, disableJavaScriptFileLoading: true } });
-  const openActivityDialog = new Function('document', 't', 'definitions', activitySource + ';return openActivityDialog;')(window.document, t, definitions);
+  const openActivityDialog = new Function('document', 'window', 't', 'definitions', activitySource + ';return openActivityDialog;')(window.document, window, t, definitions);
   const StabilityControls = new Function('document', 'window', 't', 'URL', stabilitySource + ';return StabilityControls;')(window.document, window, t, window.URL);
   window.document.body.innerHTML = '<div id="app"></div>';
   if (savedAccount) window.localStorage.setItem('bc-lite-account-v1', savedAccount);
+  if (savedPerformance) window.localStorage.setItem('bc-lite-performance-v1', savedPerformance);
   let current = { phase: 'ready', status: 'Ready', player: { Name: 'Tester', MemberNumber: 123, FriendList: [55], Appearance: [] }, room: null, rooms: [], characters: [], messages: [], friends: [], friendsQueryState: 'idle', friendsStatus: '尚未查詢', beeps: [] };
   let listener;
   const calls = [];
@@ -34,6 +36,8 @@ function setup(savedAccount) {
     activityOptions() { return [{ group: 'ItemHead', groupLabel: '頭部', name: 'Pet', label: '撫摸', reason: null }]; },
     sendActivity(id, group, name) { calls.push({ activity: name, group, id }); },
     setTextCatalog() {},
+    setMessageLimit(value) { calls.push({ historyLimit: value }); if (current.messages.length > value) { current = { ...current, messages: current.messages.slice(-value) }; listener?.(current); } },
+    clearMessages() { current = { ...current, messages: [] }; listener(current); },
     configureSummons() {}, dismissSummon() {}, acceptSummon() {}, requestLoverRoom(id) { calls.push({ lover: id }); }, sendInteraction(id, action) { calls.push({ interaction: action, id }); },
     recordLifecycle(event) { calls.push({ lifecycle: event }); },
     resumeConnection() { calls.push('resume'); },
@@ -44,13 +48,67 @@ function setup(savedAccount) {
     async login(account) { calls.push({ login: account }); },
     setFriend() {}, clearBeeps() {}, leave() {}, disconnect() {}, search() {}, join() {}, createRoom() {},
   };
-  vm.runInNewContext(source, { window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, openActivityDialog, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
+  vm.runInNewContext(source, { window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, openActivityDialog, nameColor, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
   return { window, document: window.document, calls, state: () => current, emit(change) { if (change.friendsStatus === '查詢完成') change.friendsQueryState = 'ready'; current = { ...current, ...change }; listener(current); } };
 }
 
 function messages(count) {
   return Array.from({ length: count }, (_, index) => ({ id: `id-${index}`, sender: 55, senderName: 'Friend', text: `message ${index}`, time: new Date(), type: 'Chat' }));
 }
+
+test('3000 retained messages page in bounded batches and performance preferences persist without messages', async () => {
+  const f = setup(undefined, JSON.stringify({ history: 3000, visible: 50 }));
+  f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, messages: messages(3000) });
+  assert.equal(f.document.querySelectorAll('#TextAreaChatLog .chat-message').length, 50);
+  const older = () => [...f.document.querySelectorAll('.chat-room-top-menu button')].find(b => b.textContent === t('m162'));
+  older().click();
+  assert.equal(f.document.querySelector('#TextAreaChatLog').firstElementChild.dataset.messageId, 'id-2900');
+  assert.equal(f.document.querySelectorAll('#TextAreaChatLog .chat-message').length, 50);
+  const before = f.document.querySelector('#TextAreaChatLog').textContent;
+  f.emit({ messages: [...f.state().messages.slice(1), { ...messages(1)[0], id: 'new', text: 'new arrival' }] });
+  assert.equal(f.document.querySelector('#TextAreaChatLog').textContent, before);
+  f.document.getElementById('new-messages').click();
+  assert.match(f.document.querySelector('#TextAreaChatLog').textContent, /new arrival/);
+  f.document.getElementById('nav-settings').click();
+  const history = f.document.getElementById('HistoryLimit');
+  f.window.confirm = () => false; history.value = '600'; history.dispatchEvent(new f.window.Event('change'));
+  assert.equal(history.value, '3000'); assert.equal(f.state().messages.length, 3000);
+  f.window.confirm = () => true; history.value = '600'; history.dispatchEvent(new f.window.Event('change'));
+  assert.equal(f.state().messages.length, 600);
+  assert.deepEqual(JSON.parse(f.window.localStorage.getItem('bc-lite-performance-v1')), { history: 600, visible: 50 });
+  await f.window.happyDOM.close();
+});
+
+test('reply preview sits inside composer, jumps to retained history and clear preserves draft', async () => {
+  const f = setup(); const history = messages(150).map((m, i) => ({ ...m, nativeId: `n-${i}` }));
+  history.push({ ...messages(1)[0], id: 'response', nativeId: 'response-n', replyId: 'n-0', text: 'response' });
+  f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, messages: history });
+  f.document.querySelector('[data-message-id=response] .reply-jump').click();
+  assert.ok(f.document.querySelector('[data-message-id=id-0].message-selected'));
+  f.document.querySelector('[data-message-id=id-0] .message-reply').click();
+  const input = f.document.getElementById('InputChat');
+  assert.equal(input.previousElementSibling.id, 'chat-room-reply-indicator');
+  assert.match(input.previousElementSibling.textContent, /message 0/);
+  input.value = 'draft'; input.dispatchEvent(new f.window.Event('input'));
+  f.window.confirm = () => true; f.document.querySelector('.clear-messages').click();
+  assert.equal(f.document.querySelectorAll('#TextAreaChatLog .chat-message').length, 0);
+  assert.equal(input.value, 'draft');
+  await f.window.happyDOM.close();
+});
+
+test('presence has no duplicate author and private incoming messages reuse existing DOM', async () => {
+  const f = setup();
+  f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, messages: [{ ...messages(1)[0], type: 'Action', presence: true, text: 'Friend left.' }] });
+  assert.equal(f.document.querySelector('.message-presence .message-author'), null);
+  assert.equal(f.document.querySelector('.message-presence .message-reply'), null);
+  f.document.getElementById('nav-private').click();
+  f.emit({ beeps: [{ id: 'b1', memberNumber: 55, name: 'Friend', text: 'one', incoming: true, time: new Date() }] });
+  const first = f.document.querySelector('[data-message-id=b1]');
+  f.emit({ beeps: [...f.state().beeps, { id: 'b2', memberNumber: 55, name: 'Friend', text: 'two', incoming: true, time: new Date() }] });
+  assert.equal(f.document.querySelector('[data-message-id=b1]'), first);
+  assert.ok(f.document.querySelector('.private-split .private-contacts'));
+  await f.window.happyDOM.close();
+});
 
 test('BC-style rows keep metadata separate and clicking a name composes an unsent whisper', async () => {
   const f = setup();
@@ -162,7 +220,9 @@ test('profiles show none instead of unprovided, AFC lovers, and bounded text int
   assert.equal(dialog.isConnected, false);
   const activity = f.document.querySelector('.activity-dialog');
   assert.ok(activity.querySelector('svg .body-zone'));
-  activity.querySelector('button[data-body-group="ItemHead"]').click();
+  assert.equal(activity.querySelector('.body-parts'), null);
+  assert.equal(activity.querySelector('.body-outline'), null);
+  activity.querySelector('[data-body-group="ItemHead"]').dispatchEvent(new f.window.Event('click'));
   [...activity.querySelectorAll('button')].find(n => n.textContent === '撫摸').click();
   assert.deepEqual(f.calls.at(-1), { activity: 'Pet', group: 'ItemHead', id: 55 });
   activity.querySelector('.dialog-close').click();
@@ -299,7 +359,7 @@ test('reading history freezes visible rows and offers explicit jump to latest', 
 test('friend updates and BEEP do not replace composer; untrusted content stays text', async () => {
   const f = setup();
   f.document.getElementById('nav-private').click();
-  assert.deepEqual(f.calls, ['friends']);
+  assert.deepEqual(f.calls, [{ historyLimit: 3000 }, 'friends']);
   const input = f.document.getElementById('BeepText');
   input.value = 'BEEP 草稿'; input.dispatchEvent(new f.window.Event('input'));
   f.emit({ friends: [{ MemberNumber: 55, MemberName: '<img src=x onerror=alert(1)>', Type: 'Friend' }], friendsStatus: '查詢完成', beeps: [{ id: 'beep', memberNumber: 55, name: 'Friend', text: '<script>bad()</script>', incoming: true, time: new Date() }] });

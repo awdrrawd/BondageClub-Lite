@@ -26,6 +26,7 @@ export interface PlayerSummary extends CharacterSummary {
 }
 
 export interface CharacterSummary {
+  LabelColor?: string;
   AssetFamily?: string;
   ArousalSettings?: { Active?: string; Zone?: string; Activity?: string };
   OnlineSharedSettings?: Record<string, unknown>;
@@ -116,6 +117,8 @@ export interface ChatMessage {
 }
 
 export interface DisplayMessage {
+  presence?: boolean;
+  labelColor?: string;
   replyId?: string;
   nativeId?: string;
   target?: number;

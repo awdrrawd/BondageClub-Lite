@@ -16,17 +16,17 @@ export function openActivityDialog(name: string, getOptions: (compatibility: boo
   const body = document.createElement("div"); body.className = "body-picker";
   const ns = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(ns, "svg"); svg.setAttribute("viewBox", "0 0 500 1000"); svg.classList.add("activity-body-svg"); svg.setAttribute("aria-label", t("interaction.body"));
-  // A neutral schematic, not a character renderer. Hit regions come from BC AssetGroup.Zone.
-  const outline = document.createElementNS(ns, "path"); outline.classList.add("body-outline");
-  outline.setAttribute("d", "M250 30 C175 30 175 170 220 190 L220 220 L150 240 L100 520 L140 540 L200 330 L190 580 L190 950 L235 950 L250 640 L265 950 L310 950 L310 580 L300 330 L360 540 L400 520 L350 240 L280 220 L280 190 C325 170 325 30 250 30Z"); svg.append(outline);
-  const parts = document.createElement("div"); parts.className = "body-parts";
+  // Only native hit regions: no silhouette, textures or duplicate body-part list.
   const results = document.createElement("section"); results.className = "body-results";
   const selected = document.createElement("h3"); selected.textContent = t("interaction.choosePart");
   const activities = document.createElement("div"); activities.className = "body-activities";
   const status = document.createElement("p"); status.className = "notice"; status.setAttribute("role", "status");
+  const back = document.createElement("button"); back.type = "button"; back.className = "button ghost activity-back"; back.textContent = t("interaction.back");
+  back.addEventListener("click", () => { dialog.classList.remove("show-actions"); svg.querySelector<SVGElement>('[aria-pressed="true"]')?.focus(); });
   let selectedGroup = "";
   const select = (group: string, label: string) => {
     selectedGroup = group; selected.textContent = label; activities.replaceChildren(); status.textContent = "";
+    dialog.classList.add("show-actions");
     for (const control of body.querySelectorAll("[data-body-group]")) control.setAttribute("aria-pressed", String(control.getAttribute("data-body-group") === group));
     for (const option of getOptions(compatibility.checked).filter(option => option.group === group)) {
       const row = document.createElement("div"); row.className = "activity-option";
@@ -40,11 +40,13 @@ export function openActivityDialog(name: string, getOptions: (compatibility: boo
       if (explanation) { const note = document.createElement("small"); note.className = "muted"; note.textContent = t(explanation as Parameters<typeof t>[0]); row.append(note); }
       activities.append(row);
     }
+    if (window.matchMedia("(max-width: 760px)").matches) back.focus();
   };
+  let extraRegion = 0;
   for (const [group, label] of new Map(getOptions(true).map(option => [option.group, option.groupLabel]))) {
-    const button = document.createElement("button"); button.type = "button"; button.className = "button ghost"; button.dataset.bodyGroup = group; button.textContent = label;
-    button.addEventListener("click", () => select(group, label)); parts.append(button);
-    for (const [x, y, width, height] of (definitions.geometry as Record<string, number[][]>)[group] || []) {
+    // Plugin-only groups without native geometry get auxiliary tiles, not invented body zones.
+    const regions = (definitions.geometry as Record<string, number[][]>)[group] || [[370, 750 + extraRegion++ * 75, 125, 65]];
+    for (const [x, y, width, height] of regions) {
       const region = document.createElementNS(ns, "rect"); region.classList.add("body-zone");
       for (const [key, value] of Object.entries({ x, y, width, height, rx: 10 })) region.setAttribute(key, String(value));
       region.setAttribute("data-body-group", group); region.setAttribute("role", "button"); region.setAttribute("tabindex", "0"); region.setAttribute("aria-label", label); region.setAttribute("aria-pressed", "false");
@@ -52,10 +54,11 @@ export function openActivityDialog(name: string, getOptions: (compatibility: boo
       region.addEventListener("click", () => select(group, label));
       region.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); select(group, label); } });
       svg.append(region);
+      const caption = document.createElementNS(ns, "text"); caption.setAttribute("x", String(x + width / 2)); caption.setAttribute("y", String(y + height / 2)); caption.setAttribute("text-anchor", "middle"); caption.setAttribute("dominant-baseline", "middle"); caption.classList.add("body-zone-label"); caption.textContent = label; svg.append(caption);
     }
   }
   compatibility.addEventListener("change", () => { if (selectedGroup) select(selectedGroup, selected.textContent || selectedGroup); });
-  body.append(svg, parts); results.append(selected, status, activities); layout.append(body, results);
+  body.append(svg); results.append(back, selected, status, activities); layout.append(body, results);
   dialog.append(heading, close, help, mode, layout); document.body.append(dialog); dialog.showModal();
   return dialog;
 }

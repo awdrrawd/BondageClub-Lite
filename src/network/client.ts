@@ -7,7 +7,7 @@ import { validAppearance, copyAppearance, releaseAppearance, type BundledItem } 
 import { io, type Socket } from "socket.io-client";
 import type { CharacterSummary, ChatMessage, ClientSnapshot, DictionaryEntry, DisplayMessage, OnlineFriend, PlayerSummary, RoomCreateOptions, RoomSearchRequest, RoomSearchResult, RoomSync } from "../shared/types";
 
-const MAX_MESSAGES = 600;
+const MAX_MESSAGES = 3000;
 const SEARCH_TIMEOUT_MS = 8_000;
 
 // OOC stays plain text in every channel; private messages never parse action prefixes.
@@ -31,6 +31,12 @@ export class BcLiteClient {
   private credentials: Credentials | null = null;
   private listeners = new Set<Listener>();
   private state = initialSnapshot();
+  private messageLimit = MAX_MESSAGES;
+  setMessageLimit(limit: number): void {
+    if (![600, 1500, 3000].includes(limit)) throw new RangeError("Invalid history limit");
+    this.messageLimit = limit;
+    if (this.state.messages.length > limit) this.patch({ messages: this.state.messages.slice(-limit) });
+  }
   private loginAccepted = false;
   private manualDisconnect = false;
   private serverReady = false;
@@ -40,6 +46,8 @@ export class BcLiteClient {
   private lastBeepAt = 0;
   private lastChatAt = 0;
   private lastIdentityReply = 0;
+  private departed = new Map<number, CharacterSummary>();
+  clearMessages(): void { this.patch({ messages: [] }); }
   private textCatalog: Record<string, string> = {};
   private safetyBaseline: { appearance: BundledItem[]; pose: string[] | null } | null = null;
   private safetyCurrent: BundledItem[] | null = null;
@@ -142,6 +150,7 @@ export class BcLiteClient {
   }
 
   disconnect(): void {
+    this.departed.clear();
     this.summonRule = { enabled: false, members: [], text: "Come to my room immediately" };
     this.clearRecovery();
     this.returnRoom = null;
@@ -435,6 +444,7 @@ export class BcLiteClient {
       this.clearRoomTimer();
       const characters = Array.isArray(room.Character) ? room.Character : [];
       const sameRoom = this.state.room?.Name === room.Name;
+      if (!sameRoom) this.departed.clear();
       const self = characters.find(character => character.MemberNumber === this.state.player?.MemberNumber);
       this.safetyCurrent = validAppearance(self?.Appearance) ? copyAppearance(self.Appearance) : null;
       this.patch({ phase: "in-room", room, characters, messages: sameRoom ? this.state.messages : [], status: t("m223", [room.Name]) });
@@ -444,13 +454,14 @@ export class BcLiteClient {
     this.socket.on("ChatRoomSyncMemberJoin", (data: { Character?: CharacterSummary }) => {
       if (!data?.Character) return;
       this.patch({ characters: this.upsertCharacter(data.Character) });
-      this.localMessage(t("m224", [displayName(data.Character)]));
+      this.departed.delete(data.Character.MemberNumber);
       this.announceLite(data.Character.MemberNumber);
     });
     this.socket.on("ChatRoomSyncMemberLeave", (data: { SourceMemberNumber?: number }) => {
       const character = this.findCharacter(data?.SourceMemberNumber);
+      if (character) { this.departed.set(character.MemberNumber, character); if (this.departed.size > 100) this.departed.delete(this.departed.keys().next().value!); }
       this.patch({ characters: this.state.characters.filter((item) => item.MemberNumber !== data?.SourceMemberNumber) });
-      this.localMessage(t("m225", [displayName(character)]));
+      // Native ServerLeave/Disconnect supplies the single visible notification.
     });
     for (const event of ["ChatRoomSyncCharacter", "ChatRoomSyncSingle"]) {
       this.socket.on(event, (data: { Character?: CharacterSummary }) => {
@@ -528,7 +539,7 @@ export class BcLiteClient {
     this.loginAccepted = true;
     const player: PlayerSummary = { AccountName: value.AccountName, ID: value.ID, MemberNumber: value.MemberNumber!, Name: value.Name, Nickname: value.Nickname,
       Description: value.Description, Owner: value.Owner, Ownership: value.Ownership, Lovership: value.Lovership,
-      AssetFamily: value.AssetFamily,
+      AssetFamily: value.AssetFamily, LabelColor: value.LabelColor,
       ArousalSettings: value.ArousalSettings,
       GameplaySettings: value.GameplaySettings,
       AllowedInteractions: Number.isInteger(value.AllowedInteractions) ? value.AllowedInteractions : undefined,
@@ -560,7 +571,8 @@ export class BcLiteClient {
     // BC Status packets (Talk, "null", Wardrobe, etc.) drive character indicators,
     // not chat history. Filter by packet type, never by user-entered content.
     if (!message || message.Type === "Hidden" || message.Type === "Status" || typeof message.Content !== "string") return;
-    const sender = this.findCharacter(message.Sender);
+    const presence = message.Type === "Action" && /^(ServerEnter|ServerLeave|ServerDisconnect|ServerBan|ServerKick)/.test(message.Content);
+    const sender = this.findCharacter(message.Sender) || (presence ? this.departed.get(message.Sender!) : undefined);
     const target = this.findCharacter(message.Target);
     const dictionary = (Array.isArray(message.Dictionary) ? message.Dictionary : []).slice(0, 200).filter(entry => entry && typeof entry === "object").map((entry) => {
       if (dictionaryText(entry) || !Number.isFinite(entry.MemberNumber)) return entry;
@@ -569,9 +581,10 @@ export class BcLiteClient {
     });
     const sourceId = dictionary.find(entry => typeof entry.SourceCharacter === "number")?.SourceCharacter;
     const targetId = dictionary.find(entry => typeof entry.TargetCharacter === "number")?.TargetCharacter;
-    const sourceCharacter = this.findCharacter(typeof sourceId === "number" ? sourceId : message.Sender);
+    const sourceCharacter = this.findCharacter(typeof sourceId === "number" ? sourceId : message.Sender) || (presence ? sender : undefined);
     const targetCharacter = this.findCharacter(typeof targetId === "number" ? targetId : message.Target);
-    const sourceName = sourceCharacter?.Nickname || sourceCharacter?.Name;
+    const sourceName = presence && sourceCharacter?.Nickname && sourceCharacter.Nickname !== sourceCharacter.Name ? `${sourceCharacter.Nickname} [${sourceCharacter.Name}]` : sourceCharacter?.Nickname || sourceCharacter?.Name;
+    if (presence && sourceName) for (const entry of dictionary) if (["SourceCharacter", "SourceCharacterName"].includes(entry.Tag || "")) entry.Text = sourceName;
     const targetEntry = dictionary.find(entry => ["TargetCharacter", "TargetCharacterName", "DestinationCharacter", "DestinationCharacterName"].includes(entry.Tag || ""));
     const destinationName = (targetEntry ? dictionaryText(targetEntry) : null) || targetCharacter?.Nickname || targetCharacter?.Name;
     for (const [tags, name] of [[['SourceCharacter', 'SourceCharacterName'], sourceName], [['TargetCharacter', 'TargetCharacterName', 'DestinationCharacter', 'DestinationCharacterName'], destinationName]] as const) {
@@ -580,6 +593,7 @@ export class BcLiteClient {
     const translated = ["Action", "Activity", "ServerMessage"].includes(message.Type);
     this.appendMessage({
       id: crypto.randomUUID(), sender: message.Sender ?? null, senderName: displayName(sender),
+      presence, labelColor: sender?.LabelColor,
       target: message.Type === "Whisper" ? message.Target ?? this.state.player?.MemberNumber : undefined,
       targetName: message.Type === "Whisper" ? displayName(target || this.state.player || undefined) : undefined,
       text: translated ? this.renderServerMessage(message.Content, message.Type, dictionary) : message.Content, type: message.Type, time: new Date(),
@@ -594,7 +608,7 @@ export class BcLiteClient {
   }
 
   private appendMessage(message: DisplayMessage): void {
-    this.patch({ messages: [...this.state.messages, message].slice(-MAX_MESSAGES), ...(message.type === "Whisper" ? { whispers: [...(this.state.whispers || []), message].slice(-300) } : {}) });
+    this.patch({ messages: [...this.state.messages, message].slice(-this.messageLimit), ...(message.type === "Whisper" ? { whispers: [...(this.state.whispers || []), message].slice(-300) } : {}) });
   }
 
   private upsertCharacter(character: CharacterSummary): CharacterSummary[] {

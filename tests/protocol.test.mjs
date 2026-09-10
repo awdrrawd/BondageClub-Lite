@@ -52,6 +52,44 @@ async function setup(environment, relayAvailable = true, account = {}) {
 
 const request = { Query: '', Space: 'X', Language: '', Game: '', FullRooms: false, ShowLocked: true, SearchDescs: false };
 
+test('room history defaults to 3000, trims oldest on reduction and keeps the limit across reconnects', async () => {
+  const f = await setup('PROD');
+  for (let i = 0; i < 3005; i++) f.handlers.get('ChatRoomMessage')({ Type: 'Chat', Sender: 55, Content: String(i) });
+  assert.equal(f.state().messages.length, 3000);
+  assert.equal(f.state().messages[0].text, '5');
+  const sent = f.sent.length;
+  assert.throws(() => f.client.setMessageLimit(0));
+  f.client.setMessageLimit(600);
+  assert.equal(f.state().messages.length, 600);
+  assert.equal(f.state().messages[0].text, '2405');
+  assert.equal(f.sent.length, sent);
+  f.client.setMessageLimit(3000);
+  assert.equal(f.state().messages.length, 600); // Increasing never restores discarded history.
+  f.client.setMessageLimit(600); f.client.disconnect();
+  for (let i = 0; i < 605; i++) f.client.handleMessage({ Type: 'Chat', Sender: 55, Content: String(i) });
+  assert.equal(f.state().messages.length, 600);
+});
+
+test('membership sync does not duplicate native presence, and departed nickname/color survives', async () => {
+  const f = await setup('PROD'); f.client.setTextCatalog(gameCatalog('en'));
+  const character = { MemberNumber: 55, Name: 'Account', Nickname: 'Nick', LabelColor: '#FFE800' };
+  f.handlers.get('ChatRoomSync')({ Name: 'Room', Character: [] });
+  f.client.clearMessages();
+  f.handlers.get('ChatRoomSyncMemberJoin')({ Character: character });
+  assert.equal(f.state().messages.length, 0);
+  f.handlers.get('ChatRoomMessage')({ Type: 'Action', Sender: 55, Content: 'ServerEnter', Dictionary: [] });
+  assert.equal(f.state().messages.length, 1);
+  f.handlers.get('ChatRoomSyncMemberLeave')({ SourceMemberNumber: 55 });
+  assert.equal(f.state().messages.length, 1);
+  f.handlers.get('ChatRoomMessage')({ Type: 'Action', Sender: 55, Content: 'ServerLeave', Dictionary: [{ Tag: 'SourceCharacter', Text: 'Account' }] });
+  assert.equal(f.state().messages.length, 2);
+  assert.equal(f.state().messages.at(-1).text, 'Nick [Account] left.');
+  assert.equal(f.state().messages.at(-1).presence, true);
+  assert.equal(f.state().messages.at(-1).labelColor, '#FFE800');
+  const sent = f.sent.length;
+  f.client.clearMessages(); assert.equal(f.state().messages.length, 0); assert.equal(f.sent.length, sent);
+});
+
 test('compatibility sends clothed online activity but never overrides explicit preferences or room restrictions', async () => {
   const base = { Name: 'Test', Appearance: [{ Group: 'Cloth', Name: 'Dress' }], ArousalSettings: { Active: 'Automatic', Activity: 'z'.repeat(100), Zone: 'f'.repeat(30) } };
   const f = await setup('PROD', true, base);

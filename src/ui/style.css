@@ -391,3 +391,40 @@ button, summary, .app-header, .app-nav, .toolbar, .room-card, .member-panel, .bo
   .activity-body-svg { height:280px; }
   .activity-dialog .body-parts { grid-template-columns:1fr; }
 }
+
+.chat-room-div { grid-template-rows:auto 0 minmax(0,1fr) auto; }
+.chat-room-reply-indicator { grid-column:1/-1; min-width:0; }
+.chat-room-reply-indicator:empty { display:none; }
+.reply-preview { white-space:normal; overflow-wrap:anywhere; }
+.reply-jump { text-align:left; justify-content:flex-start; }
+.chat-message { border-radius:6px; outline-offset:-2px; }
+.chat-message:hover,.chat-message:focus-within,.chat-message.message-selected { box-shadow:inset 0 0 0 1px #c8a4dc88; background-image:linear-gradient(#c8a4dc18,#c8a4dc18); }
+.chat-message.type-local,.chat-message.message-presence { grid-template-columns:1fr; text-align:center; font-style:italic; }
+.message-presence .message-meta,.type-local .message-meta { justify-content:center; justify-self:center; }
+.message-presence .message-text { color:#c4bacb; }
+.private-split { display:grid; grid-template-columns:minmax(240px, .8fr) minmax(0,2fr); gap:.75rem; min-height:0; }
+.private-split .private-contacts { margin:0; min-width:0; }
+.private-split .contact-list { max-height:62dvh; overflow:auto; }
+.private-split .private-conversation { min-width:0; }
+.private-back { display:none; }
+.activity-dialog { width:min(1100px, calc(100vw - 1rem)); }
+.activity-layout { grid-template-columns:220px minmax(0,1fr); }
+.activity-body-svg { height:440px; }
+.body-zone-label { fill:#f7f1f8; font-size:19px; pointer-events:none; }
+.body-results .body-activities { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.5rem; align-items:start; }
+.activity-option { min-width:0; margin:0; }
+.activity-option small { font-size:.7rem; }
+.activity-back { display:none; }
+@media(min-width:1100px) { .body-results .body-activities { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+@media(max-width:760px) {
+  .private-split { display:block; }
+  .private-split.show-contacts .private-conversation,.private-split.show-conversation .private-contacts { display:none; }
+  .private-back { display:inline-flex; }
+  .private-split .beep-log { height:42dvh; }
+  .activity-layout { display:block; }
+  .activity-body-svg { height:60dvh; max-height:580px; }
+  .activity-dialog:not(.show-actions) .body-results,.activity-dialog.show-actions .body-picker { display:none; }
+  .activity-back { display:inline-flex; }
+  .body-results { position:static; }
+  .body-results .body-activities { grid-template-columns:repeat(3,minmax(0,1fr)); max-height:none; }
+}
