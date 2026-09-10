@@ -66,6 +66,16 @@ test('private composer and navigation follow the compact layout, mixed channels 
   [...f.document.querySelectorAll('#contact-list button')].find(b => b.textContent === t('m177')).click();
   const input = f.document.getElementById('BeepText');
   assert.equal(input.previousElementSibling.className, 'private-channel');
+  const channels = [...input.previousElementSibling.querySelectorAll('button')];
+  assert.deepEqual(channels.map(button => button.textContent), ['悄悄話', '私聊']);
+  assert.equal(channels[1].getAttribute('aria-pressed'), 'true');
+  input.value = 'draft'; input.dispatchEvent(new f.window.Event('input'));
+  channels[0].click();
+  assert.equal(channels[0].getAttribute('aria-pressed'), 'true');
+  assert.equal(channels[1].getAttribute('aria-pressed'), 'false');
+  assert.equal(f.document.getElementById('BeepText'), input);
+  assert.equal(input.value, 'draft');
+  assert.ok(!f.calls.some(call => typeof call === 'string' && call.startsWith('/w')));
   assert.ok(input.nextElementSibling.classList.contains('primary'));
   assert.equal(f.document.getElementById('BeepTarget'), null);
   assert.ok(f.document.querySelector('.private-conversation .private-heading > .ghost:last-child'));
@@ -117,6 +127,7 @@ test('reply preview sits inside composer, jumps to retained history and clear pr
   f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, messages: history });
   f.document.querySelector('[data-message-id=response] .reply-jump').click();
   assert.ok(f.document.querySelector('[data-message-id=id-0].message-selected'));
+  assert.equal(f.document.querySelectorAll('.message-selected').length, 1);
   f.document.querySelector('[data-message-id=id-0] .message-reply').click();
   const input = f.document.getElementById('InputChat');
   assert.equal(input.previousElementSibling.id, 'chat-room-reply-indicator');
@@ -134,6 +145,11 @@ test('message selection clears when clicking outside and moves between rows', as
   const rows = f.document.querySelectorAll('#TextAreaChatLog .chat-message');
   rows[0].querySelector('.message-text').click();
   assert.ok(rows[0].classList.contains('message-selected'));
+  // Incremental updates must use the same delegated selection path as existing rows.
+  f.emit({ messages: [...f.state().messages, { ...messages(1)[0], id: 'new-selection' }] });
+  f.document.querySelector('[data-message-id=new-selection]').click();
+  assert.equal(f.document.querySelectorAll('.message-selected').length, 1);
+  assert.equal(rows[0].classList.contains('message-selected'), false);
   rows[1].click();
   assert.equal(rows[0].classList.contains('message-selected'), false);
   assert.ok(rows[1].classList.contains('message-selected'));

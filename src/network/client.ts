@@ -54,6 +54,11 @@ export class BcLiteClient {
   private cuddleSelf(): CharacterSummary {
     return { ...this.state.player!, Appearance: this.safetyCurrent ?? undefined, ActivePose: this.state.characters.find(c => c.MemberNumber === this.state.player?.MemberNumber)?.ActivePose ?? this.state.player?.ActivePose };
   }
+  private updateCharacterAppearance(memberNumber: number, appearance: BundledItem[]): void {
+    if (memberNumber === this.state.player?.MemberNumber) this.safetyCurrent = copyAppearance(appearance);
+    this.patch({ characters: this.state.characters.map(character => character.MemberNumber === memberNumber
+      ? { ...character, Appearance: copyAppearance(appearance) } : character) });
+  }
   private syncCuddle(target?: number): void {
     if (!this.canSend() || !this.state.room) return;
     this.socket!.emit("ChatRoomChat", { Type: "Hidden", Content: "Luzi_XCharacterDrawState", Dictionary: [this.cuddlePair?.state || {}], ...(target ? { Target: target } : {}) });
@@ -66,7 +71,7 @@ export class BcLiteClient {
     this.cuddlePair = { peer: peer.MemberNumber, room: this.state.room.Name, state: cuddleState(name, peer.MemberNumber, receiving) };
     this.socket!.emit("ChatRoomCharacterItemUpdate", { Target: this.state.player!.MemberNumber, ...item });
     this.syncCuddle();
-    this.patch({ characters: this.state.characters.map(c => c.MemberNumber === this.state.player?.MemberNumber ? { ...c, Appearance: copyAppearance(this.safetyCurrent!) } : c) });
+    this.updateCharacterAppearance(this.state.player!.MemberNumber, this.safetyCurrent);
   }
   stopCuddle(): void {
     if (!this.canSend() || !this.state.room) return;
@@ -74,7 +79,7 @@ export class BcLiteClient {
     if (this.safetyCurrent?.some(item => item.Group === "ItemMisc" && item.Name === "贴贴")) {
       this.safetyCurrent = this.safetyCurrent.filter(item => !(item.Group === "ItemMisc" && item.Name === "贴贴"));
       this.socket!.emit("ChatRoomCharacterItemUpdate", { Target: this.state.player!.MemberNumber, Group: "ItemMisc", Color: "Default", Difficulty: 0 });
-      this.patch({ characters: this.state.characters.map(c => c.MemberNumber === this.state.player?.MemberNumber ? { ...c, Appearance: copyAppearance(this.safetyCurrent!) } : c) });
+      this.updateCharacterAppearance(this.state.player!.MemberNumber, this.safetyCurrent);
     }
     this.cuddlePair = null; this.syncCuddle();
   }
@@ -572,8 +577,7 @@ export class BcLiteClient {
         const { Target: _target, ...bundle } = item;
         next.push(bundle as BundledItem);
       }
-      if (own) this.safetyCurrent = copyAppearance(next);
-      this.patch({ characters: this.state.characters.map(c => c.MemberNumber === item.Target ? { ...c, Appearance: copyAppearance(next) } : c) });
+      this.updateCharacterAppearance(item.Target, next);
       if (this.cuddlePair && item.Group === "ItemMisc" && (own || item.Target === this.cuddlePair.peer) && item.Name !== "贴贴") this.stopCuddle();
     });
     this.socket.on("ChatRoomSyncRoomProperties", (room: Partial<RoomSync>) => {

@@ -61,9 +61,10 @@ class LiteApp {
   private settings = { background: false, largeText: false, timestamps: true, locale: "zh" as Locale };
 
   constructor() {
-    // Clear before row/reply handlers run so a reply jump can select its destination.
-    document.addEventListener("click", () => {
-      document.querySelectorAll(".chat-message.message-selected").forEach(row => row.classList.remove("message-selected"));
+    // Delegate selection before controls run; reply jumps may then select their destination.
+    document.addEventListener("click", event => {
+      const target = event.target as HTMLElement | null;
+      this.selectMessage(target?.closest<HTMLElement>(".chat-message") ?? null);
     }, true);
     document.addEventListener("click", event => {
       const target = event.target as HTMLElement;
@@ -340,11 +341,22 @@ class LiteApp {
     text.addEventListener("input", () => { this.beepDraft = text.value; });
     const add = this.button(t("m026"), "ghost", "button");
     add.addEventListener("click", () => this.run(() => bcClient.setFriend(this.contact, true)));
-    const channel = this.select(t("m027"), [["beep", t("m028")], ["whisper", t("m029")]], this.privateMode);
-    channel.addEventListener("change", () => { this.replyTarget = null; form.querySelector(".reply-preview")?.remove(); this.privateMode = channel.value; this.updateBeepLog(); });
+    const channel = this.el("div", "private-channel");
+    channel.setAttribute("role", "group"); channel.setAttribute("aria-label", t("m027"));
+    for (const [mode, label] of [["whisper", t("m029")], ["beep", t("m028")]]) {
+      const button = this.button(label, "secondary", "button");
+      button.dataset.channel = mode;
+      button.setAttribute("aria-pressed", String(this.privateMode === mode));
+      button.addEventListener("click", () => {
+        if (this.privateMode === mode) return;
+        this.privateMode = mode; this.replyTarget = null; form.querySelector(".reply-preview")?.remove();
+        for (const control of channel.querySelectorAll("button")) control.setAttribute("aria-pressed", String(control === button));
+      });
+      channel.append(button);
+    }
     const send = this.button(t("m030"), "primary", "submit");
     send.disabled = !this.contact;
-    channel.className = "private-channel"; form.append(channel, text, send);
+    form.append(channel, text, send);
     if (this.replyTarget) form.prepend(this.replyIndicator());
     form.addEventListener("submit", event => {
       event.preventDefault();
@@ -435,7 +447,8 @@ class LiteApp {
       if (this.tab === "private" && this.contact === id) row.classList.add("selected-contact");
       const info = this.el("div");
       const relation = friend ? ({ Friend: t("relation.friend"), Lover: t("relation.lover"), Owner: t("relation.owner"), Submissive: t("relation.submissive") }[friend.Type] || friend.Type) : "";
-      info.append(this.el("strong", "", `${name} #${id}`), this.el("p", "muted", friend && fresh ? t("m038", [friend.ChatRoomName || t("m039"), friend.Private ? t("m040") : "", relation]) : inRoom ? t("m041") : presence === "offline" ? t("m042") : t("m043")));
+      const statusClass = this.tab === "private" ? "private-status" : "muted";
+      info.append(this.el("strong", "", `${name} #${id}`), this.el("p", statusClass, friend && fresh ? t("m038", [friend.ChatRoomName || t("m039"), friend.Private ? t("m040") : "", relation]) : inRoom ? t("m041") : presence === "offline" ? t("m042") : t("m043")));
       const chat = this.button(t("m177"), "secondary", "button");
       chat.addEventListener("click", () => this.openConversation(id));
       row.append(info);
@@ -446,11 +459,10 @@ class LiteApp {
         queryRoom.addEventListener("click", () => this.run(() => bcClient.requestLoverRoom(id))); row.append(queryRoom);
       }
       const sharedRoom = friend?.ChatRoomName || state.loverRooms?.[id]?.name;
-      if (sharedRoom) info.append(this.el("small", "muted", sharedRoom));
+      if (sharedRoom) info.append(this.el("small", statusClass, sharedRoom));
       if (sharedRoom) {
         const join = this.button(t("m044"), "ghost", "button");
         join.disabled = !["ready", "in-room"].includes(state.phase);
-        join.title = t("m045");
         join.title = sharedRoom;
         join.addEventListener("click", () => this.joinRoom(sharedRoom));
         row.append(join);
@@ -466,7 +478,6 @@ class LiteApp {
         row.append(remove);
       }
       list.append(row);
-      if (this.tab === "private") for (const node of row.querySelectorAll(".muted")) node.classList.remove("muted");
     }
     if (!total) list.append(this.el("p", "empty-state", t("m049")));
     if (total > 80) list.append(this.el("p", this.tab === "private" ? "private-status" : "muted", t("m050", [total])));
@@ -477,19 +488,23 @@ class LiteApp {
   private fillBeepLog(log: HTMLElement): void {
     const scrollTop = log.scrollTop;
     const follow = log.scrollHeight - log.clientHeight - scrollTop < 60;
-    try {
+    this.syncPrivateRows(log, this.privateMessages(), t("m052"));
+    log.scrollTop = follow ? log.scrollHeight : scrollTop;
+  }
+
+  private privateMessages(): DisplayMessage[] {
+    const state = this.snapshot!;
+    const self = state.player!;
     const rows: DisplayMessage[] = [];
-    rows.push(...(this.snapshot!.whispers || this.snapshot!.messages).filter(message => message.type === "Whisper" && (message.sender === this.contact || (message.sender === this.snapshot!.player?.MemberNumber && message.target === this.contact))));
-    const messages = this.snapshot!.beeps.filter(message => !this.contact || message.memberNumber === this.contact).slice(-this.privateVisible);
+    rows.push(...(state.whispers || state.messages).filter(message => message.type === "Whisper" && (message.sender === this.contact || (message.sender === self.MemberNumber && message.target === this.contact))));
+    const messages = state.beeps.filter(message => !this.contact || message.memberNumber === this.contact);
     for (const message of messages) {
-      const self = this.snapshot!.player!;
       rows.push({ id: message.id, sender: message.incoming ? message.memberNumber : self.MemberNumber,
         senderName: message.incoming ? message.name : self.Nickname || self.Name,
         target: message.incoming ? self.MemberNumber : message.memberNumber, targetName: message.incoming ? self.Name : message.name,
         text: message.text, type: "Beep", time: message.time });
     }
-    this.syncPrivateRows(log, rows.sort((a, b) => a.time.getTime() - b.time.getTime()).slice(-this.privateVisible), t("m052"));
-    } finally { log.scrollTop = follow ? log.scrollHeight : scrollTop; }
+    return rows.sort((a, b) => a.time.getTime() - b.time.getTime()).slice(-this.privateVisible);
   }
 
   private syncPrivateRows(log: HTMLElement, messages: DisplayMessage[], empty: string): void {
@@ -869,11 +884,17 @@ class LiteApp {
     return layout;
   }
 
+  private selectMessage(row: HTMLElement | null): void {
+    document.querySelectorAll(".chat-message.message-selected").forEach(selected => {
+      if (selected !== row) selected.classList.remove("message-selected");
+    });
+    row?.classList.add("message-selected");
+  }
+
   private messageNode(message: DisplayMessage): HTMLElement {
     const row = this.el("div", `chat-message type-${message.type.toLowerCase()}`);
     row.dataset.messageId = message.id;
     row.tabIndex = 0;
-    row.addEventListener("click", () => { for (const selected of row.parentElement?.querySelectorAll(".message-selected") || []) selected.classList.remove("message-selected"); row.classList.add("message-selected"); });
     if (message.presence) row.classList.add("message-presence");
     if (message.replyId) {
       const original = [...this.snapshot!.messages, ...(this.snapshot!.whispers || [])].find(item => item.nativeId === message.replyId && (item.type !== "Whisper" || (message.type === "Whisper" && new Set([item.sender, item.target]).size === 2 && [message.sender, message.target].every(id => id === item.sender || id === item.target))));
@@ -955,7 +976,7 @@ class LiteApp {
     const log = document.getElementById(message.type === "Whisper" ? "beep-log" : "TextAreaChatLog");
     const node = Array.from(log?.querySelectorAll<HTMLElement>("[data-message-id]") || []).find(node => node.dataset.messageId === message.id);
     if (!node) { this.localNotice(t("reply.unavailable")); return; }
-    node.scrollIntoView?.({ block: "center" }); node.focus({ preventScroll: true }); node.classList.add("message-selected");
+    node.scrollIntoView?.({ block: "center" }); node.focus({ preventScroll: true }); this.selectMessage(node);
   }
 
   private showCuddleRequest(): void {
