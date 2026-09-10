@@ -1,7 +1,26 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { activityReason, activityInventoryReason, definitions } from './native-helper.mjs';
+import { activityReason, activityAvailability, activityInventoryReason, definitions } from './native-helper.mjs';
 const character = id => ({ MemberNumber: id, Name: 'Test', AssetFamily: 'Female3DCG', Appearance: [{ Group: 'BodyUpper', Name: definitions.bodies.BodyUpper[0] }], ArousalSettings: { Active: 'Manual', Activity: 'z'.repeat(100), Zone: 'f'.repeat(30) } });
+
+test('ordinary poses and missing activity strings do not disable all native activities', () => {
+  const actor=character(1),target=character(2);
+  actor.ActivePose=['Kneel']; target.ActivePose=['BaseUpper'];
+  delete actor.ArousalSettings.Activity;
+  assert.equal(activityReason(actor,target,'ItemEars','Whisper',{}),null);
+  assert.equal(activityInventoryReason(actor,target,'ItemEars',['TargetKneeling']),'native.blocked');
+  target.ActivePose=['Kneel'];
+  assert.equal(activityInventoryReason(actor,target,'ItemEars',['TargetKneeling']),null);
+});
+
+test('compatibility only relaxes incomplete emulation, never refusals or missing characters', () => {
+  for (const reason of ['native.data','native.blocked','native.permission','native.room','native.target']) assert.equal(activityAvailability(reason,true).reason,reason);
+  for (const reason of ['native.equipment','native.unsupported','native.actor','native.preferences']) {
+    assert.equal(activityAvailability(reason,true).reason,null);
+    assert.equal(activityAvailability(reason,true).warning,reason);
+    assert.equal(activityAvailability(reason,false).reason,reason);
+  }
+});
 
 test('inventory prerequisites inspect both characters and union runtime properties with native effects', () => {
   const actor = character(1), target = character(2);

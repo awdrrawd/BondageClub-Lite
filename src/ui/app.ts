@@ -122,6 +122,9 @@ export class LiteApp {
     this.client.subscribe((snapshot) => {
       const previous = this.snapshot;
       this.snapshot = snapshot;
+      if (previous && (snapshot.characters !== previous.characters || snapshot.player !== previous.player || snapshot.room !== previous.room)) {
+        document.querySelector('.activity-dialog')?.dispatchEvent(new window.Event('activity-refresh'));
+      }
       if (!snapshot.player) this.roomSearchInitialized = false;
       if (snapshot.phase === "ready" && !this.roomSearchInitialized) {
         this.roomSearchInitialized = true;

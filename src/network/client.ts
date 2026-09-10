@@ -1,7 +1,7 @@
 import { t, localizeStatus } from "../i18n";
 import { afcLovers } from "../profile/afc";
 import { renderAction, dictionaryText } from "../action/render";
-import { nativeActivities, activityReason, createActivityInventoryCheck } from "../action/native";
+import { nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck } from "../action/native";
 import { extensionActivities, extensionText } from "../action/extensions";
 import { activityLabel, hasPenis, physicalGroup, textGroup } from "../action/labels";
 import { cuddleNames, cuddleReason, cuddleState } from "../action/cuddle";
@@ -395,21 +395,21 @@ export class BcLiteClient {
     const native = nativeActivities.flatMap(activity => (memberNumber === actor.MemberNumber ? activity.self : activity.target).map(group => ({
       group, name: activity.name, groupLabel: this.textCatalog[`DialogGroupName${textGroup(group, target)}`] || this.textCatalog[`Group.${group}`] || group,
       label: activityLabel(activity.name, group, target, memberNumber === actor.MemberNumber, this.textCatalog),
-      reason: !this.canSend() ? "native.data" : activityReason(actor, target, group, activity.name, this.state.room!, checkInventory),
-      warning: "", source: "BC",
+      ...activityAvailability(!this.canSend() ? "native.data" : activityReason(actor, target, group, activity.name, this.state.room!, checkInventory), compatibility),
+      source: "BC",
     })));
-    for (const option of native) {
-      if (compatibility && this.canSend() && option.reason === "native.actor") {
-        option.warning = option.reason; option.reason = null;
-      }
-    }
     const extensions = extensionActivities.filter(entry => entry.self === (actor.MemberNumber === memberNumber) && Object.hasOwn(this.textCatalog, entry.key) && (!["ItemPenis", "ItemGlans"].includes(entry.group) || hasPenis(target))).map(entry => ({
       group: physicalGroup(entry.group), name: `${entry.source === "echo" && cuddleNames.includes(entry.name) ? "cuddle" : "text"}:${entry.key}`, groupLabel: this.textCatalog[`DialogGroupName${textGroup(physicalGroup(entry.group), target)}`] || this.textCatalog[`Group.${physicalGroup(entry.group)}`] || entry.group,
       label: entry.name === "钻进怀里" ? t("interaction.cuddleIn") : entry.name === "抱入怀中" ? t("interaction.cuddleHold") : activityLabel(entry.name, physicalGroup(entry.group), target, entry.self, this.textCatalog),
       reason: !this.canSend() ? "native.data" : this.state.room!.BlockCategory?.includes("Arousal") || target.ArousalSettings?.Active === "Inactive" ? "native.permission" : this.state.room!.MapType && this.state.room!.MapType !== "Never" ? "native.room" : checkInventory(physicalGroup(entry.group), ["ZoneAccessible"]),
       warning: entry.source === "echo" && cuddleNames.includes(entry.name) ? "cuddle.help" : "interaction.textOnly", source: entry.source,
     }));
-    for (const option of extensions) if (option.name.startsWith("cuddle:") && !option.reason) option.reason = cuddleReason(this.cuddleSelf(), target);
+    for (const option of extensions) {
+      const availability = activityAvailability(option.reason, compatibility);
+      option.reason = availability.reason;
+      if (availability.warning) option.warning = availability.warning;
+      if (option.name.startsWith("cuddle:") && !option.reason) option.reason = cuddleReason(this.cuddleSelf(), target);
+    }
     if (this.safetyCurrent?.some(item => item.Group === "ItemMisc" && item.Name === "贴贴")) extensions.unshift({ group: "ItemTorso", name: "cuddle:stop", groupLabel: this.textCatalog["Group.ItemTorso"] || "ItemTorso", label: t("cuddle.stop"), reason: null, warning: "", source: "echo" });
     return [...native, ...extensions];
   }

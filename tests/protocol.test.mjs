@@ -1,5 +1,5 @@
 import { renderAction, dictionaryText } from './action-helper.mjs';
-import { nativeActivities, activityReason, createActivityInventoryCheck, definitions } from './native-helper.mjs';
+import { nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, definitions } from './native-helper.mjs';
 import { extensionActivities, extensionText } from './extensions-helper.mjs';
 import { hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState } from './activity-helper.mjs';
 import { gameCatalog } from './catalog-helper.mjs';
@@ -30,7 +30,7 @@ async function setup(environment, relayAvailable = true, account = {}, storage =
   const context = {
     hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState,
     localStorage: { getItem(key) { return storage.get(key) ?? null; }, setItem(key, value) { storage.set(key, value); } },
-    io: () => socket, nativeActivities, activityReason, createActivityInventoryCheck, extensionActivities, extensionText, renderAction, dictionaryText, t, localizeStatus, validAppearance, copyAppearance, releaseAppearance, afcLovers, embeddedAction,
+    io: () => socket, nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, extensionActivities, extensionText, renderAction, dictionaryText, t, localizeStatus, validAppearance, copyAppearance, releaseAppearance, afcLovers, embeddedAction,
     exports: {},
     require: () => ({ io: () => socket }),
     window: { setTimeout(fn) { timers.set(++timerId, fn); return timerId; }, clearTimeout(id) { timers.delete(id); } },
@@ -186,6 +186,27 @@ test('compatibility sends clothed online activity but never overrides explicit p
   f.handlers.get('ChatRoomSync')({ Name: 'Room', BlockCategory: ['Arousal'], Character: [actor, target] });
   assert.equal(f.client.activityOptions(55, true).find(option => option.name === 'Whisper').reason, 'native.room');
   assert.ok(!f.sent.some(packet => ['AccountUpdate', 'ChatRoomCharacterUpdate'].includes(packet.event)));
+});
+
+test('unknown plugin appearance is a compatibility warning, while fresh restrictions still block sending', async () => {
+  const base = {Name:'Test',Appearance:[{Group:'BodyUpper',Name:'Normal'},{Group:'Cloth',Name:'PluginDress'}],ArousalSettings:{Active:'Manual',Activity:'z'.repeat(100),Zone:'f'.repeat(30)}};
+  const f = await setup('PROD',true,base);
+  const actor = {...base,MemberNumber:123}, target = {...base,MemberNumber:55};
+  f.handlers.get('ChatRoomSync')({Name:'Room',Character:[actor,target]});
+  const option = mode => f.client.activityOptions(55,mode).find(o => o.name === 'Whisper' && o.group === 'ItemEars');
+  assert.equal(option(false).reason,'native.equipment');
+  assert.equal(option(true).reason,null);
+  assert.equal(option(true).warning,'native.equipment');
+  f.client.sendActivity(55,'ItemEars','Whisper',true);
+  assert.equal(f.sent.at(-1).payload.Type,'Activity');
+  actor.Appearance = [...actor.Appearance,{Group:'ItemMouth',Name:'PluginGag',Property:{Effect:['BlockMouth']}}];
+  f.handlers.get('ChatRoomSync')({Name:'Room',Character:[actor,target]});
+  assert.equal(option(true).reason,'native.blocked');
+  assert.throws(() => f.client.sendActivity(55,'ItemEars','Whisper',true));
+  actor.Appearance = base.Appearance;
+  target.ArousalSettings = {...base.ArousalSettings,Activity:'d'.repeat(100)};
+  f.handlers.get('ChatRoomSync')({Name:'Room',Character:[actor,target]});
+  assert.equal(option(true).reason,'native.permission');
 });
 
 test('ECHO cuddle wears only the own slot and shares native activity plus reciprocal draw state', async () => {

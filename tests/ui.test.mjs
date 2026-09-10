@@ -54,8 +54,31 @@ function setup(savedAccount, savedPerformance) {
   };
   const {isMobileLayout, bindPageSwipe} = new Function('window', mobileSource + ';return {isMobileLayout,bindPageSwipe};')(window);
   vm.runInNewContext(source, { window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, openActivityDialog, nameColor, sortRooms, canJoinRoom, isMobileLayout, bindPageSwipe, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
-  return { window, document: window.document, calls, state: () => current, emit(change) { if (change.friendsStatus === '查詢完成') change.friendsQueryState = 'ready'; current = { ...current, ...change }; listener(current); } };
+  return { window, document: window.document, calls, client:bcClient, state: () => current, emit(change) { if (change.friendsStatus === '查詢完成') change.friendsQueryState = 'ready'; current = { ...current, ...change }; listener(current); } };
 }
+
+test('activity mode toggles incomplete checks and an open panel refreshes after character updates', async () => {
+  const f=setup();
+  let blocked=false;
+  f.client.activityOptions=(_id, compatibility) => [{group:'ItemHead',groupLabel:'頭部',name:'Pet',label:'撫摸',reason:blocked ? 'native.blocked' : compatibility ? null : 'native.equipment'}];
+  f.emit({phase:'in-room',room:{Name:'Room',Limit:10},characters:[{MemberNumber:55,Name:'Friend'}]});
+  f.document.querySelector('.member-row').click();
+  f.document.querySelector('.interaction-open').click();
+  const dialog=f.document.querySelector('.activity-dialog');
+  dialog.querySelector('[data-body-group="ItemHead"]').dispatchEvent(new f.window.Event('click'));
+  assert.equal(dialog.querySelector('.activity-option button').disabled,false);
+  const mode=dialog.querySelector('input[type=checkbox]');
+  mode.checked=false; mode.dispatchEvent(new f.window.Event('change'));
+  assert.equal(dialog.querySelector('.activity-option button').disabled,true);
+  mode.checked=true; mode.dispatchEvent(new f.window.Event('change'));
+  assert.equal(dialog.querySelector('.activity-option button').disabled,false);
+  blocked=true; f.emit({characters:[{MemberNumber:55,Name:'Friend',Appearance:[]}]});
+  assert.equal(dialog.querySelector('.activity-option'),null);
+  assert.match(dialog.querySelector('[role=status]').textContent,/沒有可用動作/);
+  blocked=false; f.emit({characters:[{MemberNumber:55,Name:'Friend'}]});
+  assert.equal(dialog.querySelector('.activity-option button').disabled,false);
+  await f.window.happyDOM.close();
+});
 
 function messages(count) {
   return Array.from({ length: count }, (_, index) => ({ id: `id-${index}`, sender: 55, senderName: 'Friend', text: `message ${index}`, time: new Date(), type: 'Chat' }));

@@ -24,7 +24,7 @@ export function openActivityDialog(name: string, getOptions: (compatibility: boo
   const back = document.createElement("button"); back.type = "button"; back.className = "button ghost activity-back"; back.textContent = t("interaction.back");
   back.addEventListener("click", () => { dialog.classList.remove("show-actions"); svg.querySelector<SVGElement>('[aria-pressed="true"]')?.focus(); });
   let selectedGroup = "";
-  const select = (group: string, label: string) => {
+  const select = (group: string, label: string, focus = true) => {
     selectedGroup = group; selected.textContent = label; activities.replaceChildren(); status.textContent = "";
     dialog.classList.add("show-actions");
     for (const control of body.querySelectorAll("[data-body-group]")) control.setAttribute("aria-pressed", String(control.getAttribute("data-body-group") === group));
@@ -41,7 +41,8 @@ export function openActivityDialog(name: string, getOptions: (compatibility: boo
       if (explanation) { const note = document.createElement("small"); note.className = "muted"; note.textContent = t(explanation as Parameters<typeof t>[0]); row.append(note); }
       activities.append(row);
     }
-    if (window.matchMedia("(max-width: 760px)").matches) back.focus();
+    if (!activities.childElementCount) status.textContent = t("interaction.noAvailable");
+    if (focus && window.matchMedia("(max-width: 760px)").matches) back.focus();
   };
   let extraRegion = 0;
   for (const [group, label] of new Map(getOptions(true).map(option => [option.group, option.groupLabel]))) {
@@ -59,6 +60,7 @@ export function openActivityDialog(name: string, getOptions: (compatibility: boo
     }
   }
   compatibility.addEventListener("change", () => { if (selectedGroup) select(selectedGroup, selected.textContent || selectedGroup); });
+  dialog.addEventListener("activity-refresh", () => { if (selectedGroup) select(selectedGroup, selected.textContent || selectedGroup, false); });
   body.append(svg); results.append(back, selected, status, activities); layout.append(body, results);
   dialog.append(heading, close, help, mode, layout); document.body.append(dialog); dialog.showModal();
   return dialog;

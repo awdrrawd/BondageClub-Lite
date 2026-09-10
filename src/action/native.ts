@@ -1,6 +1,14 @@
 import definitions from "./native-data.json";
 import type { CharacterSummary } from "../shared/types";
 export const nativeActivities = definitions.activities;
+
+/** Incomplete local emulation is not an explicit refusal. Never relax known restrictions. */
+export function activityAvailability(reason: string | null, compatibility: boolean) {
+  if (compatibility && reason && ["native.equipment", "native.unsupported", "native.actor", "native.preferences"].includes(reason)) {
+    return { reason: null, warning: reason };
+  }
+  return { reason, warning: "" };
+}
 type ItemRule = { Effect?: string[]; Block?: string[]; AllowActivityOn?: string[]; unknown?: boolean };
 function inventoryState(character: CharacterSummary) {
   const effects = new Set<string>(), blocked = new Set<string>(), accessible = new Set<string>(), groups = new Set<string>();
@@ -42,6 +50,7 @@ export function createActivityInventoryCheck(actor: CharacterSummary, target: Ch
       case "UseTongue": allowed = !a.effects.has("BlockMouth"); break;
       case "TargetMouthBlocked": allowed = b.effects.has("BlockMouth"); break;
       case "IsGagged": allowed = gagged; break;
+      case "TargetKneeling": allowed = b.effects.has("ForceKneel") || (target.ActivePose || []).some(pose => ["Kneel", "KneelingSpread"].includes(pose)); break;
       case "UseHands": allowed = hands && !a.effects.has("MergedFingers"); break;
       case "UseArms": allowed = arms; break;
       case "CantUseArms": allowed = !arms; break;
@@ -85,16 +94,15 @@ export function activityReason(actor: CharacterSummary, target: CharacterSummary
   const inventoryReason = checkInventory(group, activity.prerequisites);
   if (inventoryReason) return inventoryReason;
   if (activity.special) return "native.unsupported";
-  if (actor.ActivePose?.length || target.ActivePose?.length) return "native.equipment";
   // Automatic actor arousal, expression timers and punishment caches are not emulated.
   if (actor.ArousalSettings?.Active !== "Manual") return "native.actor";
   const settings = target.ArousalSettings;
   const zoneId = (definitions.zones as Record<string, number>)[group];
-  if (!settings || !["Manual", "Hybrid", "Automatic"].includes(settings.Active || "") || typeof settings.Zone !== "string" || zoneId === undefined || settings.Zone.length <= zoneId) return "native.data";
+  if (!settings || !["Manual", "Hybrid", "Automatic"].includes(settings.Active || "") || typeof settings.Zone !== "string" || zoneId === undefined || settings.Zone.length <= zoneId) return "native.preferences";
   const zone = settings.Zone.charCodeAt(zoneId) - 100;
   if (zone < 0 || zone % 10 === 0) return "native.permission";
   for (const [character, receiving] of [[actor, false], [target, true]] as const) {
-    if (typeof character.ArousalSettings?.Activity !== "string") return "native.data";
+    if (typeof character.ArousalSettings?.Activity !== "string") continue; // BC permits missing activity preferences.
     const encoded = character.ArousalSettings.Activity.charCodeAt(activity.id) - 100;
     const value = receiving ? encoded % 10 : Math.floor(encoded / 10);
     if (value === 0) return "native.permission";
