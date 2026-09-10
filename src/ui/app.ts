@@ -8,6 +8,8 @@ import { StabilityControls } from "../platform/stability";
 import { loadTextCatalog } from "../action/catalog";
 import { openActivityDialog } from "./activity-dialog";
 import { nameColor } from "./name-color";
+import { isMobileLayout, bindPageSwipe } from "../platform/mobile";
+import { canJoinRoom, sortRooms, type RoomSort } from "./room-list";
 import type { CharacterSummary, ClientSnapshot, DisplayMessage, RoomCreateOptions, RoomSearchRequest, RoomSearchResult } from "../shared/types";
 
 const app = document.querySelector<HTMLDivElement>("#app");
@@ -38,7 +40,8 @@ export class LiteApp {
   private roomMode: "search" | "create" = "search";
   private friendFilter = "all";
   private createFields = { Background: "MainHall", Admin: "", Whitelist: "", Ban: "", ImageURL: "", MusicURL: "", Game: "", Visibility: "", Access: "All", MapType: "Never", Fog: false, MapJSON: "", BlockCategory: [] as string[] };
-  private roomPageSize = 40;
+  private roomPage = 0;
+  private roomSort: RoomSort = "friends";
   private roomSearchInitialized = false;
   private unlisted = true;
   private showFull = false;
@@ -615,7 +618,7 @@ export class LiteApp {
       const input = document.getElementById("RoomQuery") as HTMLInputElement | null;
       if (input) input.value = "";
     }
-    this.notice = ""; this.roomPageSize = 40;
+    this.notice = ""; this.roomPage = 0;
     try { this.client.search({ Query: this.query, Language: this.language, Space: this.space, Game: "", FullRooms: this.showFull, ShowLocked: this.showLocked, SearchDescs: this.searchDescriptions }); }
     catch (error) { this.localNotice(error instanceof Error ? error.message : t("m099")); }
   }
@@ -716,14 +719,30 @@ export class LiteApp {
 
     const resultHeader = this.el("div", "result-header");
     resultHeader.append(this.el("h2", "", t("m100")), this.el("span", "result-count", t("m101", [state.rooms.length])));
+    const sort = this.select(t("rooms.sort"), [["friends", t("rooms.sortFriends")], ["name", t("rooms.sortName")], ["count", t("rooms.sortCount")]], this.roomSort);
+    sort.addEventListener("change", () => { this.roomSort = sort.value as RoomSort; this.roomPage = 0; this.render(); });
+    resultHeader.append(sort);
     const rooms = this.el("div", "room-list");
-    if (!state.rooms.length) rooms.append(this.el("div", "empty-state", t("m102")));
-    else state.rooms.slice(0, this.roomPageSize).forEach((room) => rooms.append(this.roomCard(room)));
-    if (state.rooms.length > this.roomPageSize) {
-      const more = this.button(t("m103", [this.roomPageSize, state.rooms.length]), "secondary", "button");
-      more.addEventListener("click", () => { this.roomPageSize += 40; this.render(); });
-      rooms.append(more);
-    }
+    const pageSize = isMobileLayout() ? 8 : 24;
+    const ordered = sortRooms(state.rooms, this.roomSort, getLocale());
+    const pages = Math.max(1, Math.ceil(ordered.length / pageSize));
+    this.roomPage = Math.min(this.roomPage, pages - 1);
+    const pager = this.el("nav", "room-pagination"); pager.setAttribute("aria-label", t("rooms.pagination"));
+    const turn = (delta: number) => {
+      const next = Math.max(0, Math.min(pages - 1, this.roomPage + delta));
+      if (next !== this.roomPage) { this.roomPage = next; drawPage(); }
+    };
+    const drawPage = () => {
+      rooms.replaceChildren(); pager.replaceChildren();
+      if (!ordered.length) rooms.append(this.el("div", "empty-state", t("m102")));
+      else ordered.slice(this.roomPage * pageSize, (this.roomPage + 1) * pageSize).forEach(room => rooms.append(this.roomCard(room)));
+      const previous = this.button("‹", "ghost", "button"); previous.setAttribute("aria-label", t("rooms.previous")); previous.disabled = this.roomPage === 0;
+      const next = this.button("›", "ghost", "button"); next.setAttribute("aria-label", t("rooms.next")); next.disabled = this.roomPage === pages - 1;
+      previous.addEventListener("click", () => turn(-1)); next.addEventListener("click", () => turn(1));
+      const status = this.el("span", "", `${this.roomPage + 1} / ${pages}`); status.setAttribute("aria-live", "polite");
+      pager.append(previous, status, next);
+    };
+    drawPage(); bindPageSwipe(rooms, turn);
     const create = this.el("form", "room-controls create-controls") as HTMLFormElement;
     const roomName = this.input("NewRoomName", t("m104"), "text", this.newRoomName);
     roomName.maxLength = 20;
@@ -735,10 +754,6 @@ export class LiteApp {
     limit.addEventListener("change", () => { this.newRoomLimit = Number(limit.value); });
     const createButton = this.button(t("m110"), "primary", "submit");
     createButton.disabled = state.phase !== "ready";
-    const directJoin = this.button(t("m111"), "secondary", "button");
-    directJoin.disabled = !["ready", "in-room"].includes(state.phase);
-    directJoin.addEventListener("click", () => { if (this.query.trim()) this.joinRoom(this.query.trim()); else this.localNotice(t("m112")); });
-    form.append(directJoin);
     create.append(this.field(t("m113"), roomName), this.field(t("m114"), description), this.field(t("m106"), limit));
     const createLanguage = this.select(t("m115"), [["EN", "EN"], ["CN", "CN"], ["DE", "DE"], ["FR", "FR"], ["ES", "ES"], ["RU", "RU"], ["UA", "UA"]], this.language || "EN");
     createLanguage.addEventListener("change", () => { this.language = createLanguage.value as RoomSearchRequest["Language"]; });
@@ -754,7 +769,7 @@ export class LiteApp {
       catch (error) { this.localNotice(error instanceof Error ? error.message : t("m121")); }
     });
     section.append(heading);
-    if (this.roomMode === "search") section.append(form, resultHeader, rooms);
+    if (this.roomMode === "search") section.append(form, resultHeader, rooms, pager);
     else section.append(create);
     return section;
   }
@@ -769,18 +784,24 @@ export class LiteApp {
     const top = this.el("div", "room-card-top");
     const meta = this.el("div", "room-tags");
     meta.append(this.el("span", "tag", room.Language || "—"), this.el("span", "tag", `${room.MemberCount}/${room.MemberLimit}`));
-    if (room.Access && !room.Access.includes("All")) meta.append(this.el("span", "tag locked", t("m122")));
+    const restricted = room.Access && !room.Access.includes("All");
+    if (!room.CanJoin || restricted) {
+      const access = this.el("span", "tag locked", room.CanJoin ? "🗝️" : "🔒");
+      access.title = t(room.CanJoin ? "rooms.allowed" : "m130"); access.setAttribute("aria-label", access.title); meta.append(access);
+    }
     if (room.Friends?.length) { const friends = this.el("span", "tag friend-tag", t("m123", [room.Friends.length])); friends.title = room.Friends.map(friend => `#${friend.MemberNumber}`).join("、"); meta.append(friends); }
     const lovers = this.roomLovers(room);
     if (lovers.length) { const badge = this.el("span", "tag afc-tag", t("afc.inRoom", [lovers.length])); badge.title = lovers.map(lover => `${lover.name} #${lover.memberNumber}`).join("、"); meta.append(badge); }
     if (room.Visibility && !room.Visibility.includes("All")) meta.append(this.el("span", "tag", t("m124")));
     if (room.MemberCount >= room.MemberLimit) meta.append(this.el("span", "tag", t("m125")));
     if (room.Game) meta.append(this.el("span", "tag", room.Game));
-    if (room.MapType && room.MapType !== "Never") meta.append(this.el("span", "tag", t("m126", [room.MapType])));
+    if (room.MapType && room.MapType !== "Never") { const map = this.el("span", "tag", "🗺️"); map.title = t("m126", [room.MapType]); map.setAttribute("aria-label", map.title); meta.append(map); }
     top.append(this.el("h3", "", room.Name), meta);
     card.append(top, this.el("p", "room-description", room.Description || t("m127")), this.el("p", "room-creator", t("m128", [room.Creator || `#${room.CreatorMemberNumber}`])));
-    const join = this.button(room.CanJoin ? t("m129") : t("m130"), room.CanJoin ? "secondary" : "ghost", "button");
-    join.disabled = !room.CanJoin || this.snapshot!.phase === "joining";
+    const available = canJoinRoom(room);
+    card.classList.toggle("unavailable", !available);
+    const join = this.button(available ? t("m129") : t("m130"), available ? "secondary" : "ghost", "button");
+    join.disabled = !available || this.snapshot!.phase === "joining";
     join.addEventListener("click", () => this.joinRoom(room.Name));
     card.append(join);
     return card;
