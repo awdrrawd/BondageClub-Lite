@@ -321,7 +321,7 @@
   "summon.expired": "Summon expired or is no longer permitted.",
   "private.contacts": "Contacts",
   "afc.inRoom": "Extended lovers {0}",
-  "native.help": "Activities check known equipment, preferences and room restrictions. Compatibility mode warns instead of blocking on unknown equipment or unimplemented effects; this is not a complete validation. Disable it for strict checks. Extension activities remain text-only; ECHO cuddling requires confirmation.",
+  "native.help": "Checks known item effects, clothing coverage, preferences and room restrictions. Unknown item data is skipped without disabling unrelated activities. Compatibility mode can also skip unimplemented activity effects; this is not full BC validation. Extension activities remain text-only; ECHO cuddling requires confirmation.",
   "interaction.compatibility": "Compatibility sending (skip incomplete checks, keep known restrictions)",
   "interaction.noAvailable": "No available activities for this zone under the current conditions.",
   "interaction.body": "Body part selection diagram",

@@ -188,15 +188,15 @@ test('compatibility sends clothed online activity but never overrides explicit p
   assert.ok(!f.sent.some(packet => ['AccountUpdate', 'ChatRoomCharacterUpdate'].includes(packet.event)));
 });
 
-test('unknown plugin appearance is a compatibility warning, while fresh restrictions still block sending', async () => {
+test('unknown plugin appearance does not disable equipment checks, while fresh restrictions still block sending', async () => {
   const base = {Name:'Test',Appearance:[{Group:'BodyUpper',Name:'Normal'},{Group:'Cloth',Name:'PluginDress'}],ArousalSettings:{Active:'Manual',Activity:'z'.repeat(100),Zone:'f'.repeat(30)}};
   const f = await setup('PROD',true,base);
   const actor = {...base,MemberNumber:123}, target = {...base,MemberNumber:55};
   f.handlers.get('ChatRoomSync')({Name:'Room',Character:[actor,target]});
   const option = mode => f.client.activityOptions(55,mode).find(o => o.name === 'Whisper' && o.group === 'ItemEars');
-  assert.equal(option(false).reason,'native.equipment');
+  assert.equal(option(false).reason,null);
   assert.equal(option(true).reason,null);
-  assert.equal(option(true).warning,'native.equipment');
+  assert.equal(option(true).warning,'');
   f.client.sendActivity(55,'ItemEars','Whisper',true);
   assert.equal(f.sent.at(-1).payload.Type,'Activity');
   actor.Appearance = [...actor.Appearance,{Group:'ItemMouth',Name:'PluginGag',Property:{Effect:['BlockMouth']}}];

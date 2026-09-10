@@ -27,7 +27,7 @@ function walk(node) {
         const asset = node?.type === 'StringLiteral' ? { Name: node.value } : literal(node);
         if (!asset?.Name) continue;
         const rule = {};
-        for (const key of ['Effect', 'Block', 'AllowActivityOn']) {
+        for (const key of ['Effect', 'Block', 'AllowActivityOn', 'AllowActivity', 'Expose']) {
           const ownNode = node?.properties?.find(property => property.type === 'ObjectProperty' && (property.key.name || property.key.value) === key)?.value;
           const inheritedNode = key === 'AllowActivityOn' ? undefined : props[key];
           if ((ownNode && literal(ownNode) === undefined) || (!ownNode && inheritedNode && literal(inheritedNode) === undefined)) rule.unknown = true;

@@ -425,8 +425,13 @@ button, summary, .app-header, .app-nav, .toolbar, .room-card, .member-panel, .bo
 .reply-preview { white-space:normal; overflow-wrap:anywhere; }
 .reply-jump { text-align:left; justify-content:flex-start; }
 .chat-message:focus-visible,.chat-message.message-selected { box-shadow:inset 0 0 0 1px #c8a4dc88; background-image:linear-gradient(#c8a4dc18,#c8a4dc18); }
+/* Reserve the reply slot so revealing it never shifts message text or metadata. */
+.chat-message .message-reply { opacity:0; pointer-events:none; }
+.chat-message.message-selected .message-reply,
+.chat-message .message-reply:focus-visible { opacity:1; pointer-events:auto; }
 @media (hover:hover) and (pointer:fine) {
   .chat-message:hover { box-shadow:inset 0 0 0 1px #c8a4dc88; background-image:linear-gradient(#c8a4dc18,#c8a4dc18); }
+  .chat-message:hover .message-reply { opacity:1; pointer-events:auto; }
 }
 .chat-message.type-local,.chat-message.message-presence { grid-template-columns:1fr; text-align:center; font-style:italic; }
 .message-presence .message-meta,.type-local .message-meta { justify-content:flex-end; justify-self:end; }

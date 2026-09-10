@@ -13,7 +13,7 @@
 
 點個人資料工具列「互動」→ 人物線框或部位名稱 → 選活動。`src/ui/activity-dialog.ts` 使用 BC AssetGroup.Zone 矩形作為熱區，不載入人物圖片。個人資料不提供房間查詢／加入按鈕，右上角 X 關閉。
 
-**相容發送預設開啟，可在面板取消：**原始線上封包缺少 AssetFamily 時比照 BC CharacterLoadOnline 使用 Female3DCG。相容模式將未識別裝備、未實作條件、自動效果與不完整偏好資料改為警告；已知裝備封鎖、禁止偏好、房間限制及缺失角色外觀仍不放行。角色／房間更新時刷新面板，發送時再次檢查。取消相容模式採嚴格判定。Lite 不更改偏好，也不宣稱完整 BC 引擎。詳見 [目前篩選範圍與驗收](activity-search-recovery-tests.md)。
+**相容發送預設開啟，可在面板取消：**原始線上封包缺少 AssetFamily 時比照 BC CharacterLoadOnline 使用 Female3DCG。相容模式將未實作條件、自動效果與不完整偏好資料改為警告；已知裝備封鎖、禁止偏好、房間限制及缺失角色外觀仍不放行。角色／房間更新時刷新面板，發送時再次檢查。取消相容模式採嚴格判定。Lite 不更改偏好，也不宣稱完整 BC 引擎。詳見 [目前篩選範圍與驗收](activity-search-recovery-tests.md)。
 
 原生項目仍以 SourceCharacter／TargetCharacter／FocusGroupName／ActivityName 字典發出 `Type: Activity`。一般擴展項目以可讀 Action 文字送出，標示「文字模式」；ECHO 貼貼另走明確確認的道具／配對流程。
 
@@ -29,7 +29,7 @@
 
 ### 原生活動測試
 
-1. 一般穿衣角色開啟個人資料，確認無房間按鈕、右上角 X 可關閉。點工具列「互動」，點人物線框或「耳朵」名稱；相容模式下 Whisper 活動應可送出（這是 BC 活動名稱，與 `/W` 通道不同）。取消相容模式應顯示尚未支援的裝備等原因。
+1. 一般穿衣角色開啟個人資料，確認無房間按鈕、右上角 X 可關閉。點工具列「互動」，點人物線框或「耳朵」名稱；相容模式下 Whisper 活動應可送出（這是 BC 活動名稱，與 `/W` 通道不同）。取消相容模式時，僅剩未實作的活動效果等限制，不應因未知衣物全面禁用。
 2. 同房完整版 BC 玩家確認收到的是 Activity，而不是文字 Action；若接收端為 Automatic／Hybrid，核對原生效果。不應修改自己的 Appearance 或 OnlineSharedSettings。
 3. 關閉目標部位／該活動偏好或加入 Arousal 禁止房間，相容模式仍應禁用。先開面板再讓目標離房，送出仍須拒絕。
 4. 按 [貼貼驗收](echo-cuddle-tests.md) 分別測試 Lite／Lite 與 Lite／ECHO。未裝 ECHO 的完整版只能驗證文字，不能驗證插件道具與位置渲染。

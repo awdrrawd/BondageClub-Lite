@@ -9,28 +9,62 @@ export function activityAvailability(reason: string | null, compatibility: boole
   }
   return { reason, warning: "" };
 }
-type ItemRule = { Effect?: string[]; Block?: string[]; AllowActivityOn?: string[]; unknown?: boolean };
+type ItemRule = { Effect?: string[]; Block?: string[]; AllowActivityOn?: string[]; AllowActivity?: string[]; Expose?: string[]; unknown?: boolean };
+type AppearanceItem = { Group?: string; Name?: string; Property?: ItemRule; Asset?: ItemRule & { Name?: string; Group?: { Name?: string } } };
 function inventoryState(character: CharacterSummary) {
   const effects = new Set<string>(), blocked = new Set<string>(), accessible = new Set<string>(), groups = new Set<string>();
-  let unknown = !Array.isArray(character.Appearance) || !character.Appearance.length;
+  const items: { group: string; rule?: ItemRule; property?: ItemRule }[] = [];
+  const strings = (value: unknown): string[] => Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
   for (const raw of Array.isArray(character.Appearance) ? character.Appearance : []) {
-    const item = raw as { Group?: string; Name?: string; Property?: ItemRule } | null;
-    if (!item || typeof item.Group !== "string" || typeof item.Name !== "string") { unknown = true; continue; }
-    groups.add(item.Group);
-    const rule = (definitions.items as Record<string, ItemRule>)[`${item.Group}/${item.Name}`];
-    if (!rule || rule.unknown) unknown = true;
+    if (!raw || typeof raw !== "object") continue;
+    const item = raw as AppearanceItem;
+    const group = item.Asset?.Group?.Name ?? item.Group, name = item.Asset?.Name ?? item.Name;
+    if (typeof group !== "string" || typeof name !== "string") continue;
+    groups.add(group);
+    const rule = item.Asset ?? (definitions.items as Record<string, ItemRule>)[`${group}/${name}`];
+    items.push({ group, rule, property: item.Property });
+    // BC CharacterGetEffects and activity zone blocking union Asset and Property arrays.
     for (const [key, result] of [["Effect", effects], ["Block", blocked], ["AllowActivityOn", accessible]] as const) {
-      for (const source of [rule, item.Property]) {
-        const values = source?.[key];
-        if (values !== undefined && (!Array.isArray(values) || values.some(value => typeof value !== "string"))) { unknown = true; continue; }
-        if (key === "Effect" || item.Group.startsWith("Item")) for (const value of values || []) result.add(value);
+      if (key === "Effect" || group.startsWith("Item")) {
+        for (const source of [rule, item.Property]) for (const value of strings(source?.[key])) result.add(value);
       }
     }
   }
-  return { effects, groups, unknown, blocked: (group: string, activity = false) => blocked.has(group) && !(activity && accessible.has(group)) };
+  // Clothing access uses Property before Asset (InventoryGetItemProperty), unlike activity Block.
+  const property = (item: typeof items[number], key: "Block" | "Expose" | "AllowActivity") => {
+    const value = item.property?.[key] ?? item.rule?.[key];
+    if (value !== undefined) return Array.isArray(value) ? strings(value) : null;
+    return item.rule && !item.rule.unknown ? [] : null;
+  };
+  const clothingBlocks = (zone: string, slots: string[]) => items.some(item => slots.includes(item.group) && property(item, "Block")?.includes(zone));
+  const covered = (zone: string, slots: string[]) => items.some(item => {
+    if (!slots.includes(item.group)) return false;
+    const expose = property(item, "Expose");
+    return expose !== null && !expose.includes(zone);
+  });
+  const naked = (zone: string) => {
+    if (zone === "ItemBoots") return !["ItemBoots", "Socks", "Shoes"].some(slot => groups.has(slot));
+    if (zone === "ItemHands") return !["ItemHands", "Gloves"].some(slot => groups.has(slot));
+    if (zone === "ItemBreast" || zone === "ItemNipples") return !covered("ItemBreast", ["Cloth", "ClothOuter", "Bra"]) && !effects.has("BreastChaste");
+    if (["ItemButt", "ItemVulva", "ItemVulvaPiercings"].includes(zone)) {
+      const target = zone === "ItemButt" ? "ItemButt" : "ItemVulva";
+      const crotch = clothingBlocks("ItemPelvis", ["Cloth", "ClothLower", "ClothOuter", "Socks", "Panties"])
+        || ["ItemVulva", "ItemVulvaPiercings", "ItemButt"].every(part => covered(part, ["ClothLower", "Panties"]));
+      return !crotch && !clothingBlocks(target, ["Cloth", "Panties", "Socks", "ClothLower", "ItemPelvis", "ItemVulvaPiercings"])
+        && !covered(target, ["ClothLower", "Panties"]) && !effects.has(target === "ItemButt" ? "ButtChaste" : "Chaste")
+        && !(target === "ItemButt" && effects.has("IsPlugged"));
+    }
+    return true;
+  };
+  const needs = (activity: string): boolean | undefined => {
+    const values = items.map(item => property(item, "AllowActivity"));
+    if (values.some(value => value?.includes(activity))) return true;
+    return values.some(value => value === null) ? undefined : false;
+  };
+  return { effects, groups, naked, needs, blocked: (group: string, activity = false) => blocked.has(group) && !(activity && accessible.has(group)) };
 }
 
-/** Native Appearance effects are unioned with Property effects; unknown prerequisites fail closed. */
+/** Check known item effects; unknown assets never invalidate unrelated activities. */
 export function createActivityInventoryCheck(actor: CharacterSummary, target: CharacterSummary) {
   const a = inventoryState(actor), b = inventoryState(target);
   return (group: string, prerequisites: string[] = []): string | null => {
@@ -62,11 +96,17 @@ export function createActivityInventoryCheck(actor: CharacterSummary, target: Ch
       case "AssEmpty": allowed = group !== "ItemButt" || !b.effects.has("IsPlugged"); break;
       case "ZoneAccessible": allowed = !b.blocked(group, true); break;
       case "TargetZoneAccessible": allowed = !a.blocked(group, true); break;
-      default: unsupported = true;
+      case "ZoneNaked": allowed = b.naked(group); break;
+      case "TargetZoneNaked": allowed = a.naked(group); break;
+      case "Collared": allowed = b.groups.has("ItemNeck"); break;
+      default:
+        if (pre.startsWith("Needs-")) allowed = a.needs(pre.slice(6));
+        else if (pre.startsWith("TargetNeeds-")) allowed = b.needs(pre.slice(12));
+        // Item-specific packet expansion and plugin-only rules are not fully emulated.
+        unsupported = true;
     }
     if (allowed === false) return "native.blocked";
   }
-  if (a.unknown || b.unknown) return "native.equipment";
   return unsupported ? "native.unsupported" : null;
   };
 }
