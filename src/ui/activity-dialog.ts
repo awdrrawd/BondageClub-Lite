@@ -11,8 +11,8 @@ export function openActivityDialog(name: string, getOptions: (compatibility: boo
   dialog.addEventListener("close", () => dialog.remove());
   const help = document.createElement("p"); help.className = "muted"; help.textContent = t("native.help");
   const mode = document.createElement("label"); mode.className = "checkbox";
-  const compatibility = document.createElement("input"); compatibility.type = "checkbox"; compatibility.checked = true;
-  mode.append(compatibility, document.createTextNode(t("interaction.compatibility")));
+  const allActions = document.createElement("input"); allActions.type = "checkbox"; allActions.checked = false;
+  mode.append(allActions, document.createTextNode(t("interaction.allActions")));
   const layout = document.createElement("div"); layout.className = "activity-layout";
   const body = document.createElement("div"); body.className = "body-picker";
   const ns = "http://www.w3.org/2000/svg";
@@ -30,16 +30,18 @@ export function openActivityDialog(name: string, getOptions: (compatibility: boo
     selectedGroup = group; selected.textContent = label; activities.replaceChildren(); status.textContent = "";
     dialog.classList.add("show-actions");
     for (const control of body.querySelectorAll("[data-body-group]")) control.setAttribute("aria-pressed", String(canonicalPartGroup(control.getAttribute("data-body-group") || "") === group));
-    const seen = new Set<string>();
-    for (const option of getOptions(compatibility.checked).filter(option => canonicalPartGroup(option.group) === group && !option.reason)) {
+    // Prefer an eligible sibling before deduplication, independent of upstream ordering.
+    const options = new Map<string, ActivityOption>();
+    for (const option of getOptions(allActions.checked).filter(option => canonicalPartGroup(option.group) === group && (allActions.checked || !option.reason))) {
       const identity = `${option.source}:${option.name.replace(/(Chat(?:Self|Other))-Item\w+-/, "$1-")}`;
-      if (seen.has(identity)) continue;
-      seen.add(identity);
+      if (!options.has(identity) || (options.get(identity)!.reason && !option.reason)) options.set(identity, option);
+    }
+    for (const option of options.values()) {
       const row = document.createElement("div"); row.className = "activity-option";
       const action = document.createElement("button"); action.type = "button"; action.className = "button secondary";
       action.textContent = `${option.source && option.source !== "BC" ? `${option.source} · ` : ""}${option.label}`; action.disabled = Boolean(option.reason);
       action.addEventListener("click", () => {
-        try { if (send(option.group, option.name, compatibility.checked) !== false) status.textContent = t("interaction.sent"); }
+        try { if (send(option.group, option.name, allActions.checked) !== false) status.textContent = t("interaction.sent"); }
         catch (error) { status.textContent = error instanceof Error ? error.message : String(error); }
       }); row.append(action);
       const explanation = option.reason || option.warning;
@@ -67,7 +69,7 @@ export function openActivityDialog(name: string, getOptions: (compatibility: boo
       const caption = document.createElementNS(ns, "text"); caption.setAttribute("x", String(x + width / 2)); caption.setAttribute("y", String(y + height / 2)); caption.setAttribute("text-anchor", "middle"); caption.setAttribute("dominant-baseline", "middle"); caption.classList.add("body-zone-label"); caption.textContent = label; svg.append(caption);
     }
   }
-  compatibility.addEventListener("change", () => { if (selectedGroup) select(selectedGroup, selected.textContent || selectedGroup); });
+  allActions.addEventListener("change", () => { if (selectedGroup) select(selectedGroup, selected.textContent || selectedGroup); });
   dialog.addEventListener("activity-refresh", () => { if (selectedGroup) select(selectedGroup, selected.textContent || selectedGroup, false); });
   body.append(svg); results.append(back, selected, status, activities); layout.append(body, results);
   dialog.append(heading, close, help, mode, layout); document.body.append(dialog); dialog.showModal();

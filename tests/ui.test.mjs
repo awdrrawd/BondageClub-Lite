@@ -78,7 +78,7 @@ test('body families light together, merge actions and show warnings only in tool
   await f.window.happyDOM.close();
 });
 
-test('activity mode toggles incomplete checks and an open panel refreshes after character updates', async () => {
+test('all actions defaults off, reveals restrictions without enabling them and refreshes live', async () => {
   const f=setup();
   let blocked=false;
   f.client.activityOptions=(_id, compatibility) => [{group:'ItemHead',groupLabel:'頭部',name:'Pet',label:'撫摸',reason:blocked ? 'native.blocked' : compatibility ? null : 'native.equipment'}];
@@ -87,17 +87,38 @@ test('activity mode toggles incomplete checks and an open panel refreshes after 
   f.document.querySelector('.interaction-open').click();
   const dialog=f.document.querySelector('.activity-dialog');
   dialog.querySelector('[data-body-group="ItemHead"]').dispatchEvent(new f.window.Event('click'));
-  assert.equal(dialog.querySelector('.activity-option button').disabled,false);
   const mode=dialog.querySelector('input[type=checkbox]');
-  mode.checked=false; mode.dispatchEvent(new f.window.Event('change'));
+  assert.equal(mode.checked,false);
+  assert.match(mode.parentElement.textContent,/全部動作/);
   assert.equal(dialog.querySelector('.activity-option button'),null);
   mode.checked=true; mode.dispatchEvent(new f.window.Event('change'));
   assert.equal(dialog.querySelector('.activity-option button').disabled,false);
   blocked=true; f.emit({characters:[{MemberNumber:55,Name:'Friend',Appearance:[]}]});
+  assert.equal(dialog.querySelector('.activity-option button').disabled,true);
+  assert.ok(dialog.querySelector('.activity-option button').title);
+  mode.checked=false; mode.dispatchEvent(new f.window.Event('change'));
   assert.equal(dialog.querySelector('.activity-option'),null);
   assert.match(dialog.querySelector('[role=status]').textContent,/沒有可用動作/);
   blocked=false; f.emit({characters:[{MemberNumber:55,Name:'Friend'}]});
+  mode.checked=true; mode.dispatchEvent(new f.window.Event('change'));
   assert.equal(dialog.querySelector('.activity-option button').disabled,false);
+  await f.window.happyDOM.close();
+});
+
+test('merged all-actions menus prefer a usable sibling even when a blocked sibling appears first', async () => {
+  const f=setup();
+  f.client.activityOptions=()=>[
+    {group:'ItemTorso2',groupLabel:'軀幹',name:'Pet',label:'撫摸',reason:'native.blocked'},
+    {group:'ItemTorso',groupLabel:'軀幹',name:'Pet',label:'撫摸',reason:null},
+  ];
+  f.emit({phase:'in-room',room:{Name:'Room',Limit:10},characters:[{MemberNumber:55,Name:'Friend'}]});
+  f.document.querySelector('.member-row').click(); f.document.querySelector('.interaction-open').click();
+  const dialog=f.document.querySelector('.activity-dialog');
+  const mode=dialog.querySelector('input'); mode.checked=true; mode.dispatchEvent(new f.window.Event('change'));
+  dialog.querySelector('[data-body-group="ItemTorso2"]').dispatchEvent(new f.window.Event('click'));
+  assert.equal(dialog.querySelectorAll('.activity-option').length,1);
+  const action=dialog.querySelector('.activity-option button'); assert.equal(action.disabled,false); action.click();
+  assert.deepEqual(f.calls.at(-1),{activity:'Pet',group:'ItemTorso',id:55});
   await f.window.happyDOM.close();
 });
 

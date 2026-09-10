@@ -411,17 +411,21 @@ export class BcLiteClient {
     const target = this.state.characters.find(c => c.MemberNumber === memberNumber);
     if (!target || !actor.MemberNumber || !this.state.room) return [];
     const checkInventory = createActivityInventoryCheck(actor, target);
-    const native = nativeActivities.flatMap(activity => (memberNumber === actor.MemberNumber ? activity.self : activity.target).map(group => ({
-      group, name: activity.name, groupLabel: this.textCatalog[`DialogGroupName${textGroup(group, target)}`] || this.textCatalog[`Group.${group}`] || group,
-      label: activityLabel(activity.name, group, target, memberNumber === actor.MemberNumber, this.textCatalog),
-      ...activityAvailability(!this.canSend() ? "native.data" : activityReason(actor, target, group, activity.name, this.state.room!, checkInventory), compatibility),
-      source: "BC",
-    })));
-    for (const option of native) {
-      const item = activityAsset(actor, target, option.name);
-      if (item) option.label += ` · ${this.textCatalog[`Asset.${item.GroupName}.${item.AssetName}`] || item.AssetName}`;
-      if (!option.reason && !option.warning && (actor.ArousalSettings?.Active !== "Manual" || nativeActivities.find(activity => activity.name === option.name)?.special)) option.warning = "native.effects";
-    }
+    const native = nativeActivities.flatMap(activity => {
+      // A tool belongs to an activity, not to each of its target zones.
+      const item = activityAsset(actor, target, activity.name);
+      const suffix = item ? ` · ${this.textCatalog[`Asset.${item.GroupName}.${item.AssetName}`] || item.AssetName}` : "";
+      return (memberNumber === actor.MemberNumber ? activity.self : activity.target).map(group => {
+        const availability = activityAvailability(!this.canSend() ? "native.data" : activityReason(actor, target, group, activity.name, this.state.room!, checkInventory), compatibility);
+        return {
+          group, name: activity.name, groupLabel: this.textCatalog[`DialogGroupName${textGroup(group, target)}`] || this.textCatalog[`Group.${group}`] || group,
+          label: activityLabel(activity.name, group, target, memberNumber === actor.MemberNumber, this.textCatalog) + suffix,
+          reason: availability.reason,
+          warning: availability.warning || (!availability.reason && (actor.ArousalSettings?.Active !== "Manual" || activity.special) ? "native.effects" : ""),
+          source: "BC",
+        };
+      });
+    });
     const extensions = extensionActivities.filter(entry => entry.self === (actor.MemberNumber === memberNumber) && Object.hasOwn(this.textCatalog, entry.key) && (!["ItemPenis", "ItemGlans"].includes(entry.group) || hasPenis(target))).map(entry => ({
       group: physicalGroup(entry.group), name: `${entry.source === "echo" && cuddleNames.includes(entry.name) ? "cuddle" : "text"}:${entry.key}`, groupLabel: this.textCatalog[`DialogGroupName${textGroup(physicalGroup(entry.group), target)}`] || this.textCatalog[`Group.${physicalGroup(entry.group)}`] || entry.group,
       label: entry.name === "钻进怀里" ? t("interaction.cuddleIn") : entry.name === "抱入怀中" ? t("interaction.cuddleHold") : activityLabel(entry.name, physicalGroup(entry.group), target, entry.self, this.textCatalog),

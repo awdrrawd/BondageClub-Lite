@@ -70,7 +70,7 @@
         <p>手機回前景以既有好友查詢檢查連線。常亮／本機音訊由使用者選擇；無法保證瀏覽器在背景或鎖屏持續執行。</p>
       </section>
       <section id="security"><p class="eyebrow">06 / TRUST BOUNDARIES</p><h2>維持原有的資料界線。</h2>
-        <div class="table-wrap"><table><thead><tr><th>資料／操作</th><th>保存與限制</th></tr></thead><tbody><tr><td>密碼、聊天、外觀快照、召喚名單</td><td>分頁記憶體；不新增永久儲存或雲端 API。</td></tr><tr><td>記住帳號、顯示偏好、永久媒體許可</td><td>自選 localStorage；並非加密保管庫。</td></tr><tr><td>插件動作與 AFC</td><td>讀取文字／共享關係資料，不安裝插件。一般擴展互動只發送文字；ECHO 貼貼確認後只更新自己的 ItemMisc 道具並分享位置配對，先顯示雙方格子與已知配對 ID，確認後可替換自己的既有道具，絕不代替對方覆寫；不支援跨房跟隨。</td></tr><tr><td>媒體載入</td><td>先許可來源，再設定 src；來源可看到連線資訊，瀏覽器仍會跟隨重新導向。</td></tr><tr><td>安全詞</td><td>使用者確認後的外觀改寫例外；不保證完整插件連動效果。</td></tr><tr><td>BCX 召喚／個人資料互動</td><td>召喚採允許名單＋接受確認。原生活動預設相容發送，略過未實作的本機條件；已知禁止偏好與房間限制仍阻擋。可取消相容模式恢復保守判定，不代表完整 BC 引擎。</td></tr></tbody></table></div>
+        <div class="table-wrap"><table><thead><tr><th>資料／操作</th><th>保存與限制</th></tr></thead><tbody><tr><td>密碼、聊天、外觀快照、召喚名單</td><td>分頁記憶體；不新增永久儲存或雲端 API。</td></tr><tr><td>記住帳號、顯示偏好、永久媒體許可</td><td>自選 localStorage；並非加密保管庫。</td></tr><tr><td>插件動作與 AFC</td><td>讀取文字／共享關係資料，不安裝插件。一般擴展互動只發送文字；ECHO 貼貼確認後只更新自己的 ItemMisc 道具並分享位置配對，先顯示雙方格子與已知配對 ID，確認後可替換自己的既有道具，絕不代替對方覆寫；不支援跨房跟隨。</td></tr><tr><td>媒體載入</td><td>先許可來源，再設定 src；來源可看到連線資訊，瀏覽器仍會跟隨重新導向。</td></tr><tr><td>安全詞</td><td>使用者確認後的外觀改寫例外；不保證完整插件連動效果。</td></tr><tr><td>BCX 召喚／個人資料互動</td><td>召喚採允許名單＋接受確認。原生活動預設只顯示可用項目，「全部動作」預設不勾選。勾選後顯示受限項目並略過未實作條件，但已知道具、偏好與房間限制仍停用，不代表完整 BC 引擎。</td></tr></tbody></table></div>
         <p>第三方文字沿用各來源授權：詳見 <code>docs/third-party-dialogues.md</code> 與 <code>docs/licenses/</code>，不可一律視為 MIT。</p>
       </section>
       <section id="workflow"><p class="eyebrow">07 / DEVELOPMENT</p><h2>修改來源，讓建置處理產物。</h2>
