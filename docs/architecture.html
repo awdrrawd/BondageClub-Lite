@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="dark light">
   <title>BC Lite · Architecture</title>
-  <link rel="stylesheet" href="./docs/architecture.css">
+  <link rel="stylesheet" href="./architecture.css">
 </head>
 <body>
   <header class="hero">
@@ -77,7 +77,10 @@
         <pre><code>npm run catalog:compile     # 僅重新合併翻譯
 npm run build               # 自動合併＋型別檢查＋Vite
 npm test                    # 模擬 socket、DOM、翻譯與中繼測試
-npm run dev                 # UI 與 architecture.html 預覽</code></pre>
+npm run dev                 # 正常入口與 /docs/architecture.html
+npm run dev:ui              # 免登入的離線 UI 測試入口</code></pre>
+        <p><code>src/preview/client.ts</code> 透過 <code>UiClient</code> 介面注入虛構資料，重用正式 UI；<code>ui-preview.html</code> 不進入正式建置。預覽 CSP 禁止外部媒體與 iframe，不驗證真實連線或活動效果。</p>
+        <p><code>src/media/providers.ts</code> 負責純 URL 分類；<code>chat-links.ts</code> 負責實際播放器來源許可、按需建立及釋放。支援部分 YouTube／Vimeo／Spotify 網址與直連影音，不載入 ACV 插件或執行定時 DOM 掃描；iframe 服務仍可能載入自己的次級資源。</p>
         <p>更新上游資料才需要 <code>npm run catalog:bc -- 上游BC目錄</code>／<code>npm run catalog:plugins</code>／<code>npm run catalog:items</code>（ECHO 衣物）。擷取只覆寫對應來源資料，不覆寫 overrides。build／dev 啟動前會自動執行 catalog:compile；dev 運行期間修改翻譯後需再執行一次。</p>
         <p>自動測試不能取代手機、真實 BC 房间及插件觀看端驗收。部署後請依 <code>docs/community-features-tests.md</code>、<code>docs/mobile-connection-tests.md</code> 檢查。</p>
       </section>

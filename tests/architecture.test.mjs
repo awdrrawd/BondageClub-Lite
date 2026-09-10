@@ -6,11 +6,11 @@ import { Window } from 'happy-dom';
 test('architecture document is standalone, internally navigable and included in production', async () => {
   const window = new Window({ settings: { disableCSSFileLoading: true, disableJavaScriptFileLoading: true } });
   const doc = window.document;
-  doc.body.innerHTML = readFileSync('architecture.html', 'utf8');
+  doc.body.innerHTML = readFileSync('docs/architecture.html', 'utf8');
   for (const link of doc.querySelectorAll('nav a')) assert.ok(doc.querySelector(link.getAttribute('href')));
   assert.equal(doc.querySelectorAll('main section').length, 7);
   assert.equal(doc.querySelectorAll('script,iframe,img,video').length, 0);
-  const built = readFileSync('dist/architecture.html', 'utf8');
+  const built = readFileSync('dist/docs/architecture.html', 'utf8');
   assert.match(built, /src\/action\/generated/);
   assert.match(built, /<title>BC Lite · Architecture<\/title>/);
   const stylesheet = built.match(/href="(\/assets\/architecture-[^"]+\.css)"/);

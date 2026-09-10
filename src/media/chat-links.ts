@@ -1,4 +1,5 @@
 import { t } from "../i18n";
+import { resolveMedia, type MediaTarget } from "./providers";
 
 export class MediaConsent {
   private session = new Set<string>();
@@ -15,6 +16,7 @@ export class MediaConsent {
     } catch { /* Optional local preferences. */ }
   }
   resetSession(): void { this.session.clear(); }
+  dispose(root: HTMLElement): void { this.release(root); }
   private refresh(): void {
     this.document.querySelectorAll<HTMLElement>(".chat-media-slot").forEach(slot => this.render(slot));
   }
@@ -24,30 +26,62 @@ export class MediaConsent {
   }
   private render(slot: HTMLElement): void {
     const url = new URL(slot.dataset.url!);
+    const target = resolveMedia(url);
+    if (!target) { slot.replaceChildren(); return; }
+    const origin = new URL(target.src).origin;
+    this.release(slot);
+    slot.removeAttribute("data-playing");
     slot.replaceChildren();
-    if (this.session.has(url.origin) || this.remembered.has(url.origin)) {
-      const image = /\.(?:png|jpe?g|gif|webp|avif|apng|bmp|jfif)$/i.test(url.pathname);
-      const media = this.document.createElement(image ? "img" : "video"); media.className = "chat-media";
+    if (this.session.has(origin) || this.remembered.has(origin)) {
+      if (target.kind !== "image") { this.playerButton(slot, target); return; }
+      const media = this.document.createElement("img"); media.className = "chat-media";
       media.setAttribute("aria-label", url.href);
-      if (image) { const img = media as HTMLImageElement; img.alt = ""; img.loading = "lazy"; img.decoding = "async"; img.referrerPolicy = "no-referrer"; }
-      else { const video = media as HTMLVideoElement; video.controls = true; video.playsInline = true; video.preload = "metadata"; }
+      media.alt = ""; media.loading = "lazy"; media.decoding = "async"; media.referrerPolicy = "no-referrer";
       media.addEventListener("error", () => media.remove(), { once: true });
       media.src = url.href; slot.append(media); return;
     }
-    slot.append(this.document.createTextNode(t("media.prompt", [url.origin])));
+    slot.append(this.document.createTextNode(t("media.prompt", [origin])));
     for (const permanent of [false, true]) {
       const button = this.document.createElement("button"); button.type = "button"; button.className = "button ghost";
       button.textContent = t(permanent ? "media.always" : "media.once");
       button.addEventListener("click", () => {
         if (permanent) {
-          const next = new Set(this.remembered); next.add(url.origin);
+          const next = new Set(this.remembered); next.add(origin);
           try { this.document.defaultView!.localStorage.setItem(this.key, JSON.stringify([...next])); this.remembered = next; }
           catch { this.document.defaultView!.alert(t("media.storageError")); return; }
-        } else this.session.add(url.origin);
-        this.render(slot); this.refresh();
+        } else this.session.add(origin);
+        this.refresh(); if (!slot.isConnected) this.render(slot);
       });
       slot.append(button);
     }
+  }
+  private release(slot: HTMLElement): void {
+    for (const media of slot.querySelectorAll<HTMLMediaElement>("video,audio")) { media.pause(); media.removeAttribute("src"); media.load(); }
+    for (const frame of slot.querySelectorAll("iframe")) frame.removeAttribute("src");
+  }
+  private playerButton(slot: HTMLElement, target: MediaTarget): void {
+    const button = this.document.createElement("button"); button.className = "button ghost"; button.type = "button"; button.textContent = t("media.open", [target.label]);
+    button.addEventListener("click", () => {
+      // One active inline player, independent of provider. Close the old one before allocating another.
+      for (const previous of this.document.querySelectorAll<HTMLElement>(".chat-media-slot[data-playing]")) { previous.removeAttribute("data-playing"); this.render(previous); }
+      slot.replaceChildren(); slot.dataset.playing = "true";
+      const media = this.document.createElement(target.kind === "frame" ? "iframe" : target.kind === "audio" ? "audio" : "video");
+      media.className = "chat-media";
+      if (media.tagName === "IFRAME") {
+        const frame = media as HTMLIFrameElement;
+        frame.title = target.label; frame.sandbox.add("allow-scripts", "allow-same-origin", "allow-presentation");
+        frame.allow = "fullscreen; encrypted-media"; frame.allowFullscreen = true;
+        frame.referrerPolicy = "strict-origin-when-cross-origin";
+      } else {
+        const player = media as HTMLMediaElement; player.controls = true; player.preload = "none";
+        if (player.tagName === "VIDEO") (player as HTMLVideoElement).playsInline = true;
+      }
+      media.src = target.src;
+      const close = this.document.createElement("button"); close.className = "button ghost"; close.type = "button"; close.textContent = t("media.close");
+      close.addEventListener("click", () => { slot.removeAttribute("data-playing"); this.render(slot); });
+      slot.append(media, close);
+    });
+    slot.append(button);
   }
   buildSettings(): HTMLElement {
     const panel = this.document.createElement("section"); panel.className = "settings-card";
@@ -96,9 +130,7 @@ export function appendChatLinks(node: HTMLElement, text: string, consent?: Media
     anchor.className = "chat-link";
     node.append(anchor);
     if (url.protocol === "https:") {
-      const image = /\.(?:png|jpe?g|gif|webp|avif|apng|bmp|jfif)$/i.test(url.pathname);
-      const video = /\.(?:mp4|webm|ogv|mov)$/i.test(url.pathname);
-      if ((image || video) && consent) node.append(consent.slot(url));
+      if (resolveMedia(url) && consent) node.append(consent.slot(url));
     }
     cursor = match.index + value.length;
   }

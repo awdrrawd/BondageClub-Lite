@@ -16,7 +16,7 @@ const stabilitySource = stripTypeScriptTypes(readFileSync(new URL('../src/platfo
 const bioCode = stripTypeScriptTypes(readFileSync(new URL('../src/profile/biography.ts', import.meta.url), 'utf8')).replace('import LZString from "lz-string";', '').replace('import { t } from "../i18n";', '').replace('export ', '');
 const decodeBiography = new Function('LZString', 't', bioCode + '; return decodeBiography;')(LZString, t);
 
-const source = stripTypeScriptTypes(readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8')).replace(/^import .*;\r?\n/gm, '');
+const source = stripTypeScriptTypes(readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8')).replace(/^import .*;\r?\n/gm, '').replaceAll('export ', '');
 
 function setup(savedAccount, savedPerformance) {
   setLocale('zh');

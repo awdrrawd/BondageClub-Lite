@@ -33,7 +33,7 @@
 
 BIO 點擊展開時解析 BC 的 `╬` + LZ-String UTF16 格式，仍只以文字顯示。同房好友可開啟私訊（密語）；跨房使用 BEEP，不會自動切换通道。私訊草稿按對象分開保存在分頁記憶體。
 
-聊天室、密語、動作與 BEEP 支援 HTTP(S) 連結。HTTPS 圖片／影片直連取得來源許可後才在訊息內載入；提供本次／總是許可，設定頁可撤銷。來源站會收到你的連線；圖片接近可視範圍時載入，影片提供內嵌控制、不自動播放。一般網頁、HTTP 媒體與無法辨識的網址保留原始連結，不嵌入任意網站。
+聊天室、悄悄話、動作與私訊支援 HTTP(S) 連結。HTTPS 圖片／影音直連，以及 YouTube、Vimeo、Spotify 的部分標準網址可內嵌。提供本次／總是許可，設定頁可撤銷；許可依實際播放器來源網域判定。影音還需點擊開啟，不自動播放，同時只保留一個播放器，可關閉釋放資源。來源服務會收到 IP、網站來源等連線資訊，內嵌服務也可能使用 Cookie 或載入其他資源；來源許可不是匿名代理。一般網頁、HTTP 媒體與無法辨識的網址保留原始連結，不嵌入任意網站。此功能參考 ACV 的按需播放器概念，不載入 ACV 插件、外部標題抓取或定時掃描。
 
 語言選單統一放在頂部登入狀態右侧，所有分頁與登入前皆可使用。
 
@@ -57,7 +57,7 @@ BIO 點擊展開時解析 BC 的 `╬` + LZ-String UTF16 格式，仍只以文�
 
 BC 翻譯依 `messages`／`actions`／`items`／`groups` 分類；ECHO 物品與部位另放 `src/translations/items/echo/`、`groups/echo/`。`npm run catalog:items` 可更新靜態名稱擷取，不載入插件、圖片或服裝引擎。未涵蓋的動態名稱仍保留原文。
 
-- [架構導覽 architecture.html](architecture.html)：模組邊界、資料流、安全限制與開發流程；建置後也提供 `/architecture.html`。
+- [架構導覽 architecture.html](docs/architecture.html)：模組邊界、資料流、安全限制與開發流程；建置後提供 `/docs/architecture.html`。
 - [翻譯貢獻指南](src/translations/README.md)：UI、BC、插件、人工覆寫分開，不必複製整份 BC 文字表。
 - `src/main.ts` 是入口；介面在 `src/ui/`，Socket 在 `src/network/`，擴展動作在 `src/action/`；其他模組依責任分為 profile、media、safety、platform、shared。
 - `npm run build`／`npm run dev` 會先從本倉庫翻譯來源產生 `src/action/generated/`，不需要上游插件目錄。開發服務運行期間修改翻譯後，另跑 `npm run catalog:compile`。
@@ -71,7 +71,19 @@ npm install
 npm run dev
 ```
 
-上面的 Vite dev 只預覽 UI，不執行 Pages Worker。完整中繼測試：
+### 免登入、離線 UI 預覽
+
+首次安裝相依套件後執行：
+
+```bash
+npm run dev:ui
+```
+
+開啟 `http://127.0.0.1:5173/ui-preview.html`（若連接埠被占用，以終端機輸出為準）。這個入口使用同一套 Lite UI，注入 `src/preview/client.ts` 的虛構角色、房間與訊息，不使用真實帳號、不連接 BC。可測試搜尋、加入／建立房間、私聊、互動面板、回覆、語系、3000 則訊息與模擬斷線。外部圖片、影音與播放器被預覽專用 CSP 阻擋；連線恢復、原生活動效果與真正的影音播放仍需另作整合測試。顯示偏好仍會保存在本機瀏覽器。
+
+建議用瀏覽器開發工具切換 390px 手機和桌面寬度，檢查長房名、長訊息、輸入區、聯絡人切換與捲動。`ui-preview.html` 不納入正式 `npm run build`，不會提供公開的假登入入口。
+
+上面的 Vite dev 不執行 Pages Worker。完整中繼測試：
 
 ```bash
 npm run build

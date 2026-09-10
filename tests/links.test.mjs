@@ -1,7 +1,26 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Window } from 'happy-dom';
-import { appendChatLinks, MediaConsent } from './links-helper.mjs';
+import { appendChatLinks, MediaConsent, resolveMedia } from './links-helper.mjs';
+
+test('provider matching rejects spoofed hosts and embeds need destination consent plus a click', async () => {
+  assert.equal(resolveMedia(new URL('https://youtube.com.evil.test/watch?v=abcdefghijk')),null);
+  assert.equal(resolveMedia(new URL('https://youtube.com/watch?v=bad')),null);
+  assert.equal(resolveMedia(new URL('https://youtu.be/abcdefghijk')).src,'https://www.youtube-nocookie.com/embed/abcdefghijk?autoplay=0&rel=0');
+  const window = new Window({ settings:{ disableIframePageLoading:true } });
+  const node=window.document.createElement('div'); window.document.body.append(node);
+  appendChatLinks(node,'https://youtu.be/abcdefghijk',new MediaConsent(window.document));
+  assert.match(node.textContent,/youtube-nocookie.com/);
+  assert.equal(node.querySelector('iframe'),null);
+  node.querySelector('button').click();
+  assert.equal(node.querySelector('iframe'),null);
+  node.querySelector('button').click();
+  assert.ok(node.querySelector('iframe').src.startsWith('https://www.youtube-nocookie.com/embed/'));
+  assert.equal(node.querySelector('script'),null);
+  node.querySelector('button').click();
+  assert.equal(node.querySelector('iframe'),null);
+  await window.happyDOM.close();
+});
 
 test('links preserve text, balanced URL parentheses, Chinese punctuation and emote boundaries', async () => {
   const window = new Window();
@@ -75,11 +94,13 @@ test('direct videos use inline controls without autoplay; webpages and insecure 
   appendChatLinks(node, 'https://example.org/a.mp4?download=1 http://example.org/a.jpg https://example.org/page https://example.org/a.svg', new MediaConsent(window.document));
   assert.equal(node.querySelector('video'), null);
   node.querySelector('button').click();
+  assert.equal(node.querySelector('video'), null);
+  node.querySelector('button').click();
   const video = node.querySelector('video');
   assert.equal(video.controls, true);
   assert.equal(video.playsInline, true);
   assert.equal(video.autoplay, false);
-  assert.equal(video.preload, 'metadata');
+  assert.equal(video.preload, 'none');
   assert.equal(node.querySelectorAll('img,iframe').length, 0);
   assert.equal(node.querySelectorAll('a').length, 4);
   await window.happyDOM.close();

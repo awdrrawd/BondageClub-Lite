@@ -14,7 +14,9 @@ const app = document.querySelector<HTMLDivElement>("#app");
 if (!app) throw new Error(t("m001"));
 
 const escapeText = (value: unknown): string => String(value ?? "");
-class LiteApp {
+export type UiClient = Pick<typeof bcClient, "recordLifecycle" | "resumeConnection" | "setMessageLimit" | "subscribe" | "setTextCatalog" | "relocalize" | "disconnect" | "refreshFriends" | "setFriend" | "sendChat" | "sendBeep" | "requestLoverRoom" | "connectionDiagnostics" | "acceptSummon" | "dismissSummon" | "configureSummons" | "search" | "leave" | "join" | "login" | "createRoom" | "clearMessages" | "respondCuddle" | "activateSafeword" | "activityOptions" | "sendActivity">;
+export class LiteApp {
+  private client: UiClient;
   private mediaConsent = new MediaConsent(document);
   private privateFilter = "room";
   private replyTarget: DisplayMessage | null = null;
@@ -61,7 +63,8 @@ class LiteApp {
   private renderPending = false;
   private settings = { background: false, largeText: false, timestamps: true, locale: "zh" as Locale };
 
-  constructor() {
+  constructor(client: UiClient = bcClient) {
+    this.client = client;
     // Delegate selection before controls run; reply jumps may then select their destination.
     document.addEventListener("click", event => {
       const target = event.target as HTMLElement | null;
@@ -77,16 +80,16 @@ class LiteApp {
       }
     });
     const resume = (event: "visible" | "online" | "pageshow") => {
-      bcClient.recordLifecycle(event);
-      if (document.visibilityState === "visible" && window.navigator.onLine !== false) bcClient.resumeConnection();
+      this.client.recordLifecycle(event);
+      if (document.visibilityState === "visible" && window.navigator.onLine !== false) this.client.resumeConnection();
     };
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible") resume("visible");
-      else bcClient.recordLifecycle("hidden");
+      else this.client.recordLifecycle("hidden");
     });
     window.addEventListener("pageshow", () => resume("pageshow"));
     window.addEventListener("online", () => resume("online"));
-    window.addEventListener("offline", () => bcClient.recordLifecycle("offline"));
+    window.addEventListener("offline", () => this.client.recordLifecycle("offline"));
     app!.addEventListener("compositionstart", () => { this.composing = true; });
     app!.addEventListener("compositionend", () => {
       this.composing = false;
@@ -107,9 +110,9 @@ class LiteApp {
       this.performance = { history: [600, 1500, 3000].includes(saved.history) ? saved.history : 3000, visible: [50, 100, 200].includes(saved.visible) ? saved.visible : 100 };
     } catch { /* Use bounded defaults for unavailable or malformed storage. */ }
     this.visibleMessages = this.performance.visible;
-    bcClient.setMessageLimit(this.performance.history);
+    this.client.setMessageLimit(this.performance.history);
     this.applySettings();
-    bcClient.subscribe((snapshot) => {
+    this.client.subscribe((snapshot) => {
       const previous = this.snapshot;
       this.snapshot = snapshot;
       if (!snapshot.player) this.roomSearchInitialized = false;
@@ -158,7 +161,7 @@ class LiteApp {
   private refreshCatalog(): void {
     this.catalogLoading = true;
     const request = ++this.catalogRequest;
-    void loadTextCatalog(getLocale()).then(catalog => { if (request === this.catalogRequest) bcClient.setTextCatalog(catalog); }).catch(() => { if (request === this.catalogRequest) this.localNotice(t("m002")); });
+    void loadTextCatalog(getLocale()).then(catalog => { if (request === this.catalogRequest) this.client.setTextCatalog(catalog); }).catch(() => { if (request === this.catalogRequest) this.localNotice(t("m002")); });
   }
 
   private languageControl(): HTMLElement {
@@ -168,7 +171,7 @@ class LiteApp {
       this.settings.locale = select.value === "en" ? "en" : "zh";
       setLocale(this.settings.locale); this.applySettings();
       try { localStorage.setItem("bc-lite-display-v1", JSON.stringify(this.settings)); } catch { this.localNotice(t("m060")); }
-      bcClient.relocalize(); this.render();
+      this.client.relocalize(); this.render();
       if (this.snapshot?.player) this.refreshCatalog();
     });
     return this.field(t("locale.label"), select);
@@ -209,7 +212,7 @@ class LiteApp {
     if (!force && this.snapshot!.messages.length && !atBottom && log.childElementCount) { if (jump) jump.hidden = false; return; }
     const messages = this.visibleHistory();
     const ids = new Set(messages.map(message => message.id));
-    for (const node of Array.from(log.children)) if (!ids.has((node as HTMLElement).dataset.messageId || "")) node.remove();
+    for (const node of Array.from(log.children)) if (!ids.has((node as HTMLElement).dataset.messageId || "")) { this.mediaConsent.dispose(node as HTMLElement); node.remove(); }
     const existing = new Set(Array.from(log.children).map(node => (node as HTMLElement).dataset.messageId));
     const fragment = document.createDocumentFragment();
     for (const message of messages) if (!existing.has(message.id)) fragment.append(this.messageNode(message));
@@ -237,6 +240,7 @@ class LiteApp {
     const oldScroll = oldLog?.scrollTop;
     const oldRoom = oldLog?.dataset.room;
 
+    this.mediaConsent.dispose(app!);
     app!.replaceChildren(this.buildShell());
     this.updateHeader();
     const nextLog = document.getElementById("TextAreaChatLog");
@@ -251,6 +255,7 @@ class LiteApp {
   private buildShell(): HTMLElement {
     const state = this.snapshot!;
     document.body.classList.toggle("chat-active", this.tab === "chat" && state.phase === "in-room" && !!state.room);
+    document.body.classList.toggle("private-active", this.tab === "private" && !!state.player);
     const shell = this.el("main", "app-shell");
     const header = this.el("header", "app-header");
     const brand = this.el("div", "brand");
@@ -268,7 +273,7 @@ class LiteApp {
       const name = this.button(`${state.player.Nickname || state.player.Name} (#${state.player.MemberNumber})`, "ghost", "button");
       name.addEventListener("click", () => this.showMember(state.characters.find(character => character.MemberNumber === state.player!.MemberNumber) || state.player!));
       const logout = this.button(t("m007"), "ghost", "button");
-      logout.addEventListener("click", () => { if (window.confirm(t("m008"))) bcClient.disconnect(); });
+      logout.addEventListener("click", () => { if (window.confirm(t("m008"))) this.client.disconnect(); });
       account.append(name); header.append(account);
       const safety = this.button(t("safety.title"), "ghost danger header-safety", "button"); safety.id = "room-safeword";
       safety.disabled = !state.room || state.phase !== "in-room";
@@ -314,7 +319,7 @@ class LiteApp {
         if (key === "private") this.unread = 0;
         if (key === "chat") this.roomUnread = 0;
         this.render();
-        if ((key === "friends" || key === "private") && this.snapshot!.friendsQueryState === "idle") this.run(() => bcClient.refreshFriends());
+        if ((key === "friends" || key === "private") && this.snapshot!.friendsQueryState === "idle") this.run(() => this.client.refreshFriends());
       });
       nav.append(button);
     }
@@ -323,11 +328,12 @@ class LiteApp {
 
   private buildFriends(privatePage = false): HTMLElement {
     const section = this.el("section", privatePage ? "friends-view private-page" : "friends-view");
-    section.append(this.el("p", "eyebrow", t("m015")), this.el("h1", "", privatePage ? t("private.title") : t("m016")));
+    if (!privatePage) section.append(this.el("p", "eyebrow", t("m015")));
+    section.append(this.el("h1", "", privatePage ? t("private.title") : t("m016")));
     if (!privatePage) section.append(this.el("p", "muted", t("m017")));
     const toolbar = this.el("div", "toolbar");
     const refresh = this.button(t("m018"), "secondary", "button");
-    refresh.addEventListener("click", () => this.run(() => bcClient.refreshFriends()));
+    refresh.addEventListener("click", () => this.run(() => this.client.refreshFriends()));
     const query = this.input("FriendQuery", t("m019"), "search", this.friendQuery);
     query.addEventListener("input", () => { this.friendQuery = query.value; this.updateFriendContent(); });
     toolbar.append(query, refresh);
@@ -349,7 +355,7 @@ class LiteApp {
     const text = document.createElement("textarea"); text.id = "BeepText"; text.placeholder = t("m025"); text.maxLength = 1000; text.required = true; text.value = this.beepDraft;
     text.addEventListener("input", () => { this.beepDraft = text.value; });
     const add = this.button(t("m026"), "ghost", "button");
-    add.addEventListener("click", () => this.run(() => bcClient.setFriend(this.contact, true)));
+    add.addEventListener("click", () => this.run(() => this.client.setFriend(this.contact, true)));
     const channel = this.el("div", "private-channel");
     channel.setAttribute("role", "group"); channel.setAttribute("aria-label", t("m027"));
     for (const [mode, label] of [["whisper", t("m029")], ["beep", t("m028")]]) {
@@ -373,8 +379,8 @@ class LiteApp {
         if (this.privateMode === "whisper") {
           if (!this.beepDraft.trim()) return;
           if (!this.snapshot!.characters.some(character => character.MemberNumber === this.contact)) throw new Error(t("m032"));
-          bcClient.sendChat(`/w ${this.contact} ${this.replyContent(this.beepDraft)}`, this.replyTarget?.nativeId);
-        } else bcClient.sendBeep(this.contact, this.replyContent(this.beepDraft));
+          this.client.sendChat(`/w ${this.contact} ${this.replyContent(this.beepDraft)}`, this.replyTarget?.nativeId);
+        } else this.client.sendBeep(this.contact, this.replyContent(this.beepDraft));
         this.beepDraft = ""; this.replyTarget = null; form.querySelector(".reply-preview")?.remove(); this.contactDrafts.delete(this.contact); text.value = "";
       });
     });
@@ -465,7 +471,7 @@ class LiteApp {
         info.append(this.el("span", "tag afc-tag", t("afc.title")));
         const queryRoom = this.button(t("afc.query"), "ghost afc-query", "button");
         queryRoom.disabled = !state.player?.FriendList?.includes(id) || !["ready", "in-room"].includes(state.phase);
-        queryRoom.addEventListener("click", () => this.run(() => bcClient.requestLoverRoom(id))); row.append(queryRoom);
+        queryRoom.addEventListener("click", () => this.run(() => this.client.requestLoverRoom(id))); row.append(queryRoom);
       }
       const sharedRoom = friend?.ChatRoomName || state.loverRooms?.[id]?.name;
       if (sharedRoom) info.append(this.el("small", statusClass, sharedRoom));
@@ -483,7 +489,7 @@ class LiteApp {
       }
       if (this.tab !== "private" && state.player?.FriendList?.includes(id)) {
         const remove = this.button(t("m047"), "ghost danger", "button");
-        remove.addEventListener("click", () => { if (window.confirm(t("m048", [id]))) this.run(() => bcClient.setFriend(id, false)); });
+        remove.addEventListener("click", () => { if (window.confirm(t("m048", [id]))) this.run(() => this.client.setFriend(id, false)); });
         row.append(remove);
       }
       list.append(row);
@@ -518,7 +524,7 @@ class LiteApp {
 
   private syncPrivateRows(log: HTMLElement, messages: DisplayMessage[], empty: string): void {
     const ids = new Set(messages.map(message => message.id));
-    for (const node of Array.from(log.children)) if (!ids.has((node as HTMLElement).dataset.messageId || "")) node.remove();
+    for (const node of Array.from(log.children)) if (!ids.has((node as HTMLElement).dataset.messageId || "")) { this.mediaConsent.dispose(node as HTMLElement); node.remove(); }
     const existing = new Map(Array.from(log.children).map(node => [(node as HTMLElement).dataset.messageId, node]));
     let cursor: ChildNode | null = log.firstChild;
     for (const message of messages) {
@@ -554,8 +560,8 @@ class LiteApp {
     compatibility.append(this.el("h2", "", t("m065")), this.el("p", "", t("m066", [this.snapshot!.player?.Appearance?.length ?? t("m067")])), this.el("p", "muted", t("m068")));
     compatibility.append(this.el("p", "muted", t("m069")));
     const disconnect = this.button(t("m070"), "ghost danger", "button");
-    disconnect.addEventListener("click", () => { if (window.confirm(t("m071"))) bcClient.disconnect(); });
-    section.append(panel, this.buildSummonSettings(), this.mediaConsent.buildSettings(), this.stability.build(() => bcClient.connectionDiagnostics(), () => bcClient.resumeConnection()), privacy, compatibility, disconnect);
+    disconnect.addEventListener("click", () => { if (window.confirm(t("m071"))) this.client.disconnect(); });
+    section.append(panel, this.buildSummonSettings(), this.mediaConsent.buildSettings(), this.stability.build(() => this.client.connectionDiagnostics(), () => this.client.resumeConnection()), privacy, compatibility, disconnect);
     return section;
   }
 
@@ -572,7 +578,7 @@ class LiteApp {
       if (![600, 1500, 3000].includes(value)) return;
       if (value < this.snapshot!.messages.length && !window.confirm(t("performance.trim"))) { history.value = String(this.performance.history); return; }
       this.performance.history = value; this.historyEndId = null;
-      bcClient.setMessageLimit(value); save();
+      this.client.setMessageLimit(value); save();
     });
     visible.addEventListener("change", () => {
       const value = Number(visible.value); if (![50, 100, 200].includes(value)) return;
@@ -586,19 +592,19 @@ class LiteApp {
     node.replaceChildren(); const summon = this.snapshot?.summon; node.hidden = !summon;
     if (!summon) return;
     node.append(this.el("span", "", t("summon.received", [summon.sender, `${summon.room} (${summon.space || "Mixed"})`])));
-    const accept = this.button(t("summon.accept"), "secondary", "button"); accept.addEventListener("click", () => this.run(() => bcClient.acceptSummon()));
-    const cancel = this.button(t("summon.cancel"), "ghost", "button"); cancel.addEventListener("click", () => bcClient.dismissSummon()); node.append(accept, cancel);
+    const accept = this.button(t("summon.accept"), "secondary", "button"); accept.addEventListener("click", () => this.run(() => this.client.acceptSummon()));
+    const cancel = this.button(t("summon.cancel"), "ghost", "button"); cancel.addEventListener("click", () => this.client.dismissSummon()); node.append(accept, cancel);
   }
   private buildSummonSettings(): HTMLElement {
     const panel = this.el("section", "settings-card");
-    panel.append(this.el("h2", "", t("summon.title")), this.el("p", "", t("summon.help")), this.checkbox(t("summon.enabled"), this.summonConfig.enabled, value => { this.summonConfig.enabled = value; if (!value) bcClient.configureSummons(false, [], this.summonConfig.text || "summon"); }));
+    panel.append(this.el("h2", "", t("summon.title")), this.el("p", "", t("summon.help")), this.checkbox(t("summon.enabled"), this.summonConfig.enabled, value => { this.summonConfig.enabled = value; if (!value) this.client.configureSummons(false, [], this.summonConfig.text || "summon"); }));
     const members = this.input("SummonMembers", t("summon.members"), "text", this.summonConfig.members);
     const text = this.input("SummonText", t("summon.text"), "text", this.summonConfig.text);
     members.addEventListener("input", () => { this.summonConfig.members = members.value; }); text.addEventListener("input", () => { this.summonConfig.text = text.value; });
     const save = this.button(t("summon.save"), "secondary", "button");
     save.addEventListener("click", () => this.run(() => {
       const ids = members.value.trim() ? members.value.trim().split(/[\s,，]+/).map(value => /^\d+$/.test(value) ? Number(value) : NaN) : [];
-      bcClient.configureSummons(this.summonConfig.enabled, ids, text.value);
+      this.client.configureSummons(this.summonConfig.enabled, ids, text.value);
     }));
     panel.append(this.field(t("summon.members"), members), this.field(t("summon.text"), text), save); return panel;
   }
@@ -610,7 +616,7 @@ class LiteApp {
       if (input) input.value = "";
     }
     this.notice = ""; this.roomPageSize = 40;
-    try { bcClient.search({ Query: this.query, Language: this.language, Space: this.space, Game: "", FullRooms: this.showFull, ShowLocked: this.showLocked, SearchDescs: this.searchDescriptions }); }
+    try { this.client.search({ Query: this.query, Language: this.language, Space: this.space, Game: "", FullRooms: this.showFull, ShowLocked: this.showLocked, SearchDescs: this.searchDescriptions }); }
     catch (error) { this.localNotice(error instanceof Error ? error.message : t("m099")); }
   }
 
@@ -618,9 +624,9 @@ class LiteApp {
     if (name === this.snapshot!.room?.Name) { this.tab = "chat"; this.render(); return; }
     if (this.snapshot!.room) {
       if (!window.confirm(t("m073", [this.snapshot!.room.Name, name]))) return;
-      bcClient.leave();
+      this.client.leave();
     }
-    this.run(() => bcClient.join(name));
+    this.run(() => this.client.join(name));
   }
 
   private buildLogin(): HTMLElement {
@@ -655,7 +661,7 @@ class LiteApp {
     card.append(submit);
     if (busy) {
       const cancel = this.button(t("m083"), "ghost", "button");
-      cancel.addEventListener("click", () => bcClient.disconnect());
+      cancel.addEventListener("click", () => this.client.disconnect());
       card.append(cancel);
     }
     if (this.notice || state.phase === "error") card.append(this.el("p", "login-error", this.notice || state.status));
@@ -666,7 +672,7 @@ class LiteApp {
       const secret = this.password;
       this.password = "";
       password.value = "";
-      try { await bcClient.login(this.accountName, secret); } catch (error) { this.notice = error instanceof Error ? error.message : t("m084"); this.render(); }
+      try { await this.client.login(this.accountName, secret); } catch (error) { this.notice = error instanceof Error ? error.message : t("m084"); this.render(); }
     });
     wrap.append(intro, card);
     return wrap;
@@ -744,7 +750,7 @@ class LiteApp {
     create.addEventListener("submit", event => {
       event.preventDefault();
       this.notice = "";
-      try { bcClient.createRoom(this.newRoomName, this.space, this.language, this.unlisted, this.newRoomDescription, this.newRoomLimit, this.roomOptions()); }
+      try { this.client.createRoom(this.newRoomName, this.space, this.language, this.unlisted, this.newRoomDescription, this.newRoomLimit, this.roomOptions()); }
       catch (error) { this.localNotice(error instanceof Error ? error.message : t("m121")); }
     });
     section.append(heading);
@@ -833,7 +839,7 @@ class LiteApp {
     close.addEventListener("click", () => { this.membersOpen = false; this.render(); });
     roomInfo.append(close, this.el("p", "eyebrow", state.room!.Language || t("m085")), this.el("h1", "", state.room!.Name), this.el("p", "", state.room!.Description || t("m127")));
     const leave = this.button(t("m157"), "ghost danger", "button");
-    leave.addEventListener("click", () => bcClient.leave());
+    leave.addEventListener("click", () => this.client.leave());
     roomInfo.append(leave);
     sidebar.append(roomInfo, this.el("h2", "member-title", t("m158", [state.characters.length])));
     const members = this.el("div", "member-list");
@@ -868,10 +874,10 @@ class LiteApp {
     jump.addEventListener("click", () => { this.historyEndId = null; this.updateChatLog(true); });
     topMenu.append(toggle, history, jump);
     const clear = this.button(t("chat.clear"), "ghost clear-messages", "button");
-    clear.addEventListener("click", () => { if (window.confirm(t("chat.clearConfirm"))) { this.replyTarget = null; this.historyEndId = null; bcClient.clearMessages(); document.getElementById("chat-room-reply-indicator")?.replaceChildren(); this.updateChatLog(true); } });
+    clear.addEventListener("click", () => { if (window.confirm(t("chat.clearConfirm"))) { this.replyTarget = null; this.historyEndId = null; this.client.clearMessages(); document.getElementById("chat-room-reply-indicator")?.replaceChildren(); this.updateChatLog(true); } });
     topMenu.append(clear);
     const mobileLeave = this.button(t("m164"), "ghost", "button");
-    mobileLeave.addEventListener("click", () => bcClient.leave());
+    mobileLeave.addEventListener("click", () => this.client.leave());
     topMenu.append(mobileLeave);
     const struggle = this.el("div", "chat-room-struggle-bar"); struggle.id = "chat-room-struggle-bar";
     const log = this.el("div", "text-area-chat-log"); log.id = "TextAreaChatLog"; log.setAttribute("role", "log"); log.setAttribute("aria-live", "polite");
@@ -890,7 +896,7 @@ class LiteApp {
     bot.addEventListener("submit", (event) => {
       event.preventDefault();
       if (!this.chatDraft.trim()) return;
-      try { bcClient.sendChat(this.replyContent(this.chatDraft), this.replyTarget?.nativeId); this.replyTarget = null; reply.replaceChildren(); this.chatDraft = ""; input.value = ""; length.textContent = "0/1000"; }
+      try { this.client.sendChat(this.replyContent(this.chatDraft), this.replyTarget?.nativeId); this.replyTarget = null; reply.replaceChildren(); this.chatDraft = ""; input.value = ""; length.textContent = "0/1000"; }
       catch (error) { this.localNotice(error instanceof Error ? error.message : t("m167")); }
     });
     if (this.replyTarget) reply.append(this.replyIndicator());
@@ -1007,9 +1013,9 @@ class LiteApp {
     dialog.append(this.el("h2", "", t("cuddle.request", [request.sender])), this.el("p", "", t("cuddle.confirm")));
     const accept = this.button(t("cuddle.accept"), "primary", "button");
     const reject = this.button(t("safety.cancel"), "ghost", "button");
-    accept.addEventListener("click", () => this.run(() => bcClient.respondCuddle(true)));
-    reject.addEventListener("click", () => bcClient.respondCuddle(false));
-    dialog.addEventListener("cancel", () => bcClient.respondCuddle(false));
+    accept.addEventListener("click", () => this.run(() => this.client.respondCuddle(true)));
+    reject.addEventListener("click", () => this.client.respondCuddle(false));
+    dialog.addEventListener("cancel", () => this.client.respondCuddle(false));
     dialog.append(accept, reject); document.body.append(dialog); dialog.showModal();
   }
 
@@ -1023,7 +1029,7 @@ class LiteApp {
       action.dataset.safeword = mode;
       action.addEventListener("click", () => {
         if (!window.confirm(t("safety.confirm", [label]))) return;
-        try { bcClient.activateSafeword(mode); dialog.close(); dialog.remove(); }
+        try { this.client.activateSafeword(mode); dialog.close(); dialog.remove(); }
         catch (error) { this.localNotice(error instanceof Error ? error.message : String(error)); }
       });
       dialog.append(action);
@@ -1071,7 +1077,7 @@ class LiteApp {
         dismiss(); this.membersOpen = false; this.openConversation(character.MemberNumber, "whisper");
       });
       const friend = this.button(t("m176"), "ghost", "button");
-      friend.addEventListener("click", () => this.run(() => bcClient.setFriend(character.MemberNumber, true)));
+      friend.addEventListener("click", () => this.run(() => this.client.setFriend(character.MemberNumber, true)));
       const beep = this.button(t("m177"), "ghost", "button");
       beep.addEventListener("click", () => { dismiss(); this.openConversation(character.MemberNumber); });
       actions.append(whisper, friend, beep);
@@ -1080,7 +1086,7 @@ class LiteApp {
       const interact = this.button(t("interaction.title"), "secondary interaction-open", "button");
       interact.addEventListener("click", () => {
         dismiss();
-        openActivityDialog(character.Nickname || character.Name, compatibility => bcClient.activityOptions(character.MemberNumber, compatibility), (group, name, compatibility) => bcClient.sendActivity(character.MemberNumber, group, name, compatibility));
+        openActivityDialog(character.Nickname || character.Name, compatibility => this.client.activityOptions(character.MemberNumber, compatibility), (group, name, compatibility) => this.client.sendActivity(character.MemberNumber, group, name, compatibility));
       });
       actions.append(interact);
     }
@@ -1102,4 +1108,4 @@ class LiteApp {
   private el<K extends keyof HTMLElementTagNameMap>(tag: K, className = "", text?: string): HTMLElementTagNameMap[K] { const node = document.createElement(tag); if (className) node.className = className; if (text !== undefined) node.textContent = escapeText(text); return node; }
 }
 
-new LiteApp();
+if (!document.documentElement.hasAttribute("data-ui-preview")) new LiteApp();
