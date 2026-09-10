@@ -1,4 +1,5 @@
 import { t, localizeStatus } from "./i18n";
+import { validAppearance, copyAppearance, releaseAppearance, type BundledItem } from "./safeword";
 import { io, type Socket } from "socket.io-client";
 import type { CharacterSummary, ChatMessage, ClientSnapshot, DictionaryEntry, DisplayMessage, OnlineFriend, PlayerSummary, RoomCreateOptions, RoomSearchRequest, RoomSearchResult, RoomSync } from "./types";
 
@@ -49,6 +50,9 @@ export class BcLiteClient {
   private lastBeepAt = 0;
   private lastChatAt = 0;
   private textCatalog: Record<string, string> = {};
+  private safetyBaseline: { appearance: BundledItem[]; pose: string[] | null } | null = null;
+  private safetyCurrent: BundledItem[] | null = null;
+  private lastSafewordAt = 0;
 
   setTextCatalog(catalog: Record<string, string>): void {
     this.textCatalog = catalog;
@@ -111,6 +115,9 @@ export class BcLiteClient {
   }
 
   disconnect(): void {
+    this.safetyBaseline = null;
+    this.safetyCurrent = null;
+    this.lastSafewordAt = 0;
     this.manualDisconnect = true;
     this.credentials = null;
     this.loginAccepted = false;
@@ -214,9 +221,34 @@ export class BcLiteClient {
     this.patch({ phase: "ready", room: null, characters: [], messages: [], status: t("m207") });
   }
 
+  /** Explicit UI-confirmed exception to the normal no-appearance-write policy. */
+  activateSafeword(mode: "revert" | "release"): void {
+    if (mode !== "revert" && mode !== "release") throw new Error(t("safety.unavailable"));
+    const player = this.state.player;
+    if (!player || !this.canSend() || this.state.phase !== "in-room" || !this.state.room) throw new Error(t("m208"));
+    if (player.GameplaySettings?.EnableSafeword !== true || this.state.room.Game === "GGTS") throw new Error(t("safety.disabled"));
+    if (!this.safetyBaseline || !this.safetyCurrent || !player.ID || player.AssetFamily !== "Female3DCG") throw new Error(t("safety.unavailable"));
+    if (Date.now() - this.lastSafewordAt < 2000) throw new Error(t("safety.wait"));
+    const owned = Boolean(player.Ownership?.MemberNumber || player.Owner?.startsWith("NPC-"));
+    const appearance = mode === "revert" ? copyAppearance(this.safetyBaseline.appearance) : releaseAppearance(this.safetyCurrent, owned);
+    const pose = mode === "revert" ? this.safetyBaseline.pose : null;
+    const permission = mode === "revert" ? Math.max(3, player.AllowedInteractions ?? 3) : player.AllowedInteractions;
+    const update = { Appearance: appearance, AssetFamily: player.AssetFamily,
+      ...(mode === "revert" ? { AllowedInteractions: permission, ItemPermission: permission } : {}) };
+    this.lastSafewordAt = Date.now();
+    this.socket!.emit("AccountUpdate", update);
+    this.socket!.emit("ChatRoomCharacterUpdate", { ID: player.ID, Appearance: appearance, ActivePose: pose });
+    this.socket!.emit("ChatRoomChat", { Type: "Action", Content: mode === "revert" ? "ActionActivateSafewordRevert" : "ActionActivateSafewordRelease", Dictionary: [{ SourceCharacter: player.MemberNumber }] });
+    this.safetyCurrent = copyAppearance(appearance);
+    this.patch({ player: { ...player, Appearance: appearance, ActivePose: pose, AllowedInteractions: permission } });
+    if (mode === "release") this.leave();
+    this.localMessage(t("safety.sent"));
+  }
+
   sendChat(raw: string): void {
     const text = raw.trim();
     if (!text) return;
+    if (/^\/safeword(?:\s|$)/i.test(text)) throw new Error(t("safety.command"));
     if (!this.state.room || !this.canSend()) throw new Error(t("m208"));
     if (text.length > 1000) throw new Error(t("m209"));
     if (Date.now() - this.lastChatAt < 350) throw new Error(t("m210"));
@@ -289,6 +321,8 @@ export class BcLiteClient {
       this.clearRoomTimer();
       const characters = Array.isArray(room.Character) ? room.Character : [];
       const sameRoom = this.state.room?.Name === room.Name;
+      const self = characters.find(character => character.MemberNumber === this.state.player?.MemberNumber);
+      this.safetyCurrent = validAppearance(self?.Appearance) ? copyAppearance(self.Appearance) : null;
       this.patch({ phase: "in-room", room, characters, messages: sameRoom ? this.state.messages : [], status: t("m223", [room.Name]) });
       if (!sameRoom) this.localMessage(t("m223", [room.Name]));
     });
@@ -304,9 +338,23 @@ export class BcLiteClient {
     });
     for (const event of ["ChatRoomSyncCharacter", "ChatRoomSyncSingle"]) {
       this.socket.on(event, (data: { Character?: CharacterSummary }) => {
-        if (data?.Character) this.patch({ characters: this.upsertCharacter(data.Character) });
+        if (data?.Character) {
+          if (data.Character.MemberNumber === this.state.player?.MemberNumber) this.safetyCurrent = validAppearance(data.Character.Appearance) ? copyAppearance(data.Character.Appearance) : null;
+          this.patch({ characters: this.upsertCharacter(data.Character) });
+        }
       });
     }
+    this.socket.on("ChatRoomSyncItem", (data: { Item?: Record<string, unknown> }) => {
+      const item = data?.Item;
+      if (!item || item.Target !== this.state.player?.MemberNumber || !this.safetyCurrent) return;
+      if (typeof item.Group !== "string" || (item.Name !== undefined && typeof item.Name !== "string")) { this.safetyCurrent = null; return; }
+      const next = this.safetyCurrent.filter(entry => entry.Group !== item.Group);
+      if (typeof item.Name === "string") {
+        const { Target: _target, ...bundle } = item;
+        next.push(bundle as BundledItem);
+      }
+      this.safetyCurrent = copyAppearance(next);
+    });
     this.socket.on("ChatRoomSyncRoomProperties", (room: Partial<RoomSync>) => {
       if (this.state.room) this.patch({ room: { ...this.state.room, ...room } });
     });
@@ -355,10 +403,16 @@ export class BcLiteClient {
     this.loginAccepted = true;
     const player: PlayerSummary = { AccountName: value.AccountName, ID: value.ID, MemberNumber: value.MemberNumber!, Name: value.Name, Nickname: value.Nickname,
       Description: value.Description, Owner: value.Owner, Ownership: value.Ownership, Lovership: value.Lovership,
+      AssetFamily: value.AssetFamily,
+      GameplaySettings: value.GameplaySettings,
+      AllowedInteractions: Number.isInteger(value.AllowedInteractions) ? value.AllowedInteractions : undefined,
+      ActivePose: Array.isArray(value.ActivePose) && value.ActivePose.every(pose => typeof pose === "string") ? [...value.ActivePose] : null,
       Environment: typeof value.Environment === "string" ? value.Environment : undefined,
       FriendList: Array.isArray(value.FriendList) && value.FriendList.every(Number.isSafeInteger) ? value.FriendList : undefined,
       Appearance: Array.isArray(value.Appearance) ? value.Appearance : undefined,
       OnlineSharedSettings: value.OnlineSharedSettings && typeof value.OnlineSharedSettings === "object" ? value.OnlineSharedSettings : undefined };
+    this.safetyBaseline = validAppearance(player.Appearance) ? { appearance: copyAppearance(player.Appearance), pose: player.ActivePose ? [...player.ActivePose] : null } : null;
+    this.safetyCurrent = null;
     this.patch({ player, phase: "waiting-server", status: t("m236") });
     if (this.serverReady) this.patch({ phase: "ready", status: this.loginStatus() });
   }

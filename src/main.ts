@@ -2,6 +2,7 @@ import { t, getLocale, setLocale, type Locale } from "./i18n";
 import "./style.css";
 import { bcClient } from "./protocol";
 import { decodeBiography } from "./biography";
+import { appendChatLinks } from "./chat-links";
 import { loadTextCatalog } from "./text-catalog";
 import type { CharacterSummary, ClientSnapshot, DisplayMessage, RoomCreateOptions, RoomSearchRequest, RoomSearchResult } from "./types";
 
@@ -189,7 +190,11 @@ class LiteApp {
     brand.append(this.el("span", "brand-mark", "BC"), this.el("div", "", "Lite"));
     const connection = this.el("div", `connection phase-${state.phase}`);
     connection.append(this.el("span", "status-dot"), this.el("span", "", state.status));
-    header.append(brand, connection);
+    const statusControls = this.el("div", "header-status-controls");
+    const localeControl = this.languageControl();
+    localeControl.classList.add("header-locale");
+    statusControls.append(connection, localeControl);
+    header.append(brand);
     if (state.player) {
       const account = this.el("div", "header-account");
       const name = this.button(`${state.player.Nickname || state.player.Name} (#${state.player.MemberNumber})`, "ghost", "button");
@@ -198,6 +203,7 @@ class LiteApp {
       logout.addEventListener("click", () => { if (window.confirm(t("m008"))) bcClient.disconnect(); });
       account.append(name, logout); header.append(account);
     }
+    header.append(statusControls);
 
     const content = this.el("div", "app-content");
     if (state.phase === "idle" || state.phase === "connecting" || state.phase === "authenticating" || state.phase === "waiting-server" || state.phase === "reconnecting" || state.phase === "error") {
@@ -369,7 +375,7 @@ class LiteApp {
       const row = this.el("article", `beep-message ${message.incoming ? "incoming" : "outgoing"}`);
       const reply = this.button(`${message.incoming ? t("m053") : t("m054")} · ${message.name} #${message.memberNumber}`, "ghost", "button");
       reply.addEventListener("click", () => this.openConversation(message.memberNumber));
-      row.append(reply, this.el("time", "message-time", message.time.toLocaleTimeString()), this.el("p", "message-text", message.text));
+      row.append(reply, this.el("time", "message-time", message.time.toLocaleTimeString()), this.chatText("p", "message-text", message.text));
       log.append(row);
     }
   }
@@ -378,7 +384,6 @@ class LiteApp {
     const section = this.el("section", "settings-view");
     section.append(this.el("p", "eyebrow", t("m055")), this.el("h1", "", t("m056")));
     const panel = this.el("div", "settings-card");
-    panel.append(this.languageControl());
     for (const [key, label] of [["background", t("m057")], ["largeText", t("m058")], ["timestamps", t("m059")]] as const) {
       panel.append(this.checkbox(label, this.settings[key], value => {
         this.settings[key] = value; this.applySettings();
@@ -422,7 +427,6 @@ class LiteApp {
     const card = this.el("form", "login-card") as HTMLFormElement;
     card.autocomplete = "off";
     card.append(this.el("h2", "", t("m075")));
-    card.append(this.languageControl());
     const account = this.input("AccountName", t("m076"), "text", this.accountName);
     account.maxLength = 100;
     account.autocomplete = "username";
@@ -655,6 +659,10 @@ class LiteApp {
     const mobileLeave = this.button(t("m164"), "ghost", "button");
     mobileLeave.addEventListener("click", () => bcClient.leave());
     topMenu.append(mobileLeave);
+    const safeword = this.button(t("safety.title"), "ghost danger safeword-button", "button");
+    safeword.id = "room-safeword";
+    safeword.addEventListener("click", () => this.showSafeword());
+    topMenu.append(safeword);
     const struggle = this.el("div", "chat-room-struggle-bar"); struggle.id = "chat-room-struggle-bar";
     const log = this.el("div", "text-area-chat-log"); log.id = "TextAreaChatLog"; log.setAttribute("role", "log"); log.setAttribute("aria-live", "polite");
     log.dataset.room = state.room!.Name;
@@ -686,13 +694,42 @@ class LiteApp {
     if (message.type === "Local" || message.type === "ServerMessage") {
       row.append(time, this.el("span", "message-system", message.text));
     } else if (message.type === "Emote") {
-      row.append(time, this.el("span", "message-emote", `* ${message.senderName} ${message.text}`));
+      const body = this.chatText("span", "message-emote", message.text);
+      body.prepend(document.createTextNode(`* ${message.senderName} `));
+      row.append(time, body);
     } else if (message.type === "Whisper") {
-      row.append(time, this.el("strong", "message-author", message.senderName), this.el("span", "message-target", ` → ${message.targetName}`), this.el("span", "message-text", message.text));
+      row.append(time, this.el("strong", "message-author", message.senderName), this.el("span", "message-target", ` → ${message.targetName}`), this.chatText("span", "message-text", message.text));
     } else {
-      row.append(time, this.el("strong", "message-author", message.senderName), this.el("span", "message-text", message.text));
+      row.append(time, this.el("strong", "message-author", message.senderName), this.chatText("span", "message-text", message.text));
     }
     return row;
+  }
+
+  private showSafeword(): void {
+    const dialog = this.el("dialog", "profile-dialog safeword-dialog");
+    dialog.setAttribute("aria-label", t("safety.title"));
+    dialog.append(this.el("h2", "", t("safety.title")), this.el("p", "", t("safety.help")));
+    for (const mode of ["revert", "release"] as const) {
+      const label = t(mode === "revert" ? "safety.revert" : "safety.release");
+      const action = this.button(label, "ghost danger", "button");
+      action.dataset.safeword = mode;
+      action.addEventListener("click", () => {
+        if (!window.confirm(t("safety.confirm", [label]))) return;
+        try { bcClient.activateSafeword(mode); dialog.close(); dialog.remove(); }
+        catch (error) { this.localNotice(error instanceof Error ? error.message : String(error)); }
+      });
+      dialog.append(action);
+    }
+    const cancel = this.button(t("safety.cancel"), "ghost", "button");
+    cancel.addEventListener("click", () => { dialog.close(); dialog.remove(); });
+    dialog.addEventListener("close", () => dialog.remove());
+    dialog.append(cancel); document.body.append(dialog); dialog.showModal();
+  }
+
+  private chatText(tag: "span" | "p", className: string, text: string): HTMLElement {
+    const node = this.el(tag, className);
+    appendChatLinks(node, text);
+    return node;
   }
 
   private showMember(character: CharacterSummary): void {

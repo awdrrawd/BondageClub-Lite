@@ -31,11 +31,15 @@ Cloudflare 是連線中繼，BC 接收帳密、帳號資料及遊戲封包。兩
 目標不是提供衣櫃，而是不讓 Lite 因不認識 ECHO 物品而清除已有外觀。
 
 - 登入收到的 Appearance 和 OnlineSharedSettings 保留原始結構，不做未知物品過濾、重建、壓縮或欄位清洗。
-- Lite 不送 Appearance／OnlineSharedSettings 的 AccountUpdate，也不送角色換裝更新；加／移除好友只送 FriendList。
+- 一般操作不送 Appearance／OnlineSharedSettings 的 AccountUpdate，也不送角色換裝更新；加／移除好友只送 FriendList。**唯一例外：使用者選擇安全詞操作並確認後，才送 Appearance 與角色外觀更新；「回復」另依 BC 規則收緊 AllowedInteractions／ItemPermission。** 不會改寫 OnlineSharedSettings。
 - 房內收到不同外觀不會觸發「覆蓋存檔」或「還原登入外觀」。後者也可能覆蓋其他合法修改，所以不自動還原。
 - 不載入完整 ECHO、不發送假版本／能力標籤，也不加入外觀備份雲端服務或本機外觀儲存。
 
-這保護的是「Lite 不破壞伺服器已存的外觀」，不是保證 ECHO 觀看端的渲染。請先在完整版 BC + ECHO 儲存外觀，登入 Lite 後由另一位裝有 ECHO 的玩家核對。不要在 Lite 工作階段換裝；Lite 不保存他人對你進行的外觀修改。完整 ECHO 雙向操作不在此最小範圍內。
+一般操作的目標是不改寫既有外觀，不是保證 ECHO 觀看端的渲染。請先在完整版 BC + ECHO 儲存外觀，登入 Lite 後由另一位裝有 ECHO 的玩家核對。安全詞是明確的改寫例外：回復採本次登入時的快照，解除採目前收到的房內外觀（含單件更新），資料只在分頁記憶體。未知插件欄位在解除時保留，因此不能保證插件束縛全部解除。完整 ECHO 雙向操作不在此範圍內。
+
+## 聊天連結
+
+HTTP(S) 網址以 DOM 文字與連結建立，不解析 HTML。HTTPS 圖片／影片直連會自動建立內嵌媒體：圖片接近可視範圍時載入，影片預載 metadata、提供播放控制，不自動播放。這些請求直接送往媒體來源，會讓來源收到使用者 IP 等資訊；全站 Referrer-Policy 為 no-referrer。普通網頁與失敗媒體保留連結，另開分頁並設定 noopener／noreferrer。不使用 iframe、外部腳本或預覽 API；這不是惡意網站掃描或安全保證。
 
 ## 驗收
 

@@ -6,6 +6,7 @@ import vm from 'node:vm';
 import { Window } from 'happy-dom';
 import LZString from 'lz-string';
 import { t, getLocale, setLocale } from './i18n-helper.mjs';
+import { appendChatLinks } from './links-helper.mjs';
 
 const bioCode = stripTypeScriptTypes(readFileSync(new URL('../src/biography.ts', import.meta.url), 'utf8')).replace('import LZString from "lz-string";', '').replace('import { t } from "./i18n";', '').replace('export ', '');
 const decodeBiography = new Function('LZString', 't', bioCode + '; return decodeBiography;')(LZString, t);
@@ -15,6 +16,7 @@ const source = stripTypeScriptTypes(readFileSync(new URL('../src/main.ts', impor
   .replace('import "./style.css";', '')
   .replace('import { bcClient } from "./protocol";', '')
   .replace('import { decodeBiography } from "./biography";', '')
+  .replace('import { appendChatLinks } from "./chat-links";', '')
   .replace('import { loadTextCatalog } from "./text-catalog";', '');
 
 function setup(savedAccount) {
@@ -30,18 +32,50 @@ function setup(savedAccount) {
     refreshFriends() { calls.push('friends'); },
     sendChat(text) { calls.push(text); },
     setTextCatalog() {},
+    activateSafeword(mode) { calls.push({ safeword: mode }); },
     relocalize() {},
     sendBeep(id, text) { calls.push({ id, text }); },
     async login(account) { calls.push({ login: account }); },
     setFriend() {}, clearBeeps() {}, leave() {}, disconnect() {}, search() {}, join() {}, createRoom() {},
   };
-  vm.runInNewContext(source, { window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
+  vm.runInNewContext(source, { window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
   return { window, document: window.document, calls, state: () => current, emit(change) { if (change.friendsStatus === '查詢完成') change.friendsQueryState = 'ready'; current = { ...current, ...change }; listener(current); } };
 }
 
 function messages(count) {
   return Array.from({ length: count }, (_, index) => ({ id: `id-${index}`, sender: 55, senderName: 'Friend', text: `message ${index}`, time: new Date(), type: 'Chat' }));
 }
+
+test('room safeword requires choosing an operation and accepting explicit confirmation', async () => {
+  const f = setup();
+  f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, messages: [] });
+  f.document.getElementById('room-safeword').click();
+  assert.ok(f.document.querySelector('.safeword-dialog').open);
+  f.window.confirm = () => false;
+  f.document.querySelector('[data-safeword=revert]').click();
+  assert.equal(f.calls.some(call => call?.safeword), false);
+  f.window.confirm = () => true;
+  f.document.querySelector('[data-safeword=release]').click();
+  assert.deepEqual(f.calls.at(-1), { safeword: 'release' });
+  assert.equal(f.document.querySelector('.safeword-dialog'), null);
+  await f.window.happyDOM.close();
+});
+
+test('chat, actions and whispers link URLs while keeping unsafe HTML inert and drafts intact', async () => {
+  const f = setup();
+  const rows = ['Chat', 'Action', 'Whisper', 'Emote'].map((type, i) => ({ id: `link-${i}`, type, senderName: 'Friend', text: 'https://example.org/image.png <img src=x>', time: new Date() }));
+  f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, messages: rows });
+  const log = f.document.getElementById('TextAreaChatLog');
+  assert.equal(log.querySelectorAll('a.chat-link').length, 4);
+  assert.equal(log.querySelectorAll('img.chat-media').length, 4);
+  assert.equal(log.querySelectorAll('img[src=x]').length, 0);
+  const input = f.document.getElementById('InputChat');
+  input.value = 'draft'; input.dispatchEvent(new f.window.Event('input'));
+  f.emit({ messages: [...rows, { ...rows[0], id: 'new-link' }] });
+  assert.equal(f.document.getElementById('InputChat'), input);
+  assert.equal(input.value, 'draft');
+  await f.window.happyDOM.close();
+});
 
 test('language selection persists locally, translates navigation and preserves chat draft', async () => {
   const f = setup();
@@ -50,6 +84,9 @@ test('language selection persists locally, translates navigation and preserves c
   input.value = '中文 draft'; input.dispatchEvent(new f.window.Event('input'));
   f.document.getElementById('nav-settings').click();
   const select = f.document.getElementById('InterfaceLocale');
+  assert.equal(f.document.querySelectorAll('#InterfaceLocale').length, 1);
+  assert.ok(select.closest('.app-header'));
+  assert.equal(select.closest('.header-locale').previousElementSibling.classList.contains('connection'), true);
   select.value = 'en'; select.dispatchEvent(new f.window.Event('change'));
   assert.equal(f.document.documentElement.lang, 'en');
   assert.equal(JSON.parse(f.window.localStorage.getItem('bc-lite-display-v1')).locale, 'en');

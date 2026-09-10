@@ -10,6 +10,9 @@ export type ConnectionPhase =
   | "error";
 
 export interface PlayerSummary extends CharacterSummary {
+  GameplaySettings?: { EnableSafeword?: boolean };
+  AllowedInteractions?: number;
+  AssetFamily?: string;
   FriendList?: number[];
   /** Opaque server bundles: never rebuild with an incomplete asset registry. */
   Appearance?: unknown[];
@@ -23,6 +26,8 @@ export interface PlayerSummary extends CharacterSummary {
 }
 
 export interface CharacterSummary {
+  Appearance?: unknown[];
+  ActivePose?: string[] | null;
   Owner?: string;
   Ownership?: { Name?: string; MemberNumber?: number; Stage?: number };
   Lovership?: Array<{ Name?: string; MemberNumber?: number; Stage?: number }>;
@@ -74,6 +79,8 @@ export interface RoomCreateOptions {
 }
 
 export interface RoomSync {
+  Game?: string;
+  Space?: string;
   Name: string;
   Description: string;
   Language: string;

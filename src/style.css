@@ -16,6 +16,12 @@
 }
 
 * { box-sizing: border-box; }
+.chat-link { color: var(--accent); text-decoration: underline; text-underline-offset: .18em; overflow-wrap: anywhere; }
+.chat-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.chat-media { display: block; width: min(100%, 480px); aspect-ratio: 16 / 9; max-height: 320px; object-fit: contain; background: #0005; border-radius: 8px; margin-block: .5rem; }
+.safeword-dialog { max-height: 85dvh; overflow: auto; }
+.safeword-dialog p { line-height: 1.6; }
+.safeword-dialog .button { display: block; width: 100%; margin-top: .7rem; min-height: 44px; }
 html, body, #app { min-height: 100%; margin: 0; }
 body { min-width: 320px; background: radial-gradient(circle at 15% 0%, #2a1726 0, transparent 38rem), var(--bg); }
 button, input, textarea, select { font: inherit; }
@@ -219,6 +225,11 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; scroll-behavior: auto !important; } }
 
 .header-account { display: flex; align-items: center; gap: .35rem; min-width: 0; }
+.header-status-controls { display: flex; align-items: center; justify-content: flex-end; gap: .6rem; min-width: 0; margin-left: auto; }
+.header-status-controls .connection { flex: 1; }
+.header-locale.field { flex: 0 0 108px; margin: 0; }
+.header-locale .field-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.header-locale select { min-height: 44px; padding: .4rem; font-size: 16px; }
 .header-account .button { padding: .5rem; font-size: .8rem; }
 .header-account .button:first-child { max-width: 230px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .app-header > .connection { margin-inline: auto 1rem; }
@@ -245,6 +256,9 @@ summary { cursor: pointer; padding-block: .5rem; }
 .login-error { color: var(--danger); }
 @media (max-width: 760px) {
   .app-header { height: auto; min-height: 60px; flex-wrap: wrap; gap: .25rem; padding-block: .4rem; }
+  .header-status-controls { order: 3; flex-basis: 100%; margin: 0; }
+  .header-status-controls .connection { font-size: .72rem; }
+  .header-status-controls .connection span:last-child { max-width: 100%; }
   .app-header > .connection { order: 3; flex-basis: 100%; margin: 0; font-size: .72rem; }
   .app-header > .connection span:last-child { max-width: 90vw; }
   .header-account { margin-left: auto; }
@@ -268,6 +282,7 @@ summary { cursor: pointer; padding-block: .5rem; }
   .chat-room-top-menu > .room-title { grid-column: 1 / 4; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.5; font-size: 1rem; }
   .chat-room-top-menu > .room-population { grid-column: 4; text-align: right; }
   .chat-room-top-menu .button { min-width: 0; min-height: 44px; padding: .4rem .2rem; font-size: .72rem; }
+  .chat-room-top-menu .safeword-button { grid-column: 1 / -1; }
   .text-area-chat-log { min-height: 0; padding: .55rem; }
   .chat-room-bot { grid-template-columns: minmax(0, 1fr) auto; gap: .4rem; align-items: end; padding: .5rem; }
   #InputChat { height: 72px; min-height: 48px; max-height: 120px; font-size: 16px; padding: .6rem; }

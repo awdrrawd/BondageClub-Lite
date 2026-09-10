@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { stripTypeScriptTypes } from 'node:module';
 import { t, setLocale, localizeStatus } from './i18n-helper.mjs';
+import { validAppearance, copyAppearance, releaseAppearance } from './safety-helper.mjs';
 
 async function setup(environment, relayAvailable = true, account = {}) {
   setLocale('zh');
@@ -19,7 +20,7 @@ async function setup(environment, relayAvailable = true, account = {}) {
     disconnect() { this.connected = false; },
   };
   const context = {
-    t, localizeStatus,
+    t, localizeStatus, validAppearance, copyAppearance, releaseAppearance,
     exports: {},
     require: () => ({ io: () => socket }),
     window: { setTimeout(fn) { timers.set(++timerId, fn); return timerId; }, clearTimeout(id) { timers.delete(id); } },
@@ -31,6 +32,7 @@ async function setup(environment, relayAvailable = true, account = {}) {
   const source = readFileSync(new URL('../src/protocol.ts', import.meta.url), 'utf8');
   const javascript = stripTypeScriptTypes(source)
     .replace(/import .* from "\.\/i18n";/, '')
+    .replace(/import .* from "\.\/safeword";/, '')
     .replace(/import .* from "socket.io-client";/, 'const { io } = require("socket.io-client");')
     .replaceAll('export ', '');
   vm.runInNewContext(`${javascript}\nexports.BcLiteClient = BcLiteClient;`, context);
@@ -45,6 +47,76 @@ async function setup(environment, relayAvailable = true, account = {}) {
 }
 
 const request = { Query: '', Space: 'X', Language: '', Game: '', FullRooms: false, ShowLocked: true, SearchDescs: false };
+
+const safetyAccount = () => ({ AssetFamily: 'Female3DCG', GameplaySettings: { EnableSafeword: true }, AllowedInteractions: 1, ActivePose: ['Kneel'], Appearance: [{ Group: 'Cloth', Name: 'Dress', Color: 'Red' }, { Group: 'ECHO-custom', Name: 'Custom', Property: { opaque: true } }] });
+
+test('confirmed safeword revert alone writes the exact cloned login appearance and native permissions', async () => {
+  const account = safetyAccount();
+  const original = JSON.stringify(account.Appearance);
+  const f = await setup('PROD', true, account);
+  account.Appearance[0].Color = 'Mutated outside client';
+  f.handlers.get('ChatRoomSync')({ Name: 'Test', Character: [{ MemberNumber: 123, Name: 'Test', Appearance: [{ Group: 'ItemArms', Name: 'Rope' }] }] });
+  assert.equal(f.sent.some(p => p.event === 'ChatRoomCharacterUpdate'), false);
+  f.client.activateSafeword('revert');
+  const update = f.sent.find(p => p.event === 'ChatRoomCharacterUpdate').payload;
+  assert.equal(update.ID, 'socket');
+  assert.equal(JSON.stringify(update.Appearance), original);
+  assert.equal(JSON.stringify(update.ActivePose), '["Kneel"]');
+  const saved = f.sent.find(p => p.event === 'AccountUpdate').payload;
+  assert.equal(saved.AllowedInteractions, 3);
+  assert.equal(saved.ItemPermission, 3);
+  assert.equal('OnlineSharedSettings' in saved, false);
+  assert.equal(f.state().phase, 'in-room');
+  assert.equal(f.sent.at(-1).payload.Content, 'ActionActivateSafewordRevert');
+  const count = f.sent.length;
+  assert.throws(() => f.client.activateSafeword('revert'), /稍候/);
+  assert.equal(f.sent.length, count);
+});
+
+test('release follows current full and single-item updates, retains clothes and unknown groups, then leaves', async () => {
+  const f = await setup('PROD', true, { ...safetyAccount(), Ownership: { MemberNumber: 99 } });
+  const worn = [{ Group: 'Cloth', Name: 'NewDress' }, { Group: 'ECHO-custom', Name: 'KeepMe' }, { Group: 'ItemArms', Name: 'Rope' }, { Group: 'ItemNeck', Name: 'SlaveCollar', Property: { Effect: ['GagHeavy'] } }];
+  f.handlers.get('ChatRoomSync')({ Name: 'Test', Character: [{ MemberNumber: 123, Name: 'Test', Appearance: worn }] });
+  f.handlers.get('ChatRoomSyncItem')({ Source: 55, Item: { Target: 123, Group: 'Cloth', Name: 'LatestDress', Color: 'Blue' } });
+  f.client.activateSafeword('release');
+  const update = f.sent.find(p => p.event === 'AccountUpdate').payload;
+  assert.equal(update.Appearance.find(i => i.Group === 'Cloth').Name, 'LatestDress');
+  assert.equal(update.Appearance.some(i => i.Group === 'ItemArms'), false);
+  assert.equal(update.Appearance.some(i => i.Group === 'ECHO-custom'), true);
+  assert.equal(JSON.stringify(update.Appearance.find(i => i.Name === 'SlaveCollar').Property), '{"TypeRecord":{"noarch":0}}');
+  assert.equal('AllowedInteractions' in update, false);
+  assert.equal(worn[3].Property.Effect[0], 'GagHeavy');
+  assert.equal(f.sent.at(-2).payload.Content, 'ActionActivateSafewordRelease');
+  assert.equal(f.sent.at(-1).event, 'ChatRoomLeave');
+  assert.equal(f.state().room, null);
+});
+
+test('safeword refuses disabled, unsupported, incomplete or disconnected sessions without writes', async () => {
+  for (const change of [{ GameplaySettings: { EnableSafeword: false } }, { GameplaySettings: undefined }, { AssetFamily: 'Unknown' }, { Appearance: undefined }]) {
+    const f = await setup('PROD', true, { ...safetyAccount(), ...change });
+    f.handlers.get('ChatRoomSync')({ Name: 'Test', Character: [{ MemberNumber: 123, Name: 'Test', Appearance: [] }] });
+    const before = f.sent.length;
+    assert.throws(() => f.client.activateSafeword('revert'));
+    assert.equal(f.sent.length, before);
+  }
+  const f = await setup('PROD', true, safetyAccount());
+  f.handlers.get('ChatRoomSync')({ Name: 'Test', Game: 'GGTS', Character: [{ MemberNumber: 123, Name: 'Test', Appearance: [] }] });
+  assert.throws(() => f.client.activateSafeword('release'), /GGTS/);
+  f.handlers.get('ChatRoomSync')({ Name: 'Test', Character: [{ MemberNumber: 123, Name: 'Test' }] });
+  assert.throws(() => f.client.activateSafeword('release'), /完整外觀/);
+  f.client.disconnect();
+  assert.throws(() => f.client.activateSafeword('revert'));
+});
+
+test('stricter interaction permissions stay strict and slash safeword never leaks into chat', async () => {
+  const f = await setup('PROD', true, { ...safetyAccount(), AllowedInteractions: 4 });
+  f.handlers.get('ChatRoomSync')({ Name: 'Test', Character: [{ MemberNumber: 123, Name: 'Test', Appearance: [] }] });
+  const before = f.sent.length;
+  assert.throws(() => f.client.sendChat('/safeword'), /安全詞/);
+  assert.equal(f.sent.length, before);
+  f.client.activateSafeword('revert');
+  assert.equal(f.sent.find(p => p.event === 'AccountUpdate').payload.AllowedInteractions, 4);
+});
 
 test('character Status packets never enter history or notify UI; matching chat text remains', async () => {
   const f = await setup('PROD');
