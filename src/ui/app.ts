@@ -1041,16 +1041,38 @@ export class LiteApp {
     document.querySelector(".cuddle-request")?.remove();
     const request = this.snapshot?.cuddleRequest;
     if (!request) return;
-    let info: ReturnType<UiClient["cuddleInfo"]>;
-    try { info = this.client.cuddleInfo(request.sender); } catch { this.client.respondCuddle(false); return; }
-    const dialog = this.el("dialog", "profile-dialog cuddle-request");
-    dialog.append(this.el("h2", "", t("cuddle.request", [request.sender])), this.el("p", "cuddle-details", info.text));
+    this.showCuddleConfirmation(request.sender, t("cuddle.request", [request.sender]), token => this.client.respondCuddle(true, token), () => this.client.respondCuddle(false), "cuddle-request");
+  }
+
+  private showCuddleConfirmation(member: number, title: string, confirm: (token: string) => void, cancel = () => {}, className = "cuddle-confirm"): void {
+    const dialog = this.el("dialog", `profile-dialog ${className}`);
+    dialog.setAttribute("aria-label", title);
+    const details = this.el("p", "cuddle-details");
+    const status = this.el("p", "notice"); status.setAttribute("role", "alert");
     const accept = this.button(t("cuddle.accept"), "primary", "button");
     const reject = this.button(t("safety.cancel"), "ghost", "button");
-    accept.addEventListener("click", () => this.run(() => this.client.respondCuddle(true, info.token)));
-    reject.addEventListener("click", () => this.client.respondCuddle(false));
-    dialog.addEventListener("cancel", () => this.client.respondCuddle(false));
-    dialog.append(accept, reject); document.body.append(dialog); dialog.showModal();
+    const close = this.button("×", "ghost dialog-close", "button"); close.setAttribute("aria-label", t("m173"));
+    let token: string | undefined;
+    const refresh = () => {
+      try { const info = this.client.cuddleInfo(member); details.textContent = info.text; token = info.token; accept.disabled = false; }
+      catch (error) { token = undefined; accept.disabled = true; status.textContent = error instanceof Error ? error.message : String(error); }
+    };
+    const dismiss = () => { dialog.close(); dialog.remove(); cancel(); };
+    accept.addEventListener("click", () => {
+      if (!token) return;
+      try { confirm(token); dialog.close(); dialog.remove(); }
+      catch (error) {
+        status.textContent = error instanceof Error ? error.message : String(error);
+        // A stale approval never applies automatically: show fresh slots and require another click.
+        refresh();
+      }
+    });
+    reject.addEventListener("click", dismiss); close.addEventListener("click", dismiss);
+    dialog.addEventListener("cancel", event => { event.preventDefault(); dismiss(); });
+    dialog.addEventListener("close", () => dialog.remove());
+    const actions = this.el("div", "toolbar"); actions.append(accept, reject);
+    dialog.append(close, this.el("h2", "", title), details, status, actions);
+    refresh(); document.body.append(dialog); dialog.showModal();
   }
 
   private showSafeword(): void {
@@ -1120,14 +1142,16 @@ export class LiteApp {
       const interact = this.button(t("interaction.title"), "secondary interaction-open", "button");
       interact.addEventListener("click", () => {
         dismiss();
-        openActivityDialog(character.Nickname || character.Name, compatibility => this.client.activityOptions(character.MemberNumber, compatibility), (group, name, compatibility) => {
-          let token: string | undefined;
+        const activityDialog = openActivityDialog(character.Nickname || character.Name, compatibility => this.client.activityOptions(character.MemberNumber, compatibility), (group, name, compatibility) => {
           if (name.startsWith("cuddle:") && name !== "cuddle:stop") {
-            const info = this.client.cuddleInfo(character.MemberNumber);
-            if (!window.confirm(info.text)) return false;
-            token = info.token;
+            this.showCuddleConfirmation(character.MemberNumber, `${t("cuddle.item")} · ${character.Nickname || character.Name}`, token => {
+              this.client.sendActivity(character.MemberNumber, group, name, compatibility, token);
+              const status = activityDialog.querySelector<HTMLElement>('[role="status"]');
+              if (status) status.textContent = t("interaction.sent");
+            });
+            return false;
           }
-          this.client.sendActivity(character.MemberNumber, group, name, compatibility, token);
+          this.client.sendActivity(character.MemberNumber, group, name, compatibility);
         });
       });
       actions.append(interact);

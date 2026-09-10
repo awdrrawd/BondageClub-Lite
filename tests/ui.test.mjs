@@ -196,6 +196,42 @@ test('private composer and navigation follow the compact layout, mixed channels 
   await f.window.happyDOM.close();
 });
 
+test('outgoing ItemMisc consent uses an in-page dialog and retries stale state only after another approval', async () => {
+  const f=setup();
+  f.window.confirm=()=>{throw Error('Browser confirm must not be used');};
+  f.window.alert=()=>{throw Error('Browser alert must not be used');};
+  let version=1, stale=false;
+  const sent=[];
+  f.client.cuddleInfo=()=>({token:String(version),text:`ItemMisc pair #${version}`});
+  f.client.activityOptions=()=>[{group:'ItemTorso',groupLabel:'軀幹',name:'cuddle:test',label:'貼貼',reason:null}];
+  f.client.sendActivity=(_id,_group,_name,_mode,token)=>{
+    if(stale){stale=false;version=2;throw Error('Changed: please review again');}
+    sent.push(token);
+  };
+  f.emit({phase:'in-room',room:{Name:'Room',Limit:10},characters:[{MemberNumber:55,Name:'Friend'}]});
+  f.document.querySelector('.member-row').click(); f.document.querySelector('.interaction-open').click();
+  const activity=f.document.querySelector('.activity-dialog');
+  activity.querySelector('[data-body-group="ItemTorso"]').dispatchEvent(new f.window.Event('click'));
+  const open=()=>activity.querySelector('.activity-option button').click();
+  open();
+  let dialog=f.document.querySelector('.cuddle-confirm');
+  assert.match(dialog.textContent,/ItemMisc pair #1/); assert.equal(sent.length,0);
+  dialog.querySelector('.dialog-close').click(); assert.equal(f.document.querySelector('.cuddle-confirm'),null);
+  assert.equal(sent.length,0);
+  open(); dialog=f.document.querySelector('.cuddle-confirm'); stale=true;
+  dialog.querySelector('.primary').click();
+  assert.match(dialog.querySelector('[role=alert]').textContent,/Changed/);
+  assert.match(dialog.querySelector('.cuddle-details').textContent,/#2/);
+  assert.equal(sent.length,0);
+  dialog.querySelector('.primary').click();
+  assert.deepEqual(sent,['2']); assert.equal(f.document.querySelector('.cuddle-confirm'),null);
+  assert.match(activity.querySelector('[role=status]').textContent,/已/);
+  open(); dialog=f.document.querySelector('.cuddle-confirm');
+  dialog.dispatchEvent(new f.window.Event('cancel',{cancelable:true}));
+  assert.equal(f.document.querySelector('.cuddle-confirm'),null); assert.equal(sent.length,1);
+  await f.window.happyDOM.close();
+});
+
 test('incoming cuddle opens explicit consent without auto acceptance', async () => {
   const f = setup();
   f.emit({ cuddleRequest: { sender:55, name:'抱入怀中', expires:Date.now()+60000 } });
