@@ -9,6 +9,7 @@
     "catalog:bc": "node scripts/build-text-catalog.mjs",
     "catalog:plugins": "node scripts/build-plugin-catalog.mjs",
     "catalog:items": "node scripts/build-item-catalog.mjs",
+    "catalog:native": "node scripts/build-native-activities.mjs",
     "prebuild": "npm run catalog:compile",
     "predev": "npm run catalog:compile",
     "dev": "vite",

@@ -26,6 +26,8 @@ export interface PlayerSummary extends CharacterSummary {
 }
 
 export interface CharacterSummary {
+  AssetFamily?: string;
+  ArousalSettings?: { Active?: string; Zone?: string; Activity?: string };
   OnlineSharedSettings?: Record<string, unknown>;
   Appearance?: unknown[];
   ActivePose?: string[] | null;
@@ -80,6 +82,8 @@ export interface RoomCreateOptions {
 }
 
 export interface RoomSync {
+  BlockCategory?: string[];
+  MapType?: string;
   Game?: string;
   Space?: string;
   Name: string;
@@ -121,7 +125,7 @@ export interface DisplayMessage {
   senderName: string;
   targetName?: string;
   text: string;
-  type: Exclude<ChatMessageType, "Hidden" | "Status"> | "Local";
+  type: Exclude<ChatMessageType, "Hidden" | "Status"> | "Local" | "Beep";
   time: Date;
 }
 

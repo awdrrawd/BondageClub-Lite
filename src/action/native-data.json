@@ -1,0 +1,1761 @@
+{
+  "activities": [
+    {
+      "name": "Whisper",
+      "id": 0,
+      "target": [
+        "ItemEars"
+      ],
+      "self": [],
+      "prerequisites": [
+        "UseMouth"
+      ],
+      "special": false
+    },
+    {
+      "name": "MoanGag",
+      "id": 1,
+      "target": [],
+      "self": [
+        "ItemMouth"
+      ],
+      "prerequisites": [
+        "IsGagged"
+      ],
+      "special": true
+    },
+    {
+      "name": "MoanGagTalk",
+      "id": 2,
+      "target": [],
+      "self": [
+        "ItemMouth"
+      ],
+      "prerequisites": [
+        "IsGagged"
+      ],
+      "special": true
+    },
+    {
+      "name": "MoanGagWhimper",
+      "id": 3,
+      "target": [],
+      "self": [
+        "ItemMouth"
+      ],
+      "prerequisites": [
+        "IsGagged"
+      ],
+      "special": true
+    },
+    {
+      "name": "MoanGagGroan",
+      "id": 4,
+      "target": [],
+      "self": [
+        "ItemMouth"
+      ],
+      "prerequisites": [
+        "IsGagged"
+      ],
+      "special": true
+    },
+    {
+      "name": "MoanGagAngry",
+      "id": 5,
+      "target": [],
+      "self": [
+        "ItemMouth"
+      ],
+      "prerequisites": [
+        "IsGagged"
+      ],
+      "special": true
+    },
+    {
+      "name": "MoanGagGiggle",
+      "id": 6,
+      "target": [],
+      "self": [
+        "ItemMouth"
+      ],
+      "prerequisites": [
+        "IsGagged"
+      ],
+      "special": true
+    },
+    {
+      "name": "GagKiss",
+      "id": 7,
+      "target": [
+        "ItemMouth"
+      ],
+      "self": [],
+      "prerequisites": [
+        "ZoneAccessible",
+        "UseMouth",
+        "TargetMouthBlocked"
+      ],
+      "special": false
+    },
+    {
+      "name": "ChewItem",
+      "id": 67,
+      "target": [],
+      "self": [
+        "ItemMouth"
+      ],
+      "prerequisites": [
+        "Needs-ChewItem",
+        "IsGagged"
+      ],
+      "special": true
+    },
+    {
+      "name": "Nibble",
+      "id": 8,
+      "target": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemEars",
+        "ItemFeet",
+        "ItemHands",
+        "ItemLegs",
+        "ItemMouth",
+        "ItemNeck",
+        "ItemNipples",
+        "ItemNose",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ],
+      "self": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemHands",
+        "ItemMouth",
+        "ItemNipples"
+      ],
+      "prerequisites": [
+        "ZoneAccessible",
+        "UseMouth",
+        "ZoneNaked"
+      ],
+      "special": false
+    },
+    {
+      "name": "Lick",
+      "id": 9,
+      "target": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemEars",
+        "ItemFeet",
+        "ItemHands",
+        "ItemLegs",
+        "ItemMouth",
+        "ItemNeck",
+        "ItemNipples",
+        "ItemNose",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ],
+      "self": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemHands",
+        "ItemMouth",
+        "ItemNipples"
+      ],
+      "prerequisites": [
+        "ZoneAccessible",
+        "UseTongue",
+        "ZoneNaked"
+      ],
+      "special": false
+    },
+    {
+      "name": "PoliteKiss",
+      "id": 10,
+      "target": [
+        "ItemBoots",
+        "ItemHands",
+        "ItemMouth"
+      ],
+      "self": [
+        "ItemBoots",
+        "ItemHands"
+      ],
+      "prerequisites": [
+        "UseMouth"
+      ],
+      "special": false
+    },
+    {
+      "name": "Kiss",
+      "id": 11,
+      "target": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemButt",
+        "ItemEars",
+        "ItemFeet",
+        "ItemHands",
+        "ItemHead",
+        "ItemLegs",
+        "ItemMouth",
+        "ItemNeck",
+        "ItemNipples",
+        "ItemNose",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ],
+      "self": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemHands",
+        "ItemNipples"
+      ],
+      "prerequisites": [
+        "ZoneAccessible",
+        "UseMouth"
+      ],
+      "special": false
+    },
+    {
+      "name": "GaggedKiss",
+      "id": 12,
+      "target": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemButt",
+        "ItemEars",
+        "ItemFeet",
+        "ItemHands",
+        "ItemHead",
+        "ItemLegs",
+        "ItemMouth",
+        "ItemNeck",
+        "ItemNipples",
+        "ItemNose",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ],
+      "self": [],
+      "prerequisites": [
+        "IsGagged"
+      ],
+      "special": false
+    },
+    {
+      "name": "FrenchKiss",
+      "id": 13,
+      "target": [
+        "ItemMouth"
+      ],
+      "self": [],
+      "prerequisites": [
+        "ZoneAccessible",
+        "UseTongue",
+        "ZoneNaked",
+        "TargetCanUseTongue"
+      ],
+      "special": false
+    },
+    {
+      "name": "Suck",
+      "id": 14,
+      "target": [
+        "ItemBoots",
+        "ItemHands",
+        "ItemNipples"
+      ],
+      "self": [
+        "ItemBoots",
+        "ItemHands",
+        "ItemNipples"
+      ],
+      "prerequisites": [
+        "ZoneAccessible",
+        "UseMouth",
+        "ZoneNaked"
+      ],
+      "special": false
+    },
+    {
+      "name": "MasturbateTongue",
+      "id": 15,
+      "target": [
+        "ItemButt",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ],
+      "self": [],
+      "prerequisites": [
+        "ZoneAccessible",
+        "UseTongue",
+        "ZoneNaked"
+      ],
+      "special": false
+    },
+    {
+      "name": "Bite",
+      "id": 16,
+      "target": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemButt",
+        "ItemEars",
+        "ItemFeet",
+        "ItemHands",
+        "ItemHead",
+        "ItemLegs",
+        "ItemMouth",
+        "ItemNeck",
+        "ItemNipples",
+        "ItemNose",
+        "ItemTorso",
+        "ItemTorso2"
+      ],
+      "self": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemFeet",
+        "ItemHands",
+        "ItemLegs",
+        "ItemMouth"
+      ],
+      "prerequisites": [
+        "ZoneAccessible",
+        "UseMouth",
+        "ZoneNaked"
+      ],
+      "special": false
+    },
+    {
+      "name": "Caress",
+      "id": 17,
+      "target": [
+        "ItemArms",
+        "ItemBreast",
+        "ItemButt",
+        "ItemEars",
+        "ItemFeet",
+        "ItemBoots",
+        "ItemHands",
+        "ItemHead",
+        "ItemLegs",
+        "ItemMouth",
+        "ItemNeck",
+        "ItemNipples",
+        "ItemNose",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ],
+      "self": [
+        "ItemArms",
+        "ItemBreast",
+        "ItemButt",
+        "ItemEars",
+        "ItemFeet",
+        "ItemBoots",
+        "ItemHands",
+        "ItemHead",
+        "ItemLegs",
+        "ItemMouth",
+        "ItemNeck",
+        "ItemNipples",
+        "ItemNose",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ],
+      "prerequisites": [
+        "ZoneAccessible",
+        "UseHands"
+      ],
+      "special": false
+    },
+    {
+      "name": "Clean",
+      "id": 63,
+      "target": [
+        "ItemMouth"
+      ],
+      "self": [
+        "ItemMouth"
+      ],
+      "prerequisites": [
+        "TargetZoneAccessible",
+        "UseHands"
+      ],
+      "special": false
+    },
+    {
+      "name": "MassageHands",
+      "id": 18,
+      "target": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemButt",
+        "ItemFeet",
+        "ItemLegs",
+        "ItemNeck",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2"
+      ],
+      "self": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemButt",
+        "ItemFeet",
+        "ItemLegs",
+        "ItemNeck",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2"
+      ],
+      "prerequisites": [
+        "ZoneAccessible",
+        "UseHands"
+      ],
+      "special": false
+    },
+    {
+      "name": "TakeCare",
+      "id": 19,
+      "target": [
+        "ItemBoots",
+        "ItemHands",
+        "ItemHead"
+      ],
+      "self": [
+        "ItemBoots",
+        "ItemHands",
+        "ItemHead"
+      ],
+      "prerequisites": [
+        "ZoneAccessible",
+        "UseHands",
+        "ZoneNaked"
+      ],
+      "special": false
+    },
+    {
+      "name": "Tickle",
+      "id": 20,
+      "target": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemFeet",
+        "ItemLegs",
+        "ItemNeck",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2"
+      ],
+      "self": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemFeet",
+        "ItemLegs",
+        "ItemNeck",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2"
+      ],
+      "prerequisites": [
+        "ZoneAccessible",
+        "UseHands"
+      ],
+      "special": false
+    },
+    {
+      "name": "Pet",
+      "id": 21,
+      "target": [
+        "ItemHead",
+        "ItemNose"
+      ],
+      "self": [
+        "ItemHead",
+        "ItemNose"
+      ],
+      "prerequisites": [
+        "UseArms"
+      ],
+      "special": false
+    },
+    {
+      "name": "Grope",
+      "id": 22,
+      "target": [
+        "ItemArms",
+        "ItemBreast",
+        "ItemButt",
+        "ItemFeet",
+        "ItemLegs",
+        "ItemPelvis"
+      ],
+      "self": [
+        "ItemBreast",
+        "ItemButt"
+      ],
+      "prerequisites": [
+        "UseHands"
+      ],
+      "special": false
+    },
+    {
+      "name": "Pinch",
+      "id": 23,
+      "target": [
+        "ItemArms",
+        "ItemEars",
+        "ItemNipples",
+        "ItemNose",
+        "ItemPelvis"
+      ],
+      "self": [
+        "ItemArms",
+        "ItemEars",
+        "ItemNipples",
+        "ItemNose",
+        "ItemPelvis"
+      ],
+      "prerequisites": [
+        "ZoneAccessible",
+        "UseHands"
+      ],
+      "special": false
+    },
+    {
+      "name": "HandGag",
+      "id": 24,
+      "target": [
+        "ItemMouth"
+      ],
+      "self": [
+        "ItemMouth"
+      ],
+      "prerequisites": [
+        "UseHands"
+      ],
+      "special": false
+    },
+    {
+      "name": "Slap",
+      "id": 25,
+      "target": [
+        "ItemBreast",
+        "ItemHead",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ],
+      "self": [
+        "ItemBreast",
+        "ItemHead",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ],
+      "prerequisites": [
+        "UseHands"
+      ],
+      "special": false
+    },
+    {
+      "name": "Spank",
+      "id": 26,
+      "target": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemButt",
+        "ItemFeet",
+        "ItemHands",
+        "ItemLegs",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2"
+      ],
+      "self": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemButt",
+        "ItemFeet",
+        "ItemHands",
+        "ItemLegs",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2"
+      ],
+      "prerequisites": [
+        "UseHands"
+      ],
+      "special": false
+    },
+    {
+      "name": "Pull",
+      "id": 27,
+      "target": [
+        "ItemHead",
+        "ItemNipples",
+        "ItemNose"
+      ],
+      "self": [
+        "ItemHead",
+        "ItemNipples",
+        "ItemNose"
+      ],
+      "prerequisites": [
+        "ZoneAccessible",
+        "UseHands"
+      ],
+      "special": false
+    },
+    {
+      "name": "Choke",
+      "id": 28,
+      "target": [
+        "ItemNeck",
+        "ItemNose"
+      ],
+      "self": [
+        "ItemNeck",
+        "ItemNose"
+      ],
+      "prerequisites": [
+        "ZoneAccessible",
+        "UseHands"
+      ],
+      "special": false
+    },
+    {
+      "name": "MasturbateHand",
+      "id": 29,
+      "target": [
+        "ItemBreast",
+        "ItemButt",
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemMouth"
+      ],
+      "self": [
+        "ItemBreast",
+        "ItemButt",
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemMouth"
+      ],
+      "prerequisites": [
+        "ZoneAccessible",
+        "UseHands",
+        "ZoneNaked",
+        "TargetMouthOpen"
+      ],
+      "special": false
+    },
+    {
+      "name": "MasturbateFist",
+      "id": 30,
+      "target": [
+        "ItemButt",
+        "ItemVulva"
+      ],
+      "self": [
+        "ItemButt",
+        "ItemVulva"
+      ],
+      "prerequisites": [
+        "ZoneAccessible",
+        "VulvaEmpty",
+        "UseHands",
+        "ZoneNaked",
+        "HasVagina"
+      ],
+      "special": false
+    },
+    {
+      "name": "MassageFeet",
+      "id": 31,
+      "target": [
+        "ItemBoots",
+        "ItemTorso",
+        "ItemTorso2"
+      ],
+      "self": [],
+      "prerequisites": [
+        "ZoneAccessible",
+        "UseFeet"
+      ],
+      "special": false
+    },
+    {
+      "name": "MasturbateFoot",
+      "id": 32,
+      "target": [
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ],
+      "self": [],
+      "prerequisites": [
+        "ZoneAccessible",
+        "UseFeet",
+        "ZoneNaked"
+      ],
+      "special": false
+    },
+    {
+      "name": "Step",
+      "id": 33,
+      "target": [
+        "ItemBreast",
+        "ItemButt",
+        "ItemHead",
+        "ItemNeck",
+        "ItemNose",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2"
+      ],
+      "self": [],
+      "prerequisites": [
+        "UseFeet",
+        "TargetKneeling"
+      ],
+      "special": false
+    },
+    {
+      "name": "Kick",
+      "id": 34,
+      "target": [
+        "ItemButt",
+        "ItemLegs",
+        "ItemBoots",
+        "ItemFeet",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ],
+      "self": [],
+      "prerequisites": [
+        "UseFeet"
+      ],
+      "special": false
+    },
+    {
+      "name": "Cuddle",
+      "id": 35,
+      "target": [
+        "ItemArms",
+        "ItemNose"
+      ],
+      "self": [],
+      "prerequisites": [],
+      "special": false
+    },
+    {
+      "name": "Rub",
+      "id": 36,
+      "target": [
+        "ItemHead",
+        "ItemNose",
+        "ItemTorso",
+        "ItemTorso2"
+      ],
+      "self": [
+        "ItemNose"
+      ],
+      "prerequisites": [],
+      "special": false
+    },
+    {
+      "name": "StruggleArms",
+      "id": 37,
+      "target": [],
+      "self": [
+        "ItemArms"
+      ],
+      "prerequisites": [
+        "CantUseArms"
+      ],
+      "special": true
+    },
+    {
+      "name": "StruggleLegs",
+      "id": 38,
+      "target": [],
+      "self": [
+        "ItemLegs"
+      ],
+      "prerequisites": [
+        "CantUseFeet"
+      ],
+      "special": false
+    },
+    {
+      "name": "Sit",
+      "id": 39,
+      "target": [
+        "ItemLegs"
+      ],
+      "self": [],
+      "prerequisites": [
+        "UseFeet",
+        "TargetKneeling"
+      ],
+      "special": false
+    },
+    {
+      "name": "RestHead",
+      "id": 40,
+      "target": [
+        "ItemBreast",
+        "ItemLegs"
+      ],
+      "self": [],
+      "prerequisites": [
+        "TargetKneeling"
+      ],
+      "special": false
+    },
+    {
+      "name": "Nod",
+      "id": 41,
+      "target": [],
+      "self": [
+        "ItemHead"
+      ],
+      "prerequisites": [
+        "MoveHead"
+      ],
+      "special": false
+    },
+    {
+      "name": "Wiggle",
+      "id": 42,
+      "target": [],
+      "self": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemButt",
+        "ItemEars",
+        "ItemFeet",
+        "ItemHands",
+        "ItemHead",
+        "ItemLegs",
+        "ItemNose",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2"
+      ],
+      "prerequisites": [
+        "MoveHead"
+      ],
+      "special": true
+    },
+    {
+      "name": "SpankItem",
+      "id": 43,
+      "target": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemButt",
+        "ItemFeet",
+        "ItemLegs",
+        "ItemNipples",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ],
+      "self": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemButt",
+        "ItemFeet",
+        "ItemLegs",
+        "ItemNipples",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ],
+      "prerequisites": [
+        "Needs-SpankItem",
+        "UseHands"
+      ],
+      "special": true
+    },
+    {
+      "name": "TickleItem",
+      "id": 44,
+      "target": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemButt",
+        "ItemEars",
+        "ItemFeet",
+        "ItemHood",
+        "ItemLegs",
+        "ItemMouth",
+        "ItemNeck",
+        "ItemNipples",
+        "ItemNose",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ],
+      "self": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemButt",
+        "ItemEars",
+        "ItemFeet",
+        "ItemHood",
+        "ItemLegs",
+        "ItemMouth",
+        "ItemNeck",
+        "ItemNipples",
+        "ItemNose",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ],
+      "prerequisites": [
+        "Needs-TickleItem"
+      ],
+      "special": true
+    },
+    {
+      "name": "RubItem",
+      "id": 45,
+      "target": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemButt",
+        "ItemEars",
+        "ItemFeet",
+        "ItemHood",
+        "ItemLegs",
+        "ItemMouth",
+        "ItemNeck",
+        "ItemNipples",
+        "ItemNose",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ],
+      "self": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemButt",
+        "ItemEars",
+        "ItemFeet",
+        "ItemHood",
+        "ItemLegs",
+        "ItemMouth",
+        "ItemNeck",
+        "ItemNipples",
+        "ItemNose",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ],
+      "prerequisites": [
+        "Needs-RubItem",
+        "UseHands"
+      ],
+      "special": true
+    },
+    {
+      "name": "SqueezeItem",
+      "id": 61,
+      "target": [
+        "ItemHands"
+      ],
+      "self": [
+        "ItemHands"
+      ],
+      "prerequisites": [
+        "Needs-SqueezeItem",
+        "UseHands"
+      ],
+      "special": true
+    },
+    {
+      "name": "RollItem",
+      "id": 46,
+      "target": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemButt",
+        "ItemEars",
+        "ItemFeet",
+        "ItemLegs",
+        "ItemMouth",
+        "ItemNeck",
+        "ItemNipples",
+        "ItemPelvis",
+        "ItemTorso"
+      ],
+      "self": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemButt",
+        "ItemEars",
+        "ItemFeet",
+        "ItemLegs",
+        "ItemMouth",
+        "ItemNeck",
+        "ItemNipples",
+        "ItemPelvis",
+        "ItemTorso"
+      ],
+      "prerequisites": [
+        "Needs-RollItem",
+        "UseHands"
+      ],
+      "special": false
+    },
+    {
+      "name": "MasturbateItem",
+      "id": 47,
+      "target": [
+        "ItemBreast",
+        "ItemButt",
+        "ItemFeet",
+        "ItemLegs",
+        "ItemNipples",
+        "ItemPelvis",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ],
+      "self": [
+        "ItemBreast",
+        "ItemButt",
+        "ItemFeet",
+        "ItemLegs",
+        "ItemNipples",
+        "ItemPelvis",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ],
+      "prerequisites": [
+        "ZoneNaked",
+        "Needs-MasturbateItem",
+        "UseHands",
+        "ZoneAccessible"
+      ],
+      "special": true
+    },
+    {
+      "name": "PourItem",
+      "id": 48,
+      "target": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemButt",
+        "ItemFeet",
+        "ItemLegs",
+        "ItemNipples",
+        "ItemPelvis",
+        "ItemTorso"
+      ],
+      "self": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemButt",
+        "ItemFeet",
+        "ItemLegs",
+        "ItemNipples",
+        "ItemPelvis",
+        "ItemTorso"
+      ],
+      "prerequisites": [
+        "Needs-PourItem",
+        "UseHands"
+      ],
+      "special": false
+    },
+    {
+      "name": "ShockItem",
+      "id": 49,
+      "target": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemButt",
+        "ItemFeet",
+        "ItemLegs",
+        "ItemNipples",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemNeck",
+        "ItemNeckAccessories"
+      ],
+      "self": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemButt",
+        "ItemFeet",
+        "ItemLegs",
+        "ItemNipples",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemVulva",
+        "ItemVulvaPiercings",
+        "ItemNeck",
+        "ItemNeckAccessories"
+      ],
+      "prerequisites": [
+        "Needs-ShockItem",
+        "UseHands"
+      ],
+      "special": true
+    },
+    {
+      "name": "Inject",
+      "id": 50,
+      "target": [
+        "ItemNeck",
+        "ItemBreast",
+        "ItemArms",
+        "ItemButt",
+        "ItemVulvaPiercings",
+        "ItemLegs",
+        "ItemFeet"
+      ],
+      "self": [
+        "ItemNeck",
+        "ItemBreast",
+        "ItemArms",
+        "ItemButt",
+        "ItemVulvaPiercings",
+        "ItemLegs",
+        "ItemFeet"
+      ],
+      "prerequisites": [
+        "ZoneAccessible",
+        "UseHands",
+        "Needs-Inject"
+      ],
+      "special": false
+    },
+    {
+      "name": "PenetrateSlow",
+      "id": 51,
+      "target": [
+        "ItemButt",
+        "ItemMouth",
+        "ItemVulva"
+      ],
+      "self": [],
+      "prerequisites": [
+        "ZoneAccessible",
+        "TargetMouthOpen",
+        "VulvaEmpty",
+        "AssEmpty",
+        "Needs-PenetrateItem",
+        "ZoneNaked"
+      ],
+      "special": false
+    },
+    {
+      "name": "PenetrateFast",
+      "id": 52,
+      "target": [
+        "ItemButt",
+        "ItemMouth",
+        "ItemVulva"
+      ],
+      "self": [],
+      "prerequisites": [
+        "ZoneAccessible",
+        "TargetMouthOpen",
+        "VulvaEmpty",
+        "AssEmpty",
+        "Needs-PenetrateItem",
+        "ZoneNaked"
+      ],
+      "special": false
+    },
+    {
+      "name": "SipItem",
+      "id": 53,
+      "target": [
+        "ItemMouth"
+      ],
+      "self": [
+        "ItemMouth"
+      ],
+      "prerequisites": [
+        "TargetCanUseTongue",
+        "Needs-SipItem",
+        "UseHands"
+      ],
+      "special": false
+    },
+    {
+      "name": "EatItem",
+      "id": 54,
+      "target": [
+        "ItemMouth"
+      ],
+      "self": [
+        "ItemMouth"
+      ],
+      "prerequisites": [
+        "TargetCanUseTongue",
+        "Needs-EatItem"
+      ],
+      "special": false
+    },
+    {
+      "name": "Scratch",
+      "id": 55,
+      "target": [
+        "ItemArms",
+        "ItemBreast",
+        "ItemButt",
+        "ItemEars",
+        "ItemFeet",
+        "ItemBoots",
+        "ItemHands",
+        "ItemHead",
+        "ItemLegs",
+        "ItemMouth",
+        "ItemNeck",
+        "ItemNipples",
+        "ItemNose",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemVulva"
+      ],
+      "self": [
+        "ItemArms",
+        "ItemBreast",
+        "ItemButt",
+        "ItemEars",
+        "ItemFeet",
+        "ItemBoots",
+        "ItemHands",
+        "ItemHead",
+        "ItemLegs",
+        "ItemMouth",
+        "ItemNeck",
+        "ItemNipples",
+        "ItemNose",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemTorso2",
+        "ItemVulva"
+      ],
+      "prerequisites": [
+        "UseHands",
+        "Needs-Scratch"
+      ],
+      "special": true
+    },
+    {
+      "name": "ThrowItem",
+      "id": 56,
+      "target": [
+        "ItemTorso",
+        "ItemMouth",
+        "ItemBreast",
+        "ItemFeet",
+        "ItemHead"
+      ],
+      "self": [
+        "ItemTorso",
+        "ItemMouth",
+        "ItemBreast",
+        "ItemFeet",
+        "ItemHead"
+      ],
+      "prerequisites": [
+        "UseHands",
+        "Needs-ThrowItem"
+      ],
+      "special": false
+    },
+    {
+      "name": "CollarGrab",
+      "id": 60,
+      "target": [
+        "ItemNeck"
+      ],
+      "self": [
+        "ItemNeck"
+      ],
+      "prerequisites": [
+        "UseHands",
+        "Collared"
+      ],
+      "special": false
+    },
+    {
+      "name": "SistersHug",
+      "id": 57,
+      "target": [
+        "ItemArms"
+      ],
+      "self": [],
+      "prerequisites": [
+        "Sisters"
+      ],
+      "special": true
+    },
+    {
+      "name": "BrothersHandshake",
+      "id": 58,
+      "target": [
+        "ItemHands"
+      ],
+      "self": [],
+      "prerequisites": [
+        "Brothers"
+      ],
+      "special": true
+    },
+    {
+      "name": "SiblingsCheekKiss",
+      "id": 59,
+      "target": [
+        "ItemMouth"
+      ],
+      "self": [],
+      "prerequisites": [
+        "SiblingsWithDifferentGender"
+      ],
+      "special": true
+    },
+    {
+      "name": "BrushItem",
+      "id": 62,
+      "target": [
+        "ItemHead"
+      ],
+      "self": [
+        "ItemHead"
+      ],
+      "prerequisites": [
+        "Needs-BrushItem",
+        "UseHands"
+      ],
+      "special": true
+    },
+    {
+      "name": "DeepThroat",
+      "id": 65,
+      "target": [
+        "ItemVulva"
+      ],
+      "self": [],
+      "prerequisites": [
+        "ZoneAccessible",
+        "UseMouth",
+        "ZoneNaked",
+        "TargetNeeds-PenetrateItem"
+      ],
+      "special": false
+    },
+    {
+      "name": "SuckPenetrateItem",
+      "id": 64,
+      "target": [
+        "ItemVulva"
+      ],
+      "self": [],
+      "prerequisites": [
+        "ZoneAccessible",
+        "UseMouth",
+        "ZoneNaked",
+        "TargetNeeds-PenetrateItem"
+      ],
+      "special": false
+    }
+  ],
+  "zones": {
+    "ItemFeet": 0,
+    "ItemLegs": 1,
+    "ItemVulva": 2,
+    "ItemVulvaPiercings": 3,
+    "ItemButt": 4,
+    "ItemPelvis": 5,
+    "ItemTorso": 6,
+    "ItemNipples": 7,
+    "ItemBreast": 8,
+    "ItemArms": 9,
+    "ItemHands": 10,
+    "ItemNeck": 11,
+    "ItemMouth": 12,
+    "ItemHead": 13,
+    "ItemNose": 14,
+    "ItemHood": 15,
+    "ItemEars": 16,
+    "ItemBoots": 17
+  },
+  "bodies": {
+    "Height": [
+      "H0950",
+      "H0960",
+      "H0970",
+      "H0980",
+      "H0990",
+      "H1000",
+      "H0900",
+      "H0910",
+      "H0920",
+      "H0930",
+      "H0940"
+    ],
+    "BodyUpper": [
+      "Small",
+      "Normal",
+      "Large",
+      "XLarge",
+      "FlatSmall",
+      "FlatMedium"
+    ],
+    "BodyLower": [
+      "Small",
+      "Normal",
+      "Large",
+      "XLarge"
+    ],
+    "HairFront": [
+      "HairFront1",
+      "HairFront1b",
+      "HairFront2",
+      "HairFront2b",
+      "HairFront3",
+      "HairFront3b",
+      "HairFront4",
+      "HairFront4b",
+      "HairFront5",
+      "HairFront5b",
+      "HairFront6",
+      "HairFront6b",
+      "HairFront7",
+      "HairFront7b",
+      "HairFront8",
+      "HairFront8b",
+      "HairFront9",
+      "HairFront9b",
+      "HairFront10",
+      "HairFront10b",
+      "HairFront11",
+      "HairFront11b",
+      "HairFront12",
+      "HairFront12b",
+      "HairFront13",
+      "HairFront13b",
+      "HairFront14",
+      "HairFront14b",
+      "HairFront15",
+      "HairFront16",
+      "HairFront17",
+      "HairFront17b",
+      "HairFront18",
+      "HairFront19",
+      "HairFront20",
+      "HairFront21",
+      "HairFront22",
+      "HairFront22b",
+      "HairFront23",
+      "HairFront23b",
+      "HairFront24",
+      "HairFront25",
+      "HairFront26",
+      "HairFront27",
+      "HairFront28",
+      "HairFront28b",
+      "HairFront29",
+      "HairFront29b",
+      "HairFront30",
+      "HairFront31",
+      "HairFront32",
+      "HairFront33",
+      "HairFront33b",
+      "HairFront34",
+      "HairFront35",
+      "HairFront36",
+      "HairFront37",
+      "HairFront37b",
+      "HairFront38",
+      "HairFront38b",
+      "HairFront39",
+      "HairFront39b",
+      "HairFront40",
+      "HairFront40b",
+      "HairFront41",
+      "HairFront41b",
+      "HairFront42",
+      "HairFront42b",
+      "HairFront43",
+      "HairFront43b",
+      "HairFront44",
+      "HairFront44b",
+      "HairFront45",
+      "HairFront45b",
+      "HairFront46",
+      "HairFront46b",
+      "HairFront47",
+      "HairFront47b",
+      "HairFront48",
+      "HairFront48b",
+      "HairFront49",
+      "HairFront50",
+      "HairFront51",
+      "HairFront51b",
+      "HairFront52",
+      "HairFront52b",
+      "HairFront53",
+      "HairFront54",
+      "HairFront55",
+      "HairFront56",
+      "HairFront56b",
+      "HairFront57",
+      "HairFront58",
+      "HairFront59",
+      "HairFront60",
+      "HairFront61",
+      "ScalyHair",
+      "HairFront62a",
+      "HairFront62b",
+      "HairFront63",
+      "HairFront64",
+      "HairFront64b",
+      "HairFront65",
+      "HairFront66",
+      "HairFront67",
+      "HairFront68",
+      "HairFront69",
+      "HairFront70",
+      "HairFront71",
+      "HairFront72",
+      "HairFront73",
+      "HairFront74",
+      "HairFront75",
+      "HairFront76a",
+      "HairFront76b"
+    ],
+    "HairBack": [
+      "HairNone",
+      "HairBack1",
+      "HairBack1b",
+      "HairBack2",
+      "HairBack2b",
+      "HairBack4",
+      "HairBack4b",
+      "HairBack5",
+      "HairBack5b",
+      "HairBack6",
+      "HairBack6b",
+      "HairBack7",
+      "HairBack7b",
+      "HairBack7c",
+      "HairBack8",
+      "HairBack9",
+      "HairBack9b",
+      "HairBack10",
+      "HairBack10b",
+      "HairBack11",
+      "HairBack12",
+      "HairBack12b",
+      "HairBack13",
+      "HairBack13b",
+      "HairBack14",
+      "HairBack15",
+      "HairBack15b",
+      "HairBack16",
+      "HairBack17",
+      "HairBack18",
+      "HairBack18b",
+      "HairBack19",
+      "HairBack19b",
+      "HairBack20",
+      "HairBack20b",
+      "HairBack21",
+      "HairBack22",
+      "HairBack23",
+      "HairBack24",
+      "HairBack25",
+      "HairBack26",
+      "HairBack27",
+      "HairBack28",
+      "HairBack29",
+      "HairBack30",
+      "HairBack31",
+      "HairBack32",
+      "HairBack33",
+      "HairBack34",
+      "HairBack35",
+      "HairBack36",
+      "HairBack37",
+      "HairBack38",
+      "HairBack39",
+      "HairBack40",
+      "HairBack41",
+      "HairBack42",
+      "HairBack43",
+      "HairBack44",
+      "HairBack45",
+      "HairBack46",
+      "HairBack47",
+      "HairBack48",
+      "HairBack49",
+      "HairBack50",
+      "HairBack51",
+      "HairBack52",
+      "HairBack53",
+      "HairBack54",
+      "HairBack54b",
+      "HairBack55",
+      "HairBack55b",
+      "HairBack56",
+      "HairBack56b",
+      "HairBack57",
+      "HairBack57b",
+      "HairBack57c",
+      "HairBack57d",
+      "HairBack58",
+      "HairBack58b",
+      "HairBack59",
+      "HairBack60",
+      "HairBack61",
+      "HairBack61b",
+      "HairBack62",
+      "HairBack63",
+      "ScalyBackHair",
+      "HairBack64",
+      "HairBack65",
+      "HairBack65b",
+      "HairBack66",
+      "HairBack67",
+      "HairBack68",
+      "HairBack69",
+      "HairBack69b",
+      "HairBack70",
+      "HairBack70b",
+      "HairBack71",
+      "HairBack72",
+      "HairBack73",
+      "HairBack74",
+      "HairBack75",
+      "HairBack76",
+      "HairBack76b",
+      "HairBack77",
+      "HairBack77b",
+      "HairBack77c",
+      "HairBack78",
+      "HairBack78b",
+      "HairBack78c",
+      "HairBack79",
+      "HairBack80",
+      "HairBack81",
+      "HairBack82",
+      "HairBack83",
+      "HairBack84",
+      "HairBack85"
+    ],
+    "Eyebrows": [
+      "Eyebrows1",
+      "Eyebrows2",
+      "Eyebrows7",
+      "Eyebrows8"
+    ],
+    "Eyes": [
+      "Eyes1",
+      "Eyes2",
+      "Eyes3",
+      "Eyes4",
+      "Eyes5",
+      "Eyes6",
+      "Eyes7",
+      "Eyes8",
+      "Eyes9",
+      "Eyes10",
+      "Eyes11",
+      "Eyes12",
+      "Eyes13",
+      "Eyes14",
+      "Eyes15"
+    ],
+    "Eyes2": [
+      "Eyes1",
+      "Eyes2",
+      "Eyes3",
+      "Eyes4",
+      "Eyes5",
+      "Eyes6",
+      "Eyes7",
+      "Eyes8",
+      "Eyes9",
+      "Eyes10",
+      "Eyes11",
+      "Eyes12",
+      "Eyes13",
+      "Eyes14",
+      "Eyes15"
+    ],
+    "Mouth": [
+      "Regular",
+      "Discreet",
+      "Full"
+    ],
+    "Blush": [
+      "Blush"
+    ],
+    "Fluids": [
+      "Fluids"
+    ],
+    "Emoticon": [
+      "Emoticon"
+    ]
+  }
+}

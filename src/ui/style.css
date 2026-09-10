@@ -328,3 +328,37 @@ summary { cursor: pointer; padding-block: .5rem; }
   .header-account .button:first-child { max-width: 100%; }
   .summon-notice { order: 4; }
 }
+.chat-message { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:.25rem .75rem; padding:.5rem .25rem; }
+.chat-message > * { margin:0; }
+.chat-message .message-content { min-width:0; overflow-wrap:anywhere; }
+.chat-message .message-text { display:inline; padding:0; margin:0; }
+.chat-message .message-author { display:inline; border:0; border-radius:3px; padding:0; min-height:24px; background:none; color:var(--accent); font:inherit; font-weight:600; cursor:pointer; }
+.message-meta { display:flex; align-items:baseline; justify-content:flex-end; gap:.45rem; font-size:.65rem; color:var(--muted); white-space:nowrap; }
+.message-meta .message-reply { min-height:28px; padding:0 .3rem; font-size:.65rem; }
+.chat-message > .reply-preview { grid-column:1/-1; }
+.type-emote .message-content { font-style:italic; color:#d5bddf; }
+.type-emote .message-content::before { content:'* '; }
+.type-action .message-content,.type-activity .message-content { font-style:italic; color:#b8b1be; font-size:.87em; }
+.type-whisper { background:#30213a; border-left:2px solid #ca95de; }
+.type-beep { background:#182b32; border-left:2px solid #7cb9cc; }
+.type-local,.type-servermessage { color:var(--muted); font-size:.8rem; }
+.is-ooc .message-text { color:#afa6b8; }
+.private-contacts { margin-bottom:1rem; padding:.7rem; border:1px solid var(--line); border-radius:12px; }
+.private-contacts summary { cursor:pointer; padding:.4rem; }
+.private-contacts .contact-list { max-height:30dvh; overflow:auto; }
+.private-conversation { border:1px solid var(--line); border-radius:16px; padding:.75rem; min-width:0; }
+.private-conversation .beep-log { height:40dvh; max-height:none; overflow:auto; margin:0; }
+.private-conversation .beep-compose { border-top:1px solid var(--line); padding-top:.7rem; }
+.private-heading { font-size:1rem; margin:0 0 .5rem; }
+.body-parts { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.5rem; margin:1rem 0; }
+.body-parts [aria-pressed=true] { outline:2px solid var(--accent); }
+.body-activities { max-height:40dvh; overflow:auto; }
+.activity-option { display:grid; grid-template-columns:1fr; gap:.2rem; margin-bottom:.7rem; }
+.afc-tag { color:#edbadc; }
+@media(max-width:600px) {
+  .chat-message { grid-template-columns:minmax(0,1fr); }
+  .message-meta { justify-self:end; }
+  .message-meta .message-reply { min-height:32px; }
+  .body-parts { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+.selected-contact { outline:1px solid var(--accent); }

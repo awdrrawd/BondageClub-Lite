@@ -28,6 +28,8 @@ function setup(savedAccount) {
     subscribe(callback) { listener = callback; listener(current); },
     refreshFriends() { calls.push('friends'); },
     sendChat(text) { calls.push(text); },
+    activityOptions() { return [{ group: 'ItemHead', groupLabel: '頭部', name: 'Pet', label: '撫摸', reason: null }]; },
+    sendActivity(id, group, name) { calls.push({ activity: name, group, id }); },
     setTextCatalog() {},
     configureSummons() {}, dismissSummon() {}, acceptSummon() {}, requestLoverRoom(id) { calls.push({ lover: id }); }, sendInteraction(id, action) { calls.push({ interaction: action, id }); },
     recordLifecycle(event) { calls.push({ lifecycle: event }); },
@@ -46,6 +48,45 @@ function setup(savedAccount) {
 function messages(count) {
   return Array.from({ length: count }, (_, index) => ({ id: `id-${index}`, sender: 55, senderName: 'Friend', text: `message ${index}`, time: new Date(), type: 'Chat' }));
 }
+
+test('BC-style rows keep metadata separate and clicking a name composes an unsent whisper', async () => {
+  const f = setup();
+  f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, characters: [{ MemberNumber: 55, Name: 'Friend' }], messages: messages(1) });
+  const row = f.document.querySelector('.chat-message.type-chat');
+  assert.match(row.querySelector('.message-content').textContent, /Friend: message 0/);
+  assert.match(row.querySelector('.message-meta').textContent, /#55/);
+  assert.ok(row.querySelector('.message-meta .message-reply'));
+  const input = f.document.getElementById('InputChat'); input.value = 'draft'; input.dispatchEvent(new f.window.Event('input'));
+  row.querySelector('.message-author').click();
+  assert.equal(f.document.getElementById('InputChat').value, '/W 55 draft');
+  assert.ok(!f.calls.some(value => typeof value === 'string' && value.startsWith('/W')));
+  await f.window.happyDOM.close();
+});
+
+test('AFC room queries live in friends and matching room badges update without replacing search input', async () => {
+  const f = setup();
+  f.emit({ player: { ...f.state().player, OnlineSharedSettings: { AFC: { lovers: [{ memberNumber: 55, name: 'Lover' }] } } } });
+  f.document.getElementById('nav-friends').click();
+  f.document.querySelector('.afc-query').click(); assert.deepEqual(f.calls.at(-1), { lover: 55 });
+  f.document.getElementById('nav-rooms').click();
+  f.emit({ rooms: [{ Name: 'Shared', Space: 'X', MemberCount: 1, MemberLimit: 10, CanJoin: true, Friends: [] }] });
+  const search = f.document.querySelector('.search-controls input');
+  f.emit({ loverRooms: { 55: { name: 'Shared', space: 'X' } } });
+  assert.match(f.document.querySelector('.room-card .afc-tag').textContent, /擴展戀人 1/);
+  assert.equal(f.document.querySelector('.search-controls input'), search);
+  f.emit({ loverRooms: {} }); assert.equal(f.document.querySelector('.room-card .afc-tag'), null);
+  await f.window.happyDOM.close();
+});
+
+test('private messages use the shared chronological message layout with composer below the log', async () => {
+  const f = setup(); f.document.getElementById('nav-private').click();
+  f.emit({ beeps: [{ id: 'first', memberNumber: 55, name: 'Friend', text: 'first', incoming: true, time: new Date(1000) }, { id: 'second', memberNumber: 55, name: 'Friend', text: 'second', incoming: false, time: new Date(2000) }] });
+  assert.deepEqual([...f.document.querySelectorAll('#beep-log .message-text')].map(node => node.textContent), ['first', 'second']);
+  assert.equal(f.document.querySelectorAll('#beep-log .type-beep').length, 2);
+  assert.equal(f.document.querySelector('.beep-log').nextElementSibling.className, 'beep-compose');
+  assert.ok(f.document.querySelector('.private-contacts'));
+  await f.window.happyDOM.close();
+});
 
 test('foreground lifecycle checks do not replace an active chat draft', async () => {
   const f = setup();
@@ -112,8 +153,9 @@ test('profiles show none instead of unprovided, AFC lovers, and bounded text int
   const dialog = f.document.querySelector('.profile-dialog');
   assert.match(dialog.textContent, /Extended.*77/);
   assert.doesNotMatch(dialog.textContent, /未提供/);
-  [...dialog.querySelectorAll('button')].find(n => n.textContent === '揮手').click();
-  assert.deepEqual(f.calls.at(-1), { interaction: 'wave', id: 55 });
+  dialog.querySelector('[data-body-group="ItemHead"]').click();
+  [...dialog.querySelectorAll('button')].find(n => n.textContent === '撫摸').click();
+  assert.deepEqual(f.calls.at(-1), { activity: 'Pet', group: 'ItemHead', id: 55 });
   await f.window.happyDOM.close();
 });
 
@@ -349,7 +391,7 @@ test('friend tabs use room presence and successful query, with join before BEEP'
   f.emit({ player: { ...f.state().player, FriendList: [55, 66, 77] }, characters: [{ MemberNumber: 66, Name: 'Same room' }], friendsStatus: '查詢完成', friends: [{ MemberNumber: 55, MemberName: 'Remote', Type: 'Friend', ChatRoomName: 'Elsewhere' }] });
   f.document.getElementById('nav-friends').click();
   const card = f.document.querySelector('.contact-card');
-  assert.deepEqual([...card.querySelectorAll('button')].slice(0, 2).map(button => button.textContent), ['前往房間', 'BEEP']);
+  assert.deepEqual([...card.querySelectorAll('button')].slice(0, 2).map(button => button.textContent), ['前往房間', '私訊']);
   const clickFilter = name => [...f.document.querySelectorAll('.friend-filters button')].find(button => button.textContent === name).click();
   clickFilter('在線'); assert.equal(f.document.querySelectorAll('.contact-card').length, 2);
   clickFilter('不在線'); assert.equal(f.document.querySelectorAll('.contact-card').length, 1);

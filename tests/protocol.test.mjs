@@ -1,4 +1,5 @@
 import { renderAction, dictionaryText } from './action-helper.mjs';
+import { nativeActivities, activityReason, definitions } from './native-helper.mjs';
 import { gameCatalog } from './catalog-helper.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -24,7 +25,7 @@ async function setup(environment, relayAvailable = true, account = {}) {
     disconnect() { this.connected = false; handlers.get('disconnect')?.('io client disconnect'); return this; },
   };
   const context = {
-    io: () => socket, renderAction, dictionaryText, t, localizeStatus, validAppearance, copyAppearance, releaseAppearance, afcLovers, embeddedAction,
+    io: () => socket, nativeActivities, activityReason, renderAction, dictionaryText, t, localizeStatus, validAppearance, copyAppearance, releaseAppearance, afcLovers, embeddedAction,
     exports: {},
     require: () => ({ io: () => socket }),
     window: { setTimeout(fn) { timers.set(++timerId, fn); return timerId; }, clearTimeout(id) { timers.delete(id); } },
@@ -49,6 +50,32 @@ async function setup(environment, relayAvailable = true, account = {}) {
 }
 
 const request = { Query: '', Space: 'X', Language: '', Game: '', FullRooms: false, ShowLocked: true, SearchDescs: false };
+
+test('native activity sends the BC Activity dictionary, rechecks permissions, and never writes appearance', async () => {
+  const base = { Name: 'Test', AssetFamily: 'Female3DCG', Appearance: [{ Group: 'BodyUpper', Name: definitions.bodies.BodyUpper[0] }], ArousalSettings: { Active: 'Manual', Activity: 'z'.repeat(100), Zone: 'f'.repeat(30) } };
+  const f = await setup('PROD', true, base);
+  f.handlers.get('ChatRoomSync')({ Name: 'Room', Character: [{ ...base, MemberNumber: 123 }, { ...base, MemberNumber: 55 }] });
+  f.client.sendActivity(55, 'ItemEars', 'Whisper');
+  const packet = f.sent.at(-1).payload;
+  assert.equal(packet.Type, 'Activity');
+  assert.equal(packet.Content, 'ChatOther-ItemEars-Whisper');
+  assert.equal(packet.Dictionary.find(entry => entry.ActivityName).ActivityName, 'Whisper');
+  assert.equal(packet.Dictionary.find(entry => entry.FocusGroupName).FocusGroupName, 'ItemEars');
+  f.handlers.get('ChatRoomSyncMemberLeave')({ SourceMemberNumber: 55 });
+  assert.throws(() => f.client.sendActivity(55, 'ItemEars', 'Whisper'));
+  assert.ok(!f.sent.some(packet => ['AccountUpdate', 'ChatRoomCharacterUpdate'].includes(packet.event)));
+});
+
+test('Lite identity uses its own hidden channel without versions or account data', async () => {
+  const f = await setup('PROD');
+  f.handlers.get('ChatRoomSync')({ Name: 'Room', Character: [{ MemberNumber: 55, Name: 'Friend' }] });
+  const packet = f.sent.find(packet => packet.payload?.Content === 'BCLiteHello').payload;
+  assert.equal(JSON.stringify(packet), JSON.stringify({ Type: 'Hidden', Content: 'BCLiteHello', Dictionary: [{ client: 'Lite' }] }));
+  const before = f.state().messages.length;
+  f.handlers.get('ChatRoomMessage')({ Type: 'Hidden', Content: 'BCEMsg', Sender: 55, Dictionary: [{ message: { type: 'Hello', lce: '1.0' } }] });
+  assert.equal(f.sent.at(-1).payload.Target, 55);
+  assert.equal(f.state().messages.length, before);
+});
 
 test('plugin fallback dialogues render without executing plugins or exposing control packets', async () => {
   const f = await setup('PROD');

@@ -336,7 +336,11 @@ class LiteApp {
     const inbox = this.el("div", "beep-log"); inbox.id = "beep-log"; inbox.setAttribute("role", "log");
     const clear = this.button(t("m033"), "ghost", "button");
     clear.addEventListener("click", () => { if (window.confirm(t("m034"))) bcClient.clearBeeps(); });
-    section.append(toolbar, filters, status, list, this.el("h2", "", t("m035")), form, inbox, clear);
+    const contacts = this.el("details", "private-contacts"); contacts.open = !this.contact;
+    contacts.append(this.el("summary", "", t("private.contacts")), toolbar, filters, status, list);
+    const conversation = this.el("section", "private-conversation");
+    conversation.append(this.el("h2", "private-heading", this.contact ? `${t("private.title")} · #${this.contact}` : t("m035")), inbox, form, clear);
+    section.append(contacts, conversation);
     // Populate detached containers; later updates only touch list and log, never the composer.
     this.fillFriendList(list);
     status.textContent = this.snapshot!.friendsStatus;
@@ -345,6 +349,13 @@ class LiteApp {
   }
 
   private updateFriendContent(): void {
+    document.querySelectorAll<HTMLElement>(".room-card[data-room-name]").forEach(card => {
+      const room = this.snapshot!.rooms.find(value => value.Name === card.dataset.roomName && value.Space === card.dataset.roomSpace);
+      const tags = card.querySelector(".room-tags"); if (!room || !tags) return;
+      tags.querySelector(".afc-tag")?.remove();
+      const lovers = this.roomLovers(room);
+      if (lovers.length) { const badge = this.el("span", "tag afc-tag", t("afc.inRoom", [lovers.length])); badge.title = lovers.map(lover => `${lover.name} #${lover.memberNumber}`).join("、"); tags.append(badge); }
+    });
     document.querySelectorAll<HTMLButtonElement>("[data-lover-room]").forEach(button => {
       const id = Number(button.dataset.loverRoom);
       const room = this.snapshot!.friends.find(friend => friend.MemberNumber === id)?.ChatRoomName || this.snapshot!.loverRooms?.[id]?.name;
@@ -395,13 +406,21 @@ class LiteApp {
       total++;
       if (total > 80) continue;
       const row = this.el("article", "contact-card");
+      if (this.tab === "private" && this.contact === id) row.classList.add("selected-contact");
       const info = this.el("div");
       const relation = friend ? ({ Friend: t("relation.friend"), Lover: t("relation.lover"), Owner: t("relation.owner"), Submissive: t("relation.submissive") }[friend.Type] || friend.Type) : "";
       info.append(this.el("strong", "", `${name} #${id}`), this.el("p", "muted", friend && fresh ? t("m038", [friend.ChatRoomName || t("m039"), friend.Private ? t("m040") : "", relation]) : inRoom ? t("m041") : presence === "offline" ? t("m042") : t("m043")));
-      const chat = this.button("BEEP", "secondary", "button");
+      const chat = this.button(t("m177"), "secondary", "button");
       chat.addEventListener("click", () => this.openConversation(id));
       row.append(info);
+      if (afcLovers(state.player).some(lover => lover.memberNumber === id)) {
+        info.append(this.el("span", "tag afc-tag", t("afc.title")));
+        const queryRoom = this.button(t("afc.query"), "ghost afc-query", "button");
+        queryRoom.disabled = !state.player?.FriendList?.includes(id) || !["ready", "in-room"].includes(state.phase);
+        queryRoom.addEventListener("click", () => this.run(() => bcClient.requestLoverRoom(id))); row.append(queryRoom);
+      }
       const sharedRoom = friend?.ChatRoomName || state.loverRooms?.[id]?.name;
+      if (sharedRoom) info.append(this.el("small", "muted", sharedRoom));
       if (sharedRoom) {
         const join = this.button(t("m044"), "ghost", "button");
         join.disabled = !["ready", "in-room"].includes(state.phase);
@@ -429,6 +448,9 @@ class LiteApp {
   private updateBeepLog(): void { const log = document.getElementById("beep-log"); if (log) this.fillBeepLog(log); }
 
   private fillBeepLog(log: HTMLElement): void {
+    const scrollTop = log.scrollTop;
+    const follow = log.scrollHeight - log.clientHeight - scrollTop < 60;
+    try {
     log.replaceChildren();
     if (this.privateMode === "whisper") {
       const messages = (this.snapshot!.whispers || this.snapshot!.messages).filter(message => message.type === "Whisper" && (message.sender === this.contact || (message.sender === this.snapshot!.player?.MemberNumber && message.target === this.contact))).slice(-60);
@@ -438,17 +460,14 @@ class LiteApp {
     }
     const messages = this.snapshot!.beeps.filter(message => !this.contact || message.memberNumber === this.contact).slice(-60);
     if (!messages.length) log.append(this.el("p", "muted", t("m052")));
-    for (const message of messages.reverse()) {
-      const row = this.el("article", `beep-message ${message.incoming ? "incoming" : "outgoing"}`);
-      const reply = this.button(`${message.incoming ? t("m053") : t("m054")} · ${message.name} #${message.memberNumber}`, "ghost", "button");
-      reply.addEventListener("click", () => {
-        this.openConversation(message.memberNumber);
-        this.beepDraft = `> ${message.name}: ${message.text.slice(0, 160)}\n${this.beepDraft}`;
-        this.render(); document.getElementById("BeepText")?.focus();
-      });
-      row.append(reply, this.el("time", "message-time", message.time.toLocaleTimeString()), this.chatText("p", "message-text", message.text));
-      log.append(row);
+    for (const message of messages) {
+      const self = this.snapshot!.player!;
+      log.append(this.messageNode({ id: message.id, sender: message.incoming ? message.memberNumber : self.MemberNumber,
+        senderName: message.incoming ? message.name : self.Nickname || self.Name,
+        target: message.incoming ? self.MemberNumber : message.memberNumber, targetName: message.incoming ? self.Name : message.name,
+        text: message.text, type: "Beep", time: message.time }));
     }
+    } finally { log.scrollTop = follow ? log.scrollHeight : scrollTop; }
   }
 
   private buildSettings(): HTMLElement {
@@ -643,13 +662,20 @@ class LiteApp {
     return section;
   }
 
+  private roomLovers(room: RoomSearchResult) {
+    return afcLovers(this.snapshot!.player).filter(lover => room.Friends?.some(friend => friend.MemberNumber === lover.memberNumber) || (this.snapshot!.loverRooms?.[lover.memberNumber]?.name === room.Name && this.snapshot!.loverRooms?.[lover.memberNumber]?.space === room.Space));
+  }
+
   private roomCard(room: RoomSearchResult): HTMLElement {
     const card = this.el("article", "room-card");
+    card.dataset.roomName = room.Name; card.dataset.roomSpace = room.Space;
     const top = this.el("div", "room-card-top");
     const meta = this.el("div", "room-tags");
     meta.append(this.el("span", "tag", room.Language || "—"), this.el("span", "tag", `${room.MemberCount}/${room.MemberLimit}`));
     if (room.Access && !room.Access.includes("All")) meta.append(this.el("span", "tag locked", t("m122")));
     if (room.Friends?.length) { const friends = this.el("span", "tag friend-tag", t("m123", [room.Friends.length])); friends.title = room.Friends.map(friend => `#${friend.MemberNumber}`).join("、"); meta.append(friends); }
+    const lovers = this.roomLovers(room);
+    if (lovers.length) { const badge = this.el("span", "tag afc-tag", t("afc.inRoom", [lovers.length])); badge.title = lovers.map(lover => `${lover.name} #${lover.memberNumber}`).join("、"); meta.append(badge); }
     if (room.Visibility && !room.Visibility.includes("All")) meta.append(this.el("span", "tag", t("m124")));
     if (room.MemberCount >= room.MemberLimit) meta.append(this.el("span", "tag", t("m125")));
     if (room.Game) meta.append(this.el("span", "tag", room.Game));
@@ -784,30 +810,48 @@ class LiteApp {
       const original = [...this.snapshot!.messages, ...(this.snapshot!.whispers || [])].find(item => item.nativeId === message.replyId && (item.type !== "Whisper" || (message.type === "Whisper" && new Set([item.sender, item.target]).size === 2 && [message.sender, message.target].every(id => id === item.sender || id === item.target))));
       row.append(this.el("span", "reply-preview", original ? t("reply.preview", [original.senderName, original.text.slice(0, 160)]) : t("reply.unavailable")));
     }
-    const time = this.el("time", "message-time", message.time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
-    if (message.type === "Local" || message.type === "ServerMessage") {
-      row.append(time, this.el("span", "message-system", message.text));
-    } else if (message.type === "Emote") {
-      const body = this.chatText("span", "message-emote", message.text);
-      body.prepend(document.createTextNode(`* ${message.senderName} `));
-      row.append(time, body);
-    } else if (message.type === "Whisper") {
-      row.append(time, this.el("strong", "message-author", message.senderName), this.el("span", "message-target", ` → ${message.targetName}`), this.chatText("span", "message-text", message.text));
-    } else {
-      row.append(time, this.el("strong", "message-author", message.senderName), this.chatText("span", "message-text", message.text));
+    const content = this.el("span", "message-content");
+    const meta = this.el("span", "message-meta");
+    const name = message.senderName.replace(/\s+#\d+$/, "");
+    if (message.sender) {
+      const author = this.button(name, "message-author", "button");
+      author.addEventListener("click", () => this.composeWhisper(message.sender!)); content.append(author);
     }
+    if (message.type === "Whisper" || message.type === "Beep") content.append(this.el("span", "message-target", ` → ${message.targetName?.replace(/\s+#\d+$/, "") || "#" + message.target} `));
+    if (message.type === "Chat" || message.type === "Whisper" || message.type === "Beep") content.append(document.createTextNode(": "));
+    else content.append(document.createTextNode(" "));
+    content.append(this.chatText("span", "message-text", message.text));
+    if (message.text.startsWith("(") && ["Chat", "Whisper", "Beep"].includes(message.type)) row.classList.add("is-ooc");
+    meta.append(this.el("time", "message-time", message.time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })));
+    if (message.sender) meta.append(this.el("span", "message-id", "#" + message.sender));
+    row.append(content, meta);
     if (message.type !== "Local") {
       const reply = this.button(t("reply.button"), "ghost message-reply", "button");
       reply.addEventListener("click", () => {
+        if (message.type === "Beep") {
+          const peer = message.sender === this.snapshot!.player?.MemberNumber ? message.target! : message.sender!;
+          this.openConversation(peer);
+          this.beepDraft = `> ${message.senderName}: ${message.text.slice(0, 160)}\n${this.beepDraft}`;
+          this.render(); document.getElementById("BeepText")?.focus(); return;
+        }
         if (message.type === "Whisper") this.openConversation(message.sender === this.snapshot!.player?.MemberNumber ? message.target! : message.sender!, "whisper");
         else this.tab = "chat";
         if (message.nativeId) this.replyTarget = message;
         else if (message.type === "Whisper") this.beepDraft = `> ${message.senderName}: ${message.text.slice(0, 160)}\n${this.beepDraft}`;
         else this.chatDraft = `> ${message.senderName}: ${message.text.slice(0, 160)}\n${this.chatDraft}`;
         this.render(); document.getElementById(message.type === "Whisper" ? "BeepText" : "InputChat")?.focus();
-      }); row.append(reply);
+      }); meta.append(reply);
     }
     return row;
+  }
+
+  private composeWhisper(id: number): void {
+    if (id === this.snapshot!.player?.MemberNumber || !this.snapshot!.characters.some(character => character.MemberNumber === id)) { this.localNotice(t("m032")); return; }
+    this.replyTarget = null;
+    this.chatDraft = `/W ${id} ${this.chatDraft.replace(/^\/w(?:hisper)?\s+\d+\s*/i, "")}`;
+    this.tab = "chat"; this.render();
+    const input = document.getElementById("InputChat") as HTMLTextAreaElement | null;
+    input?.focus(); input?.setSelectionRange(input.value.length, input.value.length);
   }
 
   private replyIndicator(): HTMLElement {
@@ -858,9 +902,6 @@ class LiteApp {
           const destination = this.snapshot!.friends.find(friend => friend.MemberNumber === lover.memberNumber)?.ChatRoomName || this.snapshot!.loverRooms?.[lover.memberNumber]?.name;
           if (destination) { dialog.close(); dialog.remove(); this.joinRoom(destination); }
         }); row.append(join);
-        if (character.MemberNumber === this.snapshot!.player?.MemberNumber) {
-          const query = this.button(t("afc.query"), "ghost", "button"); query.addEventListener("click", () => this.run(() => bcClient.requestLoverRoom(lover.memberNumber))); row.append(query);
-        }
         dialog.append(row);
       }
     }
@@ -885,11 +926,30 @@ class LiteApp {
       actions.append(whisper, friend, beep);
     }
     if (this.snapshot!.characters.some(item => item.MemberNumber === character.MemberNumber)) {
-      const interact = this.el("details"); interact.append(this.el("summary", "", t("interaction.title")), this.el("p", "muted", t("interaction.help")));
-      for (const action of ["wave", "nod", "smile", "hug"] as const) {
-        const button = this.button(t(`interaction.${action}`), "ghost", "button");
-        button.addEventListener("click", () => this.run(() => bcClient.sendInteraction(character.MemberNumber, action))); interact.append(button);
-      } dialog.append(interact);
+      const interact = this.el("details", "interaction-panel"); interact.append(this.el("summary", "", t("interaction.title")), this.el("p", "muted", t("native.help")));
+      const parts = this.el("div", "body-parts"), activities = this.el("div", "body-activities");
+      const activityError = this.el("p", "notice"); activityError.setAttribute("role", "status");
+      const options = bcClient.activityOptions(character.MemberNumber);
+      for (const [group, label] of new Map(options.map(option => [option.group, option.groupLabel]))) {
+        const part = this.button(label, "ghost", "button"); part.dataset.bodyGroup = group;
+        part.addEventListener("click", () => {
+          activities.replaceChildren();
+          for (const button of parts.querySelectorAll("button")) button.setAttribute("aria-pressed", String(button === part));
+          for (const option of bcClient.activityOptions(character.MemberNumber).filter(value => value.group === group)) {
+            const row = this.el("div", "activity-option");
+            const action = this.button(option.label, "secondary", "button"); action.disabled = Boolean(option.reason);
+            action.addEventListener("click", () => {
+              try { bcClient.sendActivity(character.MemberNumber, group, option.name); activityError.textContent = ""; }
+              catch (error) { activityError.textContent = error instanceof Error ? error.message : String(error); }
+            });
+            row.append(action);
+            if (option.reason) row.append(this.el("small", "muted", t(option.reason as Parameters<typeof t>[0])));
+            activities.append(row);
+          }
+        }); parts.append(part);
+      }
+      if (!options.length) parts.append(this.el("p", "muted", t("native.data")));
+      interact.append(parts, activities, activityError); dialog.append(interact);
     }
     actions.append(close); dialog.append(actions); document.body.append(dialog); dialog.showModal();
   }

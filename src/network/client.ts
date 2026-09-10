@@ -1,6 +1,7 @@
 import { t, localizeStatus } from "../i18n";
 import { afcLovers } from "../profile/afc";
 import { renderAction, dictionaryText } from "../action/render";
+import { nativeActivities, activityReason } from "../action/native";
 import { validAppearance, copyAppearance, releaseAppearance, type BundledItem } from "../safety/safeword";
 import { io, type Socket } from "socket.io-client";
 import type { CharacterSummary, ChatMessage, ClientSnapshot, DictionaryEntry, DisplayMessage, OnlineFriend, PlayerSummary, RoomCreateOptions, RoomSearchRequest, RoomSearchResult, RoomSync } from "../shared/types";
@@ -37,6 +38,7 @@ export class BcLiteClient {
   private friendsTimer: number | null = null;
   private lastBeepAt = 0;
   private lastChatAt = 0;
+  private lastIdentityReply = 0;
   private textCatalog: Record<string, string> = {};
   private safetyBaseline: { appearance: BundledItem[]; pose: string[] | null } | null = null;
   private safetyCurrent: BundledItem[] | null = null;
@@ -290,6 +292,33 @@ export class BcLiteClient {
     this.sendChat(`.a ${t(keys[action], [this.state.player?.Nickname || this.state.player?.Name, target.Nickname || target.Name])}`);
   }
 
+  activityOptions(memberNumber: number) {
+    const actor = { ...this.state.player!, ...this.state.characters.find(c => c.MemberNumber === this.state.player?.MemberNumber) };
+    const target = this.state.characters.find(c => c.MemberNumber === memberNumber);
+    if (!target || !actor.MemberNumber || !this.state.room) return [];
+    return nativeActivities.flatMap(activity => (memberNumber === actor.MemberNumber ? activity.self : activity.target).map(group => ({
+      group, name: activity.name, groupLabel: this.textCatalog[`Group.${group}`] || group,
+      label: this.textCatalog[`Label-Chat${memberNumber === actor.MemberNumber ? "Self" : "Other"}-${group}-${activity.name}`] || activity.name,
+      reason: !this.canSend() ? "native.data" : activityReason(actor, target, group, activity.name, this.state.room!),
+    })));
+  }
+
+  sendActivity(memberNumber: number, group: string, name: string): void {
+    const option = this.activityOptions(memberNumber).find(value => value.group === group && value.name === name);
+    if (!option || option.reason) throw new Error(t((option?.reason || "native.target") as Parameters<typeof t>[0]));
+    if (Date.now() - this.lastChatAt < 350) throw new Error(t("m210"));
+    this.lastChatAt = Date.now();
+    this.socket!.emit("ChatRoomChat", { Type: "Activity", Content: `Chat${memberNumber === this.state.player!.MemberNumber ? "Self" : "Other"}-${group}-${name}`, Dictionary: [
+      { SourceCharacter: this.state.player!.MemberNumber },
+      { TargetCharacter: memberNumber }, { FocusGroupName: group }, { ActivityName: name },
+    ] });
+  }
+
+  private announceLite(target?: number): void {
+    if (!this.canSend() || !this.state.room || target === this.state.player?.MemberNumber) return;
+    this.socket!.emit("ChatRoomChat", { Type: "Hidden", Content: "BCLiteHello", Dictionary: [{ client: "Lite" }], ...(target ? { Target: target } : {}) });
+  }
+
   sendChat(raw: string, replyId?: string): void {
     const text = raw.trim();
     if (!text) return;
@@ -391,11 +420,13 @@ export class BcLiteClient {
       this.safetyCurrent = validAppearance(self?.Appearance) ? copyAppearance(self.Appearance) : null;
       this.patch({ phase: "in-room", room, characters, messages: sameRoom ? this.state.messages : [], status: t("m223", [room.Name]) });
       if (!sameRoom) this.localMessage(t("m223", [room.Name]));
+      if (!sameRoom) this.announceLite();
     });
     this.socket.on("ChatRoomSyncMemberJoin", (data: { Character?: CharacterSummary }) => {
       if (!data?.Character) return;
       this.patch({ characters: this.upsertCharacter(data.Character) });
       this.localMessage(t("m224", [displayName(data.Character)]));
+      this.announceLite(data.Character.MemberNumber);
     });
     this.socket.on("ChatRoomSyncMemberLeave", (data: { SourceMemberNumber?: number }) => {
       const character = this.findCharacter(data?.SourceMemberNumber);
@@ -479,6 +510,7 @@ export class BcLiteClient {
     const player: PlayerSummary = { AccountName: value.AccountName, ID: value.ID, MemberNumber: value.MemberNumber!, Name: value.Name, Nickname: value.Nickname,
       Description: value.Description, Owner: value.Owner, Ownership: value.Ownership, Lovership: value.Lovership,
       AssetFamily: value.AssetFamily,
+      ArousalSettings: value.ArousalSettings,
       GameplaySettings: value.GameplaySettings,
       AllowedInteractions: Number.isInteger(value.AllowedInteractions) ? value.AllowedInteractions : undefined,
       ActivePose: Array.isArray(value.ActivePose) && value.ActivePose.every(pose => typeof pose === "string") ? [...value.ActivePose] : null,
@@ -500,6 +532,12 @@ export class BcLiteClient {
   }
 
   private handleMessage(message: ChatMessage): void {
+    if (message?.Type === "Hidden" && ["BCEMsg", "LCEMsg"].includes(message.Content) && Array.isArray(message.Dictionary)) {
+      const hello = message.Dictionary.find(entry => entry && typeof entry === "object" && "message" in entry) as { message?: { type?: string; lce?: string } } | undefined;
+      if (hello?.message?.type === "Hello" && (message.Content === "LCEMsg" || typeof hello.message.lce === "string") && message.Sender !== this.state.player?.MemberNumber && this.state.characters.some(character => character.MemberNumber === message.Sender) && Date.now() - this.lastIdentityReply > 3000) {
+        this.lastIdentityReply = Date.now(); this.announceLite(message.Sender);
+      }
+    }
     // BC Status packets (Talk, "null", Wardrobe, etc.) drive character indicators,
     // not chat history. Filter by packet type, never by user-entered content.
     if (!message || message.Type === "Hidden" || message.Type === "Status" || typeof message.Content !== "string") return;
