@@ -1,5 +1,7 @@
 # 架構與協定筆記
 
+完整導覽見 [architecture.html](../architecture.html)，翻譯擴充見 [翻譯貢獻指南](../src/translations/README.md)。本頁保留協定查證筆記；目前目錄以 HTML 導覽為準。
+
 ## 資料路徑
 
 ```text
@@ -59,18 +61,18 @@ idle → connecting → authenticating → waiting-server → ready
 
 ## 模組界線
 
-- `src/protocol.ts`：唯一接觸 Socket.IO 的模組；保管短期帳密、狀態與 BC 事件。
-- `src/types.ts`：Lite 實際使用的 BC 資料子集，避免把大型遊戲型別搬進來。
-- `src/main.ts`：以安全 DOM API 建立畫面，不把伺服器內容寫進 `innerHTML`。
-- `src/style.css`：登入、搜尋及與 BC 相容的 `chat-room-div` 響應式版面。
+- `src/network/client.ts`：唯一接觸 Socket.IO 的模組；保管短期帳密、狀態與 BC 事件。
+- `src/shared/types.ts`：Lite 實際使用的 BC 資料子集，避免把大型遊戲型別搬進來。
+- `src/ui/app.ts`：以安全 DOM API 建立畫面，不把伺服器內容寫進 `innerHTML`。
+- `src/ui/style.css`：登入、搜尋及與 BC 相容的 `chat-room-div` 響應式版面。
 - `public/_headers`：Cloudflare Pages 的 CSP、權限與快取規則。
 
 ## 刻意不做的事
 
 - 不下載或繪製角色與服裝素材。
-- 不解析完整 BC 翻譯字典、活動引擎或遊戲規則。
-- 不保存帳號密碼，不提供「記住我」。
+- 只載入建置擷取的文字表，不載入完整活動引擎或遊戲規則。
+- 可選記住帳號名稱，但密碼只留分頁記憶體；不持久保存密碼。
 - 不建立資料庫或紀錄 BC 帳密／聊天封包。
 - 瀏覽器不改寫 Origin；伺服器端 Worker 使用與 ShuangClient 相同的上游 Origin。
 
-若將來要支援完整 Action／Activity 文字，建議在建置階段從相同 BC 版本擷取必要翻譯鍵，產生小型靜態 JSON；不要直接載入完整遊戲資源。
+目前 Action／Activity 文字處理由 `src/action/` 負責；翻譯來源在 `src/translations/`，建置後合併共用基底與語言差異，不直接載入插件或完整 BC 執行資源。

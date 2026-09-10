@@ -15,7 +15,7 @@
 
 ## 維護
 
-- `src/locales/zh.json`、`en.json` 是介面翻譯來源；新增字串須同步兩份及參數占位符。產品名、命令與 BC 協定代碼保留原樣。
-- `src/i18n.ts` 提供 `t(key, values)`，不解析 HTML。`scripts/extract-ui-i18n.mjs` 是已完成的一次性遷移工具，不應重跑覆寫現有翻譯。
+- `src/translations/ui/zh.json`、`en.json` 是介面翻譯來源；新增字串須同步兩份及參數占位符。產品名、命令與 BC 協定代碼保留原樣。
+- `src/i18n/index.ts` 提供 `t(key, values)`，不解析 HTML。`scripts/legacy/extract-ui-i18n.mjs` 是已完成的一次性遷移工具，不應重跑覆寫現有翻譯。
 - 遊戲訊息表由 `scripts/build-text-catalog.mjs` 產生，已隨專案保存。只有所選語言延遲載入，不載入 BC 圖像／人物渲染，也不呼叫外部翻譯服務。
 - 執行 `npm run build` 再 `npm test`；測試包含語言鍵值／參數一致性、動作 Dictionary、草稿與玩家原文保留、Status 雜訊過濾。

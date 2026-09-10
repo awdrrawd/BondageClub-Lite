@@ -1,9 +1,12 @@
+import { renderAction, dictionaryText } from './action-helper.mjs';
+import { gameCatalog } from './catalog-helper.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { stripTypeScriptTypes } from 'node:module';
 import { t, setLocale, localizeStatus } from './i18n-helper.mjs';
+import { afcLovers, embeddedAction } from './community-helper.mjs';
 import { validAppearance, copyAppearance, releaseAppearance } from './safety-helper.mjs';
 
 async function setup(environment, relayAvailable = true, account = {}) {
@@ -21,7 +24,7 @@ async function setup(environment, relayAvailable = true, account = {}) {
     disconnect() { this.connected = false; handlers.get('disconnect')?.('io client disconnect'); return this; },
   };
   const context = {
-    t, localizeStatus, validAppearance, copyAppearance, releaseAppearance,
+    io: () => socket, renderAction, dictionaryText, t, localizeStatus, validAppearance, copyAppearance, releaseAppearance, afcLovers, embeddedAction,
     exports: {},
     require: () => ({ io: () => socket }),
     window: { setTimeout(fn) { timers.set(++timerId, fn); return timerId; }, clearTimeout(id) { timers.delete(id); } },
@@ -30,11 +33,9 @@ async function setup(environment, relayAvailable = true, account = {}) {
     AbortSignal,
     fetch: async () => ({ ok: relayAvailable, json: async () => relayAvailable ? ({ service: 'bc-lite-relay', version: 1 }) : ({}) }),
   };
-  const source = readFileSync(new URL('../src/protocol.ts', import.meta.url), 'utf8');
+  const source = readFileSync(new URL('../src/network/client.ts', import.meta.url), 'utf8');
   const javascript = stripTypeScriptTypes(source)
-    .replace(/import .* from "\.\/i18n";/, '')
-    .replace(/import .* from "\.\/safeword";/, '')
-    .replace(/import .* from "socket.io-client";/, 'const { io } = require("socket.io-client");')
+    .replace(/^import .*;\r?\n/gm, '')
     .replaceAll('export ', '');
   vm.runInNewContext(`${javascript}\nexports.BcLiteClient = BcLiteClient;`, context);
   const client = new context.exports.BcLiteClient();
@@ -48,6 +49,105 @@ async function setup(environment, relayAvailable = true, account = {}) {
 }
 
 const request = { Query: '', Space: 'X', Language: '', Game: '', FullRooms: false, ShowLocked: true, SearchDescs: false };
+
+test('plugin fallback dialogues render without executing plugins or exposing control packets', async () => {
+  const f = await setup('PROD');
+  f.handlers.get('ChatRoomSync')({ Name: 'Test', Character: [{ MemberNumber: 55, Name: 'Alice' }], Limit: 10 });
+  for (const [type, key, file] of [['Activity', 'ChatOther-ItemHead-XSAct_Test', 'ActivityDictionary.csv'], ['Activity', 'ChatOther-ItemHead-LSCG_Test', 'ActivityDictionary.csv'], ['Action', 'BCX_PLAYER_CUSTOM_DIALOG', 'Interface.csv'], ['Action', 'QiAct_ChatFallback', 'Interface.csv']]) {
+    f.handlers.get('ChatRoomMessage')({ Type: type, Sender: 55, Content: key, Dictionary: [{ Tag: { Name: 'ignored' } }, { Tag: `MISSING TEXT IN "${file}": ${key}`, Text: 'SourceCharacter smiles <script>not HTML</script>' }] });
+    assert.equal(f.state().messages.at(-1).text, 'Alice smiles <script>not HTML</script>');
+  }
+  f.handlers.get('ChatRoomMessage')({ Type: 'Chat', Sender: 55, Content: 'BCX_PLAYER_CUSTOM_DIALOG', Dictionary: [{ Tag: 'MISSING TEXT IN "Interface.csv": BCX_PLAYER_CUSTOM_DIALOG', Text: 'spoof' }] });
+  assert.equal(f.state().messages.at(-1).text, 'BCX_PLAYER_CUSTOM_DIALOG');
+  const count = f.state().messages.length;
+  f.handlers.get('ChatRoomMessage')({ Type: 'Hidden', Sender: 55, Content: 'BCXMsg', Dictionary: [{ command: 'anything' }] });
+  assert.equal(f.state().messages.length, count);
+});
+
+test('BC input prefixes and native reply IDs survive the wire', async () => {
+  for (const [input, type, content] of [['*waves', 'Emote', 'waves'], ['*waves*', 'Emote', 'waves'], ['(hello', 'Chat', '(hello)'], ['.A SourceCharacter nods', 'Action', 'BCX_PLAYER_CUSTOM_DIALOG']]) {
+    const f = await setup('PROD'); f.handlers.get('ChatRoomSync')({ Name: 'Test', Character: [], Limit: 10 });
+    f.client.sendChat(input, 'native-reply');
+    const packet = f.sent.at(-1).payload;
+    assert.equal(packet.Type, type); assert.equal(packet.Content, content);
+    assert.equal(packet.Dictionary.find(entry => entry.Tag === 'ReplyId').ReplyId, 'native-reply');
+  }
+});
+
+test('private channels only normalize OOC and preserve action prefixes as literal text', async () => {
+  for (const [input, expected] of [['.A waves', '.A waves'], ['.a waves', '.a waves'], ['*waves*', '*waves*'], ['/me waves', '/me waves'], ['(hello', '(hello)'], ['(hello)', '(hello)']]) {
+    const f = await setup('PROD');
+    f.handlers.get('ChatRoomSync')({ Name: 'Test', Character: [{ MemberNumber: 55, Name: 'Alice' }], Limit: 10 });
+    f.client.sendChat(`/w 55 ${input}`, 'reply-private');
+    const whisper = f.sent.at(-1).payload;
+    assert.equal(whisper.Type, 'Whisper');
+    assert.equal(whisper.Target, 55);
+    assert.equal(whisper.Content, expected);
+    assert.equal(whisper.Dictionary.find(entry => entry.Tag === 'ReplyId').ReplyId, 'reply-private');
+    f.client.sendBeep(55, input);
+    assert.equal(f.sent.at(-1).event, 'AccountBeep');
+    assert.equal(f.sent.at(-1).payload.Message, expected);
+    assert.equal(f.sent.at(-1).payload.BeepType, '');
+  }
+});
+
+test('private OOC normalization cannot bypass the message length limit', async () => {
+  const f = await setup('PROD');
+  assert.throws(() => f.client.sendBeep(55, '(' + 'x'.repeat(999)));
+  assert.equal(f.sent.filter(packet => packet.event === 'AccountBeep').length, 0);
+});
+
+test('private whispers retain server MsgId and stay in session history across room changes', async () => {
+  const f = await setup('PROD'); f.handlers.get('ChatRoomSync')({ Name: 'Test', Character: [], Limit: 10 });
+  f.handlers.get('ChatRoomMessage')({ Type: 'Whisper', Sender: 55, Target: 123, Content: 'private', Dictionary: [{ MsgId: 'native-1' }, { Tag: 'ReplyId', ReplyId: 'native-0' }] });
+  assert.equal(f.state().whispers.at(-1).nativeId, 'native-1');
+  assert.equal(f.state().whispers.at(-1).replyId, 'native-0');
+  f.client.leave(); assert.equal(f.state().whispers.length, 1);
+  f.client.disconnect(); assert.equal(f.state().whispers.length, 0);
+});
+
+test('AFC reads only shared lovers and accepts room information only from those members', async () => {
+  const f = await setup('PROD', true, { FriendList: [55], OnlineSharedSettings: { AFC: { lovers: [{ memberNumber: 55, name: 'Lover' }] } } });
+  f.client.requestLoverRoom(55);
+  assert.equal(f.sent.at(-1).payload.BeepType, 'afcBeep');
+  assert.equal(f.sent.at(-1).payload.IsSecret, true);
+  assert.throws(() => f.client.requestLoverRoom(66));
+  const receive = f.handlers.get('AccountBeep');
+  receive({ BeepType: 'afcBeep', MemberNumber: 66, Message: 'RoomName', ChatRoomName: 'spoof' });
+  assert.equal(f.state().loverRooms[66], undefined);
+  receive({ BeepType: 'afcBeep', MemberNumber: 55, Message: 'RoomName', ChatRoomName: 'Shared', ChatRoomSpace: 'X' });
+  assert.equal(f.state().loverRooms[55].name, 'Shared');
+  assert.equal(f.state().beeps.length, 0);
+  receive({ BeepType: 'afcBeep', MemberNumber: 55, Message: 'DelRoom' });
+  assert.equal(f.state().loverRooms[55], undefined);
+  assert.equal(f.sent.some(p => p.event === 'AccountUpdate'), false);
+});
+
+test('BCX-compatible summons require opt-in, allowed sender, ordinary beep, matching text and room', async () => {
+  const f = await setup('PROD'); const receive = f.handlers.get('AccountBeep');
+  const beep = { MemberNumber: 55, MemberName: 'Allowed', Message: 'summon', ChatRoomName: 'Target', ChatRoomSpace: 'X' };
+  receive(beep); assert.equal(f.state().summon, null);
+  f.client.configureSummons(true, [55], 'Come here');
+  for (const change of [{ MemberNumber: 66 }, { Message: 'other' }, { BeepType: 'BCX' }, { ChatRoomName: '' }, { ChatRoomSpace: 'invalid' }]) {
+    receive({ ...beep, ...change }); assert.equal(f.state().summon, null);
+  }
+  receive(beep); assert.equal(f.state().summon.sender, 55);
+  assert.equal(f.sent.some(p => p.event === 'ChatRoomJoin'), false);
+  f.client.acceptSummon(); assert.equal(f.sent.at(-1).payload.Name, 'Target');
+  assert.equal(f.state().summon, null);
+  receive(beep); f.client.configureSummons(false, [], 'Come here');
+  assert.throws(() => f.client.acceptSummon());
+});
+
+test('text interactions send readable actions but never change appearance', async () => {
+  const f = await setup('PROD'); f.handlers.get('ChatRoomSync')({ Name: 'Test', Character: [{ Name: 'Alice', MemberNumber: 55 }], Limit: 10 });
+  f.client.sendInteraction(55, 'wave');
+  const packet = f.sent.at(-1).payload;
+  assert.equal(packet.Type, 'Action');
+  assert.match(packet.Dictionary[0].Text, /Test.*Alice/);
+  assert.equal(f.sent.some(p => /CharacterUpdate|AccountUpdate/.test(p.event)), false);
+  assert.throws(() => f.client.sendInteraction(99, 'wave'));
+});
 
 test('temporary disconnect rejoins the last room once after both login and server readiness', async () => {
   const f = await setup('PROD');
@@ -389,8 +489,8 @@ test('invalid map and unsafe custom URL fail before creating or changing phase',
 
 test('item actions resolve assets, craft names, focus groups and language changes', async () => {
   const f = await setup('PROD');
-  const zh = JSON.parse(readFileSync(new URL('../src/data/bc-messages.json', import.meta.url), 'utf8'));
-  const en = JSON.parse(readFileSync(new URL('../src/data/bc-messages-en.json', import.meta.url), 'utf8'));
+  const zh = gameCatalog('zh');
+  const en = gameCatalog('en');
   const assetKey = Object.keys(en).find(key => key.startsWith('Asset.ItemArms.'));
   const asset = assetKey.split('.').at(-1);
   f.handlers.get('ChatRoomSync')({ Name: 'Test', Character: [{ MemberNumber: 55, Name: 'Alice' }, { MemberNumber: 66, Name: 'Bob' }], Limit: 10 });
@@ -416,7 +516,7 @@ test('item actions resolve assets, craft names, focus groups and language change
 test('activity keys resolve through bundled translations, names and late catalog load', async () => {
   const f = await setup('PROD');
   const key = 'ChatOther-ItemEars-Lick';
-  const catalog = JSON.parse(readFileSync(new URL('../src/data/bc-messages.json', import.meta.url), 'utf8'));
+  const catalog = gameCatalog('zh');
   f.handlers.get('ChatRoomSync')({ Name: 'Test', Character: [{ MemberNumber: 55, Name: 'Alice' }, { MemberNumber: 66, Name: 'Bob' }], Limit: 10 });
   f.handlers.get('ChatRoomMessage')({ Type: 'Activity', Sender: 55, Content: key, Dictionary: [{ SourceCharacter: 55 }, { TargetCharacter: 66 }] });
   f.client.setTextCatalog(catalog);

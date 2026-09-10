@@ -21,7 +21,7 @@ test("production build contains the static shell and security headers", async ()
 });
 
 test("client is WebSocket-only and does not persist credentials", async () => {
-  const protocol = await readFile(new URL("src/protocol.ts", root), "utf8");
+  const protocol = await readFile(new URL("src/network/client.ts", root), "utf8");
   assert.match(protocol, /transports:\s*\["websocket"\]/);
   assert.match(protocol, /upgrade:\s*false/);
   assert.doesNotMatch(protocol, /localStorage|sessionStorage|indexedDB|document\.cookie/);

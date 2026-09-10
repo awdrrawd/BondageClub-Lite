@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Window } from 'happy-dom';
-import { appendChatLinks } from './links-helper.mjs';
+import { appendChatLinks, MediaConsent } from './links-helper.mjs';
 
 test('links preserve text, balanced URL parentheses, Chinese punctuation and emote boundaries', async () => {
   const window = new Window();
@@ -18,14 +18,47 @@ test('links preserve text, balanced URL parentheses, Chinese punctuation and emo
   await window.happyDOM.close();
 });
 
-test('unsafe schemes, credentials and markup remain text; HTTPS images render inline', async () => {
+test('permanent origin grants persist, stay origin-specific and can be revoked', async () => {
+  const window = new Window({ url: 'https://lite.example' });
+  const node = window.document.createElement('span'); window.document.body.append(node);
+  let consent = new MediaConsent(window.document);
+  appendChatLinks(node, 'https://images.example/a.png https://images.example.evil/b.png', consent);
+  assert.equal(node.querySelector('img'), null);
+  node.querySelectorAll('button')[1].click();
+  assert.equal(node.querySelectorAll('img').length, 1);
+  assert.equal(JSON.parse(window.localStorage.getItem('bc-lite-media-origins-v1'))[0], 'https://images.example');
+  consent = new MediaConsent(window.document);
+  const next = window.document.createElement('span'); appendChatLinks(next, 'https://images.example/c.png', consent);
+  assert.ok(next.querySelector('img'));
+  const settings = consent.buildSettings(); settings.querySelector('button').click();
+  assert.equal(node.querySelector('img'), null);
+  assert.deepEqual(JSON.parse(window.localStorage.getItem('bc-lite-media-origins-v1')), []);
+  await window.happyDOM.close();
+});
+
+test('session grants never persist and disappear on session reset', async () => {
+  const window = new Window({ url: 'https://lite.example' });
+  const consent = new MediaConsent(window.document);
+  const node = window.document.createElement('span'); appendChatLinks(node, 'https://image.example/a.png', consent);
+  node.querySelector('button').click(); assert.ok(node.querySelector('img'));
+  assert.equal(window.localStorage.length, 0);
+  consent.resetSession();
+  const next = window.document.createElement('span'); appendChatLinks(next, 'https://image.example/b.png', consent);
+  assert.equal(next.querySelector('img'), null);
+  await window.happyDOM.close();
+});
+
+test('unsafe schemes and markup stay text; images require origin permission', async () => {
   const window = new Window();
   const node = window.document.createElement('span');
   const text = '<img src=x onerror=alert(1)> javascript:alert(1) data:text/html,evil https://user:pass@example.com/ https:// https://example.org/test.png';
-  appendChatLinks(node, text);
-  assert.equal(node.textContent, text);
+  const consent = new MediaConsent(window.document);
+  appendChatLinks(node, text, consent);
+  assert.ok(node.textContent.startsWith(text));
   assert.equal(node.querySelectorAll('a').length, 1);
   assert.equal(node.querySelectorAll('iframe,video,audio,script').length, 0);
+  assert.equal(node.querySelector('img'), null);
+  node.querySelector('button').click();
   const img = node.querySelector('img');
   assert.equal(img.src, 'https://example.org/test.png');
   assert.equal(img.referrerPolicy, 'no-referrer');
@@ -39,7 +72,9 @@ test('unsafe schemes, credentials and markup remain text; HTTPS images render in
 test('direct videos use inline controls without autoplay; webpages and insecure media stay links', async () => {
   const window = new Window();
   const node = window.document.createElement('span');
-  appendChatLinks(node, 'https://example.org/a.mp4?download=1 http://example.org/a.jpg https://example.org/page https://example.org/a.svg');
+  appendChatLinks(node, 'https://example.org/a.mp4?download=1 http://example.org/a.jpg https://example.org/page https://example.org/a.svg', new MediaConsent(window.document));
+  assert.equal(node.querySelector('video'), null);
+  node.querySelector('button').click();
   const video = node.querySelector('video');
   assert.equal(video.controls, true);
   assert.equal(video.playsInline, true);

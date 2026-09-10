@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>BC Lite · Architecture</title>
+  <link rel="stylesheet" href="./docs/architecture.css">
+</head>
+<body>
+  <header class="hero">
+    <p class="eyebrow">BC LITE / ENGINEERING NOTES</p>
+    <h1>輕量的是執行環境，<br>清楚的是模組邊界。</h1>
+    <p class="lede">文字客戶端的架構導覽：連線、動作、翻譯與畫面各司其職。不安裝遊戲插件，也不載入角色繪圖引擎。</p>
+    <div class="tags"><span>TypeScript + DOM</span><span>Socket.IO</span><span>Cloudflare Pages</span><span>2026-09 重構</span></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="架構章節"><a href="#overview">01 · 系統邊界</a><a href="#modules">02 · 原始碼目錄</a><a href="#actions">03 · 動作資料流</a><a href="#translations">04 · 翻譯擴充</a><a href="#lifecycle">05 · 連線與狀態</a><a href="#security">06 · 安全與限制</a><a href="#workflow">07 · 開發驗證</a></nav>
+    <main>
+      <section id="overview"><p class="eyebrow">01 / OVERVIEW</p><h2>靜態前端，不代表沒有中繼。</h2>
+        <div class="flow" aria-label="網路資料流"><article><small>下載介面</small><h3>Pages 靜態資源</h3><p>HTML、CSS、應用程式與按需文字表。</p></article><span class="arrow" aria-hidden="true">→</span><article><small>玩家裝置</small><h3>瀏覽器</h3><p>DOM 聊天畫面、短期連線狀態、來源許可。</p></article><span class="arrow" aria-hidden="true">↔</span><article><small>同站 WebSocket</small><h3>Pages Worker ↔ BC</h3><p>固定上游與 Origin；BC 負責帳號、房間及遊戲規則。</p></article></div>
+        <p>帳密與後續遊戲封包都經過 Cloudflare 中繼，並非只有登入那次請求。程式不新增封包日誌或資料庫，但不能承諾平台及部署者完全不處理資料。</p>
+      </section>
+      <section id="modules"><p class="eyebrow">02 / MODULE MAP</p><h2>先按責任找檔案。</h2>
+        <div class="module-grid">
+          <article><code>src/main.ts</code><h3>瀏覽器入口</h3><p>只啟動 UI，不保存帳密、不處理遊戲協定。</p></article>
+          <article><code>src/ui/</code><h3>介面與版面</h3><p>app.ts 訂閱快照，建立安全 DOM、表單與分頁；style.css 管理手機版面。仍是集中式 LiteApp，尚未逐頁拆成元件。</p></article>
+          <article><code>src/network/</code><h3>唯一的 Socket 擁有者</h3><p>client.ts：登入、重連、房間、好友、私聊、召喚授權與送出驗證。模組重排不改變協定行為。</p></article>
+          <article><code>src/action/</code><h3>動作文字管線</h3><p>catalog.ts 載入基底／差異；embedded.ts 讀取插件原文；render.ts 代入人物、部位及物品字典。</p></article>
+          <article><code>src/translations/ + src/i18n/</code><h3>資料與翻譯函數分離</h3><p>翻譯者編輯 JSON；i18n/index.ts 管理 UI 語言、參數及狀態重譯。不呼叫外部翻譯服務。</p></article>
+          <article><code>src/profile/ · media/ · safety/ · platform/</code><h3>邊界功能</h3><p>AFC／BIO、媒體來源許可、安全詞外觀規則、行動裝置連線輔助分開維護。shared/types.ts 定義共用資料。</p></article>
+        </div>
+      </section>
+      <section id="actions"><p class="eyebrow">03 / ACTION PIPELINE</p><h2>擴充文字，不擴大執行權限。</h2>
+        <ol class="steps"><li><strong>接收與過濾</strong><span>network/client 接收 BC 封包，排除 Hidden／Status 等控制訊息，補齊玩家字典。</span></li><li><strong>選取句子</strong><span>action/embedded 優先保留合規的封包附帶原文；沒有原文才使用文字表，最後退回通用文案或原始鍵。</span></li><li><strong>字典代入</strong><span>action/render 解析角色、Asset／Group、CraftName 與 FocusAssetGroup，純文字替換，不執行插件程式。</span></li><li><strong>呈現</strong><span>UI 以 textContent 建立訊息，再經媒體許可機制處理網址。原文聊天、BIO、房名不自動翻譯。</span></li></ol>
+        <aside>插件封包自带的原文目前優先於靜態翻譯，因此為了保留動態內容，有些插件訊息不會隨 UI 語言切換。新增動作資料不等於新增活動效果或原生互動引擎。</aside>
+      </section>
+      <section id="translations"><p class="eyebrow">04 / TRANSLATION CONTRIBUTIONS</p><h2>英文基底一次維護，其他語言只寫差異。</h2>
+        <pre aria-label="翻譯目錄"><code>src/translations/
+├─ ui/                     # 介面文字，en.json / zh.json
+├─ bc/                     # 每類皆為 en 基底、zh 差異
+│  ├─ messages/            # 系統與介面訊息
+│  ├─ actions/             # 動作句子
+│  ├─ items/               # Asset.部位.物品
+│  └─ groups/              # Group.部位
+├─ action/
+│  ├─ xiaosu/              # 小酥動作
+│  ├─ lscg/                # 英文原文；無翻譯時 zh 為空
+│  └─ echo/                # ECHO 活動文字
+├─ items/echo/             # ECHO 物品名稱與已辨識舊名
+├─ groups/echo/            # ECHO 自訂部位名稱
+└─ overrides/              # 人工修正，不被擷取腳本覆寫
+   ├─ en.json
+   └─ zh.json</code></pre>
+        <h3>只想補一條翻譯？</h3><p>編輯 <code>src/translations/overrides/zh.json</code>，保留 BC 的鍵與佔位符。例如：</p><pre><code>{
+  "ChatOther-ItemHead-LSCG_Bap": "SourceCharacter輕拍了TargetCharacter的頭。"
+}</code></pre>
+        <p>一般來源檔以「英文＋所選語言」合併；人工 overrides 最後套用（英文，再所選語言）。缺少翻譯時保留英文，不必複製整份 bc-messages。UI 仍要求中英文鍵與數字佔位符一致。</p>
+        <div class="flow compact"><article><h3>可讀的來源 JSON</h3><p>按插件／責任拆檔，保留來源授權。</p></article><span class="arrow" aria-hidden="true">→</span><article><h3>建置時合併</h3><p>compile-action-catalogs 檢查格式及重複基底鍵。</p></article><span class="arrow" aria-hidden="true">→</span><article><h3>按需下載</h3><p>一份英文基底＋所選語言差異，不為每個插件多發請求。</p></article></div>
+        <p><code>src/action/generated/</code> 是忽略版控的建置產物，不要手改。差異檔使用共用基底的鍵索引，避免每種語言重複長動作名稱；<code>merge.ts</code> 在執行時還原鍵。<code>npm run build</code> 會自動重建，Cloudflare 不需要那些本機插件倉庫。中文覆蓋率高時差異檔仍然很大；這是維護及共用基底的改善，不保證首次中文載入更小。</p>
+        <h3>新增插件或語言</h3><p>插件動作新增 <code>action/插件名稱/en.json</code>，物品名稱新增 <code>items/插件名稱/en.json</code>，部位名稱新增 <code>groups/插件名稱/en.json</code>；每類可選 <code>zh.json</code> 差異，建置器遞迴發現。名稱資料不會載入服裝圖片或改寫外觀。特殊封包格式在 action/ 加入純文字解析與測試。新增完整 UI 語言還需調整 i18n 的 Locale、字典登錄與 UI 語言選單，只有新增 JSON 不會自動新增選單。</p>
+        <p>ECHO 衣物目前靜態擷取 465 個物品鍵（含部分舊名別名）及 11 個部位；動態生成、鏡像部位或執行期修改並非完整涵蓋，未知名稱保留原文。玩家 CraftName 永遠保留自訂名稱。</p>
+      </section>
+      <section id="lifecycle"><p class="eyebrow">05 / SESSION LIFECYCLE</p><h2>先驗證就緒，再開放操作。</h2>
+        <pre><code>idle → connecting → authenticating → waiting-server → ready
+                                                        ↕
+                                                   joining → in-room
+暫時斷線 → Socket.IO 重連 → 重新登入／ServerInfo → 嘗試回原房一次</code></pre>
+        <p>LoginResponse 與 ServerInfo 必須完成；PROD／DEV 以伺服器回覆為準。UI 訂閱唯讀快照，所有送出操作由 client 再驗證。登出、強制斷線及帳號被別處登入不會無限搶回連線。</p>
+        <p>手機回前景以既有好友查詢檢查連線。常亮／本機音訊由使用者選擇；無法保證瀏覽器在背景或鎖屏持續執行。</p>
+      </section>
+      <section id="security"><p class="eyebrow">06 / TRUST BOUNDARIES</p><h2>維持原有的資料界線。</h2>
+        <div class="table-wrap"><table><thead><tr><th>資料／操作</th><th>保存與限制</th></tr></thead><tbody><tr><td>密碼、聊天、外觀快照、召喚名單</td><td>分頁記憶體；不新增永久儲存或雲端 API。</td></tr><tr><td>記住帳號、顯示偏好、永久媒體許可</td><td>自選 localStorage；並非加密保管庫。</td></tr><tr><td>插件動作與 AFC</td><td>讀取文字／共享關係資料，不安裝插件或改寫其設定。</td></tr><tr><td>媒體載入</td><td>先許可來源，再設定 src；來源可看到連線資訊，瀏覽器仍會跟隨重新導向。</td></tr><tr><td>安全詞</td><td>使用者確認後的外觀改寫例外；不保證完整插件連動效果。</td></tr><tr><td>BCX 召喚／個人資料互動</td><td>本機允許名單＋接受確認；互動是文字動作，不是完整原生遊戲引擎。</td></tr></tbody></table></div>
+        <p>第三方文字沿用各來源授權：詳見 <code>docs/third-party-dialogues.md</code> 與 <code>docs/licenses/</code>，不可一律視為 MIT。</p>
+      </section>
+      <section id="workflow"><p class="eyebrow">07 / DEVELOPMENT</p><h2>修改來源，讓建置處理產物。</h2>
+        <pre><code>npm run catalog:compile     # 僅重新合併翻譯
+npm run build               # 自動合併＋型別檢查＋Vite
+npm test                    # 模擬 socket、DOM、翻譯與中繼測試
+npm run dev                 # UI 與 architecture.html 預覽</code></pre>
+        <p>更新上游資料才需要 <code>npm run catalog:bc -- 上游BC目錄</code>／<code>npm run catalog:plugins</code>／<code>npm run catalog:items</code>（ECHO 衣物）。擷取只覆寫對應來源資料，不覆寫 overrides。build／dev 啟動前會自動執行 catalog:compile；dev 運行期間修改翻譯後需再執行一次。</p>
+        <p>自動測試不能取代手機、真實 BC 房间及插件觀看端驗收。部署後請依 <code>docs/community-features-tests.md</code>、<code>docs/mobile-connection-tests.md</code> 檢查。</p>
+      </section>
+      <footer>Architecture is a map, not a promise. · 本文件描述目前實作與明確限制。</footer>
+    </main>
+  </div>
+</body>
+</html>

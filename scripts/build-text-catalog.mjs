@@ -1,5 +1,6 @@
 // Mechanical conversion of BC text resources; no BC executable code or images.
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
+import { writeBcCatalog } from './catalog-utils.mjs';
 import { resolve } from 'node:path';
 const root = resolve(process.argv[2] || '../BCJS/Bondage-College-master/BondageClub');
 function csv(source) {
@@ -40,7 +41,5 @@ for (const [group, asset, english] of csv(readFileSync(resolve(root, assetFile +
   catalog[key] = twAssets.get(english.trim()) || cnAssets.get(english.trim()) || english;
   englishCatalog[key] = english;
 }
-mkdirSync('src/data', { recursive: true });
-writeFileSync('src/data/bc-messages.json', JSON.stringify(catalog));
-writeFileSync('src/data/bc-messages-en.json', JSON.stringify(englishCatalog));
+writeBcCatalog(englishCatalog, catalog);
 console.log(`Generated ${Object.keys(catalog).length} text entries`);

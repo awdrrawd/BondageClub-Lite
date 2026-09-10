@@ -5,6 +5,12 @@
   "type": "module",
   "description": "A static, low-bandwidth Bondage Club chat client.",
   "scripts": {
+    "catalog:compile": "node scripts/compile-action-catalogs.mjs",
+    "catalog:bc": "node scripts/build-text-catalog.mjs",
+    "catalog:plugins": "node scripts/build-plugin-catalog.mjs",
+    "catalog:items": "node scripts/build-item-catalog.mjs",
+    "prebuild": "npm run catalog:compile",
+    "predev": "npm run catalog:compile",
     "dev": "vite",
     "dev:relay": "wrangler pages dev dist --ip 127.0.0.1 --port 8788 --compatibility-date 2026-09-01",
     "build": "tsc --noEmit && vite build",

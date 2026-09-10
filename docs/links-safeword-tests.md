@@ -2,9 +2,9 @@
 
 ## 網址
 
-- 參考 LCE `src/features/chat/chat-augments.js` 的文字節點連結化與 HTTP(S) 限制；Lite 支援 HTTPS 圖片／影片直連在訊息內顯示，不使用網域信任名單或任意网页 iframe。
+- 參考 LCE `src/features/chat/chat-augments.js` 的文字節點連結化與 HTTP(S) 限制；Lite 支援 HTTPS 圖片／影片直連在訊息內顯示，使用本次／永久來源許可，不嵌入任意网页 iframe。
 - 測試一般聊天、密語、/me、動作及 BEEP 內的 `https://example.org/`、多個連結、帶參數連結及括號／中文句號。可點擊、另開分頁、原文保持不變。
-- `javascript:`、`data:`、含帳密 URL、HTML 標籤不得成為可執行內容。測試 JPG／PNG／GIF／WebP／AVIF 與 MP4／WebM 直連（含查詢參數）：圖片內嵌、影片有播放控制且不自動播放；故意失效網址应移除媒體並保留連結。来源站會收到媒體請求，並非只在點擊後才連線。普通网页、HTTP 媒體、SVG 及不帶可辨識副檔名的網址只保留連結。
+- `javascript:`、`data:`、含帳密 URL、HTML 標籤不得成為可執行內容。測試 JPG／PNG／GIF／WebP／AVIF 與 MP4／WebM 直連（含查詢參數）：未許可前沒有媒體請求；許可後圖片內嵌、影片有播放控制且不自動播放；故意失效網址应移除媒體並保留連結。來源獲許可後，後續同來源媒體可直接請求；請測試設定頁撤銷，以及本次許可在重新整理／登出後失效。普通网页、HTTP 媒體、SVG 及不帶可辨識副檔名的網址只保留連結。
 - 手機長網址應可折行，不撑寬聊天室；收到連結訊息時草稿與中文輸入不能被重建。
 
 ## 安全詞：請先以可恢復的外觀測試
@@ -22,7 +22,7 @@
 
 - 只有確認安全詞才寫 `AccountUpdate`（Appearance／AssetFamily，以及回復時的權限）、`ChatRoomCharacterUpdate`（自己的 ID／Appearance／ActivePose）及原生安全詞 Action。OnlineSharedSettings 不改動。
 - 送出並非伺服器保存成功回執；沒有把本機改變稱為已驗證成功。請以重登入和同房玩家觀察驗收。此次自動測試使用模擬 socket，未動用真實帳號。
-- 原生流程參考本機 BC `ChatRoomSafewordRevert`、`ChatRoomSafewordRelease`、`CharacterReleaseTotal`、`ServerPlayerAppearanceSync`。已知 Item 分類取自 Female3DCG 資產表；新增分類時須同步 `src/safeword.ts`。不引入完整 BC 執行程式或圖片。
+- 原生流程參考本機 BC `ChatRoomSafewordRevert`、`ChatRoomSafewordRelease`、`CharacterReleaseTotal`、`ServerPlayerAppearanceSync`。已知 Item 分類取自 Female3DCG 資產表；新增分類時須同步 `src/safety/safeword.ts`。不引入完整 BC 執行程式或圖片。
 - 不使用 LCE 的「保留互動權限」hook：安全詞回復採 BC 預設收緊權限，避免靜默取消保護。
 
 執行 `npm run build`、`npm test`；部署設定不變，仍需提交／推送後等待 Cloudflare 建置。

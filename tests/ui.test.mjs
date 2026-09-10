@@ -6,20 +6,14 @@ import vm from 'node:vm';
 import { Window } from 'happy-dom';
 import LZString from 'lz-string';
 import { t, getLocale, setLocale } from './i18n-helper.mjs';
-import { appendChatLinks } from './links-helper.mjs';
-const stabilitySource = stripTypeScriptTypes(readFileSync(new URL('../src/stability.ts', import.meta.url), 'utf8')).replace('import { t } from "./i18n";', '').replace('export ', '');
+import { appendChatLinks, MediaConsent } from './links-helper.mjs';
+import { afcLovers } from './community-helper.mjs';
+const stabilitySource = stripTypeScriptTypes(readFileSync(new URL('../src/platform/stability.ts', import.meta.url), 'utf8')).replace('import { t } from "../i18n";', '').replace('export ', '');
 
-const bioCode = stripTypeScriptTypes(readFileSync(new URL('../src/biography.ts', import.meta.url), 'utf8')).replace('import LZString from "lz-string";', '').replace('import { t } from "./i18n";', '').replace('export ', '');
+const bioCode = stripTypeScriptTypes(readFileSync(new URL('../src/profile/biography.ts', import.meta.url), 'utf8')).replace('import LZString from "lz-string";', '').replace('import { t } from "../i18n";', '').replace('export ', '');
 const decodeBiography = new Function('LZString', 't', bioCode + '; return decodeBiography;')(LZString, t);
 
-const source = stripTypeScriptTypes(readFileSync(new URL('../src/main.ts', import.meta.url), 'utf8'))
-  .replace(/import .* from "\.\/i18n";/, '')
-  .replace('import "./style.css";', '')
-  .replace('import { bcClient } from "./protocol";', '')
-  .replace('import { decodeBiography } from "./biography";', '')
-  .replace('import { appendChatLinks } from "./chat-links";', '')
-  .replace('import { StabilityControls } from "./stability";', '')
-  .replace('import { loadTextCatalog } from "./text-catalog";', '');
+const source = stripTypeScriptTypes(readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8')).replace(/^import .*;\r?\n/gm, '');
 
 function setup(savedAccount) {
   setLocale('zh');
@@ -35,6 +29,7 @@ function setup(savedAccount) {
     refreshFriends() { calls.push('friends'); },
     sendChat(text) { calls.push(text); },
     setTextCatalog() {},
+    configureSummons() {}, dismissSummon() {}, acceptSummon() {}, requestLoverRoom(id) { calls.push({ lover: id }); }, sendInteraction(id, action) { calls.push({ interaction: action, id }); },
     recordLifecycle(event) { calls.push({ lifecycle: event }); },
     resumeConnection() { calls.push('resume'); },
     connectionDiagnostics() { return 'test-event'; },
@@ -44,7 +39,7 @@ function setup(savedAccount) {
     async login(account) { calls.push({ login: account }); },
     setFriend() {}, clearBeeps() {}, leave() {}, disconnect() {}, search() {}, join() {}, createRoom() {},
   };
-  vm.runInNewContext(source, { window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, StabilityControls, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
+  vm.runInNewContext(source, { window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
   return { window, document: window.document, calls, state: () => current, emit(change) { if (change.friendsStatus === '查詢完成') change.friendsQueryState = 'ready'; current = { ...current, ...change }; listener(current); } };
 }
 
@@ -62,6 +57,63 @@ test('foreground lifecycle checks do not replace an active chat draft', async ()
   assert.ok(f.calls.includes('resume'));
   assert.equal(f.document.getElementById('InputChat'), input);
   assert.equal(input.value, 'draft');
+  await f.window.happyDOM.close();
+});
+
+test('friends no longer owns composer; private tab has room, friends and recent lists', async () => {
+  const f = setup();
+  f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, characters: [{ MemberNumber: 123, Name: 'Tester' }, { MemberNumber: 66, Name: 'RoomMember' }], beeps: [{ id: 'b', memberNumber: 77, name: 'Recent', text: 'hello', incoming: true, time: new Date() }] });
+  f.document.getElementById('nav-friends').click();
+  assert.equal(f.document.getElementById('BeepText'), null);
+  f.document.getElementById('nav-private').click();
+  assert.ok(f.document.getElementById('BeepText'));
+  assert.match(f.document.getElementById('contact-list').textContent, /RoomMember/);
+  [...f.document.querySelectorAll('.friend-filters button')].find(n => n.textContent === '最近聊天').click();
+  assert.match(f.document.getElementById('contact-list').textContent, /Recent/);
+  assert.equal(f.document.querySelectorAll('.app-nav button').length, 5);
+  await f.window.happyDOM.close();
+});
+
+test('header contains safety in requested order and outside clicks dismiss members without clearing draft', async () => {
+  const f = setup();
+  f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, characters: [{ MemberNumber: 123, Name: 'Tester' }], messages: [] });
+  const header = f.document.querySelector('.app-header');
+  assert.equal(header.children[0].className, 'brand');
+  assert.equal(header.children[1].className, 'header-account');
+  assert.equal(header.children[2].id, 'room-safeword');
+  assert.equal(header.children[3].querySelector('select').id, 'InterfaceLocale');
+  assert.equal(f.document.querySelector('.chat-room-top-menu #room-safeword'), null);
+  f.document.querySelector('.chat-room-top-menu .mobile-members').click();
+  assert.ok(f.document.querySelector('.members-open'));
+  const input = f.document.getElementById('InputChat'); input.value = 'draft'; input.dispatchEvent(new f.window.Event('input')); input.click();
+  assert.equal(f.document.querySelector('.members-open'), null);
+  assert.equal(f.document.getElementById('InputChat'), input);
+  assert.equal(input.value, 'draft');
+  await f.window.happyDOM.close();
+});
+
+test('native reply selection stays in private channel; private reply previews never leak to public messages', async () => {
+  const f = setup();
+  const privateMessage = { id: 'p', nativeId: 'native-p', type: 'Whisper', sender: 55, target: 123, senderName: 'Friend', text: 'SECRET', time: new Date() };
+  f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, characters: [{ MemberNumber: 55, Name: 'Friend' }], messages: [privateMessage, { id: 'c', type: 'Chat', sender: 66, senderName: 'Other', replyId: 'native-p', text: 'Public', time: new Date() }] });
+  const publicRow = f.document.querySelector('[data-message-id=c]');
+  assert.doesNotMatch(publicRow.querySelector('.reply-preview').textContent, /SECRET/);
+  f.document.querySelector('[data-message-id=p] .message-reply').click();
+  assert.equal(f.document.getElementById('nav-private').getAttribute('aria-current'), 'page');
+  assert.equal(f.document.getElementById('BeepTarget').value, '55');
+  assert.ok(f.document.querySelector('.beep-compose .reply-preview'));
+  await f.window.happyDOM.close();
+});
+
+test('profiles show none instead of unprovided, AFC lovers, and bounded text interactions', async () => {
+  const f = setup();
+  f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, characters: [{ MemberNumber: 55, Name: 'Friend', OnlineSharedSettings: { AFC: { lovers: [{ memberNumber: 77, name: 'Extended' }] } } }], messages: [] });
+  f.document.querySelector('.member-row').click();
+  const dialog = f.document.querySelector('.profile-dialog');
+  assert.match(dialog.textContent, /Extended.*77/);
+  assert.doesNotMatch(dialog.textContent, /未提供/);
+  [...dialog.querySelectorAll('button')].find(n => n.textContent === '揮手').click();
+  assert.deepEqual(f.calls.at(-1), { interaction: 'wave', id: 55 });
   await f.window.happyDOM.close();
 });
 
@@ -127,6 +179,8 @@ test('chat, actions and whispers link URLs while keeping unsafe HTML inert and d
   f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, messages: rows });
   const log = f.document.getElementById('TextAreaChatLog');
   assert.equal(log.querySelectorAll('a.chat-link').length, 4);
+  assert.equal(log.querySelectorAll('img.chat-media').length, 0);
+  log.querySelector('.chat-media-slot button').click();
   assert.equal(log.querySelectorAll('img.chat-media').length, 4);
   assert.equal(log.querySelectorAll('img[src=x]').length, 0);
   const input = f.document.getElementById('InputChat');
@@ -146,7 +200,7 @@ test('language selection persists locally, translates navigation and preserves c
   const select = f.document.getElementById('InterfaceLocale');
   assert.equal(f.document.querySelectorAll('#InterfaceLocale').length, 1);
   assert.ok(select.closest('.app-header'));
-  assert.equal(select.closest('.header-locale').previousElementSibling.classList.contains('connection'), true);
+  assert.equal(select.closest('.header-locale').nextElementSibling.textContent, '登出');
   select.value = 'en'; select.dispatchEvent(new f.window.Event('change'));
   assert.equal(f.document.documentElement.lang, 'en');
   assert.equal(JSON.parse(f.window.localStorage.getItem('bc-lite-display-v1')).locale, 'en');
@@ -191,7 +245,7 @@ test('reading history freezes visible rows and offers explicit jump to latest', 
 
 test('friend updates and BEEP do not replace composer; untrusted content stays text', async () => {
   const f = setup();
-  f.document.getElementById('nav-friends').click();
+  f.document.getElementById('nav-private').click();
   assert.deepEqual(f.calls, ['friends']);
   const input = f.document.getElementById('BeepText');
   input.value = 'BEEP 草稿'; input.dispatchEvent(new f.window.Event('input'));
@@ -265,7 +319,7 @@ test('a remembered name prefills login without password and can be erased in set
 
 test('room heading switches a single form, header owns identity and logout', async () => {
   const f = setup();
-  assert.match(f.document.querySelector('.header-account').textContent, /Tester.*123.*登出/);
+  assert.match(f.document.querySelector('.app-header').textContent, /Tester.*123.*安全詞.*登出/);
   assert.equal(f.document.querySelectorAll('.form-notice, .search-form').length, 0);
   assert.ok(f.document.getElementById('RoomQuery'));
   assert.equal(f.document.getElementById('NewRoomName'), null);
