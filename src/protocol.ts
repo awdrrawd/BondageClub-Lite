@@ -1,5 +1,5 @@
 import { io, type Socket } from "socket.io-client";
-import type { CharacterSummary, ChatMessage, ClientSnapshot, DictionaryEntry, DisplayMessage, OnlineFriend, PlayerSummary, RoomSearchRequest, RoomSearchResult, RoomSync } from "./types";
+import type { CharacterSummary, ChatMessage, ClientSnapshot, DictionaryEntry, DisplayMessage, OnlineFriend, PlayerSummary, RoomCreateOptions, RoomSearchRequest, RoomSearchResult, RoomSync } from "./types";
 
 const MAX_MESSAGES = 600;
 const SEARCH_TIMEOUT_MS = 8_000;
@@ -154,17 +154,24 @@ export class BcLiteClient {
     this.socket!.emit("ChatRoomJoin", { Name: roomName });
   }
 
-  createRoom(name: string, space: RoomSearchRequest["Space"], language: RoomSearchRequest["Language"], unlisted: boolean, description = "BC Lite chat room", limit = 10): void {
+  createRoom(name: string, space: RoomSearchRequest["Space"], language: RoomSearchRequest["Language"], unlisted: boolean, description = "BC Lite chat room", limit = 10, options: RoomCreateOptions = {}): void {
     if (!this.canSend() || this.state.phase !== "ready") throw new Error("請等待目前操作完成");
     if (!name.trim() || name.trim().length > 20) throw new Error("房名請填 1–20 個字元");
     if (description.length > 100 || !Number.isInteger(limit) || limit < 2 || limit > 10) throw new Error("描述最多 100 字，人數上限 2–10 人");
+    for (const list of [options.Admin, options.Whitelist, options.Ban]) if (list && (list.length > 100 || list.some(id => !Number.isSafeInteger(id) || id <= 0))) throw new Error("名單必須為有效玩家編號，最多 100 人");
+    for (const url of [options.Custom?.ImageURL, options.Custom?.MusicURL]) if (url && (!/^https:\/\//i.test(url) || url.length > 2000)) throw new Error("自訂網址請使用 HTTPS，最多 2000 字元");
+    if (options.Game && !["ClubCard", "LARP", "MagicBattle", "GGTS"].includes(options.Game)) throw new Error("不支援的遊戲類型");
+    const map = options.MapData;
+    if (map && (!["Never", "Hybrid", "Always"].includes(map.Type) || [map.Tiles, map.Objects, map.Effects].some(value => value !== undefined && (typeof value !== "string" || value.length !== 1600)))) throw new Error("地圖格式不符：網格必須為 40×40（1600 字元）");
     this.startRoomTimer();
     this.patch({ phase: "joining", status: `正在建立「${name.trim()}」…` });
     this.socket!.emit("ChatRoomCreate", {
-      Name: name.trim(), Description: description, Background: "MainHall",
-      Space: space, Language: language || "EN", Game: "", Limit: limit,
-      Admin: [this.state.player!.MemberNumber], Whitelist: [], Ban: [], BlockCategory: [],
-      Visibility: unlisted ? [] : ["All"], Access: ["All"],
+      Name: name.trim(), Description: description, Background: options.Background || "MainHall",
+      Space: space, Language: language || "EN", Game: options.Game || "", Limit: limit,
+      Admin: [...new Set([this.state.player!.MemberNumber, ...(options.Admin || [])])], Whitelist: options.Whitelist || [], Ban: options.Ban || [], BlockCategory: options.BlockCategory || [],
+      Visibility: options.Visibility ?? (unlisted ? [] : ["All"]), Access: options.Access ?? ["All"],
+      ...(options.Custom ? { Custom: options.Custom } : {}),
+      ...(map && map.Type !== "Never" ? { MapData: { ...map, Tiles: map.Tiles ?? "d".repeat(1600), Objects: map.Objects ?? "d".repeat(1600) } } : {}),
     });
   }
 
@@ -237,6 +244,7 @@ export class BcLiteClient {
       this.patch({ rooms: safeRooms, status: `找到 ${safeRooms.length} 個房間` });
     });
     this.socket.on("ChatRoomSearchResponse", (result: unknown) => {
+      if (this.state.phase !== "joining") { this.patch({ status: `房間回應：${String(result)}` }); return; }
       if (result !== "JoinedRoom") { this.clearRoomTimer(); this.patch({ phase: "ready", room: null, characters: [], status: `無法加入房間：${String(result)}` }); }
     });
     this.socket.on("ChatRoomCreateResponse", (result: unknown) => {
@@ -312,6 +320,7 @@ export class BcLiteClient {
     }
     this.loginAccepted = true;
     const player: PlayerSummary = { AccountName: value.AccountName, ID: value.ID, MemberNumber: value.MemberNumber!, Name: value.Name, Nickname: value.Nickname,
+      Description: value.Description, Owner: value.Owner, Ownership: value.Ownership, Lovership: value.Lovership,
       Environment: typeof value.Environment === "string" ? value.Environment : undefined,
       FriendList: Array.isArray(value.FriendList) && value.FriendList.every(Number.isSafeInteger) ? value.FriendList : undefined,
       Appearance: Array.isArray(value.Appearance) ? value.Appearance : undefined,

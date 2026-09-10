@@ -136,3 +136,55 @@ test('a remembered name prefills login without password and can be erased in set
   assert.equal(f.window.localStorage.getItem('bc-lite-account-v1'), null);
   await f.window.happyDOM.close();
 });
+
+test('room heading switches a single form, header owns identity and logout', async () => {
+  const f = setup();
+  assert.match(f.document.querySelector('.header-account').textContent, /Tester.*123.*登出/);
+  assert.equal(f.document.querySelectorAll('.form-notice, .search-form').length, 0);
+  assert.ok(f.document.getElementById('RoomQuery'));
+  assert.equal(f.document.getElementById('NewRoomName'), null);
+  [...f.document.querySelectorAll('.view-heading button')].find(button => button.textContent === '建立房間').click();
+  assert.equal(f.document.querySelectorAll('.room-controls').length, 1);
+  assert.equal(f.document.getElementById('RoomQuery'), null);
+  for (const id of ['NewRoomName', 'CreateBackground', 'CreateAdmin', 'CreateWhitelist', 'CreateBan', 'CreateImageURL', 'CreateMusicURL', 'CreateMapJSON']) assert.ok(f.document.getElementById(id));
+  await f.window.happyDOM.close();
+});
+
+test('room search navigation remains usable in-room without consuming chat draft', async () => {
+  const f = setup();
+  f.emit({ phase: 'in-room', room: { Name: 'Still here', Limit: 10 }, messages: messages(5) });
+  const draft = f.document.getElementById('InputChat'); draft.value = 'keep'; draft.dispatchEvent(new f.window.Event('input'));
+  assert.equal(f.document.getElementById('nav-rooms').disabled, false);
+  f.document.getElementById('nav-rooms').click();
+  assert.ok(f.document.getElementById('RoomQuery'));
+  assert.equal(f.state().room.Name, 'Still here');
+  f.document.getElementById('nav-chat').click();
+  assert.equal(f.document.getElementById('InputChat').value, 'keep');
+  assert.equal(f.document.querySelector('#chat-room-bot button').textContent, '送出');
+  await f.window.happyDOM.close();
+});
+
+test('friend tabs use room presence and successful query, with join before BEEP', async () => {
+  const f = setup();
+  f.emit({ player: { ...f.state().player, FriendList: [55, 66, 77] }, characters: [{ MemberNumber: 66, Name: 'Same room' }], friendsStatus: '查詢完成', friends: [{ MemberNumber: 55, MemberName: 'Remote', Type: 'Friend', ChatRoomName: 'Elsewhere' }] });
+  f.document.getElementById('nav-friends').click();
+  const card = f.document.querySelector('.contact-card');
+  assert.deepEqual([...card.querySelectorAll('button')].slice(0, 2).map(button => button.textContent), ['前往房間', 'BEEP']);
+  const clickFilter = name => [...f.document.querySelectorAll('.friend-filters button')].find(button => button.textContent === name).click();
+  clickFilter('在線'); assert.equal(f.document.querySelectorAll('.contact-card').length, 2);
+  clickFilter('不在線'); assert.equal(f.document.querySelectorAll('.contact-card').length, 1);
+  assert.match(f.document.querySelector('.contact-card').textContent, /77/);
+  await f.window.happyDOM.close();
+});
+
+test('profile displays relations and defers biography until expanded', async () => {
+  const f = setup();
+  f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, characters: [{ MemberNumber: 55, Name: 'Friend', Ownership: { Name: 'Owner', MemberNumber: 5 }, Lovership: [{ Name: 'Lover', MemberNumber: 6 }], Description: 'Long biography' }] });
+  f.document.querySelector('.member-row').click();
+  const dialog = f.document.querySelector('.profile-dialog');
+  assert.match(dialog.textContent, /Owner.*5/); assert.match(dialog.textContent, /Lover.*6/);
+  assert.doesNotMatch(dialog.textContent, /Long biography/);
+  const details = dialog.querySelector('details'); details.open = true; details.dispatchEvent(new f.window.Event('toggle'));
+  assert.match(dialog.textContent, /Long biography/);
+  await f.window.happyDOM.close();
+});

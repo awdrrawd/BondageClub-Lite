@@ -187,3 +187,41 @@ test('room and character synchronization never write back unknown ECHO appearanc
   }
   assert.equal(f.sent.some(packet => /CharacterUpdate|CharacterItemUpdate/.test(packet.event)), false);
 });
+
+test('search while in-room retains membership and messages, including search errors', async () => {
+  const f = await setup('PROD');
+  f.handlers.get('ChatRoomSync')({ Name: 'Test', Character: [], Limit: 10 });
+  const messages = f.state().messages;
+  f.client.search(request);
+  f.handlers.get('ChatRoomSearchResult')([]);
+  f.handlers.get('ChatRoomSearchResponse')('Error');
+  assert.equal(f.state().phase, 'in-room');
+  assert.equal(f.state().room.Name, 'Test');
+  assert.equal(f.state().messages, messages);
+  assert.equal(f.sent.some(packet => packet.event === 'ChatRoomLeave'), false);
+});
+
+test('creation sends native permissions, custom URLs and default map without loading resources', async () => {
+  const f = await setup('PROD');
+  f.client.createRoom('Advanced', 'X', 'CN', false, 'Description', 5, {
+    Background: 'MainHall', Admin: [55], Whitelist: [66], Ban: [77], Game: 'LARP',
+    Visibility: ['Admin', 'Whitelist'], Access: ['Admin'], BlockCategory: ['Photos'],
+    Custom: { ImageURL: 'https://example.org/background.png', MusicURL: 'https://example.org/audio.mp3' }, MapData: { Type: 'Hybrid', Fog: true },
+  });
+  const payload = f.sent.find(packet => packet.event === 'ChatRoomCreate').payload;
+  assert.equal(JSON.stringify(payload.Admin), '[123,55]');
+  assert.equal(payload.Custom.ImageURL, 'https://example.org/background.png');
+  assert.equal(payload.MapData.Tiles, 'd'.repeat(1600));
+  assert.equal(payload.MapData.Objects.length, 1600);
+  assert.equal(payload.Access[0], 'Admin');
+  assert.equal(payload.Ban[0], 77);
+  assert.equal(payload.Game, 'LARP');
+});
+
+test('invalid map and unsafe custom URL fail before creating or changing phase', async () => {
+  const f = await setup('PROD');
+  assert.throws(() => f.client.createRoom('Test', 'X', 'CN', false, '', 5, { MapData: { Type: 'Always', Tiles: 'broken' } }), /地圖格式/);
+  assert.throws(() => f.client.createRoom('Test', 'X', 'CN', false, '', 5, { Custom: { ImageURL: 'javascript:alert(1)' } }), /HTTPS/);
+  assert.equal(f.state().phase, 'ready');
+  assert.equal(f.sent.some(packet => packet.event === 'ChatRoomCreate'), false);
+});

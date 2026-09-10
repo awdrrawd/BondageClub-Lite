@@ -1,6 +1,6 @@
 import "./style.css";
 import { bcClient } from "./protocol";
-import type { CharacterSummary, ClientSnapshot, DisplayMessage, RoomSearchRequest, RoomSearchResult } from "./types";
+import type { CharacterSummary, ClientSnapshot, DisplayMessage, RoomCreateOptions, RoomSearchRequest, RoomSearchResult } from "./types";
 
 const app = document.querySelector<HTMLDivElement>("#app");
 if (!app) throw new Error("找不到應用程式根節點");
@@ -18,6 +18,9 @@ class LiteApp {
   private newRoomName = "";
   private newRoomDescription = "BC Lite chat room";
   private newRoomLimit = 10;
+  private roomMode: "search" | "create" = "search";
+  private friendFilter = "all";
+  private createFields = { Background: "MainHall", Admin: "", Whitelist: "", Ban: "", ImageURL: "", MusicURL: "", Game: "", Visibility: "", Access: "All", MapType: "Never", Fog: false, MapJSON: "", BlockCategory: [] as string[] };
   private roomPageSize = 40;
   private unlisted = true;
   private showFull = false;
@@ -152,6 +155,14 @@ class LiteApp {
     const connection = this.el("div", `connection phase-${state.phase}`);
     connection.append(this.el("span", "status-dot"), this.el("span", "", state.status));
     header.append(brand, connection);
+    if (state.player) {
+      const account = this.el("div", "header-account");
+      const name = this.button(`${state.player.Nickname || state.player.Name} (#${state.player.MemberNumber})`, "ghost", "button");
+      name.addEventListener("click", () => this.showMember(state.characters.find(character => character.MemberNumber === state.player!.MemberNumber) || state.player!));
+      const logout = this.button("登出", "ghost", "button");
+      logout.addEventListener("click", () => { if (window.confirm("確定登出？本次聊天與草稿將清除。")) bcClient.disconnect(); });
+      account.append(name, logout); header.append(account);
+    }
 
     const content = this.el("div", "app-content");
     if (state.phase === "idle" || state.phase === "connecting" || state.phase === "authenticating" || state.phase === "waiting-server" || state.phase === "reconnecting" || state.phase === "error") {
@@ -160,7 +171,7 @@ class LiteApp {
       content.append(this.buildFriends());
     } else if (this.tab === "settings") {
       content.append(this.buildSettings());
-    } else if (state.room) {
+    } else if (state.room && this.tab === "chat") {
       content.append(this.buildRoom());
     } else {
       content.append(this.buildSearch());
@@ -178,8 +189,7 @@ class LiteApp {
       const button = this.button(label, this.tab === key ? "active" : "ghost", "button");
       button.id = `nav-${key}`;
       button.setAttribute("aria-current", this.tab === key ? "page" : "false");
-      button.disabled = (key === "chat" && !this.snapshot!.room) || (key === "rooms" && !!this.snapshot!.room);
-      if (key === "rooms" && this.snapshot!.room) button.title = "請先離開目前房間";
+      button.disabled = key === "chat" && !this.snapshot!.room;
       button.addEventListener("click", () => {
         this.tab = key;
         if (key === "friends") this.unread = 0;
@@ -202,6 +212,13 @@ class LiteApp {
     const query = this.input("FriendQuery", "搜尋名字或編號", "search", this.friendQuery);
     query.addEventListener("input", () => { this.friendQuery = query.value; this.updateFriendContent(); });
     toolbar.append(query, refresh);
+    const filters = this.el("div", "toolbar friend-filters");
+    for (const [value, label] of [["all", "全部"], ["online", "在線"], ["offline", "不在線"], ["unknown", "未確認"]]) {
+      const button = this.button(label, this.friendFilter === value ? "secondary" : "ghost", "button");
+      button.setAttribute("aria-pressed", String(this.friendFilter === value));
+      button.addEventListener("click", () => { this.friendFilter = value; this.render(); });
+      filters.append(button);
+    }
     const status = this.el("p", "muted"); status.id = "friends-status";
     const list = this.el("div", "contact-list"); list.id = "contact-list";
     const form = this.el("form", "beep-compose") as HTMLFormElement;
@@ -212,7 +229,7 @@ class LiteApp {
     text.addEventListener("input", () => { this.beepDraft = text.value; });
     const add = this.button("加入好友", "ghost", "button");
     add.addEventListener("click", () => this.run(() => bcClient.setFriend(this.contact, true)));
-    const send = this.button("傳送 BEEP", "primary", "submit");
+    const send = this.button("送出 BEEP", "primary", "submit");
     form.append(this.field("對象編號（可直接輸入，不必在同一房間）", target), text, add, send);
     form.addEventListener("submit", event => {
       event.preventDefault();
@@ -221,7 +238,7 @@ class LiteApp {
     const inbox = this.el("div", "beep-log"); inbox.id = "beep-log"; inbox.setAttribute("role", "log");
     const clear = this.button("清除本次 BEEP 紀錄", "ghost", "button");
     clear.addEventListener("click", () => { if (window.confirm("只清除此頁記憶體中的 BEEP 紀錄？")) bcClient.clearBeeps(); });
-    section.append(toolbar, status, list, this.el("h2", "", "BEEP 對話"), form, inbox, clear);
+    section.append(toolbar, filters, status, list, this.el("h2", "", "BEEP 對話"), form, inbox, clear);
     // Populate detached containers; later updates only touch list and log, never the composer.
     this.fillFriendList(list);
     status.textContent = this.snapshot!.friendsStatus;
@@ -246,13 +263,17 @@ class LiteApp {
     let total = 0;
     for (const id of ids) {
       const friend = online.get(id);
-      const name = friend?.MemberName || [...state.beeps].reverse().find(message => message.memberNumber === id)?.name || "尚無名稱";
+      const inRoom = state.characters.some(character => character.MemberNumber === id);
+      const fresh = state.friendsStatus.startsWith("查詢完成");
+      const presence = inRoom || (friend && fresh) ? "online" : fresh && state.player?.FriendList?.includes(id) ? "offline" : "unknown";
+      if (this.friendFilter !== "all" && this.friendFilter !== presence) continue;
+      const name = friend?.MemberName || state.characters.find(character => character.MemberNumber === id)?.Name || [...state.beeps].reverse().find(message => message.memberNumber === id)?.name || "尚無名稱";
       if (!`${name} ${id}`.toLowerCase().includes(this.friendQuery.trim().toLowerCase())) continue;
       total++;
       if (total > 80) continue;
       const row = this.el("article", "contact-card");
       const info = this.el("div");
-      info.append(this.el("strong", "", `${name} #${id}`), this.el("p", "muted", friend ? `在線 · ${friend.ChatRoomName || "未公開房間"}${friend.Private ? "（隱藏）" : ""} · ${friend.Type}` : "未查得在線（不一定離線）"));
+      info.append(this.el("strong", "", `${name} #${id}`), this.el("p", "muted", friend && fresh ? `在線 · ${friend.ChatRoomName || "未公開房間"}${friend.Private ? "（隱藏）" : ""} · ${friend.Type}` : inRoom ? "在線 · 同一房間" : presence === "offline" ? "不在線（依最後查詢；可能受隱私限制）" : "尚未確認在線狀態"));
       const chat = this.button("BEEP", "secondary", "button");
       chat.addEventListener("click", () => {
         this.contact = id;
@@ -260,14 +281,15 @@ class LiteApp {
         if (target) target.value = String(id);
         this.updateBeepLog(); document.getElementById("BeepText")?.focus();
       });
-      row.append(info, chat);
+      row.append(info);
       if (friend?.ChatRoomName) {
         const join = this.button("前往房間", "ghost", "button");
-        join.disabled = state.phase !== "ready";
-        join.title = state.room ? "請先離開目前房間" : "仍受房間權限限制";
-        join.addEventListener("click", () => this.run(() => bcClient.join(friend.ChatRoomName!)));
+        join.disabled = !["ready", "in-room"].includes(state.phase);
+        join.title = "前往其他房間前會確認離開目前房間";
+        join.addEventListener("click", () => this.joinRoom(friend.ChatRoomName!));
         row.append(join);
       }
+      row.append(chat);
       if (state.player?.FriendList?.includes(id)) {
         const remove = this.button("移除", "ghost danger", "button");
         remove.addEventListener("click", () => { if (window.confirm(`確定從 BC 好友清單移除 #${id}？`)) this.run(() => bcClient.setFriend(id, false)); });
@@ -321,17 +343,22 @@ class LiteApp {
 
   private run(action: () => void): void { try { action(); } catch (error) { this.localNotice(error instanceof Error ? error.message : "操作失敗"); } }
 
+  private joinRoom(name: string): void {
+    if (name === this.snapshot!.room?.Name) { this.tab = "chat"; this.render(); return; }
+    if (this.snapshot!.room) {
+      if (!window.confirm(`離開「${this.snapshot!.room.Name}」並加入「${name}」？若加入失敗不會自動返回。`)) return;
+      bcClient.leave();
+    }
+    this.run(() => bcClient.join(name));
+  }
+
   private buildLogin(): HTMLElement {
     const state = this.snapshot!;
     const wrap = this.el("section", "login-layout");
     const intro = this.el("div", "intro-panel");
     intro.append(
-      this.el("p", "eyebrow", "LOW-BANDWIDTH CLIENT"),
-      this.el("h1", "", "只帶聊天室，輕一點登入。"),
-      this.el("p", "lede", "不載入角色繪圖、服裝素材與遊戲畫面；透過本站 Cloudflare 中繼連到 BC。中繼不儲存帳密或聊天內容。"),
-      this.feature("WebSocket 中繼", "Cloudflare 託管連線"),
-      this.feature("純文字聊天室", "搜尋、進房、聊天與密語"),
-      this.feature("密碼只在記憶體", "重新整理或登出即消失"),
+      this.el("h1", "", "Bondage Club"),
+      this.el("p", "lede", "輕量登入，聊天與好友隨行。"),
     );
     const card = this.el("form", "login-card") as HTMLFormElement;
     card.autocomplete = "off";
@@ -347,7 +374,10 @@ class LiteApp {
     card.append(this.checkbox("記住帳號（只存這個瀏覽器，不存密碼）", this.rememberAccount, value => {
       this.rememberAccount = value;
       this.saveAccountPreference();
-    }), this.accountPrivacyNote());
+    }));
+    const privacy = this.el("details", "login-privacy");
+    privacy.append(this.el("summary", "", "帳號保存與資料安全說明"), this.accountPrivacyNote(), this.el("p", "security-note", "登入流量經 Cloudflare 中繼到 BC。此版本不主動記錄封包，但不是沒有第三方經手。登入會使同帳號其他連線斷線。"));
+    card.append(privacy);
     const busy = !["idle", "error"].includes(state.phase);
     const submit = this.button(busy ? "連線中…" : "登入", "primary", "submit");
     submit.disabled = busy;
@@ -357,9 +387,7 @@ class LiteApp {
       cancel.addEventListener("click", () => bcClient.disconnect());
       card.append(cancel);
     }
-    card.append(this.el("p", "security-note", "提醒：登入會讓同帳號在其他 BC 視窗斷線。請只使用你信任的部署網址。"));
-    card.append(this.el("p", "security-note", "資料流向：瀏覽器 → Cloudflare 中繼 → BC。此版本不主動記錄帳密或聊天封包，但 Cloudflare 與 BC 仍會處理連線資料，不能視為沒有第三方經手。"));
-    if (this.notice || state.phase === "error") card.append(this.el("div", "form-notice", this.notice || state.status));
+    if (this.notice || state.phase === "error") card.append(this.el("p", "login-error", this.notice || state.status));
     card.addEventListener("submit", async (event) => {
       event.preventDefault();
       this.notice = "";
@@ -378,12 +406,17 @@ class LiteApp {
     const section = this.el("section", "search-view");
     const heading = this.el("div", "view-heading");
     const titleWrap = this.el("div");
-    titleWrap.append(this.el("p", "eyebrow", `登入為 ${state.player?.Nickname || state.player?.Name} #${state.player?.MemberNumber}`), this.el("h1", "", "搜尋聊天室"));
-    const logout = this.button("登出", "ghost", "button");
-    logout.addEventListener("click", () => { this.password = ""; bcClient.disconnect(); });
-    heading.append(titleWrap, logout);
+    titleWrap.append(this.el("h1", "", "聊天室"));
+    const modes = this.el("div", "toolbar");
+    for (const [mode, label] of [["search", "搜尋房間"], ["create", "建立房間"]] as const) {
+      const button = this.button(label, this.roomMode === mode ? "secondary" : "ghost", "button");
+      button.setAttribute("aria-pressed", String(this.roomMode === mode));
+      button.addEventListener("click", () => { this.roomMode = mode; this.render(); });
+      modes.append(button);
+    }
+    heading.append(titleWrap, modes);
 
-    const form = this.el("form", "search-form") as HTMLFormElement;
+    const form = this.el("form", "room-controls") as HTMLFormElement;
     const query = this.input("RoomQuery", "房名或描述", "search", this.query);
     query.addEventListener("input", () => { this.query = query.value; });
     const language = this.select("語言", [["", "全部"], ["EN", "EN"], ["CN", "CN"], ["DE", "DE"], ["FR", "FR"], ["ES", "ES"], ["RU", "RU"], ["UA", "UA"]], this.language);
@@ -405,7 +438,7 @@ class LiteApp {
       try {
         this.roomPageSize = 40;
         bcClient.search({ Query: this.query, Language: this.language, Space: this.space, Game: "", FullRooms: this.showFull, ShowLocked: this.showLocked, SearchDescs: this.searchDescriptions });
-      } catch (error) { this.notice = error instanceof Error ? error.message : "搜尋失敗"; this.render(); }
+      } catch (error) { this.localNotice(error instanceof Error ? error.message : "搜尋失敗"); }
     });
 
     const resultHeader = this.el("div", "result-header");
@@ -418,17 +451,7 @@ class LiteApp {
       more.addEventListener("click", () => { this.roomPageSize += 40; this.render(); });
       rooms.append(more);
     }
-    const status = this.el("p", "form-notice", this.notice || state.status);
-    status.setAttribute("role", "status");
-    const environment = state.player?.Environment;
-    const diagnostics = this.el("div", "form-notice");
-    diagnostics.append(this.el("p", "", `伺服器登入環境：${environment || "未提供（不能判定為 PROD）"} · 連線方式：本站 Cloudflare 中繼`));
-    diagnostics.append(this.el("p", "", environment === "DEV"
-      ? "中繼連線仍被 BC 分配到 DEV。請回報 /api/relay-status 的 bcOrigin 與目前環境；建立房間不會切換環境。"
-      : environment === "PROD" ? "伺服器確認為正式環境。搜尋會排除隱藏房間；輸入完整房名可搜尋隱藏房間，仍受權限與其他篩選條件限制。"
-      : "帳密驗證已通過，但伺服器未確認正式環境；不能只以登入成功或在線人數判定。"));
-    diagnostics.append(this.el("small", "", `伺服器總在線人數：${state.onlinePlayers ?? "未知"}（不代表所在環境人數）`));
-    const create = this.el("form", "search-form") as HTMLFormElement;
+    const create = this.el("form", "room-controls create-controls") as HTMLFormElement;
     const roomName = this.input("NewRoomName", "輸入房名", "text", this.newRoomName);
     roomName.maxLength = 20;
     roomName.addEventListener("input", () => { this.newRoomName = roomName.value; });
@@ -439,17 +462,27 @@ class LiteApp {
     limit.addEventListener("change", () => { this.newRoomLimit = Number(limit.value); });
     const createButton = this.button("建立並進入", "primary", "submit");
     createButton.disabled = state.phase !== "ready";
-    const directJoin = this.button("按房名加入", "secondary", "button");
-    directJoin.disabled = state.phase !== "ready";
-    directJoin.addEventListener("click", () => { if (create.reportValidity()) bcClient.join(this.newRoomName.trim()); });
-    create.append(this.field("建立房間／直接加入（建立時沿用上方區域與語言）", roomName), this.field("描述", description), this.field("人數上限", limit), this.checkbox("不列入公開搜尋", this.unlisted, value => { this.unlisted = value; }), createButton, directJoin);
+    const directJoin = this.button("按完整房名加入", "secondary", "button");
+    directJoin.disabled = !["ready", "in-room"].includes(state.phase);
+    directJoin.addEventListener("click", () => { if (this.query.trim()) this.joinRoom(this.query.trim()); else this.localNotice("請先輸入完整房名"); });
+    form.append(directJoin);
+    create.append(this.field("房間名稱", roomName), this.field("描述", description), this.field("人數上限", limit));
+    const createLanguage = this.select("建房語言", [["EN", "EN"], ["CN", "CN"], ["DE", "DE"], ["FR", "FR"], ["ES", "ES"], ["RU", "RU"], ["UA", "UA"]], this.language || "EN");
+    createLanguage.addEventListener("change", () => { this.language = createLanguage.value as RoomSearchRequest["Language"]; });
+    const createSpace = this.select("建房區域", [["X", "混合"], ["", "女性"], ["M", "男性"]], this.space);
+    createSpace.addEventListener("change", () => { this.space = createSpace.value as RoomSearchRequest["Space"]; });
+    create.append(this.field("語言", createLanguage), this.field("區域", createSpace), this.buildRoomOptions());
+    if (state.room) create.append(this.el("p", "muted", "可以在房內搜尋；建立新房前請先離開目前房間。"));
+    create.append(createButton);
     create.addEventListener("submit", event => {
       event.preventDefault();
       this.notice = "";
-      try { bcClient.createRoom(this.newRoomName, this.space, this.language, this.unlisted, this.newRoomDescription, this.newRoomLimit); }
-      catch (error) { this.notice = error instanceof Error ? error.message : "建立失敗"; this.render(); }
+      try { bcClient.createRoom(this.newRoomName, this.space, this.language, this.unlisted, this.newRoomDescription, this.newRoomLimit, this.roomOptions()); }
+      catch (error) { this.localNotice(error instanceof Error ? error.message : "建立失敗"); }
     });
-    section.append(heading, form, status, diagnostics, this.el("h2", "", "建立或直接加入房間"), create, resultHeader, rooms);
+    section.append(heading);
+    if (this.roomMode === "search") section.append(form, resultHeader, rooms);
+    else section.append(create);
     return section;
   }
 
@@ -459,13 +492,62 @@ class LiteApp {
     const meta = this.el("div", "room-tags");
     meta.append(this.el("span", "tag", room.Language || "—"), this.el("span", "tag", `${room.MemberCount}/${room.MemberLimit}`));
     if (room.Access && !room.Access.includes("All")) meta.append(this.el("span", "tag locked", "受限"));
+    if (room.Friends?.length) { const friends = this.el("span", "tag friend-tag", `好友 ${room.Friends.length}`); friends.title = room.Friends.map(friend => `#${friend.MemberNumber}`).join("、"); meta.append(friends); }
+    if (room.Visibility && !room.Visibility.includes("All")) meta.append(this.el("span", "tag", "隱藏／限定可見"));
+    if (room.MemberCount >= room.MemberLimit) meta.append(this.el("span", "tag", "已滿"));
+    if (room.Game) meta.append(this.el("span", "tag", room.Game));
+    if (room.MapType && room.MapType !== "Never") meta.append(this.el("span", "tag", `地圖 ${room.MapType}`));
     top.append(this.el("h3", "", room.Name), meta);
     card.append(top, this.el("p", "room-description", room.Description || "沒有房間描述"), this.el("p", "room-creator", `建立者：${room.Creator || `#${room.CreatorMemberNumber}`}`));
     const join = this.button(room.CanJoin ? "加入" : "無法加入", room.CanJoin ? "secondary" : "ghost", "button");
     join.disabled = !room.CanJoin || this.snapshot!.phase === "joining";
-    join.addEventListener("click", () => bcClient.join(room.Name));
+    join.addEventListener("click", () => this.joinRoom(room.Name));
     card.append(join);
     return card;
+  }
+
+  private buildRoomOptions(): HTMLElement {
+    const panel = this.el("div", "room-options");
+    const fields = this.createFields;
+    for (const [key, label] of [["Background", "背景圖片名稱（BC 內建，例如 MainHall）"], ["Admin", "管理者編號（自己自動加入）"], ["Whitelist", "白名單編號"], ["Ban", "黑名單編號"], ["ImageURL", "自訂圖片 HTTPS 網址"], ["MusicURL", "音樂 HTTPS 網址"]] as const) {
+      const input = this.input(`Create${key}`, label, key.endsWith("URL") ? "url" : "text", fields[key]);
+      input.required = false; input.maxLength = key.endsWith("URL") ? 2000 : 1000;
+      input.addEventListener("input", () => { fields[key] = input.value; });
+      panel.append(this.field(label, input));
+    }
+    for (const [key, label, options] of [
+      ["Game", "遊戲模式", [["", "無"], ["ClubCard", "ClubCard"], ["LARP", "LARP"], ["MagicBattle", "MagicBattle"], ["GGTS", "GGTS"]]],
+      ["Visibility", "房間可見性", [["All", "公開"], ["Admin,Whitelist", "管理者與白名單"], ["Admin", "僅管理者"], ["", "隱藏"]]],
+      ["Access", "加入權限", [["All", "任何人"], ["Admin,Whitelist", "管理者與白名單"], ["Admin", "僅管理者"]]],
+      ["MapType", "地圖", [["Never", "停用"], ["Hybrid", "Hybrid 混合"], ["Always", "Always 強制地圖"]]],
+    ] as const) {
+      const select = this.select(label, options.map(option => [...option]), fields[key]);
+      select.addEventListener("change", () => { fields[key] = select.value; }); panel.append(this.field(label, select));
+    }
+    panel.append(this.checkbox("地圖迷霧", fields.Fog, value => { fields.Fog = value; }));
+    const blocks = this.el("fieldset", "search-options"); blocks.append(this.el("legend", "", "禁止類別"));
+    for (const category of ["ABDL", "SciFi", "Fantasy", "Leashing", "Photos", "Arousal", "Smoking"]) blocks.append(this.checkbox(category, fields.BlockCategory.includes(category), checked => { fields.BlockCategory = checked ? [...fields.BlockCategory, category] : fields.BlockCategory.filter(value => value !== category); }));
+    panel.append(blocks);
+    const advanced = this.el("details", "map-import"); advanced.append(this.el("summary", "", "匯入 BC 地圖資料（選用）"));
+    const json = document.createElement("textarea"); json.id = "CreateMapJSON"; json.value = fields.MapJSON; json.maxLength = 30000;
+    json.placeholder = '貼上 MapData JSON；留空建立原版 40×40 空白地圖';
+    json.addEventListener("input", () => { fields.MapJSON = json.value; }); advanced.append(json); panel.append(advanced);
+    panel.append(this.el("p", "muted", "網址只送作房間設定，不在 Lite 自動載入。Lite 不提供遊戲操作、地圖移動或圖形編輯器；強制地圖可能影響聊天可見範圍。名單以逗號或空白分隔。"));
+    return panel;
+  }
+
+  private roomOptions(): RoomCreateOptions {
+    const fields = this.createFields;
+    const ids = (text: string) => text.trim() ? text.trim().split(/[\s,，]+/).map(value => { if (!/^\d+$/.test(value)) throw new Error("名單只接受玩家編號"); return Number(value); }) : [];
+    let map: RoomCreateOptions["MapData"] = { Type: fields.MapType as "Never" | "Hybrid" | "Always", Fog: fields.Fog };
+    if (fields.MapJSON.trim() && fields.MapType !== "Never") {
+      const parsed = JSON.parse(fields.MapJSON);
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("地圖必須為 MapData 物件");
+      map = { ...map, Tiles: parsed.Tiles, Objects: parsed.Objects, Effects: parsed.Effects };
+    }
+    return { Background: fields.Background.trim(), Admin: ids(fields.Admin), Whitelist: ids(fields.Whitelist), Ban: ids(fields.Ban), Game: fields.Game,
+      Visibility: fields.Visibility ? fields.Visibility.split(",") : [], Access: fields.Access.split(","), BlockCategory: fields.BlockCategory,
+      Custom: { ImageURL: fields.ImageURL.trim(), MusicURL: fields.MusicURL.trim() }, MapData: map };
   }
 
   private buildRoom(): HTMLElement {
@@ -523,7 +605,7 @@ class LiteApp {
     input.addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey && !event.isComposing && event.keyCode !== 229) { event.preventDefault(); bot.requestSubmit(); } });
     const buttons = this.el("div", "chat-room-buttons-div"); buttons.id = "chat-room-buttons-div";
     const inner = this.el("div", "chat-room-buttons"); inner.id = "chat-room-buttons";
-    const send = this.button("傳送", "primary", "submit"); inner.append(length, send); buttons.append(inner); bot.append(input, buttons);
+    const send = this.button("送出", "primary", "submit"); inner.append(length, send); buttons.append(inner); bot.append(input, buttons);
     bot.addEventListener("submit", (event) => {
       event.preventDefault();
       try { bcClient.sendChat(this.chatDraft); this.chatDraft = ""; input.value = ""; length.textContent = "0/1000"; }
@@ -552,7 +634,13 @@ class LiteApp {
 
   private showMember(character: CharacterSummary): void {
     const dialog = this.el("dialog", "profile-dialog");
-    dialog.append(this.el("h2", "", `${character.Nickname || character.Name} #${character.MemberNumber}`), this.el("p", "profile-description", character.Description || "未提供個人描述"));
+    dialog.append(this.el("h2", "", `${character.Nickname || character.Name} #${character.MemberNumber}`));
+    const relationName = (value: { Name?: string; MemberNumber?: number }) => `${value.Name || "未提供姓名"}${value.MemberNumber ? ` (#${value.MemberNumber})` : ""}`;
+    dialog.append(this.el("p", "", `主人：${character.Ownership ? relationName(character.Ownership) : character.Owner || "未提供"}`), this.el("p", "", `戀人：${character.Lovership?.length ? character.Lovership.map(relationName).join("、") : "未提供"}`));
+    const bio = this.el("details", "profile-bio");
+    bio.append(this.el("summary", "", "BIO · 點擊展開"));
+    bio.addEventListener("toggle", () => { if (bio.open && bio.childElementCount === 1) bio.append(this.el("p", "profile-description", character.Description || "未提供個人描述")); });
+    dialog.append(bio);
     const actions = this.el("div", "toolbar");
     const close = this.button("關閉", "ghost", "button");
     const dismiss = () => { dialog.close(); dialog.remove(); };
@@ -566,7 +654,7 @@ class LiteApp {
       });
       const friend = this.button("加好友", "ghost", "button");
       friend.addEventListener("click", () => this.run(() => bcClient.setFriend(character.MemberNumber, true)));
-      const beep = this.button("BEEP", "ghost", "button");
+      const beep = this.button("私訊（BEEP）", "ghost", "button");
       beep.addEventListener("click", () => { dismiss(); this.contact = character.MemberNumber; this.tab = "friends"; this.unread = 0; this.render(); document.getElementById("BeepText")?.focus(); });
       actions.append(whisper, friend, beep);
     }
@@ -579,9 +667,6 @@ class LiteApp {
     return footer;
   }
 
-  private feature(title: string, text: string): HTMLElement {
-    const row = this.el("div", "feature-row"); row.append(this.el("span", "feature-check", "✓"), this.el("div", "", title), this.el("small", "", text)); return row;
-  }
   private field(label: string, control: HTMLElement): HTMLElement { const field = this.el("label", "field"); field.append(this.el("span", "field-label", label), control); return field; }
   private input(id: string, placeholder: string, type: string, value: string): HTMLInputElement { const input = document.createElement("input"); input.id = id; input.name = id; input.type = type; input.placeholder = placeholder; input.value = value; input.required = type !== "search"; return input; }
   private select(label: string, options: string[][], value: string): HTMLSelectElement { const select = document.createElement("select"); select.setAttribute("aria-label", label); for (const [key, text] of options) { const option = document.createElement("option"); option.value = key; option.textContent = text; option.selected = key === value; select.append(option); } return select; }

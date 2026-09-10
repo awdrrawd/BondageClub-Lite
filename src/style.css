@@ -217,3 +217,41 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
   .login-layout { min-height: calc(100dvh - 90px); }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; scroll-behavior: auto !important; } }
+
+.header-account { display: flex; align-items: center; gap: .35rem; min-width: 0; }
+.header-account .button { padding: .5rem; font-size: .8rem; }
+.header-account .button:first-child { max-width: 230px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app-header > .connection { margin-inline: auto 1rem; }
+.room-controls { display: grid; grid-template-columns: minmax(180px, 2fr) repeat(2, minmax(100px, 1fr)); gap: .8rem; align-items: end; padding-block: .5rem 1rem; }
+.room-controls .field { margin: 0; }
+.room-controls > .button { width: auto; }
+.room-options { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+.room-options > p, .room-options > details, .room-options > fieldset { grid-column: 1 / -1; }
+.map-import textarea { margin-top: .7rem; min-height: 100px; }
+.friend-filters { padding-block: .8rem; flex-wrap: wrap; }
+.room-card { display: flex; flex-direction: column; height: 330px; contain-intrinsic-size: auto 330px; }
+.room-card-top { flex-direction: column; }
+.room-card h3 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.room-tags { flex-wrap: wrap; max-height: 65px; overflow: auto; }
+.friend-tag { border-color: var(--good); color: var(--good); }
+.room-card .room-description { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-block: .6rem; }
+.room-card .room-creator { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-block: .3rem; }
+.room-card > .button { margin-top: auto; flex-shrink: 0; }
+.login-layout { grid-template-columns: minmax(280px, 440px); justify-content: center; gap: 1rem; align-content: center; }
+.intro-panel h1 { font-size: 2.2rem; max-width: none; letter-spacing: -.03em; }
+.intro-panel .lede { margin-block: .5rem; }
+.login-privacy { margin-block: 1rem; color: var(--muted); font-size: .8rem; line-height: 1.6; }
+summary { cursor: pointer; padding-block: .5rem; }
+.login-error { color: var(--danger); }
+@media (max-width: 760px) {
+  .app-header { height: auto; min-height: 60px; flex-wrap: wrap; gap: .25rem; padding-block: .4rem; }
+  .app-header > .connection { order: 3; flex-basis: 100%; margin: 0; font-size: .72rem; }
+  .app-header > .connection span:last-child { max-width: 90vw; }
+  .header-account { margin-left: auto; }
+  .header-account .button:first-child { max-width: 48vw; }
+  .room-controls, .room-options { grid-template-columns: 1fr 1fr; }
+  .room-controls > .field:first-child { grid-column: 1 / -1; }
+  .view-heading { align-items: start; flex-direction: column; }
+  .room-view { height: calc(100dvh - 175px - env(safe-area-inset-bottom)); }
+}
+@media (max-width: 430px) { .room-controls, .room-options { grid-template-columns: 1fr; } }

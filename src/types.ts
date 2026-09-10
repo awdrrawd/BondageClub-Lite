@@ -9,7 +9,7 @@ export type ConnectionPhase =
   | "reconnecting"
   | "error";
 
-export interface PlayerSummary {
+export interface PlayerSummary extends CharacterSummary {
   FriendList?: number[];
   /** Opaque server bundles: never rebuild with an incomplete asset registry. */
   Appearance?: unknown[];
@@ -23,6 +23,9 @@ export interface PlayerSummary {
 }
 
 export interface CharacterSummary {
+  Owner?: string;
+  Ownership?: { Name?: string; MemberNumber?: number; Stage?: number };
+  Lovership?: Array<{ Name?: string; MemberNumber?: number; Stage?: number }>;
   Description?: string;
   ID?: string;
   MemberNumber: number;
@@ -41,6 +44,7 @@ export interface RoomSearchRequest {
 }
 
 export interface RoomSearchResult {
+  Game?: string;
   Name: string;
   Language: string;
   Creator: string;
@@ -54,6 +58,19 @@ export interface RoomSearchResult {
   Access?: string[];
   CanJoin: boolean;
   MapType?: string;
+}
+
+export interface RoomCreateOptions {
+  Background?: string;
+  Admin?: number[];
+  Whitelist?: number[];
+  Ban?: number[];
+  Game?: string;
+  Visibility?: string[];
+  Access?: string[];
+  BlockCategory?: string[];
+  Custom?: { ImageURL?: string; MusicURL?: string; ImageFilter?: string; SizeMode?: number };
+  MapData?: { Type: "Never" | "Hybrid" | "Always"; Fog?: boolean; Tiles?: string; Objects?: string; Effects?: string };
 }
 
 export interface RoomSync {
