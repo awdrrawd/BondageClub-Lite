@@ -1,4 +1,5 @@
 import { renderAction, dictionaryText } from './action-helper.mjs';
+import { receivedSpeech } from './speech-helper.mjs';
 import { nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, definitions } from './native-helper.mjs';
 import { extensionActivities, extensionText } from './extensions-helper.mjs';
 import { hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState } from './activity-helper.mjs';
@@ -28,7 +29,7 @@ async function setup(environment, relayAvailable = true, account = {}, storage =
     disconnect() { this.connected = false; handlers.get('disconnect')?.('io client disconnect'); return this; },
   };
   const context = {
-    hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState,
+    hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState, receivedSpeech,
     localStorage: { getItem(key) { return storage.get(key) ?? null; }, setItem(key, value) { storage.set(key, value); } },
     io: () => socket, nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, extensionActivities, extensionText, renderAction, dictionaryText, t, localizeStatus, validAppearance, copyAppearance, releaseAppearance, afcLovers, embeddedAction,
     exports: {},
@@ -163,6 +164,19 @@ test('membership sync does not duplicate native presence, and departed nickname/
   f.client.clearMessages(); assert.equal(f.state().messages.length, 0); assert.equal(f.sent.length, sent);
 });
 
+test('incoming LCE ungarbled speech reaches chat and private history without sending any packets', async () => {
+  const f=await setup('PROD');
+  f.handlers.get('ChatRoomSync')({Name:'Room',Character:[{MemberNumber:123,Name:'Me'},{MemberNumber:55,Name:'Friend'}]});
+  const sent=f.sent.length;
+  f.handlers.get('ChatRoomMessage')({Type:'Chat',Sender:55,Content:'mm',Dictionary:[{Effects:['gagged'],Original:'hello'},{MsgId:'original-id'}]});
+  assert.equal(f.state().messages.at(-1).text,'mm [hello]');
+  assert.equal(f.state().messages.at(-1).nativeId,'original-id');
+  f.handlers.get('ChatRoomMessage')({Type:'Whisper',Sender:55,Target:123,Content:'mmm',Dictionary:[{Original:'private'},{Tag:'ReplyId',ReplyId:'original-id'}]});
+  assert.equal(f.state().whispers.at(-1).text,'mmm [private]');
+  assert.equal(f.state().whispers.at(-1).replyId,'original-id');
+  assert.equal(f.sent.length,sent);
+});
+
 test('compatibility sends clothed online activity but never overrides explicit preferences or room restrictions', async () => {
   const clothing = Object.keys(definitions.items).find(key => key.startsWith('Cloth/') && Object.keys(definitions.items[key]).length === 0).split('/');
   const base = { Name: 'Test', Appearance: [{ Group: clothing[0], Name: clothing[1] }], ArousalSettings: { Active: 'Automatic', Activity: 'z'.repeat(100), Zone: 'f'.repeat(30) } };
@@ -170,9 +184,9 @@ test('compatibility sends clothed online activity but never overrides explicit p
   const actor = { ...base, MemberNumber: 123 }, target = { ...base, MemberNumber: 55 };
   f.handlers.get('ChatRoomSync')({ Name: 'Room', Character: [actor, target] });
   const option = f.client.activityOptions(55, true).find(option => option.name === 'Whisper' && option.group === 'ItemEars');
-  assert.equal(option.reason, null); assert.equal(option.warning, 'native.actor');
-  assert.throws(() => f.client.sendActivity(55, 'ItemEars', 'Whisper'));
-  f.client.sendActivity(55, 'ItemEars', 'Whisper', true);
+  assert.equal(option.reason, null); assert.equal(option.warning, 'native.effects');
+  assert.equal(f.client.activityOptions(55, false).find(option => option.name === 'Whisper').reason, null);
+  f.client.sendActivity(55, 'ItemEars', 'Whisper', false);
   assert.equal(f.sent.at(-1).payload.Type, 'Activity');
   actor.Appearance.push({ Group:'ItemMouth', Name:'BallGag', Property:{ Effect:[] } });
   f.handlers.get('ChatRoomSync')({ Name:'Room', Character:[actor, target] });
@@ -186,6 +200,36 @@ test('compatibility sends clothed online activity but never overrides explicit p
   f.handlers.get('ChatRoomSync')({ Name: 'Room', BlockCategory: ['Arousal'], Character: [actor, target] });
   assert.equal(f.client.activityOptions(55, true).find(option => option.name === 'Whisper').reason, 'native.room');
   assert.ok(!f.sent.some(packet => ['AccountUpdate', 'ChatRoomCharacterUpdate'].includes(packet.event)));
+});
+
+test('paw activities require the correct wearer in both modes while ordinary automatic-mode activities remain usable', async () => {
+  const base={Name:'Test',Appearance:[{Group:'BodyUpper',Name:'Normal'}],ArousalSettings:{Active:'Automatic',Activity:'z'.repeat(100),Zone:'f'.repeat(30)}};
+  const f=await setup('PROD',true,base);
+  f.client.setTextCatalog(gameCatalog('zh'));
+  const actor={...base,MemberNumber:123},target={...base,MemberNumber:55};
+  const sync=()=>f.handlers.get('ChatRoomSync')({Name:'Room',Character:[actor,target]});
+  const get=(name,mode)=>f.client.activityOptions(55,mode).find(option=>option.name===name);
+  const paw='text:ChatOther-ItemHead-猫爪梳毛', squeeze='text:ChatOther-ItemHands-捏猫爪';
+  sync();
+  for(const mode of [false,true]) {
+    assert.equal(get('Pet',mode).reason,null);
+    assert.equal(get(paw,mode).reason,'native.blocked');
+    assert.equal(get(squeeze,mode).reason,'native.blocked');
+    assert.throws(()=>f.client.sendActivity(55,'ItemHead',paw,mode));
+  }
+  actor.Appearance=[...base.Appearance,{Group:'ItemHands',Name:'PawMittens'}]; sync();
+  for(const mode of [false,true]) {
+    assert.equal(get(paw,mode).reason,null);
+    assert.equal(get(squeeze,mode).reason,'native.blocked');
+  }
+  actor.Appearance=base.Appearance;
+  target.Appearance=[...base.Appearance,{Group:'ItemHands',Name:'ElbowLengthMittens'}]; sync();
+  for(const mode of [false,true]) {
+    assert.equal(get(paw,mode).reason,'native.blocked');
+    assert.equal(get(squeeze,mode).reason,null);
+  }
+  target.Appearance=base.Appearance; sync();
+  assert.throws(()=>f.client.sendActivity(55,'ItemHands',squeeze,true));
 });
 
 test('unknown plugin appearance does not disable equipment checks, while fresh restrictions still block sending', async () => {

@@ -4,7 +4,7 @@ export const nativeActivities = definitions.activities;
 
 /** Incomplete local emulation is not an explicit refusal. Never relax known restrictions. */
 export function activityAvailability(reason: string | null, compatibility: boolean) {
-  if (compatibility && reason && ["native.equipment", "native.unsupported", "native.actor", "native.preferences"].includes(reason)) {
+  if (compatibility && reason && ["native.equipment", "native.unsupported", "native.preferences"].includes(reason)) {
     return { reason: null, warning: reason };
   }
   return { reason, warning: "" };
@@ -13,7 +13,7 @@ type ItemRule = { Effect?: string[]; Block?: string[]; AllowActivityOn?: string[
 type AppearanceItem = { Group?: string; Name?: string; Property?: ItemRule; Asset?: ItemRule & { Name?: string; Group?: { Name?: string } } };
 function inventoryState(character: CharacterSummary) {
   const effects = new Set<string>(), blocked = new Set<string>(), accessible = new Set<string>(), groups = new Set<string>();
-  const items: { group: string; rule?: ItemRule; property?: ItemRule }[] = [];
+  const items: { group: string; name: string; rule?: ItemRule; property?: ItemRule }[] = [];
   const strings = (value: unknown): string[] => Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
   for (const raw of Array.isArray(character.Appearance) ? character.Appearance : []) {
     if (!raw || typeof raw !== "object") continue;
@@ -22,7 +22,7 @@ function inventoryState(character: CharacterSummary) {
     if (typeof group !== "string" || typeof name !== "string") continue;
     groups.add(group);
     const rule = item.Asset ?? (definitions.items as Record<string, ItemRule>)[`${group}/${name}`];
-    items.push({ group, rule, property: item.Property });
+    items.push({ group, name, rule, property: item.Property });
     // BC CharacterGetEffects and activity zone blocking union Asset and Property arrays.
     for (const [key, result] of [["Effect", effects], ["Block", blocked], ["AllowActivityOn", accessible]] as const) {
       if (key === "Effect" || group.startsWith("Item")) {
@@ -61,7 +61,8 @@ function inventoryState(character: CharacterSummary) {
     if (values.some(value => value?.includes(activity))) return true;
     return values.some(value => value === null) ? undefined : false;
   };
-  return { effects, groups, naked, needs, blocked: (group: string, activity = false) => blocked.has(group) && !(activity && accessible.has(group)) };
+  const hasItem = (group: string, names?: string[]) => items.some(item => item.group === group && (!names || names.includes(item.name)));
+  return { effects, groups, naked, needs, hasItem, blocked: (group: string, activity = false) => blocked.has(group) && !(activity && accessible.has(group)) };
 }
 
 /** Check known item effects; unknown assets never invalidate unrelated activities. */
@@ -99,6 +100,18 @@ export function createActivityInventoryCheck(actor: CharacterSummary, target: Ch
       case "ZoneNaked": allowed = b.naked(group); break;
       case "TargetZoneNaked": allowed = a.naked(group); break;
       case "Collared": allowed = b.groups.has("ItemNeck"); break;
+      case "Luzi_HasPawMittens": allowed = a.hasItem("ItemHands", ["PawMittens", "ElbowLengthMittens"]); break;
+      case "Luzi_TargetHasPawMittens": allowed = b.hasItem("ItemHands", ["PawMittens", "ElbowLengthMittens"]); break;
+      case "Luzi_HasTail": allowed = a.hasItem("TailStraps"); break;
+      case "Luzi_TargetHasTail": allowed = b.hasItem("TailStraps"); break;
+      case "Luzi_HasWings": allowed = a.hasItem("Wings"); break;
+      case "Luzi_TargetHasWings": allowed = b.hasItem("Wings"); break;
+      case "Luzi_HasCatTail": case "Luzi_TargetHasCatTail":
+        allowed = (pre.startsWith("Luzi_Target") ? b : a).hasItem("TailStraps", ["TailStrap", "KittenTailStrap2", "KittenTailStrap1", "穿戴式浅色猫尾镜像", "小型穿戴式软猫尾镜像"]); break;
+      case "Luzi_HasTentacles": case "Luzi_TargetHasTentacles": {
+        const wearer = pre.startsWith("Luzi_Target") ? b : a;
+        allowed = wearer.hasItem("TailStraps", ["Tentacles"]) || wearer.hasItem("ItemButt", ["Tentacles"]); break;
+      }
       default:
         if (pre.startsWith("Needs-")) allowed = a.needs(pre.slice(6));
         else if (pre.startsWith("TargetNeeds-")) allowed = b.needs(pre.slice(12));
@@ -133,9 +146,7 @@ export function activityReason(actor: CharacterSummary, target: CharacterSummary
   if (![actor, target].every(character => Array.isArray(character.Appearance) && character.Appearance.length)) return "native.data";
   const inventoryReason = checkInventory(group, activity.prerequisites);
   if (inventoryReason) return inventoryReason;
-  if (activity.special) return "native.unsupported";
-  // Automatic actor arousal, expression timers and punishment caches are not emulated.
-  if (actor.ArousalSettings?.Active !== "Manual") return "native.actor";
+  // Local expression/arousal effects are execution limitations, not eligibility conditions.
   const settings = target.ArousalSettings;
   const zoneId = (definitions.zones as Record<string, number>)[group];
   if (!settings || !["Manual", "Hybrid", "Automatic"].includes(settings.Active || "") || typeof settings.Zone !== "string" || zoneId === undefined || settings.Zone.length <= zoneId) return "native.preferences";

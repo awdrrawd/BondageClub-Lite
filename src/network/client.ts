@@ -2,6 +2,7 @@ import { t, localizeStatus } from "../i18n";
 import { afcLovers } from "../profile/afc";
 import { renderAction, dictionaryText } from "../action/render";
 import { nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck } from "../action/native";
+import { receivedSpeech } from "./speech";
 import { extensionActivities, extensionText } from "../action/extensions";
 import { activityLabel, hasPenis, physicalGroup, textGroup } from "../action/labels";
 import { cuddleNames, cuddleReason, cuddleState } from "../action/cuddle";
@@ -398,10 +399,11 @@ export class BcLiteClient {
       ...activityAvailability(!this.canSend() ? "native.data" : activityReason(actor, target, group, activity.name, this.state.room!, checkInventory), compatibility),
       source: "BC",
     })));
+    for (const option of native) if (!option.reason && !option.warning && (actor.ArousalSettings?.Active !== "Manual" || nativeActivities.find(activity => activity.name === option.name)?.special)) option.warning = "native.effects";
     const extensions = extensionActivities.filter(entry => entry.self === (actor.MemberNumber === memberNumber) && Object.hasOwn(this.textCatalog, entry.key) && (!["ItemPenis", "ItemGlans"].includes(entry.group) || hasPenis(target))).map(entry => ({
       group: physicalGroup(entry.group), name: `${entry.source === "echo" && cuddleNames.includes(entry.name) ? "cuddle" : "text"}:${entry.key}`, groupLabel: this.textCatalog[`DialogGroupName${textGroup(physicalGroup(entry.group), target)}`] || this.textCatalog[`Group.${physicalGroup(entry.group)}`] || entry.group,
       label: entry.name === "钻进怀里" ? t("interaction.cuddleIn") : entry.name === "抱入怀中" ? t("interaction.cuddleHold") : activityLabel(entry.name, physicalGroup(entry.group), target, entry.self, this.textCatalog),
-      reason: !this.canSend() ? "native.data" : this.state.room!.BlockCategory?.includes("Arousal") || target.ArousalSettings?.Active === "Inactive" ? "native.permission" : this.state.room!.MapType && this.state.room!.MapType !== "Never" ? "native.room" : checkInventory(physicalGroup(entry.group), ["ZoneAccessible"]),
+      reason: !this.canSend() ? "native.data" : this.state.room!.BlockCategory?.includes("Arousal") || target.ArousalSettings?.Active === "Inactive" ? "native.permission" : this.state.room!.MapType && this.state.room!.MapType !== "Never" ? "native.room" : checkInventory(physicalGroup(entry.group), entry.prerequisites ?? ["ZoneAccessible"]),
       warning: entry.source === "echo" && cuddleNames.includes(entry.name) ? "cuddle.help" : "interaction.textOnly", source: entry.source,
     }));
     for (const option of extensions) {
@@ -728,7 +730,7 @@ export class BcLiteClient {
       presence, labelColor: sender?.LabelColor,
       target: message.Type === "Whisper" ? message.Target ?? this.state.player?.MemberNumber : undefined,
       targetName: message.Type === "Whisper" ? displayName(target || this.state.player || undefined) : undefined,
-      text: translated ? this.renderServerMessage(message.Content, message.Type, dictionary) : message.Content, type: message.Type, time: new Date(),
+      text: translated ? this.renderServerMessage(message.Content, message.Type, dictionary) : receivedSpeech(message.Content, message.Type, dictionary), type: message.Type, time: new Date(),
       ...(translated ? { translation: { content: message.Content, dictionary } } : {}),
       nativeId: typeof dictionary.find(entry => typeof entry.MsgId === "string")?.MsgId === "string" ? String(dictionary.find(entry => typeof entry.MsgId === "string")!.MsgId).slice(0, 256) : undefined,
       replyId: typeof dictionary.find(entry => entry.Tag === "ReplyId")?.ReplyId === "string" ? String(dictionary.find(entry => entry.Tag === "ReplyId")!.ReplyId) : undefined,

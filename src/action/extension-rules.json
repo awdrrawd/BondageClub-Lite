@@ -1,0 +1,535 @@
+{
+  "echo:竖起尾巴": [
+    "Luzi_HasCatTail"
+  ],
+  "echo:炸毛": [
+    "Luzi_HasCatTail"
+  ],
+  "echo:舔尾巴": [
+    "Luzi_TargetHasCatTail",
+    "UseTongue"
+  ],
+  "echo:衔尾": [
+    "Luzi_TargetHasCatTail",
+    "UseTongue"
+  ],
+  "echo:尾巴缠绕": [
+    "Luzi_HasCatTail"
+  ],
+  "echo:尾巴拍打地面": [
+    "Luzi_HasTail"
+  ],
+  "echo:尾巴炸毛": [
+    "Luzi_HasCatTail"
+  ],
+  "echo:尾巴戳脸": [
+    "Luzi_HasCatTail"
+  ],
+  "echo:尾巴戳胸": [
+    "Luzi_HasCatTail",
+    "Luzi_TargetHasBreast"
+  ],
+  "echo:宠物服爬到脚边": [
+    "Luzi_HasPetSuit"
+  ],
+  "echo:宠物服蹭小腿": [
+    "Luzi_HasPetSuit",
+    "MoveHead"
+  ],
+  "echo:宠物服蹭大腿": [
+    "Luzi_HasPetSuit"
+  ],
+  "echo:宠物服趴下": [
+    "Luzi_HasPetSuit",
+    "Luzi_IsKneeling"
+  ],
+  "echo:宠物服跪立": [
+    "Luzi_HasPetSuit",
+    "Luzi_IsAllFours"
+  ],
+  "echo:宠物服扑": [
+    "Luzi_HasPetSuit",
+    "Luzi_CharacterViewWithinReach"
+  ],
+  "echo:鱼尾揉脸": [
+    "Luzi_Has鱼鱼尾"
+  ],
+  "echo:鱼尾戳脸": [
+    "Luzi_Has鱼鱼尾"
+  ],
+  "echo:鱼尾抚脸": [
+    "Luzi_Has鱼鱼尾"
+  ],
+  "echo:鱼尾担膝盖": [
+    "Luzi_Has鱼鱼尾",
+    "TargetKneeling"
+  ],
+  "echo:鱼尾揉乳房": [
+    "Luzi_Has鱼鱼尾"
+  ],
+  "echo:鱼尾扇风": [
+    "Luzi_Has鱼鱼尾"
+  ],
+  "echo:鱼尾戳乳头": [
+    "Luzi_Has鱼鱼尾"
+  ],
+  "echo:鱼尾碰手": [
+    "Luzi_Has鱼鱼尾"
+  ],
+  "echo:鱼尾抚弄大腿": [
+    "Luzi_Has鱼鱼尾"
+  ],
+  "echo:鱼尾挠肋": [
+    "Luzi_Has鱼鱼尾"
+  ],
+  "echo:尾鳍骚挠鼻子": [
+    "Luzi_Has鱼鱼尾"
+  ],
+  "echo:鱼尾抓手": [
+    "Luzi_Has鱼鱼尾"
+  ],
+  "echo:鱼尾松手": [
+    "Luzi_Has鱼鱼尾"
+  ],
+  "echo:鱼尾缠绕": [
+    "Luzi_Has鱼鱼尾"
+  ],
+  "echo:鱼尾松绑": [
+    "Luzi_Has鱼鱼尾"
+  ],
+  "echo:扇动翅膀": [
+    "Luzi_HasWings"
+  ],
+  "echo:翅膀轻拍": [
+    "Luzi_HasWings"
+  ],
+  "echo:翅膀环绕": [
+    "Luzi_HasWings"
+  ],
+  "echo:翅膀扇风": [
+    "Luzi_HasWings"
+  ],
+  "echo:收拢翅膀": [
+    "Luzi_HasWings"
+  ],
+  "echo:撞笼子": [
+    "Luzi_HasKennel"
+  ],
+  "echo:咬笼子": [
+    "Luzi_HasKennel",
+    "UseMouth"
+  ],
+  "echo:摇晃笼子": [
+    "Luzi_HasKennel",
+    "UseArms"
+  ],
+  "echo:抓挠笼子": [
+    "Luzi_HasKennel",
+    "UseArms",
+    "UseHands"
+  ],
+  "echo:推挤笼门": [
+    "Luzi_HasKennel"
+  ],
+  "echo:啃咬笼锁": [
+    "Luzi_HasKennel",
+    "UseMouth"
+  ],
+  "echo:蜷缩角落": [
+    "Luzi_HasKennel"
+  ],
+  "echo:摩擦笼子": [
+    "Luzi_HasKennel",
+    "Luzi_Female",
+    "Luzi_ActedZoneNaked"
+  ],
+  "echo:猫爪挠手": [
+    "Luzi_HasPawMittens",
+    "UseArms"
+  ],
+  "echo:猫爪挠手臂": [
+    "Luzi_HasPawMittens",
+    "UseArms"
+  ],
+  "echo:猫爪舔手": [
+    "Luzi_HasPawMittens",
+    "UseArms",
+    "UseTongue"
+  ],
+  "echo:猫爪戳脸": [
+    "Luzi_HasPawMittens",
+    "UseArms"
+  ],
+  "echo:猫爪戳鼻子": [
+    "Luzi_HasPawMittens",
+    "UseArms"
+  ],
+  "echo:猫爪揉脸": [
+    "Luzi_HasPawMittens",
+    "UseArms"
+  ],
+  "echo:猫爪揉鼻子": [
+    "Luzi_HasPawMittens",
+    "UseArms"
+  ],
+  "echo:猫爪拍手": [
+    "Luzi_HasPawMittens",
+    "UseArms"
+  ],
+  "echo:猫爪梳毛": [
+    "Luzi_HasPawMittens",
+    "UseArms"
+  ],
+  "echo:猫爪遮眼": [
+    "Luzi_HasPawMittens",
+    "UseArms"
+  ],
+  "echo:猫爪握手": [
+    "Luzi_HasPawMittens",
+    "UseArms"
+  ],
+  "echo:猫爪拍头": [
+    "Luzi_HasPawMittens",
+    "UseArms"
+  ],
+  "echo:猫爪按手": [
+    "Luzi_HasPawMittens",
+    "UseArms"
+  ],
+  "echo:猫爪摸脸": [
+    "Luzi_HasPawMittens",
+    "UseArms"
+  ],
+  "echo:猫爪拍肩": [
+    "Luzi_HasPawMittens",
+    "UseArms"
+  ],
+  "echo:猫爪碰鼻": [
+    "Luzi_HasPawMittens",
+    "UseArms"
+  ],
+  "echo:猫爪拍肚": [
+    "Luzi_HasPawMittens",
+    "UseArms"
+  ],
+  "echo:猫爪揉肚": [
+    "Luzi_HasPawMittens",
+    "UseArms"
+  ],
+  "echo:猫爪暖腹": [
+    "Luzi_HasPawMittens",
+    "UseArms"
+  ],
+  "echo:猫爪画圈": [
+    "Luzi_HasPawMittens",
+    "UseArms"
+  ],
+  "echo:猫爪轻按": [
+    "Luzi_HasPawMittens",
+    "UseArms"
+  ],
+  "echo:猫爪护裆": [
+    "Luzi_HasPawMittens",
+    "UseArms"
+  ],
+  "echo:捏猫爪": [
+    "Luzi_TargetHasPawMittens",
+    "UseArms"
+  ],
+  "echo:舔触手": [
+    "Luzi_TargetHasTentacles"
+  ],
+  "echo:触手摸头": [
+    "Luzi_HasTentacles"
+  ],
+  "echo:触手戳": [
+    "Luzi_HasTentacles"
+  ],
+  "echo:触手轻抚鼻尖": [
+    "Luzi_HasTentacles"
+  ],
+  "echo:触手揉鼻子": [
+    "Luzi_HasTentacles"
+  ],
+  "echo:触手掀裙子": [
+    "Luzi_HasTentacles"
+  ],
+  "echo:触手揉脸": [
+    "Luzi_HasTentacles"
+  ],
+  "echo:触手缠绕手腕": [
+    "Luzi_HasTentacles"
+  ],
+  "echo:躲到身后": [
+    "Luzi_CharacterViewWithinReach"
+  ],
+  "echo:移动到身后": [
+    "Luzi_CharacterViewWithinReach"
+  ],
+  "echo:剑架在脖子上": [
+    "UseHands",
+    "UseArms",
+    "Luzi_HasSword"
+  ],
+  "echo:剑拍脸": [
+    "UseHands",
+    "UseArms",
+    "Luzi_HasSword"
+  ],
+  "echo:挥手致意": [
+    "UseHands",
+    "UseArms"
+  ],
+  "echo:伸出手": [
+    "UseHands",
+    "UseArms"
+  ],
+  "echo:轻抬下巴": [
+    "UseHands",
+    "UseArms"
+  ],
+  "echo:轻弹额头": [
+    "UseHands",
+    "UseArms"
+  ],
+  "echo:轻拍脑袋": [
+    "UseHands",
+    "UseArms"
+  ],
+  "echo:戳胸部": [
+    "Luzi_TargetHasBreast"
+  ],
+  "echo:戳乳头": [
+    "Luzi_TargetHasBreast",
+    "Luzi_ActedZoneNaked"
+  ],
+  "echo:戳阴部": [
+    "Luzi_TargetFemale",
+    "Luzi_ActedZoneNaked"
+  ],
+  "echo:戳阴蒂": [
+    "Luzi_TargetFemale",
+    "Luzi_ActedZoneNaked"
+  ],
+  "echo:摇晃手臂": [
+    "UseHands"
+  ],
+  "echo:轻推": [
+    "UseHands",
+    "UseArms"
+  ],
+  "echo:扭动手腕": [
+    "UseHands",
+    "UseArms"
+  ],
+  "echo:掀开裙子": [
+    "UseHands",
+    "UseArms"
+  ],
+  "echo:轻扯衣角": [
+    "UseHands",
+    "UseArms"
+  ],
+  "echo:拨弄发丝": [
+    "UseArms",
+    "UseHands"
+  ],
+  "echo:盖住耳朵": [
+    "UseHands",
+    "UseArms"
+  ],
+  "echo:遮住眼睛": [
+    "UseHands",
+    "UseArms"
+  ],
+  "echo:拽链子": [
+    "UseHands",
+    "UseArms",
+    "Luzi_IsLeashingTarget"
+  ],
+  "echo:打响指": [
+    "UseHands"
+  ],
+  "echo:耳边打响指": [
+    "UseHands"
+  ],
+  "echo:歪头": [
+    "MoveHead"
+  ],
+  "echo:捏脸": [
+    "UseHands",
+    "UseArms"
+  ],
+  "echo:揉脸": [
+    "UseHands",
+    "UseArms"
+  ],
+  "echo:挠头": [
+    "UseHands",
+    "UseArms"
+  ],
+  "echo:阴部轻蹭手": [
+    "HasVagina",
+    "Luzi_PrivateExposed"
+  ],
+  "echo:弹阴蒂": [
+    "UseHands",
+    "UseArms",
+    "Luzi_ActedZoneNaked"
+  ],
+  "echo:揉搓乳头": [
+    "UseHands",
+    "UseArms",
+    "Luzi_ActedZoneNaked"
+  ],
+  "echo:托起乳房": [],
+  "echo:流出液体": [
+    "Luzi_TargetHasItemVulva"
+  ],
+  "echo:失禁": [
+    "Luzi_TargetHasItemVulva"
+  ],
+  "echo:阴茎摩擦": [
+    "Luzi_CanWalk",
+    "Luzi_HasPenis",
+    "Luzi_PrivateExposed"
+  ],
+  "echo:捂住头": [
+    "UseHands",
+    "UseArms"
+  ],
+  "echo:捂住下体": [
+    "UseHands",
+    "UseArms",
+    "Luzi_ActedZoneNaked"
+  ],
+  "echo:捂住胸": [
+    "UseHands",
+    "UseArms",
+    "Luzi_HasBreast",
+    "Luzi_ActedZoneNaked"
+  ],
+  "echo:撇眼": [],
+  "echo:环视周围": [],
+  "echo:上下打量": [],
+  "echo:闭上眼睛": [],
+  "echo:眼睛呆滞": [],
+  "echo:眼睛湿润": [],
+  "echo:流眼泪": [],
+  "echo:踮起脚尖": [],
+  "echo:摇晃脚踝": [],
+  "echo:伸出脚": [
+    "UseFeet"
+  ],
+  "echo:脚托起下巴": [
+    "UseFeet",
+    "Luzi_IsStanding",
+    "Luzi_TargetKneelOrAllFours"
+  ],
+  "echo:双腿颤抖": [
+    "Luzi_TargetHasItemVulva"
+  ],
+  "echo:摇晃双腿": [],
+  "echo:跺脚": [],
+  "echo:脚按摩": [
+    "UseFeet",
+    "Luzi_TargetKneelOrAllFours"
+  ],
+  "echo:脚戳低处": [
+    "UseFeet",
+    "Luzi_IsStanding"
+  ],
+  "echo:脚戳刺激": [
+    "UseFeet",
+    "Luzi_IsStanding",
+    "TargetZoneNaked",
+    "Luzi_TargetKneelOrAllFours"
+  ],
+  "echo:爬到脚边": [
+    "Luzi_CharacterViewWithinReach",
+    "Luzi_KneelOrAllFours"
+  ],
+  "echo:蹭大腿": [
+    "Luzi_CharacterViewWithinReach",
+    "Luzi_KneelOrAllFours"
+  ],
+  "echo:蹭小腿": [
+    "Luzi_CharacterViewWithinReach",
+    "Luzi_KneelOrAllFours"
+  ],
+  "echo:抱腿": [
+    "Luzi_CharacterViewWithinReach",
+    "UseArms",
+    "Luzi_KneelOrAllFours"
+  ],
+  "echo:托起脚": [
+    "Luzi_CharacterViewWithinReach",
+    "UseHands",
+    "UseArms",
+    "Luzi_KneelOrAllFours"
+  ],
+  "echo:手臂搭在肩膀上": [
+    "UseArms"
+  ],
+  "echo:下巴搭在肩膀上": [],
+  "echo:抬起屁股": [],
+  "echo:搂腰": [
+    "UseArms",
+    "UseHands"
+  ],
+  "echo:叉腰": [
+    "UseArms",
+    "UseHands"
+  ],
+  "echo:身体颤抖": [],
+  "echo:身体抽搐": [],
+  "echo:嗅手": [],
+  "echo:张开嘴": [
+    "UseMouth"
+  ],
+  "echo:闭上嘴": [
+    "UseMouth"
+  ],
+  "echo:吞咽口水": [],
+  "echo:流口水": [],
+  "echo:轻声喘息": [
+    "UseTongue"
+  ],
+  "echo:打哈欠": [
+    "UseMouth"
+  ],
+  "echo:嘟囔": [
+    "UseMouth"
+  ],
+  "echo:舔手": [
+    "UseMouth",
+    "Luzi_ActedZoneNaked"
+  ],
+  "echo:舔手指": [
+    "UseMouth",
+    "Luzi_ActedZoneNaked"
+  ],
+  "echo:舔脸": [
+    "UseTongue"
+  ],
+  "echo:舔脚": [
+    "UseTongue"
+  ],
+  "echo:耳朵呵气": [
+    "UseMouth"
+  ],
+  "echo:乳头呵气": [
+    "UseMouth",
+    "Luzi_ActedZoneNaked"
+  ],
+  "echo:舔牵绳手": [
+    "UseTongue",
+    "Luzi_LeashedBy"
+  ],
+  "echo:口塞亲吻嘴唇": [
+    "IsGagged"
+  ],
+  "echo:挣脱牵绳": [
+    "Luzi_LeashedBy"
+  ]
+}

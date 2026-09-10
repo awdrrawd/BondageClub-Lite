@@ -60,14 +60,20 @@
     "source": "echo",
     "self": false,
     "group": "ItemTorso",
-    "name": "躲到身后"
+    "name": "躲到身后",
+    "prerequisites": [
+      "Luzi_CharacterViewWithinReach"
+    ]
   },
   {
     "key": "ChatOther-ItemTorso-移动到身后",
     "source": "echo",
     "self": false,
     "group": "ItemTorso",
-    "name": "移动到身后"
+    "name": "移动到身后",
+    "prerequisites": [
+      "Luzi_CharacterViewWithinReach"
+    ]
   },
   {
     "key": "ChatOther-ItemTorso-钻进怀里",
@@ -137,63 +143,95 @@
     "source": "echo",
     "self": false,
     "group": "ItemBoots",
-    "name": "宠物服爬到脚边"
+    "name": "宠物服爬到脚边",
+    "prerequisites": [
+      "Luzi_HasPetSuit"
+    ]
   },
   {
     "key": "ChatOther-ItemFeet-宠物服蹭小腿",
     "source": "echo",
     "self": false,
     "group": "ItemFeet",
-    "name": "宠物服蹭小腿"
+    "name": "宠物服蹭小腿",
+    "prerequisites": [
+      "Luzi_HasPetSuit",
+      "MoveHead"
+    ]
   },
   {
     "key": "ChatOther-ItemLegs-宠物服蹭大腿",
     "source": "echo",
     "self": false,
     "group": "ItemLegs",
-    "name": "宠物服蹭大腿"
+    "name": "宠物服蹭大腿",
+    "prerequisites": [
+      "Luzi_HasPetSuit"
+    ]
   },
   {
     "key": "ChatSelf-ItemLegs-宠物服趴下",
     "source": "echo",
     "self": true,
     "group": "ItemLegs",
-    "name": "宠物服趴下"
+    "name": "宠物服趴下",
+    "prerequisites": [
+      "Luzi_HasPetSuit",
+      "Luzi_IsKneeling"
+    ]
   },
   {
     "key": "ChatSelf-ItemLegs-宠物服跪立",
     "source": "echo",
     "self": true,
     "group": "ItemLegs",
-    "name": "宠物服跪立"
+    "name": "宠物服跪立",
+    "prerequisites": [
+      "Luzi_HasPetSuit",
+      "Luzi_IsAllFours"
+    ]
   },
   {
     "key": "ChatOther-ItemArms-宠物服扑",
     "source": "echo",
     "self": false,
     "group": "ItemArms",
-    "name": "宠物服扑"
+    "name": "宠物服扑",
+    "prerequisites": [
+      "Luzi_HasPetSuit",
+      "Luzi_CharacterViewWithinReach"
+    ]
   },
   {
     "key": "ChatSelf-ItemButt-竖起尾巴",
     "source": "echo",
     "self": true,
     "group": "ItemButt",
-    "name": "竖起尾巴"
+    "name": "竖起尾巴",
+    "prerequisites": [
+      "Luzi_HasCatTail"
+    ]
   },
   {
     "key": "ChatSelf-ItemButt-炸毛",
     "source": "echo",
     "self": true,
     "group": "ItemButt",
-    "name": "炸毛"
+    "name": "炸毛",
+    "prerequisites": [
+      "Luzi_HasCatTail"
+    ]
   },
   {
     "key": "ChatOther-ItemButt-舔尾巴",
     "source": "echo",
     "self": false,
     "group": "ItemButt",
-    "name": "舔尾巴"
+    "name": "舔尾巴",
+    "prerequisites": [
+      "Luzi_TargetHasCatTail",
+      "UseTongue"
+    ]
   },
   {
     "key": "ChatOther-ItemButt-轻抚尾巴",
@@ -207,448 +245,674 @@
     "source": "echo",
     "self": false,
     "group": "ItemButt",
-    "name": "衔尾"
+    "name": "衔尾",
+    "prerequisites": [
+      "Luzi_TargetHasCatTail",
+      "UseTongue"
+    ]
   },
   {
     "key": "ChatOther-ItemArms-尾巴缠绕",
     "source": "echo",
     "self": false,
     "group": "ItemArms",
-    "name": "尾巴缠绕"
+    "name": "尾巴缠绕",
+    "prerequisites": [
+      "Luzi_HasCatTail"
+    ]
   },
   {
     "key": "ChatSelf-ItemButt-尾巴拍打地面",
     "source": "echo",
     "self": true,
     "group": "ItemButt",
-    "name": "尾巴拍打地面"
+    "name": "尾巴拍打地面",
+    "prerequisites": [
+      "Luzi_HasTail"
+    ]
   },
   {
     "key": "ChatSelf-ItemButt-尾巴炸毛",
     "source": "echo",
     "self": true,
     "group": "ItemButt",
-    "name": "尾巴炸毛"
+    "name": "尾巴炸毛",
+    "prerequisites": [
+      "Luzi_HasCatTail"
+    ]
   },
   {
     "key": "ChatOther-ItemMouth-尾巴戳脸",
     "source": "echo",
     "self": false,
     "group": "ItemMouth",
-    "name": "尾巴戳脸"
+    "name": "尾巴戳脸",
+    "prerequisites": [
+      "Luzi_HasCatTail"
+    ]
   },
   {
     "key": "ChatOther-ItemBreast-尾巴戳胸",
     "source": "echo",
     "self": false,
     "group": "ItemBreast",
-    "name": "尾巴戳胸"
+    "name": "尾巴戳胸",
+    "prerequisites": [
+      "Luzi_HasCatTail",
+      "Luzi_TargetHasBreast"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-猫爪挠手",
     "source": "echo",
     "self": false,
     "group": "ItemHands",
-    "name": "猫爪挠手"
+    "name": "猫爪挠手",
+    "prerequisites": [
+      "Luzi_HasPawMittens",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemArms-猫爪挠手臂",
     "source": "echo",
     "self": false,
     "group": "ItemArms",
-    "name": "猫爪挠手臂"
+    "name": "猫爪挠手臂",
+    "prerequisites": [
+      "Luzi_HasPawMittens",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatSelf-ItemHands-猫爪舔手",
     "source": "echo",
     "self": true,
     "group": "ItemHands",
-    "name": "猫爪舔手"
+    "name": "猫爪舔手",
+    "prerequisites": [
+      "Luzi_HasPawMittens",
+      "UseArms",
+      "UseTongue"
+    ]
   },
   {
     "key": "ChatOther-ItemMouth-猫爪戳脸",
     "source": "echo",
     "self": false,
     "group": "ItemMouth",
-    "name": "猫爪戳脸"
+    "name": "猫爪戳脸",
+    "prerequisites": [
+      "Luzi_HasPawMittens",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemNose-猫爪戳鼻子",
     "source": "echo",
     "self": false,
     "group": "ItemNose",
-    "name": "猫爪戳鼻子"
+    "name": "猫爪戳鼻子",
+    "prerequisites": [
+      "Luzi_HasPawMittens",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemMouth-猫爪揉脸",
     "source": "echo",
     "self": false,
     "group": "ItemMouth",
-    "name": "猫爪揉脸"
+    "name": "猫爪揉脸",
+    "prerequisites": [
+      "Luzi_HasPawMittens",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemNose-猫爪揉鼻子",
     "source": "echo",
     "self": false,
     "group": "ItemNose",
-    "name": "猫爪揉鼻子"
+    "name": "猫爪揉鼻子",
+    "prerequisites": [
+      "Luzi_HasPawMittens",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-猫爪拍手",
     "source": "echo",
     "self": false,
     "group": "ItemHands",
-    "name": "猫爪拍手"
+    "name": "猫爪拍手",
+    "prerequisites": [
+      "Luzi_HasPawMittens",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemHead-猫爪梳毛",
     "source": "echo",
     "self": false,
     "group": "ItemHead",
-    "name": "猫爪梳毛"
+    "name": "猫爪梳毛",
+    "prerequisites": [
+      "Luzi_HasPawMittens",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemHead-猫爪遮眼",
     "source": "echo",
     "self": false,
     "group": "ItemHead",
-    "name": "猫爪遮眼"
+    "name": "猫爪遮眼",
+    "prerequisites": [
+      "Luzi_HasPawMittens",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-猫爪握手",
     "source": "echo",
     "self": false,
     "group": "ItemHands",
-    "name": "猫爪握手"
+    "name": "猫爪握手",
+    "prerequisites": [
+      "Luzi_HasPawMittens",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemHead-猫爪拍头",
     "source": "echo",
     "self": false,
     "group": "ItemHead",
-    "name": "猫爪拍头"
+    "name": "猫爪拍头",
+    "prerequisites": [
+      "Luzi_HasPawMittens",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-猫爪按手",
     "source": "echo",
     "self": false,
     "group": "ItemHands",
-    "name": "猫爪按手"
+    "name": "猫爪按手",
+    "prerequisites": [
+      "Luzi_HasPawMittens",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemMouth-猫爪摸脸",
     "source": "echo",
     "self": false,
     "group": "ItemMouth",
-    "name": "猫爪摸脸"
+    "name": "猫爪摸脸",
+    "prerequisites": [
+      "Luzi_HasPawMittens",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemArms-猫爪拍肩",
     "source": "echo",
     "self": false,
     "group": "ItemArms",
-    "name": "猫爪拍肩"
+    "name": "猫爪拍肩",
+    "prerequisites": [
+      "Luzi_HasPawMittens",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemNose-猫爪碰鼻",
     "source": "echo",
     "self": false,
     "group": "ItemNose",
-    "name": "猫爪碰鼻"
+    "name": "猫爪碰鼻",
+    "prerequisites": [
+      "Luzi_HasPawMittens",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemPelvis-猫爪拍肚",
     "source": "echo",
     "self": false,
     "group": "ItemPelvis",
-    "name": "猫爪拍肚"
+    "name": "猫爪拍肚",
+    "prerequisites": [
+      "Luzi_HasPawMittens",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemPelvis-猫爪揉肚",
     "source": "echo",
     "self": false,
     "group": "ItemPelvis",
-    "name": "猫爪揉肚"
+    "name": "猫爪揉肚",
+    "prerequisites": [
+      "Luzi_HasPawMittens",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemPelvis-猫爪暖腹",
     "source": "echo",
     "self": false,
     "group": "ItemPelvis",
-    "name": "猫爪暖腹"
+    "name": "猫爪暖腹",
+    "prerequisites": [
+      "Luzi_HasPawMittens",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemPelvis-猫爪画圈",
     "source": "echo",
     "self": false,
     "group": "ItemPelvis",
-    "name": "猫爪画圈"
+    "name": "猫爪画圈",
+    "prerequisites": [
+      "Luzi_HasPawMittens",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemPelvis-猫爪轻按",
     "source": "echo",
     "self": false,
     "group": "ItemPelvis",
-    "name": "猫爪轻按"
+    "name": "猫爪轻按",
+    "prerequisites": [
+      "Luzi_HasPawMittens",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemVulva-猫爪护裆",
     "source": "echo",
     "self": false,
     "group": "ItemVulva",
-    "name": "猫爪护裆"
+    "name": "猫爪护裆",
+    "prerequisites": [
+      "Luzi_HasPawMittens",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-捏猫爪",
     "source": "echo",
     "self": false,
     "group": "ItemHands",
-    "name": "捏猫爪"
+    "name": "捏猫爪",
+    "prerequisites": [
+      "Luzi_TargetHasPawMittens",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatSelf-ItemArms-撞笼子",
     "source": "echo",
     "self": true,
     "group": "ItemArms",
-    "name": "撞笼子"
+    "name": "撞笼子",
+    "prerequisites": [
+      "Luzi_HasKennel"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth-咬笼子",
     "source": "echo",
     "self": true,
     "group": "ItemMouth",
-    "name": "咬笼子"
+    "name": "咬笼子",
+    "prerequisites": [
+      "Luzi_HasKennel",
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemArms-摇晃笼子",
     "source": "echo",
     "self": true,
     "group": "ItemArms",
-    "name": "摇晃笼子"
+    "name": "摇晃笼子",
+    "prerequisites": [
+      "Luzi_HasKennel",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatSelf-ItemHands-抓挠笼子",
     "source": "echo",
     "self": true,
     "group": "ItemHands",
-    "name": "抓挠笼子"
+    "name": "抓挠笼子",
+    "prerequisites": [
+      "Luzi_HasKennel",
+      "UseArms",
+      "UseHands"
+    ]
   },
   {
     "key": "ChatSelf-ItemArms-推挤笼门",
     "source": "echo",
     "self": true,
     "group": "ItemArms",
-    "name": "推挤笼门"
+    "name": "推挤笼门",
+    "prerequisites": [
+      "Luzi_HasKennel"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth-啃咬笼锁",
     "source": "echo",
     "self": true,
     "group": "ItemMouth",
-    "name": "啃咬笼锁"
+    "name": "啃咬笼锁",
+    "prerequisites": [
+      "Luzi_HasKennel",
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemTorso-蜷缩角落",
     "source": "echo",
     "self": true,
     "group": "ItemTorso",
-    "name": "蜷缩角落"
+    "name": "蜷缩角落",
+    "prerequisites": [
+      "Luzi_HasKennel"
+    ]
   },
   {
     "key": "ChatSelf-ItemVulva-摩擦笼子",
     "source": "echo",
     "self": true,
     "group": "ItemVulva",
-    "name": "摩擦笼子"
+    "name": "摩擦笼子",
+    "prerequisites": [
+      "Luzi_HasKennel",
+      "Luzi_Female",
+      "Luzi_ActedZoneNaked"
+    ]
   },
   {
     "key": "ChatSelf-ItemArms-扇动翅膀",
     "source": "echo",
     "self": true,
     "group": "ItemArms",
-    "name": "扇动翅膀"
+    "name": "扇动翅膀",
+    "prerequisites": [
+      "Luzi_HasWings"
+    ]
   },
   {
     "key": "ChatOther-ItemArms-翅膀轻拍",
     "source": "echo",
     "self": false,
     "group": "ItemArms",
-    "name": "翅膀轻拍"
+    "name": "翅膀轻拍",
+    "prerequisites": [
+      "Luzi_HasWings"
+    ]
   },
   {
     "key": "ChatOther-ItemArms-翅膀环绕",
     "source": "echo",
     "self": false,
     "group": "ItemArms",
-    "name": "翅膀环绕"
+    "name": "翅膀环绕",
+    "prerequisites": [
+      "Luzi_HasWings"
+    ]
   },
   {
     "key": "ChatOther-ItemHead-翅膀扇风",
     "source": "echo",
     "self": false,
     "group": "ItemHead",
-    "name": "翅膀扇风"
+    "name": "翅膀扇风",
+    "prerequisites": [
+      "Luzi_HasWings"
+    ]
   },
   {
     "key": "ChatSelf-ItemArms-收拢翅膀",
     "source": "echo",
     "self": true,
     "group": "ItemArms",
-    "name": "收拢翅膀"
+    "name": "收拢翅膀",
+    "prerequisites": [
+      "Luzi_HasWings"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth-舔触手",
     "source": "echo",
     "self": true,
     "group": "ItemMouth",
-    "name": "舔触手"
+    "name": "舔触手",
+    "prerequisites": [
+      "Luzi_TargetHasTentacles"
+    ]
   },
   {
     "key": "ChatOther-ItemHead-触手摸头",
     "source": "echo",
     "self": false,
     "group": "ItemHead",
-    "name": "触手摸头"
+    "name": "触手摸头",
+    "prerequisites": [
+      "Luzi_HasTentacles"
+    ]
   },
   {
     "key": "ChatOther-ItemNose-触手轻抚鼻尖",
     "source": "echo",
     "self": false,
     "group": "ItemNose",
-    "name": "触手轻抚鼻尖"
+    "name": "触手轻抚鼻尖",
+    "prerequisites": [
+      "Luzi_HasTentacles"
+    ]
   },
   {
     "key": "ChatOther-ItemNose-触手揉鼻子",
     "source": "echo",
     "self": false,
     "group": "ItemNose",
-    "name": "触手揉鼻子"
+    "name": "触手揉鼻子",
+    "prerequisites": [
+      "Luzi_HasTentacles"
+    ]
   },
   {
     "key": "ChatOther-ItemButt-触手掀裙子",
     "source": "echo",
     "self": false,
     "group": "ItemButt",
-    "name": "触手掀裙子"
+    "name": "触手掀裙子",
+    "prerequisites": [
+      "Luzi_HasTentacles"
+    ]
   },
   {
     "key": "ChatOther-ItemMouth-触手揉脸",
     "source": "echo",
     "self": false,
     "group": "ItemMouth",
-    "name": "触手揉脸"
+    "name": "触手揉脸",
+    "prerequisites": [
+      "Luzi_HasTentacles"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-触手缠绕手腕",
     "source": "echo",
     "self": false,
     "group": "ItemHands",
-    "name": "触手缠绕手腕"
+    "name": "触手缠绕手腕",
+    "prerequisites": [
+      "Luzi_HasTentacles"
+    ]
   },
   {
     "key": "ChatOther-ItemMouth-鱼尾揉脸",
     "source": "echo",
     "self": false,
     "group": "ItemMouth",
-    "name": "鱼尾揉脸"
+    "name": "鱼尾揉脸",
+    "prerequisites": [
+      "Luzi_Has鱼鱼尾"
+    ]
   },
   {
     "key": "ChatOther-ItemMouth-鱼尾戳脸",
     "source": "echo",
     "self": false,
     "group": "ItemMouth",
-    "name": "鱼尾戳脸"
+    "name": "鱼尾戳脸",
+    "prerequisites": [
+      "Luzi_Has鱼鱼尾"
+    ]
   },
   {
     "key": "ChatOther-ItemMouth-鱼尾抚脸",
     "source": "echo",
     "self": false,
     "group": "ItemMouth",
-    "name": "鱼尾抚脸"
+    "name": "鱼尾抚脸",
+    "prerequisites": [
+      "Luzi_Has鱼鱼尾"
+    ]
   },
   {
     "key": "ChatOther-ItemLegs-鱼尾担膝盖",
     "source": "echo",
     "self": false,
     "group": "ItemLegs",
-    "name": "鱼尾担膝盖"
+    "name": "鱼尾担膝盖",
+    "prerequisites": [
+      "Luzi_Has鱼鱼尾",
+      "TargetKneeling"
+    ]
   },
   {
     "key": "ChatOther-ItemBreast-鱼尾揉乳房",
     "source": "echo",
     "self": false,
     "group": "ItemBreast",
-    "name": "鱼尾揉乳房"
+    "name": "鱼尾揉乳房",
+    "prerequisites": [
+      "Luzi_Has鱼鱼尾"
+    ]
   },
   {
     "key": "ChatOther-ItemMouth-鱼尾扇风",
     "source": "echo",
     "self": false,
     "group": "ItemMouth",
-    "name": "鱼尾扇风"
+    "name": "鱼尾扇风",
+    "prerequisites": [
+      "Luzi_Has鱼鱼尾"
+    ]
   },
   {
     "key": "ChatOther-ItemNipples-鱼尾戳乳头",
     "source": "echo",
     "self": false,
     "group": "ItemNipples",
-    "name": "鱼尾戳乳头"
+    "name": "鱼尾戳乳头",
+    "prerequisites": [
+      "Luzi_Has鱼鱼尾"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-鱼尾碰手",
     "source": "echo",
     "self": false,
     "group": "ItemHands",
-    "name": "鱼尾碰手"
+    "name": "鱼尾碰手",
+    "prerequisites": [
+      "Luzi_Has鱼鱼尾"
+    ]
   },
   {
     "key": "ChatOther-ItemLegs-鱼尾抚弄大腿",
     "source": "echo",
     "self": false,
     "group": "ItemLegs",
-    "name": "鱼尾抚弄大腿"
+    "name": "鱼尾抚弄大腿",
+    "prerequisites": [
+      "Luzi_Has鱼鱼尾"
+    ]
   },
   {
     "key": "ChatOther-ItemTorso-鱼尾挠肋",
     "source": "echo",
     "self": false,
     "group": "ItemTorso",
-    "name": "鱼尾挠肋"
+    "name": "鱼尾挠肋",
+    "prerequisites": [
+      "Luzi_Has鱼鱼尾"
+    ]
   },
   {
     "key": "ChatOther-ItemNose-尾鳍骚挠鼻子",
     "source": "echo",
     "self": false,
     "group": "ItemNose",
-    "name": "尾鳍骚挠鼻子"
+    "name": "尾鳍骚挠鼻子",
+    "prerequisites": [
+      "Luzi_Has鱼鱼尾"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-鱼尾抓手",
     "source": "echo",
     "self": false,
     "group": "ItemHands",
-    "name": "鱼尾抓手"
+    "name": "鱼尾抓手",
+    "prerequisites": [
+      "Luzi_Has鱼鱼尾"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-鱼尾松手",
     "source": "echo",
     "self": false,
     "group": "ItemHands",
-    "name": "鱼尾松手"
+    "name": "鱼尾松手",
+    "prerequisites": [
+      "Luzi_Has鱼鱼尾"
+    ]
   },
   {
     "key": "ChatOther-ItemArms-鱼尾缠绕",
     "source": "echo",
     "self": false,
     "group": "ItemArms",
-    "name": "鱼尾缠绕"
+    "name": "鱼尾缠绕",
+    "prerequisites": [
+      "Luzi_Has鱼鱼尾"
+    ]
   },
   {
     "key": "ChatOther-ItemArms-鱼尾松绑",
     "source": "echo",
     "self": false,
     "group": "ItemArms",
-    "name": "鱼尾松绑"
+    "name": "鱼尾松绑",
+    "prerequisites": [
+      "Luzi_Has鱼鱼尾"
+    ]
   },
   {
     "key": "ChatOther-ItemLegs-掰开双腿",
@@ -711,105 +975,150 @@
     "source": "echo",
     "self": true,
     "group": "ItemMouth",
-    "name": "张开嘴"
+    "name": "张开嘴",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth-闭上嘴",
     "source": "echo",
     "self": true,
     "group": "ItemMouth",
-    "name": "闭上嘴"
+    "name": "闭上嘴",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemNeck-吞咽口水",
     "source": "echo",
     "self": true,
     "group": "ItemNeck",
-    "name": "吞咽口水"
+    "name": "吞咽口水",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemMouth-流口水",
     "source": "echo",
     "self": true,
     "group": "ItemMouth",
-    "name": "流口水"
+    "name": "流口水",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemMouth-轻声喘息",
     "source": "echo",
     "self": true,
     "group": "ItemMouth",
-    "name": "轻声喘息"
+    "name": "轻声喘息",
+    "prerequisites": [
+      "UseTongue"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth-打哈欠",
     "source": "echo",
     "self": true,
     "group": "ItemMouth",
-    "name": "打哈欠"
+    "name": "打哈欠",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth-嘟囔",
     "source": "echo",
     "self": true,
     "group": "ItemMouth",
-    "name": "嘟囔"
+    "name": "嘟囔",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-舔手",
     "source": "echo",
     "self": false,
     "group": "ItemHands",
-    "name": "舔手"
+    "name": "舔手",
+    "prerequisites": [
+      "UseMouth",
+      "Luzi_ActedZoneNaked"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-舔手指",
     "source": "echo",
     "self": false,
     "group": "ItemHands",
-    "name": "舔手指"
+    "name": "舔手指",
+    "prerequisites": [
+      "UseMouth",
+      "Luzi_ActedZoneNaked"
+    ]
   },
   {
     "key": "ChatOther-ItemMouth-舔脸",
     "source": "echo",
     "self": false,
     "group": "ItemMouth",
-    "name": "舔脸"
+    "name": "舔脸",
+    "prerequisites": [
+      "UseTongue"
+    ]
   },
   {
     "key": "ChatOther-ItemBoots-舔脚",
     "source": "echo",
     "self": false,
     "group": "ItemBoots",
-    "name": "舔脚"
+    "name": "舔脚",
+    "prerequisites": [
+      "UseTongue"
+    ]
   },
   {
     "key": "ChatOther-ItemEars-耳朵呵气",
     "source": "echo",
     "self": false,
     "group": "ItemEars",
-    "name": "耳朵呵气"
+    "name": "耳朵呵气",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatOther-ItemNipples-乳头呵气",
     "source": "echo",
     "self": false,
     "group": "ItemNipples",
-    "name": "乳头呵气"
+    "name": "乳头呵气",
+    "prerequisites": [
+      "UseMouth",
+      "Luzi_ActedZoneNaked"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-舔牵绳手",
     "source": "echo",
     "self": false,
     "group": "ItemHands",
-    "name": "舔牵绳手"
+    "name": "舔牵绳手",
+    "prerequisites": [
+      "UseTongue",
+      "Luzi_LeashedBy"
+    ]
   },
   {
     "key": "ChatOther-ItemMouth-口塞亲吻嘴唇",
     "source": "echo",
     "self": false,
     "group": "ItemMouth",
-    "name": "口塞亲吻嘴唇"
+    "name": "口塞亲吻嘴唇",
+    "prerequisites": [
+      "IsGagged"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth-叼牵绳",
@@ -823,70 +1132,106 @@
     "source": "echo",
     "self": false,
     "group": "ItemHands",
-    "name": "挣脱牵绳"
+    "name": "挣脱牵绳",
+    "prerequisites": [
+      "Luzi_LeashedBy"
+    ]
   },
   {
     "key": "ChatSelf-ItemNeck-歪头",
     "source": "echo",
     "self": true,
     "group": "ItemNeck",
-    "name": "歪头"
+    "name": "歪头",
+    "prerequisites": [
+      "MoveHead"
+    ]
   },
   {
     "key": "ChatSelf-ItemHead-歪头",
     "source": "echo",
     "self": true,
     "group": "ItemHead",
-    "name": "歪头"
+    "name": "歪头",
+    "prerequisites": [
+      "MoveHead"
+    ]
   },
   {
     "key": "ChatOther-ItemMouth-捏脸",
     "source": "echo",
     "self": false,
     "group": "ItemMouth",
-    "name": "捏脸"
+    "name": "捏脸",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemMouth-揉脸",
     "source": "echo",
     "self": false,
     "group": "ItemMouth",
-    "name": "揉脸"
+    "name": "揉脸",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatSelf-ItemHead-挠头",
     "source": "echo",
     "self": true,
     "group": "ItemHead",
-    "name": "挠头"
+    "name": "挠头",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-阴部轻蹭手",
     "source": "echo",
     "self": false,
     "group": "ItemHands",
-    "name": "阴部轻蹭手"
+    "name": "阴部轻蹭手",
+    "prerequisites": [
+      "HasVagina",
+      "Luzi_PrivateExposed"
+    ]
   },
   {
     "key": "ChatOther-ItemVulvaPiercings-弹阴蒂",
     "source": "echo",
     "self": false,
     "group": "ItemVulvaPiercings",
-    "name": "弹阴蒂"
+    "name": "弹阴蒂",
+    "prerequisites": [
+      "UseHands",
+      "UseArms",
+      "Luzi_ActedZoneNaked"
+    ]
   },
   {
     "key": "ChatOther-ItemNipples-揉搓乳头",
     "source": "echo",
     "self": false,
     "group": "ItemNipples",
-    "name": "揉搓乳头"
+    "name": "揉搓乳头",
+    "prerequisites": [
+      "UseHands",
+      "UseArms",
+      "Luzi_ActedZoneNaked"
+    ]
   },
   {
     "key": "ChatOther-ItemBreast-托起乳房",
     "source": "echo",
     "self": false,
     "group": "ItemBreast",
-    "name": "托起乳房"
+    "name": "托起乳房",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemLegs-夹紧双腿",
@@ -928,161 +1273,249 @@
     "source": "echo",
     "self": true,
     "group": "ItemVulva",
-    "name": "流出液体"
+    "name": "流出液体",
+    "prerequisites": [
+      "Luzi_TargetHasItemVulva"
+    ]
   },
   {
     "key": "ChatSelf-ItemVulva-失禁",
     "source": "echo",
     "self": true,
     "group": "ItemVulva",
-    "name": "失禁"
+    "name": "失禁",
+    "prerequisites": [
+      "Luzi_TargetHasItemVulva"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-挥手致意",
     "source": "echo",
     "self": false,
     "group": "ItemHands",
-    "name": "挥手致意"
+    "name": "挥手致意",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatSelf-ItemHands-伸出手",
     "source": "echo",
     "self": true,
     "group": "ItemHands",
-    "name": "伸出手"
+    "name": "伸出手",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemNeck-轻抬下巴",
     "source": "echo",
     "self": false,
     "group": "ItemNeck",
-    "name": "轻抬下巴"
+    "name": "轻抬下巴",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemMouth-轻抬下巴",
     "source": "echo",
     "self": false,
     "group": "ItemMouth",
-    "name": "轻抬下巴"
+    "name": "轻抬下巴",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemHead-轻弹额头",
     "source": "echo",
     "self": false,
     "group": "ItemHead",
-    "name": "轻弹额头"
+    "name": "轻弹额头",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemHead-轻拍脑袋",
     "source": "echo",
     "self": false,
     "group": "ItemHead",
-    "name": "轻拍脑袋"
+    "name": "轻拍脑袋",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemArms-摇晃手臂",
     "source": "echo",
     "self": false,
     "group": "ItemArms",
-    "name": "摇晃手臂"
+    "name": "摇晃手臂",
+    "prerequisites": [
+      "UseHands"
+    ]
   },
   {
     "key": "ChatOther-ItemTorso-轻推",
     "source": "echo",
     "self": false,
     "group": "ItemTorso",
-    "name": "轻推"
+    "name": "轻推",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatSelf-ItemHands-扭动手腕",
     "source": "echo",
     "self": true,
     "group": "ItemHands",
-    "name": "扭动手腕"
+    "name": "扭动手腕",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemButt-掀开裙子",
     "source": "echo",
     "self": false,
     "group": "ItemButt",
-    "name": "掀开裙子"
+    "name": "掀开裙子",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemPelvis-轻扯衣角",
     "source": "echo",
     "self": false,
     "group": "ItemPelvis",
-    "name": "轻扯衣角"
+    "name": "轻扯衣角",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatSelf-ItemHood-拨弄发丝",
     "source": "echo",
     "self": true,
     "group": "ItemHood",
-    "name": "拨弄发丝"
+    "name": "拨弄发丝",
+    "prerequisites": [
+      "UseArms",
+      "UseHands"
+    ]
   },
   {
     "key": "ChatOther-ItemEars-盖住耳朵",
     "source": "echo",
     "self": false,
     "group": "ItemEars",
-    "name": "盖住耳朵"
+    "name": "盖住耳朵",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemHead-遮住眼睛",
     "source": "echo",
     "self": false,
     "group": "ItemHead",
-    "name": "遮住眼睛"
+    "name": "遮住眼睛",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemNeck-拽链子",
     "source": "echo",
     "self": false,
     "group": "ItemNeck",
-    "name": "拽链子"
+    "name": "拽链子",
+    "prerequisites": [
+      "UseHands",
+      "UseArms",
+      "Luzi_IsLeashingTarget"
+    ]
   },
   {
     "key": "ChatOther-ItemEars-耳边打响指",
     "source": "echo",
     "self": false,
     "group": "ItemEars",
-    "name": "耳边打响指"
+    "name": "耳边打响指",
+    "prerequisites": [
+      "UseHands"
+    ]
   },
   {
     "key": "ChatOther-ItemHead-捂住头",
     "source": "echo",
     "self": false,
     "group": "ItemHead",
-    "name": "捂住头"
+    "name": "捂住头",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemVulva-捂住下体",
     "source": "echo",
     "self": false,
     "group": "ItemVulva",
-    "name": "捂住下体"
+    "name": "捂住下体",
+    "prerequisites": [
+      "UseHands",
+      "UseArms",
+      "Luzi_ActedZoneNaked"
+    ]
   },
   {
     "key": "ChatSelf-ItemBreast-捂住胸",
     "source": "echo",
     "self": true,
     "group": "ItemBreast",
-    "name": "捂住胸"
+    "name": "捂住胸",
+    "prerequisites": [
+      "UseHands",
+      "UseArms",
+      "Luzi_HasBreast",
+      "Luzi_ActedZoneNaked"
+    ]
   },
   {
     "key": "ChatOther-ItemNeck-手臂搭在肩膀上",
     "source": "echo",
     "self": false,
     "group": "ItemNeck",
-    "name": "手臂搭在肩膀上"
+    "name": "手臂搭在肩膀上",
+    "prerequisites": [
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemNeck-下巴搭在肩膀上",
     "source": "echo",
     "self": false,
     "group": "ItemNeck",
-    "name": "下巴搭在肩膀上"
+    "name": "下巴搭在肩膀上",
+    "prerequisites": []
   },
   {
     "key": "ChatOther-ItemHead-玩偶拍头",
@@ -1110,56 +1543,64 @@
     "source": "echo",
     "self": false,
     "group": "ItemHead",
-    "name": "撇眼"
+    "name": "撇眼",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemNeck-环视周围",
     "source": "echo",
     "self": true,
     "group": "ItemNeck",
-    "name": "环视周围"
+    "name": "环视周围",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemHead-环视周围",
     "source": "echo",
     "self": true,
     "group": "ItemHead",
-    "name": "环视周围"
+    "name": "环视周围",
+    "prerequisites": []
   },
   {
     "key": "ChatOther-ItemHead-上下打量",
     "source": "echo",
     "self": false,
     "group": "ItemHead",
-    "name": "上下打量"
+    "name": "上下打量",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemHead-闭上眼睛",
     "source": "echo",
     "self": true,
     "group": "ItemHead",
-    "name": "闭上眼睛"
+    "name": "闭上眼睛",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemHead-眼睛呆滞",
     "source": "echo",
     "self": true,
     "group": "ItemHead",
-    "name": "眼睛呆滞"
+    "name": "眼睛呆滞",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemHead-眼睛湿润",
     "source": "echo",
     "self": true,
     "group": "ItemHead",
-    "name": "眼睛湿润"
+    "name": "眼睛湿润",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemHead-流眼泪",
     "source": "echo",
     "self": true,
     "group": "ItemHead",
-    "name": "流眼泪"
+    "name": "流眼泪",
+    "prerequisites": []
   },
   {
     "key": "ChatOther-ItemVulvaPiercings-钩住阴蒂环",
@@ -1194,126 +1635,180 @@
     "source": "echo",
     "self": true,
     "group": "ItemBoots",
-    "name": "踮起脚尖"
+    "name": "踮起脚尖",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemBoots-摇晃脚踝",
     "source": "echo",
     "self": true,
     "group": "ItemBoots",
-    "name": "摇晃脚踝"
+    "name": "摇晃脚踝",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemBoots-伸出脚",
     "source": "echo",
     "self": true,
     "group": "ItemBoots",
-    "name": "伸出脚"
+    "name": "伸出脚",
+    "prerequisites": [
+      "UseFeet"
+    ]
   },
   {
     "key": "ChatOther-ItemNeck-脚托起下巴",
     "source": "echo",
     "self": false,
     "group": "ItemNeck",
-    "name": "脚托起下巴"
+    "name": "脚托起下巴",
+    "prerequisites": [
+      "UseFeet",
+      "Luzi_IsStanding",
+      "Luzi_TargetKneelOrAllFours"
+    ]
   },
   {
     "key": "ChatOther-ItemMouth-脚托起下巴",
     "source": "echo",
     "self": false,
     "group": "ItemMouth",
-    "name": "脚托起下巴"
+    "name": "脚托起下巴",
+    "prerequisites": [
+      "UseFeet",
+      "Luzi_IsStanding",
+      "Luzi_TargetKneelOrAllFours"
+    ]
   },
   {
     "key": "ChatSelf-ItemLegs-双腿颤抖",
     "source": "echo",
     "self": true,
     "group": "ItemLegs",
-    "name": "双腿颤抖"
+    "name": "双腿颤抖",
+    "prerequisites": [
+      "Luzi_TargetHasItemVulva"
+    ]
   },
   {
     "key": "ChatSelf-ItemLegs-摇晃双腿",
     "source": "echo",
     "self": true,
     "group": "ItemLegs",
-    "name": "摇晃双腿"
+    "name": "摇晃双腿",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemBoots-跺脚",
     "source": "echo",
     "self": true,
     "group": "ItemBoots",
-    "name": "跺脚"
+    "name": "跺脚",
+    "prerequisites": []
   },
   {
     "key": "ChatOther-ItemBoots-爬到脚边",
     "source": "echo",
     "self": false,
     "group": "ItemBoots",
-    "name": "爬到脚边"
+    "name": "爬到脚边",
+    "prerequisites": [
+      "Luzi_CharacterViewWithinReach",
+      "Luzi_KneelOrAllFours"
+    ]
   },
   {
     "key": "ChatOther-ItemLegs-蹭大腿",
     "source": "echo",
     "self": false,
     "group": "ItemLegs",
-    "name": "蹭大腿"
+    "name": "蹭大腿",
+    "prerequisites": [
+      "Luzi_CharacterViewWithinReach",
+      "Luzi_KneelOrAllFours"
+    ]
   },
   {
     "key": "ChatOther-ItemFeet-蹭小腿",
     "source": "echo",
     "self": false,
     "group": "ItemFeet",
-    "name": "蹭小腿"
+    "name": "蹭小腿",
+    "prerequisites": [
+      "Luzi_CharacterViewWithinReach",
+      "Luzi_KneelOrAllFours"
+    ]
   },
   {
     "key": "ChatOther-ItemLegs-抱腿",
     "source": "echo",
     "self": false,
     "group": "ItemLegs",
-    "name": "抱腿"
+    "name": "抱腿",
+    "prerequisites": [
+      "Luzi_CharacterViewWithinReach",
+      "UseArms",
+      "Luzi_KneelOrAllFours"
+    ]
   },
   {
     "key": "ChatOther-ItemBoots-托起脚",
     "source": "echo",
     "self": false,
     "group": "ItemBoots",
-    "name": "托起脚"
+    "name": "托起脚",
+    "prerequisites": [
+      "Luzi_CharacterViewWithinReach",
+      "UseHands",
+      "UseArms",
+      "Luzi_KneelOrAllFours"
+    ]
   },
   {
     "key": "ChatSelf-ItemButt-抬起屁股",
     "source": "echo",
     "self": true,
     "group": "ItemButt",
-    "name": "抬起屁股"
+    "name": "抬起屁股",
+    "prerequisites": []
   },
   {
     "key": "ChatOther-ItemTorso-搂腰",
     "source": "echo",
     "self": false,
     "group": "ItemTorso",
-    "name": "搂腰"
+    "name": "搂腰",
+    "prerequisites": [
+      "UseArms",
+      "UseHands"
+    ]
   },
   {
     "key": "ChatSelf-ItemTorso-叉腰",
     "source": "echo",
     "self": true,
     "group": "ItemTorso",
-    "name": "叉腰"
+    "name": "叉腰",
+    "prerequisites": [
+      "UseArms",
+      "UseHands"
+    ]
   },
   {
     "key": "ChatSelf-ItemTorso-身体颤抖",
     "source": "echo",
     "self": true,
     "group": "ItemTorso",
-    "name": "身体颤抖"
+    "name": "身体颤抖",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemTorso-身体抽搐",
     "source": "echo",
     "self": true,
     "group": "ItemTorso",
-    "name": "身体抽搐"
+    "name": "身体抽搐",
+    "prerequisites": []
   },
   {
     "key": "ChatOther-ItemVulva-贞操带互动",
@@ -1334,35 +1829,56 @@
     "source": "echo",
     "self": false,
     "group": "ItemHands",
-    "name": "嗅手"
+    "name": "嗅手",
+    "prerequisites": []
   },
   {
     "key": "ChatOther-ItemNeck-剑架在脖子上",
     "source": "echo",
     "self": false,
     "group": "ItemNeck",
-    "name": "剑架在脖子上"
+    "name": "剑架在脖子上",
+    "prerequisites": [
+      "UseHands",
+      "UseArms",
+      "Luzi_HasSword"
+    ]
   },
   {
     "key": "ChatOther-ItemNeckRestraints-剑架在脖子上",
     "source": "echo",
     "self": false,
     "group": "ItemNeckRestraints",
-    "name": "剑架在脖子上"
+    "name": "剑架在脖子上",
+    "prerequisites": [
+      "UseHands",
+      "UseArms",
+      "Luzi_HasSword"
+    ]
   },
   {
     "key": "ChatOther-ItemNeckAccessories-剑架在脖子上",
     "source": "echo",
     "self": false,
     "group": "ItemNeckAccessories",
-    "name": "剑架在脖子上"
+    "name": "剑架在脖子上",
+    "prerequisites": [
+      "UseHands",
+      "UseArms",
+      "Luzi_HasSword"
+    ]
   },
   {
     "key": "ChatOther-ItemMouth-剑拍脸",
     "source": "echo",
     "self": false,
     "group": "ItemMouth",
-    "name": "剑拍脸"
+    "name": "剑拍脸",
+    "prerequisites": [
+      "UseHands",
+      "UseArms",
+      "Luzi_HasSword"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-用嘴脱掉手套",

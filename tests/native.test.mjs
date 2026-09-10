@@ -66,7 +66,7 @@ test('ordinary poses and missing activity strings do not disable all native acti
 
 test('compatibility only relaxes incomplete emulation, never refusals or missing characters', () => {
   for (const reason of ['native.data','native.blocked','native.permission','native.room','native.target']) assert.equal(activityAvailability(reason,true).reason,reason);
-  for (const reason of ['native.equipment','native.unsupported','native.actor','native.preferences']) {
+  for (const reason of ['native.equipment','native.unsupported','native.preferences']) {
     assert.equal(activityAvailability(reason,true).reason,null);
     assert.equal(activityAvailability(reason,true).warning,reason);
     assert.equal(activityAvailability(reason,false).reason,reason);
@@ -117,7 +117,7 @@ test('native activity prerequisites fail closed on missing data, equipment, loca
   assert.equal(activityReason(actor, target, 'ItemEars', 'Whisper', {}), null);
   assert.equal(activityReason({ ...actor, Appearance: [] }, target, 'ItemEars', 'Whisper', {}), 'native.data');
   assert.equal(activityReason({ ...actor, Appearance: [{ Group: 'ItemMouth', Name: 'BallGag' }] }, target, 'ItemEars', 'Whisper', {}), 'native.blocked');
-  assert.equal(activityReason({ ...actor, ArousalSettings: { ...actor.ArousalSettings, Active: 'Automatic' } }, target, 'ItemEars', 'Whisper', {}), 'native.actor');
+  assert.equal(activityReason({ ...actor, ArousalSettings: { ...actor.ArousalSettings, Active: 'Automatic' } }, target, 'ItemEars', 'Whisper', {}), null);
   assert.equal(activityReason(actor, target, 'ItemEars', 'Whisper', { BlockCategory: ['Arousal'] }), 'native.room');
   assert.equal(activityReason(actor, target, 'ItemEars', 'Whisper', { MapType: 'Grid' }), 'native.room');
   assert.equal(activityReason(actor, { ...target, ArousalSettings: { ...target.ArousalSettings, Activity: 'd'.repeat(100) } }, 'ItemEars', 'Whisper', {}), 'native.permission');

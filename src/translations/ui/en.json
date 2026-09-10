@@ -355,7 +355,7 @@
   "native.equipment": "Unknown or dynamic equipment prevents complete checks; known restrictions still apply",
   "native.preferences": "Some activity preferences are unavailable for complete checks",
   "native.unsupported": "Activity needs unsupported conditions or local effects",
-  "native.actor": "Local automatic effects are not implemented; strict checks require Manual mode",
+  "native.effects": "Available; Lite does not simulate all local arousal and expression effects",
   "native.permission": "Activity or zone disabled in preferences",
   "native.blocked": "Current equipment effects or body-zone restrictions prevent this activity",
   "stability.gap": "Connection interrupted: messages may be missing. Reconnecting does not restore missed history.",

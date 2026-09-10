@@ -62,6 +62,10 @@ BC 翻譯依 `messages`／`actions`／`items`／`groups` 分類；ECHO 物品與
 - `src/main.ts` 是入口；介面在 `src/ui/`，Socket 在 `src/network/`，擴展動作在 `src/action/`；其他模組依責任分為 profile、media、safety、platform、shared。
 - `npm run build`／`npm run dev` 會先從本倉庫翻譯來源產生 `src/action/generated/`，不需要上游插件目錄。開發服務運行期間修改翻譯後，另跑 `npm run catalog:compile`。
 
+## LCE 反混淆相容
+
+聊天與悄悄話自動讀取 BC／LCE／WCE 封包內的 `Dictionary.Original`，顯示為「混淆訊息 [原文]」；相同文字不重複顯示。這是發送者主動分享的原文（也可能仍有部分混淆），不是破解：未附原文就維持收到的內容。只在本機顯示，不發送還原請求、不改寫他人設定；原文沿用聊天的純文字與媒體來源許可機制。Lite 不載入語音混淆引擎，因此本身送出的文字不需額外還原。
+
 ## 本機開發
 
 建置與 Worker 開發使用 Node.js 22.13+（Cloudflare 設 NODE_VERSION=22）。
