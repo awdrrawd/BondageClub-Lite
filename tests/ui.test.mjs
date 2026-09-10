@@ -1,0 +1,138 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { stripTypeScriptTypes } from 'node:module';
+import vm from 'node:vm';
+import { Window } from 'happy-dom';
+
+const source = stripTypeScriptTypes(readFileSync(new URL('../src/main.ts', import.meta.url), 'utf8'))
+  .replace('import "./style.css";', '')
+  .replace('import { bcClient } from "./protocol";', '');
+
+function setup(savedAccount) {
+  const window = new Window({ url: 'https://lite.example', settings: { disableCSSFileLoading: true, disableJavaScriptFileLoading: true } });
+  window.document.body.innerHTML = '<div id="app"></div>';
+  if (savedAccount) window.localStorage.setItem('bc-lite-account-v1', savedAccount);
+  let current = { phase: 'ready', status: 'Ready', player: { Name: 'Tester', MemberNumber: 123, FriendList: [55], Appearance: [] }, room: null, rooms: [], characters: [], messages: [], friends: [], friendsStatus: '尚未查詢', beeps: [] };
+  let listener;
+  const calls = [];
+  const bcClient = {
+    subscribe(callback) { listener = callback; listener(current); },
+    refreshFriends() { calls.push('friends'); },
+    sendChat(text) { calls.push(text); },
+    sendBeep(id, text) { calls.push({ id, text }); },
+    async login(account) { calls.push({ login: account }); },
+    setFriend() {}, clearBeeps() {}, leave() {}, disconnect() {}, search() {}, join() {}, createRoom() {},
+  };
+  vm.runInNewContext(source, { window, document: window.document, localStorage: window.localStorage, bcClient });
+  return { window, document: window.document, calls, state: () => current, emit(change) { current = { ...current, ...change }; listener(current); } };
+}
+
+function messages(count) {
+  return Array.from({ length: count }, (_, index) => ({ id: `id-${index}`, sender: 55, senderName: 'Friend', text: `message ${index}`, time: new Date(), type: 'Chat' }));
+}
+
+test('incoming chat preserves textarea identity, draft, focus, and a bounded log', async () => {
+  const f = setup();
+  f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, characters: [{ MemberNumber: 123, Name: 'Tester' }], messages: messages(150) });
+  const input = f.document.getElementById('InputChat');
+  input.value = '未送出的草稿'; input.dispatchEvent(new f.window.Event('input')); input.focus();
+  f.emit({ messages: messages(151) });
+  assert.equal(f.document.getElementById('InputChat'), input);
+  assert.equal(f.document.activeElement, input);
+  assert.equal(input.value, '未送出的草稿');
+  assert.equal(f.document.getElementById('TextAreaChatLog').children.length, 100);
+  assert.match(f.document.getElementById('TextAreaChatLog').textContent, /message 150/);
+  await f.window.happyDOM.close();
+});
+
+test('reading history freezes visible rows and offers explicit jump to latest', async () => {
+  const f = setup();
+  f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, messages: messages(100) });
+  const log = f.document.getElementById('TextAreaChatLog');
+  Object.defineProperty(log, 'scrollHeight', { value: 1000, configurable: true });
+  Object.defineProperty(log, 'clientHeight', { value: 200, configurable: true });
+  log.scrollTop = 100;
+  f.emit({ messages: messages(101) });
+  assert.doesNotMatch(log.textContent, /message 100/);
+  assert.equal(log.scrollTop, 100);
+  assert.equal(f.document.getElementById('new-messages').hidden, false);
+  f.document.getElementById('new-messages').click();
+  assert.match(log.textContent, /message 100/);
+  assert.equal(log.children.length, 100);
+  await f.window.happyDOM.close();
+});
+
+test('friend updates and BEEP do not replace composer; untrusted content stays text', async () => {
+  const f = setup();
+  f.document.getElementById('nav-friends').click();
+  assert.deepEqual(f.calls, ['friends']);
+  const input = f.document.getElementById('BeepText');
+  input.value = 'BEEP 草稿'; input.dispatchEvent(new f.window.Event('input'));
+  f.emit({ friends: [{ MemberNumber: 55, MemberName: '<img src=x onerror=alert(1)>', Type: 'Friend' }], friendsStatus: '查詢完成', beeps: [{ id: 'beep', memberNumber: 55, name: 'Friend', text: '<script>bad()</script>', incoming: true, time: new Date() }] });
+  assert.equal(f.document.getElementById('BeepText'), input);
+  assert.equal(input.value, 'BEEP 草稿');
+  assert.equal(f.document.querySelectorAll('img,script').length, 0);
+  assert.match(f.document.getElementById('beep-log').textContent, /<script>bad\(\)<\/script>/);
+  await f.window.happyDOM.close();
+});
+
+test('IME composition defers structural updates until final input event', async () => {
+  const f = setup();
+  f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, messages: [] });
+  const input = f.document.getElementById('InputChat');
+  input.dispatchEvent(new f.window.Event('compositionstart', { bubbles: true }));
+  f.emit({ characters: [{ MemberNumber: 55, Name: 'New member' }] });
+  assert.equal(f.document.getElementById('InputChat'), input);
+  input.dispatchEvent(new f.window.Event('compositionend', { bubbles: true }));
+  input.value = '中文完成'; input.dispatchEvent(new f.window.Event('input'));
+  await new Promise(resolve => setTimeout(resolve, 15));
+  assert.equal(f.document.getElementById('InputChat').value, '中文完成');
+  await f.window.happyDOM.close();
+});
+
+test('display preferences persist alone and background starts disabled', async () => {
+  const f = setup();
+  assert.equal(f.document.body.classList.contains('scenic'), false);
+  f.document.getElementById('nav-settings').click();
+  const checkbox = f.document.querySelector('.settings-card input[type=checkbox]');
+  checkbox.click();
+  assert.equal(f.document.body.classList.contains('scenic'), true);
+  assert.deepEqual(JSON.parse(f.window.localStorage.getItem('bc-lite-display-v1')), { background: true, largeText: false, timestamps: true });
+  assert.equal(f.window.localStorage.length, 1);
+  await f.window.happyDOM.close();
+});
+
+test('remembering an account is opt-in, stores only the name, and unchecking removes it', async () => {
+  const f = setup();
+  f.emit({ phase: 'idle', player: null });
+  const account = f.document.getElementById('AccountName');
+  const password = f.document.getElementById('Password');
+  const remember = f.document.querySelector('.login-card input[type=checkbox]');
+  assert.equal(remember.checked, false);
+  account.value = ' test-account '; account.dispatchEvent(new f.window.Event('input'));
+  password.value = 'test-secret-only'; password.dispatchEvent(new f.window.Event('input'));
+  assert.equal(f.window.localStorage.length, 0);
+  remember.click();
+  assert.equal(f.window.localStorage.getItem('bc-lite-account-v1'), 'test-account');
+  f.document.querySelector('.login-card').dispatchEvent(new f.window.Event('submit', { cancelable: true }));
+  assert.equal(f.window.localStorage.length, 1);
+  assert.equal(f.window.localStorage.getItem('bc-lite-account-v1').includes('test-secret-only'), false);
+  assert.equal(password.value, '');
+  remember.click();
+  assert.equal(f.window.localStorage.getItem('bc-lite-account-v1'), null);
+  await f.window.happyDOM.close();
+});
+
+test('a remembered name prefills login without password and can be erased in settings', async () => {
+  const f = setup('saved-name');
+  f.emit({ phase: 'idle', player: null });
+  assert.equal(f.document.getElementById('AccountName').value, 'saved-name');
+  assert.equal(f.document.getElementById('Password').value, '');
+  assert.equal(f.document.querySelector('.login-card input[type=checkbox]').checked, true);
+  f.emit({ phase: 'ready', player: { Name: 'Tester', MemberNumber: 123 } });
+  f.document.getElementById('nav-settings').click();
+  [...f.document.querySelectorAll('button')].find(button => button.textContent === '刪除本機保存的帳號').click();
+  assert.equal(f.window.localStorage.getItem('bc-lite-account-v1'), null);
+  await f.window.happyDOM.close();
+});

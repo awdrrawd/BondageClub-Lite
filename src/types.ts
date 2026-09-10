@@ -10,6 +10,10 @@ export type ConnectionPhase =
   | "error";
 
 export interface PlayerSummary {
+  FriendList?: number[];
+  /** Opaque server bundles: never rebuild with an incomplete asset registry. */
+  Appearance?: unknown[];
+  OnlineSharedSettings?: Record<string, unknown>;
   Environment?: string;
   AccountName: string;
   ID: string;
@@ -19,6 +23,7 @@ export interface PlayerSummary {
 }
 
 export interface CharacterSummary {
+  Description?: string;
   ID?: string;
   MemberNumber: number;
   Name: string;
@@ -92,6 +97,9 @@ export interface DisplayMessage {
 }
 
 export interface ClientSnapshot {
+  friends: OnlineFriend[];
+  friendsStatus: string;
+  beeps: BeepMessage[];
   onlinePlayers?: number;
   phase: ConnectionPhase;
   status: string;
@@ -100,4 +108,24 @@ export interface ClientSnapshot {
   room: RoomSync | null;
   characters: CharacterSummary[];
   messages: DisplayMessage[];
+}
+
+export interface OnlineFriend {
+  MemberNumber: number;
+  MemberName: string;
+  Type: string;
+  ChatRoomName?: string | null;
+  ChatRoomSpace?: string | null;
+  ChatRoomMemberCount?: number;
+  ChatRoomLimit?: number;
+  Private?: boolean;
+}
+
+export interface BeepMessage {
+  id: string;
+  memberNumber: number;
+  name: string;
+  text: string;
+  incoming: boolean;
+  time: Date;
 }

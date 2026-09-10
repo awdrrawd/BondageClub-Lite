@@ -144,3 +144,76 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); box-sha
   .chat-message { grid-template-columns: 34px 1fr; }
   .message-text, .message-target { grid-column: 2; }
 }
+
+/* Social layout: static panels, no canvas, video, backdrop blur or continuous animation. */
+body.scenic {
+  background: linear-gradient(#100d13b8, #100d13ed), url("./assets/lce-lounge.jpg") center top / cover no-repeat, var(--bg);
+}
+.app-header { backdrop-filter: none; background: #100d13f5; }
+.status-dot { animation: none !important; }
+.app-shell { grid-template-rows: auto 1fr auto auto; }
+.app-content { padding: 1.4rem clamp(.75rem, 3vw, 2rem); }
+.app-nav { position: sticky; bottom: 0; z-index: 12; display: flex; justify-content: center; gap: .65rem; padding: .7rem 1rem max(.7rem, env(safe-area-inset-bottom)); background: #17121c; border-top: 1px solid var(--line); }
+.app-nav .button { min-height: 44px; min-width: 100px; }
+.app-nav .active { background: #49314d; color: #ffbdd4; border-color: var(--accent); }
+.muted { color: var(--muted); font-size: .85rem; line-height: 1.6; }
+.view-heading h1, .friends-view > h1, .settings-view > h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); letter-spacing: -.035em; margin: .4rem 0 1rem; }
+.toolbar { display: flex; align-items: center; gap: .75rem; }
+.toolbar input { flex: 1; min-width: 0; }
+.toolbar button { flex-shrink: 0; }
+.contact-list { display: grid; gap: .55rem; max-height: 45dvh; overflow: auto; overscroll-behavior: contain; }
+.contact-card { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; padding: .85rem; background: #211b28f5; border: 1px solid var(--line); border-radius: 14px; }
+.contact-card > div { flex: 1 1 220px; min-width: 0; overflow-wrap: anywhere; }
+.contact-card p { margin: .3rem 0 0; }
+.contact-card .button { padding: .6rem .75rem; min-height: 44px; }
+.beep-compose { display: grid; grid-template-columns: 1fr auto; gap: .75rem; border: 1px solid var(--line); background: #1d1723; padding: 1rem; border-radius: 14px; }
+.beep-compose .field, .beep-compose textarea { grid-column: 1 / -1; margin: 0; }
+.beep-compose textarea { min-height: 100px; resize: vertical; }
+.beep-log { max-height: 45dvh; overflow: auto; padding: .5rem 0; margin-bottom: 1rem; }
+.beep-message { margin: .6rem 0; padding: .7rem; border: 1px solid var(--line); background: #1d1723; border-radius: 12px; }
+.beep-message.incoming { border-left: 3px solid var(--accent-2); }
+.beep-message.outgoing { border-left: 3px solid var(--accent); }
+.beep-message p { margin: .5rem; }
+.beep-message time { margin-left: .5rem; }
+.settings-view { max-width: 800px; margin: auto; }
+.settings-card { padding: 1.25rem; border: 1px solid var(--line); border-radius: 16px; margin: 1rem 0; background: #1d1723f5; line-height: 1.7; }
+.settings-card .checkbox { margin: 1rem 0; font-size: .95rem; min-height: 32px; }
+.settings-card h2 { font-size: 1.15rem; }
+.room-view { height: calc(100dvh - 225px); min-height: 380px; }
+.text-area-chat-log { scroll-behavior: auto; overflow-anchor: none; overscroll-behavior: contain; }
+.chat-room-top-menu { flex-wrap: wrap; gap: .35rem; padding: .45rem .7rem; }
+.chat-room-top-menu > strong { flex: 1; overflow-wrap: anywhere; }
+.chat-room-top-menu .button { font-size: .75rem; padding: .55rem; min-height: 38px; }
+.chat-message { display: block; border-bottom: 1px solid #ffffff05; }
+.chat-message > * { margin-right: .5rem; }
+.chat-message .message-text { display: block; padding-left: 0; margin-top: .15rem; }
+.chat-message .message-author { overflow-wrap: anywhere; }
+.large-text .chat-message, .large-text .message-author, .large-text .beep-message { font-size: 1.1rem; }
+.hide-times .message-time { display: none; }
+.mobile-members { display: none; }
+.profile-dialog { color: #f7f1f8; background: #211929; border: 1px solid var(--accent-2); border-radius: 18px; padding: 1.5rem; width: min(540px, calc(100vw - 2rem)); max-height: 80dvh; }
+.profile-dialog::backdrop { background: #000b; }
+.profile-dialog .toolbar { flex-wrap: wrap; }
+.profile-description { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.6; max-height: 45dvh; overflow: auto; }
+[hidden] { display: none !important; }
+.room-card { content-visibility: auto; contain-intrinsic-size: auto 200px; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+@media (max-width: 760px) {
+  .app-nav { gap: .25rem; padding-inline: .5rem; }
+  .app-nav .button { min-width: 0; flex: 1; padding: .65rem .3rem; font-size: .85rem; }
+  .app-content { padding: .75rem .5rem; }
+  .room-view { height: calc(100dvh - 150px - env(safe-area-inset-bottom)); min-height: 280px; position: relative; }
+  .mobile-members { display: inline-block; }
+  .members-open .member-panel { display: flex; position: absolute; inset: 0 15% 0 0; z-index: 5; background: #211929; border: 1px solid var(--accent-2); box-shadow: 8px 0 20px #0009; }
+  .members-open .chat-room-top-menu { position: relative; z-index: 6; }
+  .members-open .member-panel { top: 70px; }
+  .text-area-chat-log { padding: .6rem; }
+  .chat-room-bot { gap: .35rem; padding: .5rem; }
+  .chat-room-buttons .button { min-height: 44px; }
+  .toolbar { flex-wrap: wrap; }
+  .toolbar input { flex-basis: 100%; }
+  .contact-card > div { flex-basis: 100%; }
+  input, textarea, select { font-size: 16px; }
+  .login-layout { min-height: calc(100dvh - 90px); }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; scroll-behavior: auto !important; } }

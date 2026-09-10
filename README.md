@@ -1,6 +1,6 @@
 # BondageClub-Lite
 
-一個只載入登入、聊天室搜尋與純文字聊天室的 Bondage Club 非官方輕量入口。使用 Cloudflare Pages 提供前端，搭配同站 Pages Worker 中繼 BC WebSocket，不需要自行維護常駐主機。
+一個保留聊天、好友與 BEEP 的 Bondage Club 非官方輕量入口；不載入完整人物繪圖與服裝圖片。使用 Cloudflare Pages 提供前端，搭配同站 Pages Worker 中繼 BC WebSocket，不需要自行維護常駐主機。
 
 **Relay v1：** BC 依 WebSocket Origin 分配 PROD/DEV。中繼參考 ShuangClient，在伺服器端設定官方來源；瀏覽器只連同站 `/socket.io/`。登入前先檢查中繼存在，登入後以真實 `LoginResponse.Environment` 驗證 PROD，不會自動退回直連 DEV。
 
@@ -14,11 +14,23 @@
 - 接收 Chat、Whisper、Emote、Action、Activity 與系統訊息
 - 傳送一般聊天、`/me 動作`、`*動作*`、`/w 會員編號 密語`
 - 響應式手機版 `chat-room-div` 結構
+- 手機底部分頁、成員抽屜、個人描述與密語／加好友／BEEP 快捷操作
+- BC 在線好友查詢、名字／編號篩選、好友加入／移除、前往好友房間（須先離開目前房間）
+- 原生 BEEP 收發，與 FCM 一般文字互通；不處理附件、離線投遞或已讀回條
+- 聊天增量更新，不因一般新訊息替換輸入框；預設 100 則 DOM，最多保留 600 則聊天／300 則 BEEP
+- 翻讀紀錄時暫停更新可見聊天，點「新訊息」回到最新；「更多紀錄」每次多顯示 100 則
+- 可選單張 LCE 靜態背景、字體大小與時間顯示；這些偏好存入 localStorage
+- 可選「記住帳號」，僅明文儲存帳號於本站 localStorage；不存密碼，可取消或在設定頁刪除
+- 自訂新房間描述、2／5／10 人上限；分批顯示房間列表
 
-這是文字客戶端，刻意不載入角色外觀、服裝、活動資產與完整翻譯字典。因此 Action／Activity 可能顯示 BC 的原始訊息鍵；也不提供換裝、互動、遊戲、好友 Beep 或管理房間等功能。
+這是文字客戶端，刻意不載入角色繪圖、服裝圖片、活動資產與完整翻譯字典。因此 Action／Activity 可能顯示 BC 的原始訊息鍵；也不提供換裝、道具互動、遊戲或進房後的管理操作。
+
+新增功能的驗收步驟與 ECHO 限制見 [social-preview-tests.md](docs/social-preview-tests.md)。ECHO 並未完整載入；登入的原始 Appearance／OnlineSharedSettings 僅保留在記憶體，Lite 不重建或上傳它們。好友更新只送 FriendList，不覆蓋其他設定。不要在 Lite 期間修改服裝或期待保存他人換裝。
 
 ## 安全模型
 
+- 本機記住帳號預設關閉，啟用後保存於 `bc-lite-account-v1`，登出仍保留；詳見 [帳號保存與資料流向](docs/privacy-and-appearance.md)。
+- 帳密及遊戲流量經過 Cloudflare 中繼到 BC，不能宣稱無第三方經手。此版本未加入帳號保存 API、分析追蹤、資料庫或封包日誌；平台及實際部署設定未經審核，不能保證零收集。
 - 密碼只保留在目前分頁的 JavaScript 記憶體，不寫入 localStorage、cookie、IndexedDB 或網址。
 - 所有伺服器文字均以 `textContent` 建立，不執行聊天室傳入的 HTML。
 - Cloudflare Pages 的 `_headers` 會限制腳本與連線來源。
@@ -72,4 +84,4 @@ npm run dev:relay
 
 ## 授權
 
-本專案程式碼依 [MIT License](LICENSE) 發布。`socket.io-client` 為 MIT 授權。Bondage Club 名稱及伺服器協定屬其各自權利人；本專案不包含遊戲素材。
+本專案自有程式碼依 [MIT License](LICENSE) 發布。`socket.io-client` 為 MIT 授權。背景素材另見 [第三方說明](docs/THIRD-PARTY-NOTICES.md)，不在 Lite 自有程式的 MIT 授權範圍內；未打包 BC 人物／服裝素材。

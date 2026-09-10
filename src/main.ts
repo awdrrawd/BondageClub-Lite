@@ -1,6 +1,6 @@
 import "./style.css";
 import { bcClient } from "./protocol";
-import type { ClientSnapshot, DisplayMessage, RoomSearchRequest, RoomSearchResult } from "./types";
+import type { CharacterSummary, ClientSnapshot, DisplayMessage, RoomSearchRequest, RoomSearchResult } from "./types";
 
 const app = document.querySelector<HTMLDivElement>("#app");
 if (!app) throw new Error("找不到應用程式根節點");
@@ -9,36 +9,137 @@ const escapeText = (value: unknown): string => String(value ?? "");
 class LiteApp {
   private snapshot: Readonly<ClientSnapshot> | null = null;
   private accountName = "";
+  private rememberAccount = false;
   private password = "";
   private query = "";
   private chatDraft = "";
   private language: RoomSearchRequest["Language"] = "";
   private space: RoomSearchRequest["Space"] = "X";
   private newRoomName = "";
+  private newRoomDescription = "BC Lite chat room";
+  private newRoomLimit = 10;
+  private roomPageSize = 40;
   private unlisted = true;
   private showFull = false;
   private showLocked = true;
   private searchDescriptions = false;
   private notice = "";
+  private tab: "rooms" | "chat" | "friends" | "settings" = "rooms";
+  private friendQuery = "";
+  private contact = 0;
+  private beepDraft = "";
+  private membersOpen = false;
+  private visibleMessages = 100;
+  private unread = 0;
+  private roomUnread = 0;
+  private composing = false;
+  private renderPending = false;
+  private settings = { background: false, largeText: false, timestamps: true };
 
   constructor() {
+    app!.addEventListener("compositionstart", () => { this.composing = true; });
+    app!.addEventListener("compositionend", () => {
+      this.composing = false;
+      // The final input event follows compositionend. Read its draft before replacing controls.
+      window.setTimeout(() => { if (this.renderPending) { this.renderPending = false; this.render(); } }, 0);
+    });
+    try {
+      const saved = JSON.parse(localStorage.getItem("bc-lite-display-v1") || "{}");
+      this.settings = { background: saved.background === true, largeText: saved.largeText === true, timestamps: saved.timestamps !== false };
+    } catch { /* Storage can be unavailable in private browsing. */ }
+    try {
+      const savedAccount = localStorage.getItem("bc-lite-account-v1");
+      if (savedAccount && savedAccount.length <= 100) { this.accountName = savedAccount; this.rememberAccount = true; }
+    } catch { /* Remembering an account is optional. */ }
+    this.applySettings();
     bcClient.subscribe((snapshot) => {
+      const previous = this.snapshot;
       this.snapshot = snapshot;
+      if (!["ready", "joining", "in-room"].includes(snapshot.phase)) document.querySelectorAll(".profile-dialog").forEach(dialog => dialog.remove());
+      if (!snapshot.player) { this.unread = 0; this.contact = 0; this.beepDraft = ""; this.chatDraft = ""; this.tab = "rooms"; }
+      if (snapshot.room && !previous?.room) { this.tab = "chat"; this.visibleMessages = 100; }
+      if (!snapshot.room && previous?.room && this.tab === "chat") this.tab = "rooms";
+      if (previous && snapshot.beeps !== previous.beeps && snapshot.beeps.at(-1)?.incoming && this.tab !== "friends") this.unread++;
+      if (previous && snapshot.messages !== previous.messages && snapshot.messages.length && this.tab !== "chat") this.roomUnread++;
+      // Chat packets and server population updates never replace an active composer (including IME input).
+      if (previous && snapshot.phase === previous.phase && snapshot.player === previous.player && snapshot.room === previous.room && snapshot.characters === previous.characters && snapshot.rooms === previous.rooms) {
+        this.updateHeader();
+        this.updateChatLog();
+        if (snapshot.friends !== previous.friends || snapshot.friendsStatus !== previous.friendsStatus || snapshot.beeps !== previous.beeps) this.updateFriendContent();
+        return;
+      }
       this.render();
     });
   }
 
+  private applySettings(): void {
+    document.body.classList.toggle("scenic", this.settings.background);
+    document.body.classList.toggle("large-text", this.settings.largeText);
+    document.body.classList.toggle("hide-times", !this.settings.timestamps);
+  }
+
+  private saveAccountPreference(): void {
+    try {
+      if (this.rememberAccount && this.accountName.trim()) localStorage.setItem("bc-lite-account-v1", this.accountName.trim());
+      else localStorage.removeItem("bc-lite-account-v1");
+    } catch {
+      this.localNotice("無法存取本機儲存空間；保存或刪除可能未完成，請到瀏覽器網站資料設定確認。登入功能仍可使用。");
+    }
+  }
+
+  private accountPrivacyNote(): HTMLElement {
+    return this.el("p", "security-note", "記住帳號為自願選項，預設關閉；僅將帳號明文存入此瀏覽器、此網站的 localStorage（bc-lite-account-v1），不存密碼、不另送往帳號保存服務。登出仍會保留，取消勾選或清除本站資料可刪除。同源網頁程式、有權限的擴充套件或使用此裝置的人可能讀取；網站遭入侵亦可能外洩。共用裝置請勿使用，啟用前請自行評估並承擔本機保存風險。這不是加密保管庫，也與瀏覽器密碼管理器分開。");
+  }
+
+  private updateHeader(): void {
+    const connection = document.querySelector(".connection span:last-child");
+    if (connection) connection.textContent = this.snapshot!.status;
+    const friends = document.getElementById("nav-friends");
+    if (friends) friends.textContent = `好友${this.unread ? ` · ${this.unread}` : ""}`;
+    const chat = document.getElementById("nav-chat");
+    if (chat) chat.textContent = `聊天${this.roomUnread ? ` · ${this.roomUnread}` : ""}`;
+  }
+
+  private updateChatLog(force = false): void {
+    const log = document.getElementById("TextAreaChatLog");
+    if (!log) return;
+    const atBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 70;
+    const latest = this.snapshot!.messages.at(-1)?.id || "";
+    if (!force && log.dataset.latest === latest) return;
+    const jump = document.getElementById("new-messages");
+    // Freeze the visible slice while reading older messages; no scroll jump or unbounded hidden DOM.
+    if (!force && !atBottom && log.childElementCount) { if (jump) jump.hidden = false; return; }
+    const messages = this.snapshot!.messages.slice(-this.visibleMessages);
+    const ids = new Set(messages.map(message => message.id));
+    for (const node of Array.from(log.children)) if (!ids.has((node as HTMLElement).dataset.messageId || "")) node.remove();
+    const existing = new Set(Array.from(log.children).map(node => (node as HTMLElement).dataset.messageId));
+    const fragment = document.createDocumentFragment();
+    for (const message of messages) if (!existing.has(message.id)) fragment.append(this.messageNode(message));
+    log.append(fragment);
+    log.dataset.latest = latest;
+    if (atBottom || force) log.scrollTop = log.scrollHeight;
+    if (jump) jump.hidden = true;
+  }
+
   private render(): void {
     if (!this.snapshot) return;
+    if (this.composing) { this.renderPending = true; return; }
     const active = document.activeElement as HTMLInputElement | HTMLTextAreaElement | null;
     const focusId = active?.id;
     const selectionStart = active?.selectionStart;
+    const selectionEnd = active?.selectionEnd;
+    const oldLog = document.getElementById("TextAreaChatLog");
+    const oldScroll = oldLog?.scrollTop;
+    const oldRoom = oldLog?.dataset.room;
 
     app!.replaceChildren(this.buildShell());
+    this.updateHeader();
+    const nextLog = document.getElementById("TextAreaChatLog");
+    if (nextLog) nextLog.scrollTop = oldRoom === this.snapshot.room?.Name && oldScroll !== undefined ? oldScroll : nextLog.scrollHeight;
     if (focusId) {
       const next = document.getElementById(focusId) as HTMLInputElement | HTMLTextAreaElement | null;
       next?.focus({ preventScroll: true });
-      if (next && selectionStart !== null && selectionStart !== undefined) next.setSelectionRange(selectionStart, selectionStart);
+      if (next && selectionStart !== null && selectionStart !== undefined && ["text", "search", "password", "textarea"].includes(next.type)) next.setSelectionRange(selectionStart, selectionEnd ?? selectionStart);
     }
   }
 
@@ -55,14 +156,170 @@ class LiteApp {
     const content = this.el("div", "app-content");
     if (state.phase === "idle" || state.phase === "connecting" || state.phase === "authenticating" || state.phase === "waiting-server" || state.phase === "reconnecting" || state.phase === "error") {
       content.append(this.buildLogin());
+    } else if (this.tab === "friends") {
+      content.append(this.buildFriends());
+    } else if (this.tab === "settings") {
+      content.append(this.buildSettings());
     } else if (state.room) {
       content.append(this.buildRoom());
     } else {
       content.append(this.buildSearch());
     }
-    shell.append(header, content, this.buildFooter());
+    shell.append(header, content);
+    if (state.player && ["ready", "joining", "in-room"].includes(state.phase)) shell.append(this.buildNavigation());
+    shell.append(this.buildFooter());
     return shell;
   }
+
+  private buildNavigation(): HTMLElement {
+    const nav = this.el("nav", "app-nav");
+    nav.setAttribute("aria-label", "主要功能");
+    for (const [key, label] of [["rooms", "房間"], ["chat", "聊天"], ["friends", "好友"], ["settings", "設定"]] as const) {
+      const button = this.button(label, this.tab === key ? "active" : "ghost", "button");
+      button.id = `nav-${key}`;
+      button.setAttribute("aria-current", this.tab === key ? "page" : "false");
+      button.disabled = (key === "chat" && !this.snapshot!.room) || (key === "rooms" && !!this.snapshot!.room);
+      if (key === "rooms" && this.snapshot!.room) button.title = "請先離開目前房間";
+      button.addEventListener("click", () => {
+        this.tab = key;
+        if (key === "friends") this.unread = 0;
+        if (key === "chat") this.roomUnread = 0;
+        this.render();
+        if (key === "friends" && this.snapshot!.friendsStatus === "尚未查詢") this.run(() => bcClient.refreshFriends());
+      });
+      nav.append(button);
+    }
+    return nav;
+  }
+
+  private buildFriends(): HTMLElement {
+    const section = this.el("section", "friends-view");
+    section.append(this.el("p", "eyebrow", "CONTACTS & BEEP"), this.el("h1", "", "好友與私訊"));
+    section.append(this.el("p", "muted", "原生 BEEP 可跨房間，與 BC／FCM 文字互通。送出不代表已送達；離線訊息不會排隊補送。"));
+    const toolbar = this.el("div", "toolbar");
+    const refresh = this.button("重新查詢在線好友", "secondary", "button");
+    refresh.addEventListener("click", () => this.run(() => bcClient.refreshFriends()));
+    const query = this.input("FriendQuery", "搜尋名字或編號", "search", this.friendQuery);
+    query.addEventListener("input", () => { this.friendQuery = query.value; this.updateFriendContent(); });
+    toolbar.append(query, refresh);
+    const status = this.el("p", "muted"); status.id = "friends-status";
+    const list = this.el("div", "contact-list"); list.id = "contact-list";
+    const form = this.el("form", "beep-compose") as HTMLFormElement;
+    const target = this.input("BeepTarget", "玩家編號", "number", this.contact ? String(this.contact) : "");
+    target.min = "1"; target.step = "1";
+    target.addEventListener("input", () => { this.contact = Number(target.value); this.updateBeepLog(); });
+    const text = document.createElement("textarea"); text.id = "BeepText"; text.placeholder = "BEEP 文字（不公開你的房間位置）"; text.maxLength = 1000; text.required = true; text.value = this.beepDraft;
+    text.addEventListener("input", () => { this.beepDraft = text.value; });
+    const add = this.button("加入好友", "ghost", "button");
+    add.addEventListener("click", () => this.run(() => bcClient.setFriend(this.contact, true)));
+    const send = this.button("傳送 BEEP", "primary", "submit");
+    form.append(this.field("對象編號（可直接輸入，不必在同一房間）", target), text, add, send);
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      this.run(() => { bcClient.sendBeep(this.contact, this.beepDraft); this.beepDraft = ""; text.value = ""; });
+    });
+    const inbox = this.el("div", "beep-log"); inbox.id = "beep-log"; inbox.setAttribute("role", "log");
+    const clear = this.button("清除本次 BEEP 紀錄", "ghost", "button");
+    clear.addEventListener("click", () => { if (window.confirm("只清除此頁記憶體中的 BEEP 紀錄？")) bcClient.clearBeeps(); });
+    section.append(toolbar, status, list, this.el("h2", "", "BEEP 對話"), form, inbox, clear);
+    // Populate detached containers; later updates only touch list and log, never the composer.
+    this.fillFriendList(list);
+    status.textContent = this.snapshot!.friendsStatus;
+    this.fillBeepLog(inbox);
+    return section;
+  }
+
+  private updateFriendContent(): void {
+    const list = document.getElementById("contact-list");
+    if (list) this.fillFriendList(list);
+    const status = document.getElementById("friends-status");
+    if (status) status.textContent = this.snapshot!.friendsStatus;
+    this.updateBeepLog();
+  }
+
+  private fillFriendList(list: HTMLElement): void {
+    list.replaceChildren();
+    const state = this.snapshot!;
+    const online = new Map(state.friends.map(friend => [friend.MemberNumber, friend]));
+    const ids = [...new Set([...online.keys(), ...(state.player?.FriendList || []), ...state.beeps.map(message => message.memberNumber)])];
+    ids.sort((a, b) => Number(online.has(b)) - Number(online.has(a)) || a - b);
+    let total = 0;
+    for (const id of ids) {
+      const friend = online.get(id);
+      const name = friend?.MemberName || [...state.beeps].reverse().find(message => message.memberNumber === id)?.name || "尚無名稱";
+      if (!`${name} ${id}`.toLowerCase().includes(this.friendQuery.trim().toLowerCase())) continue;
+      total++;
+      if (total > 80) continue;
+      const row = this.el("article", "contact-card");
+      const info = this.el("div");
+      info.append(this.el("strong", "", `${name} #${id}`), this.el("p", "muted", friend ? `在線 · ${friend.ChatRoomName || "未公開房間"}${friend.Private ? "（隱藏）" : ""} · ${friend.Type}` : "未查得在線（不一定離線）"));
+      const chat = this.button("BEEP", "secondary", "button");
+      chat.addEventListener("click", () => {
+        this.contact = id;
+        const target = document.getElementById("BeepTarget") as HTMLInputElement | null;
+        if (target) target.value = String(id);
+        this.updateBeepLog(); document.getElementById("BeepText")?.focus();
+      });
+      row.append(info, chat);
+      if (friend?.ChatRoomName) {
+        const join = this.button("前往房間", "ghost", "button");
+        join.disabled = state.phase !== "ready";
+        join.title = state.room ? "請先離開目前房間" : "仍受房間權限限制";
+        join.addEventListener("click", () => this.run(() => bcClient.join(friend.ChatRoomName!)));
+        row.append(join);
+      }
+      if (state.player?.FriendList?.includes(id)) {
+        const remove = this.button("移除", "ghost danger", "button");
+        remove.addEventListener("click", () => { if (window.confirm(`確定從 BC 好友清單移除 #${id}？`)) this.run(() => bcClient.setFriend(id, false)); });
+        row.append(remove);
+      }
+      list.append(row);
+    }
+    if (!total) list.append(this.el("p", "empty-state", "沒有符合的聯絡人；可重新查詢，或直接輸入玩家編號。"));
+    if (total > 80) list.append(this.el("p", "muted", `顯示前 80 / ${total} 位，請用搜尋縮小清單。`));
+  }
+
+  private updateBeepLog(): void { const log = document.getElementById("beep-log"); if (log) this.fillBeepLog(log); }
+
+  private fillBeepLog(log: HTMLElement): void {
+    log.replaceChildren();
+    const messages = this.snapshot!.beeps.filter(message => !this.contact || message.memberNumber === this.contact).slice(-60);
+    if (!messages.length) log.append(this.el("p", "muted", "尚無本次對話紀錄。最多保留 300 則 BEEP，登出／重新整理即清除。"));
+    for (const message of messages.reverse()) {
+      const row = this.el("article", `beep-message ${message.incoming ? "incoming" : "outgoing"}`);
+      const reply = this.button(`${message.incoming ? "收到" : "已送出，未確認送達"} · ${message.name} #${message.memberNumber}`, "ghost", "button");
+      reply.addEventListener("click", () => { this.contact = message.memberNumber; (document.getElementById("BeepTarget") as HTMLInputElement).value = String(this.contact); this.updateBeepLog(); });
+      row.append(reply, this.el("time", "message-time", message.time.toLocaleTimeString()), this.el("p", "message-text", message.text));
+      log.append(row);
+    }
+  }
+
+  private buildSettings(): HTMLElement {
+    const section = this.el("section", "settings-view");
+    section.append(this.el("p", "eyebrow", "MAKE IT YOURS"), this.el("h1", "", "顯示與相容性"));
+    const panel = this.el("div", "settings-card");
+    for (const [key, label] of [["background", "LCE 靜態背景（只載入一張，無輪播／影片）"], ["largeText", "加大聊天文字"], ["timestamps", "顯示聊天時間"]] as const) {
+      panel.append(this.checkbox(label, this.settings[key], value => {
+        this.settings[key] = value; this.applySettings();
+        try { localStorage.setItem("bc-lite-display-v1", JSON.stringify(this.settings)); } catch { this.localNotice("瀏覽器不允許儲存設定，本次仍有效。"); }
+      }));
+    }
+    panel.append(this.el("p", "muted", "預設僅儲存顯示偏好；自願啟用記住帳號後另存帳號，不存密碼、好友資料或聊天紀錄。聊天預設顯示最近 100 則，記憶體保留最多 600 則。"));
+    const privacy = this.el("div", "settings-card");
+    privacy.append(this.el("h2", "", "本機帳號與資料流向"), this.accountPrivacyNote());
+    const forget = this.button("刪除本機保存的帳號", "ghost", "button");
+    forget.addEventListener("click", () => { this.rememberAccount = false; this.saveAccountPreference(); });
+    privacy.append(forget, this.el("p", "muted", "目前路徑：瀏覽器 → Cloudflare 中繼 → BC 伺服器。帳密與遊戲流量會經過中繼，並非瀏覽器到 BC 的端對端加密。此版本未加入分析追蹤、帳號保存 API、資料庫或封包日誌；但無法保證部署者未修改程式、平台日誌設定或 BC 的資料處理方式。請只信任你核對過的部署。"));
+    const compatibility = this.el("div", "settings-card");
+    compatibility.append(this.el("h2", "", "ECHO／服裝保護"), this.el("p", "", `登入時收到 ${this.snapshot!.player?.Appearance?.length ?? "未知數量的"} 件服裝資料，保留原始內容，不用 Lite 的資產清單重建。`), this.el("p", "muted", "目前不是完整 ECHO：不載入服裝圖片、衣櫃或宣告假插件版本，也不送出 Appearance／OnlineSharedSettings 更新。已有 ECHO 服裝能否完整顯示，仍須用另一位已裝 ECHO 的玩家實測。Lite 暫不支援換裝、道具操作與保存他人對你的服裝修改。"));
+    compatibility.append(this.el("p", "muted", "建議先在完整 BC + ECHO 儲存服裝，再登入 Lite。不要在 Lite 工作階段更換服裝；返回完整版後核對。未裝 ECHO 的觀看者本來就看不到擴充服裝。"));
+    const disconnect = this.button("登出並清除本次記憶體資料", "ghost danger", "button");
+    disconnect.addEventListener("click", () => { if (window.confirm("確定登出？未送出草稿與聊天紀錄將清除。")) bcClient.disconnect(); });
+    section.append(panel, privacy, compatibility, disconnect);
+    return section;
+  }
+
+  private run(action: () => void): void { try { action(); } catch (error) { this.localNotice(error instanceof Error ? error.message : "操作失敗"); } }
 
   private buildLogin(): HTMLElement {
     const state = this.snapshot!;
@@ -80,12 +337,17 @@ class LiteApp {
     card.autocomplete = "off";
     card.append(this.el("h2", "", "登入 Bondage Club"));
     const account = this.input("AccountName", "帳號", "text", this.accountName);
+    account.maxLength = 100;
     account.autocomplete = "username";
     account.addEventListener("input", () => { this.accountName = account.value; });
     const password = this.input("Password", "密碼", "password", this.password);
     password.autocomplete = "current-password";
     password.addEventListener("input", () => { this.password = password.value; });
     card.append(this.field("帳號", account), this.field("密碼", password));
+    card.append(this.checkbox("記住帳號（只存這個瀏覽器，不存密碼）", this.rememberAccount, value => {
+      this.rememberAccount = value;
+      this.saveAccountPreference();
+    }), this.accountPrivacyNote());
     const busy = !["idle", "error"].includes(state.phase);
     const submit = this.button(busy ? "連線中…" : "登入", "primary", "submit");
     submit.disabled = busy;
@@ -96,10 +358,12 @@ class LiteApp {
       card.append(cancel);
     }
     card.append(this.el("p", "security-note", "提醒：登入會讓同帳號在其他 BC 視窗斷線。請只使用你信任的部署網址。"));
+    card.append(this.el("p", "security-note", "資料流向：瀏覽器 → Cloudflare 中繼 → BC。此版本不主動記錄帳密或聊天封包，但 Cloudflare 與 BC 仍會處理連線資料，不能視為沒有第三方經手。"));
     if (this.notice || state.phase === "error") card.append(this.el("div", "form-notice", this.notice || state.status));
     card.addEventListener("submit", async (event) => {
       event.preventDefault();
       this.notice = "";
+      this.saveAccountPreference();
       const secret = this.password;
       this.password = "";
       password.value = "";
@@ -139,6 +403,7 @@ class LiteApp {
       event.preventDefault();
       this.notice = "";
       try {
+        this.roomPageSize = 40;
         bcClient.search({ Query: this.query, Language: this.language, Space: this.space, Game: "", FullRooms: this.showFull, ShowLocked: this.showLocked, SearchDescs: this.searchDescriptions });
       } catch (error) { this.notice = error instanceof Error ? error.message : "搜尋失敗"; this.render(); }
     });
@@ -147,7 +412,12 @@ class LiteApp {
     resultHeader.append(this.el("h2", "", "房間列表"), this.el("span", "result-count", `${state.rooms.length} 間`));
     const rooms = this.el("div", "room-list");
     if (!state.rooms.length) rooms.append(this.el("div", "empty-state", "輸入條件後搜尋；空白搜尋會列出公開房間。"));
-    else state.rooms.forEach((room) => rooms.append(this.roomCard(room)));
+    else state.rooms.slice(0, this.roomPageSize).forEach((room) => rooms.append(this.roomCard(room)));
+    if (state.rooms.length > this.roomPageSize) {
+      const more = this.button(`顯示更多（${this.roomPageSize}/${state.rooms.length}）`, "secondary", "button");
+      more.addEventListener("click", () => { this.roomPageSize += 40; this.render(); });
+      rooms.append(more);
+    }
     const status = this.el("p", "form-notice", this.notice || state.status);
     status.setAttribute("role", "status");
     const environment = state.player?.Environment;
@@ -162,16 +432,21 @@ class LiteApp {
     const roomName = this.input("NewRoomName", "輸入房名", "text", this.newRoomName);
     roomName.maxLength = 20;
     roomName.addEventListener("input", () => { this.newRoomName = roomName.value; });
+    const description = this.input("NewRoomDescription", "房間描述", "text", this.newRoomDescription);
+    description.maxLength = 100; description.required = false;
+    description.addEventListener("input", () => { this.newRoomDescription = description.value; });
+    const limit = this.select("人數上限", [["2", "2 人"], ["5", "5 人"], ["10", "10 人"]], String(this.newRoomLimit));
+    limit.addEventListener("change", () => { this.newRoomLimit = Number(limit.value); });
     const createButton = this.button("建立並進入", "primary", "submit");
     createButton.disabled = state.phase !== "ready";
     const directJoin = this.button("按房名加入", "secondary", "button");
     directJoin.disabled = state.phase !== "ready";
     directJoin.addEventListener("click", () => { if (create.reportValidity()) bcClient.join(this.newRoomName.trim()); });
-    create.append(this.field("建立房間／直接加入（建立時沿用上方區域與語言）", roomName), this.checkbox("不列入公開搜尋", this.unlisted, value => { this.unlisted = value; }), createButton, directJoin);
+    create.append(this.field("建立房間／直接加入（建立時沿用上方區域與語言）", roomName), this.field("描述", description), this.field("人數上限", limit), this.checkbox("不列入公開搜尋", this.unlisted, value => { this.unlisted = value; }), createButton, directJoin);
     create.addEventListener("submit", event => {
       event.preventDefault();
       this.notice = "";
-      try { bcClient.createRoom(this.newRoomName, this.space, this.language, this.unlisted); }
+      try { bcClient.createRoom(this.newRoomName, this.space, this.language, this.unlisted, this.newRoomDescription, this.newRoomLimit); }
       catch (error) { this.notice = error instanceof Error ? error.message : "建立失敗"; this.render(); }
     });
     section.append(heading, form, status, diagnostics, this.el("h2", "", "建立或直接加入房間"), create, resultHeader, rooms);
@@ -195,7 +470,7 @@ class LiteApp {
 
   private buildRoom(): HTMLElement {
     const state = this.snapshot!;
-    const layout = this.el("section", "room-view");
+    const layout = this.el("section", `room-view${this.membersOpen ? " members-open" : ""}`);
     const sidebar = this.el("aside", "member-panel");
     const roomInfo = this.el("div", "room-info");
     roomInfo.append(this.el("p", "eyebrow", state.room!.Language || "CHAT ROOM"), this.el("h1", "", state.room!.Name), this.el("p", "", state.room!.Description || "沒有房間描述"));
@@ -208,8 +483,8 @@ class LiteApp {
       const member = this.el("button", "member-row") as HTMLButtonElement;
       member.type = "button";
       member.append(this.el("span", "member-avatar", (character.Nickname || character.Name || "?").slice(0, 1).toUpperCase()), this.el("span", "member-name", character.Nickname || character.Name), this.el("span", "member-number", `#${character.MemberNumber}`));
-      member.title = "點擊填入密語指令";
-      member.addEventListener("click", () => { this.chatDraft = `/w ${character.MemberNumber} `; this.render(); document.getElementById("InputChat")?.focus(); });
+      member.title = "玩家資料、密語、好友與 BEEP";
+      member.addEventListener("click", () => this.showMember(character));
       members.append(member);
     });
     sidebar.append(members);
@@ -219,12 +494,27 @@ class LiteApp {
     const topMenu = this.el("div", "chat-room-top-menu");
     topMenu.id = "chat-room-top-menu";
     topMenu.append(this.el("strong", "", state.room!.Name), this.el("span", "", `${state.characters.length}/${state.room!.Limit}`));
+    const toggle = this.button(this.membersOpen ? "關閉成員" : "成員", "ghost mobile-members", "button");
+    toggle.addEventListener("click", () => { this.membersOpen = !this.membersOpen; this.render(); });
+    const history = this.button("更多紀錄", "ghost", "button");
+    history.addEventListener("click", () => {
+      const old = document.getElementById("TextAreaChatLog")!;
+      const height = old.scrollHeight; const top = old.scrollTop;
+      this.visibleMessages = Math.min(600, this.visibleMessages + 100); this.render();
+      const next = document.getElementById("TextAreaChatLog")!;
+      next.scrollTop = top + next.scrollHeight - height;
+    });
+    const jump = this.button("新訊息 ↓", "secondary", "button"); jump.id = "new-messages"; jump.hidden = true;
+    jump.addEventListener("click", () => { this.visibleMessages = 100; this.updateChatLog(true); });
+    topMenu.append(toggle, history, jump);
     const mobileLeave = this.button("離開", "ghost", "button");
     mobileLeave.addEventListener("click", () => bcClient.leave());
     topMenu.append(mobileLeave);
     const struggle = this.el("div", "chat-room-struggle-bar"); struggle.id = "chat-room-struggle-bar";
     const log = this.el("div", "text-area-chat-log"); log.id = "TextAreaChatLog"; log.setAttribute("role", "log"); log.setAttribute("aria-live", "polite");
-    state.messages.forEach((message) => log.append(this.messageNode(message)));
+    log.dataset.room = state.room!.Name;
+    log.dataset.latest = state.messages.at(-1)?.id || "";
+    state.messages.slice(-this.visibleMessages).forEach((message) => log.append(this.messageNode(message)));
     const reply = this.el("div", "chat-room-reply-indicator"); reply.id = "chat-room-reply-indicator";
     const bot = this.el("form", "chat-room-bot") as HTMLFormElement; bot.id = "chat-room-bot";
     const input = document.createElement("textarea"); input.id = "InputChat"; input.placeholder = "輸入訊息…（/me 動作，/w 編號 密語）"; input.maxLength = 1000; input.value = this.chatDraft;
@@ -240,7 +530,6 @@ class LiteApp {
       catch (error) { this.localNotice(error instanceof Error ? error.message : "訊息無法傳送"); }
     });
     chat.append(topMenu, struggle, log, reply, bot);
-    requestAnimationFrame(() => { const current = document.getElementById("TextAreaChatLog"); if (current) current.scrollTop = current.scrollHeight; });
     layout.append(sidebar, chat);
     return layout;
   }
@@ -261,9 +550,32 @@ class LiteApp {
     return row;
   }
 
+  private showMember(character: CharacterSummary): void {
+    const dialog = this.el("dialog", "profile-dialog");
+    dialog.append(this.el("h2", "", `${character.Nickname || character.Name} #${character.MemberNumber}`), this.el("p", "profile-description", character.Description || "未提供個人描述"));
+    const actions = this.el("div", "toolbar");
+    const close = this.button("關閉", "ghost", "button");
+    const dismiss = () => { dialog.close(); dialog.remove(); };
+    close.addEventListener("click", dismiss);
+    dialog.addEventListener("close", () => dialog.remove());
+    if (character.MemberNumber !== this.snapshot!.player?.MemberNumber) {
+      const whisper = this.button("房內密語", "secondary", "button");
+      whisper.addEventListener("click", () => {
+        if (this.chatDraft.trim() && !window.confirm("切換密語對象會取代目前草稿，確定？")) return;
+        dismiss(); this.chatDraft = `/w ${character.MemberNumber} `; this.membersOpen = false; this.render(); document.getElementById("InputChat")?.focus();
+      });
+      const friend = this.button("加好友", "ghost", "button");
+      friend.addEventListener("click", () => this.run(() => bcClient.setFriend(character.MemberNumber, true)));
+      const beep = this.button("BEEP", "ghost", "button");
+      beep.addEventListener("click", () => { dismiss(); this.contact = character.MemberNumber; this.tab = "friends"; this.unread = 0; this.render(); document.getElementById("BeepText")?.focus(); });
+      actions.append(whisper, friend, beep);
+    }
+    actions.append(close); dialog.append(actions); document.body.append(dialog); dialog.showModal();
+  }
+
   private buildFooter(): HTMLElement {
     const footer = this.el("footer", "app-footer");
-    footer.append(this.el("span", "", "BC Lite · Relay v1"), this.el("span", "", "非 Bondage Club 官方客戶端"));
+    footer.append(this.el("span", "", "BC Lite · Social preview · Relay v1"), this.el("span", "", "非 Bondage Club 官方客戶端"));
     return footer;
   }
 

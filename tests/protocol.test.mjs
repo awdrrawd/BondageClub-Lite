@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { stripTypeScriptTypes } from 'node:module';
 
-async function setup(environment, relayAvailable = true) {
+async function setup(environment, relayAvailable = true, account = {}) {
   const handlers = new Map();
   const sent = [];
   const timers = new Map();
@@ -35,7 +35,7 @@ async function setup(environment, relayAvailable = true) {
   client.subscribe(value => { state = value; });
   await client.login('test', 'not-a-real-password');
   if (!relayAvailable) return { client, handlers, sent, timers, state: () => state };
-  handlers.get('LoginResponse')({ AccountName: 'test', Name: 'Test', ID: 'socket', MemberNumber: 123, Environment: environment });
+  handlers.get('LoginResponse')({ AccountName: 'test', Name: 'Test', ID: 'socket', MemberNumber: 123, Environment: environment, ...account });
   handlers.get('ServerInfo')({ OnlinePlayers: 345 });
   return { client, handlers, sent, timers, state: () => state };
 }
@@ -101,4 +101,89 @@ test('creation failure restores controls and exposes server error', async () => 
   assert.equal(fixture.state().phase, 'ready');
   assert.match(fixture.state().status, /RoomAlreadyExist/);
   assert.equal(fixture.timers.size, 0);
+});
+
+test('native friends query validates response, times out and clears on logout', async () => {
+  const f = await setup('PROD');
+  f.client.refreshFriends();
+  assert.equal(f.sent.at(-1).event, 'AccountQuery');
+  assert.equal(f.sent.at(-1).payload.Query, 'OnlineFriends');
+  assert.throws(() => f.client.refreshFriends(), /查詢中/);
+  f.handlers.get('AccountQueryResult')({ Query: 'OnlineFriends', Result: [{ MemberNumber: 55, MemberName: 'Friend', ChatRoomName: 'Test room' }, null] });
+  assert.equal(f.state().friends.length, 1);
+  assert.equal(f.timers.size, 0);
+  f.client.refreshFriends();
+  [...f.timers.values()][0]();
+  assert.match(f.state().friendsStatus, /逾時/);
+  f.client.disconnect();
+  assert.equal(f.state().friends.length, 0);
+  assert.equal(f.timers.size, 0);
+});
+
+test('friend updates preserve opaque custom outfit and shared settings; missing list is never overwritten', async () => {
+  const appearance = [{ Group: 'UnknownEchoSlot', Name: 'custom', Property: { nested: ['data'] } }];
+  const settings = { Echo: { opaque: true } };
+  const f = await setup('PROD', true, { Appearance: appearance, OnlineSharedSettings: settings, FriendList: [77, 88] });
+  f.client.setFriend(99, true);
+  f.client.setFriend(77, false);
+  assert.equal(JSON.stringify(f.sent.at(-1).payload), JSON.stringify({ FriendList: [88, 99] }));
+  assert.equal(f.state().player.Appearance, appearance);
+  assert.equal(f.state().player.OnlineSharedSettings, settings);
+  for (const item of f.sent) assert.equal('Appearance' in item.payload || 'OnlineSharedSettings' in item.payload, false);
+  const missing = await setup('PROD');
+  assert.throws(() => missing.client.setFriend(99, true), /停止修改/);
+});
+
+test('BEEP interoperates with FCM native text, ignores control packets, and is bounded', async () => {
+  const f = await setup('PROD');
+  f.client.sendBeep(55, 'hello');
+  assert.equal(f.sent.at(-1).event, 'AccountBeep');
+  assert.equal(f.sent.at(-1).payload.BeepType, '');
+  assert.equal(f.sent.at(-1).payload.IsSecret, true);
+  assert.equal(f.state().beeps[0].incoming, false);
+  assert.throws(() => f.client.sendBeep(55, 'too fast'), /稍等/);
+  const receive = f.handlers.get('AccountBeep');
+  receive({ MemberNumber: 55, MemberName: 'Friend', BeepType: 'FCMChatPrivate', Message: '{control}' });
+  receive({ MemberNumber: 55, MemberName: 'Friend', BeepType: '', Message: { invalid: true } });
+  assert.equal(f.state().beeps.length, 1);
+  for (let index = 0; index < 310; index++) receive({ MemberNumber: 55, MemberName: 'Friend', BeepType: '', Message: `text ${index}` });
+  assert.equal(f.state().beeps.length, 300);
+  assert.equal(f.state().beeps.at(-1).text, 'text 309');
+  f.client.disconnect();
+  assert.equal(f.state().beeps.length, 0);
+  assert.throws(() => f.client.sendBeep(55, 'offline'), /未連線/);
+});
+
+test('disconnected chat throws instead of silently consuming a draft', async () => {
+  const f = await setup('PROD');
+  assert.throws(() => f.client.sendChat('draft'), /草稿/);
+  f.handlers.get('ChatRoomSync')({ Name: 'test', Character: [], Limit: 10 });
+  f.handlers.get('disconnect')('transport close');
+  const before = f.sent.length;
+  assert.throws(() => f.client.sendChat('draft'), /草稿/);
+  assert.equal(f.sent.length, before);
+});
+
+test('same-room synchronization preserves chat history', async () => {
+  const f = await setup('PROD');
+  f.handlers.get('ChatRoomSync')({ Name: 'test', Character: [], Limit: 10 });
+  f.handlers.get('ChatRoomMessage')({ Type: 'Chat', Sender: 123, Content: 'keep me' });
+  const messages = f.state().messages;
+  f.handlers.get('ChatRoomSync')({ Name: 'test', Character: [], Limit: 10 });
+  assert.equal(f.state().messages, messages);
+});
+
+test('room and character synchronization never write back unknown ECHO appearance', async () => {
+  const appearance = [{ Group: 'ECHO-custom', Name: 'Unknown', Color: ['#123456'], Property: { extra: { opaque: true } } }];
+  const f = await setup('PROD', true, { Appearance: appearance, FriendList: [] });
+  f.handlers.get('ChatRoomSync')({ Name: 'test', Character: [{ MemberNumber: 123, Name: 'Test', Appearance: appearance }], Limit: 10 });
+  f.handlers.get('ChatRoomSyncCharacter')({ Character: { MemberNumber: 123, Name: 'Test', Appearance: [] } });
+  f.client.sendChat('hello');
+  f.client.setFriend(55, true);
+  f.client.leave();
+  assert.equal(f.state().player.Appearance, appearance);
+  for (const packet of f.sent.filter(packet => packet.event === 'AccountUpdate')) {
+    assert.deepEqual(Object.keys(packet.payload), ['FriendList']);
+  }
+  assert.equal(f.sent.some(packet => /CharacterUpdate|CharacterItemUpdate/.test(packet.event)), false);
 });

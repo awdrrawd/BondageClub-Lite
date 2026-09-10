@@ -1,5 +1,5 @@
 import { io, type Socket } from "socket.io-client";
-import type { CharacterSummary, ChatMessage, ClientSnapshot, DictionaryEntry, DisplayMessage, PlayerSummary, RoomSearchRequest, RoomSearchResult, RoomSync } from "./types";
+import type { CharacterSummary, ChatMessage, ClientSnapshot, DictionaryEntry, DisplayMessage, OnlineFriend, PlayerSummary, RoomSearchRequest, RoomSearchResult, RoomSync } from "./types";
 
 const MAX_MESSAGES = 600;
 const SEARCH_TIMEOUT_MS = 8_000;
@@ -7,7 +7,7 @@ const SEARCH_TIMEOUT_MS = 8_000;
 type Listener = (snapshot: Readonly<ClientSnapshot>) => void;
 type Credentials = { accountName: string; password: string };
 
-const initialSnapshot = (): ClientSnapshot => ({ phase: "idle", status: "尚未連線", player: null, rooms: [], room: null, characters: [], messages: [] });
+const initialSnapshot = (): ClientSnapshot => ({ phase: "idle", status: "尚未連線", player: null, rooms: [], room: null, characters: [], messages: [], friends: [], friendsStatus: "尚未查詢", beeps: [] });
 
 function displayName(character: CharacterSummary | undefined): string {
   if (!character) return "未知玩家";
@@ -43,6 +43,9 @@ export class BcLiteClient {
   private serverReady = false;
   private searchTimer: number | null = null;
   private roomTimer: number | null = null;
+  private friendsTimer: number | null = null;
+  private lastBeepAt = 0;
+  private lastChatAt = 0;
 
   subscribe(listener: Listener): () => void {
     this.listeners.add(listener);
@@ -80,6 +83,9 @@ export class BcLiteClient {
     this.serverReady = false;
     this.clearSearchTimer();
     this.clearRoomTimer();
+    this.clearFriendsTimer();
+    this.lastBeepAt = 0;
+    this.lastChatAt = 0;
     this.socket?.removeAllListeners();
     this.socket?.disconnect();
     this.socket = null;
@@ -98,6 +104,49 @@ export class BcLiteClient {
     this.socket!.emit("ChatRoomSearch", { ...request, Query: request.Query.toUpperCase().trim() });
   }
 
+  refreshFriends(): void {
+    if (!this.canSend()) throw new Error("請等待連線恢復");
+    if (this.friendsTimer !== null) throw new Error("好友查詢中，請稍候");
+    this.friendsTimer = window.setTimeout(() => {
+      this.clearFriendsTimer();
+      this.patch({ friendsStatus: "查詢逾時；目前清單可能已過期，請重新整理" });
+    }, SEARCH_TIMEOUT_MS);
+    this.patch({ friendsStatus: "正在查詢好友…" });
+    this.socket!.emit("AccountQuery", { Query: "OnlineFriends" });
+  }
+
+  setFriend(memberNumber: number, enabled: boolean): void {
+    if (!this.canSend()) throw new Error("請等待連線恢復");
+    if (!Number.isSafeInteger(memberNumber) || memberNumber <= 0 || memberNumber === this.state.player?.MemberNumber) throw new Error("請輸入其他玩家的有效編號");
+    const current = this.state.player?.FriendList;
+    if (!Array.isArray(current)) throw new Error("伺服器未提供完整好友清單，已停止修改以免覆寫資料");
+    const next = enabled ? [...new Set([...current, memberNumber])] : current.filter(id => id !== memberNumber);
+    this.socket!.emit("AccountUpdate", { FriendList: next });
+    this.patch({ player: { ...this.state.player!, FriendList: next }, friendsStatus: "好友變更已送出（伺服器無確認回覆）；重新登入可核對" });
+  }
+
+  sendBeep(memberNumber: number, raw: string): void {
+    if (!this.canSend()) throw new Error("未連線；訊息未送出，也不會在重連後補送");
+    if (!Number.isSafeInteger(memberNumber) || memberNumber <= 0 || memberNumber === this.state.player?.MemberNumber) throw new Error("請輸入其他玩家的有效編號");
+    const message = raw.trim();
+    if (!message || message.length > 1000) throw new Error("BEEP 請填 1–1000 個字元");
+    if (Date.now() - this.lastBeepAt < 1500) throw new Error("請稍等一下再傳送 BEEP");
+    this.lastBeepAt = Date.now();
+    this.socket!.emit("AccountBeep", { MemberNumber: memberNumber, BeepType: "", Message: message, IsSecret: true });
+    this.addBeep(memberNumber, this.state.friends.find(friend => friend.MemberNumber === memberNumber)?.MemberName || `#${memberNumber}`, message, false);
+  }
+
+  clearBeeps(): void { this.patch({ beeps: [] }); }
+
+  private clearFriendsTimer(): void {
+    if (this.friendsTimer !== null) window.clearTimeout(this.friendsTimer);
+    this.friendsTimer = null;
+  }
+
+  private addBeep(memberNumber: number, name: string, text: string, incoming: boolean): void {
+    this.patch({ beeps: [...this.state.beeps, { id: crypto.randomUUID(), memberNumber, name, text, incoming, time: new Date() }].slice(-300) });
+  }
+
   join(roomName: string): void {
     if (!this.canSend() || !roomName.trim() || this.state.phase !== "ready") return;
     this.startRoomTimer();
@@ -105,14 +154,15 @@ export class BcLiteClient {
     this.socket!.emit("ChatRoomJoin", { Name: roomName });
   }
 
-  createRoom(name: string, space: RoomSearchRequest["Space"], language: RoomSearchRequest["Language"], unlisted: boolean): void {
+  createRoom(name: string, space: RoomSearchRequest["Space"], language: RoomSearchRequest["Language"], unlisted: boolean, description = "BC Lite chat room", limit = 10): void {
     if (!this.canSend() || this.state.phase !== "ready") throw new Error("請等待目前操作完成");
     if (!name.trim() || name.trim().length > 20) throw new Error("房名請填 1–20 個字元");
+    if (description.length > 100 || !Number.isInteger(limit) || limit < 2 || limit > 10) throw new Error("描述最多 100 字，人數上限 2–10 人");
     this.startRoomTimer();
     this.patch({ phase: "joining", status: `正在建立「${name.trim()}」…` });
     this.socket!.emit("ChatRoomCreate", {
-      Name: name.trim(), Description: "BC Lite chat room", Background: "MainHall",
-      Space: space, Language: language || "EN", Game: "", Limit: 10,
+      Name: name.trim(), Description: description, Background: "MainHall",
+      Space: space, Language: language || "EN", Game: "", Limit: limit,
       Admin: [this.state.player!.MemberNumber], Whitelist: [], Ban: [], BlockCategory: [],
       Visibility: unlisted ? [] : ["All"], Access: ["All"],
     });
@@ -125,7 +175,10 @@ export class BcLiteClient {
 
   sendChat(raw: string): void {
     const text = raw.trim();
-    if (!text || !this.state.room || !this.canSend()) return;
+    if (!text) return;
+    if (!this.state.room || !this.canSend()) throw new Error("未連線或不在房間；草稿尚未送出");
+    if (text.length > 1000) throw new Error("訊息不得超過 1000 個字元");
+    if (Date.now() - this.lastChatAt < 350) throw new Error("傳送過快，請稍候；草稿仍保留");
     let message: ChatMessage;
     const whisper = text.match(/^\/w(?:hisper)?\s+(\d+)\s+([\s\S]+)$/i);
     if (whisper) {
@@ -140,6 +193,7 @@ export class BcLiteClient {
       message = { Type: "Chat", Content: text };
     }
     message.Dictionary = [{ Tag: "SourceCharacter", MemberNumber: this.state.player?.MemberNumber }];
+    this.lastChatAt = Date.now();
     this.socket!.emit("ChatRoomChat", message);
     if (message.Type === "Whisper") this.handleMessage({ ...message, Sender: this.state.player?.MemberNumber });
   }
@@ -158,6 +212,19 @@ export class BcLiteClient {
     });
     this.socket.on("LoginQueue", (position: unknown) => this.patch({ status: `登入排隊中（第 ${String(position)} 位）…` }));
     this.socket.on("LoginResponse", (data: unknown) => this.handleLogin(data));
+    this.socket.on("AccountQueryResult", (data: { Query?: string; Result?: OnlineFriend[] }) => {
+      if (data?.Query !== "OnlineFriends") return;
+      this.clearFriendsTimer();
+      if (!Array.isArray(data.Result)) { this.patch({ friendsStatus: "好友回應格式錯誤，保留原清單" }); return; }
+      const friends = data.Result.filter(friend => friend && Number.isSafeInteger(friend.MemberNumber) && typeof friend.MemberName === "string");
+      this.patch({ friends, friendsStatus: `查詢完成：${friends.length} 位可見在線好友 · ${new Date().toLocaleTimeString()}` });
+    });
+    this.socket.on("AccountBeep", (data: { MemberNumber?: number; MemberName?: string; BeepType?: string; Message?: unknown }) => {
+      // FCM sends normal text separately from attachment/control packets. Never show or execute those packets.
+      if (!data || (data.BeepType && data.BeepType !== "") || !Number.isSafeInteger(data.MemberNumber) || data.MemberNumber! <= 0) return;
+      if (data.Message !== undefined && typeof data.Message !== "string") return;
+      this.addBeep(data.MemberNumber!, typeof data.MemberName === "string" ? data.MemberName : `#${data.MemberNumber}`, (data.Message || "（BEEP 通知）").slice(0, 1000), true);
+    });
     this.socket.on("ServerInfo", (info: { OnlinePlayers?: number }) => {
       this.serverReady = true;
       this.patch({ onlinePlayers: typeof info?.OnlinePlayers === "number" ? info.OnlinePlayers : undefined });
@@ -179,8 +246,9 @@ export class BcLiteClient {
     this.socket.on("ChatRoomSync", (room: RoomSync) => {
       this.clearRoomTimer();
       const characters = Array.isArray(room.Character) ? room.Character : [];
-      this.patch({ phase: "in-room", room, characters, messages: [], status: `已加入「${room.Name}」` });
-      this.localMessage(`已加入「${room.Name}」`);
+      const sameRoom = this.state.room?.Name === room.Name;
+      this.patch({ phase: "in-room", room, characters, messages: sameRoom ? this.state.messages : [], status: `已加入「${room.Name}」` });
+      if (!sameRoom) this.localMessage(`已加入「${room.Name}」`);
     });
     this.socket.on("ChatRoomSyncMemberJoin", (data: { Character?: CharacterSummary }) => {
       if (!data?.Character) return;
@@ -208,6 +276,7 @@ export class BcLiteClient {
       this.serverReady = false;
       this.clearSearchTimer();
       this.clearRoomTimer();
+      this.clearFriendsTimer();
       this.patch({ phase: "error", status });
       this.socket?.disconnect();
     });
@@ -217,6 +286,8 @@ export class BcLiteClient {
       this.loginAccepted = false;
       this.clearSearchTimer();
       this.clearRoomTimer();
+      this.clearFriendsTimer();
+      this.patch({ friends: [], friendsStatus: "連線中斷，請重查好友狀態" });
       if (reason === "io server disconnect") {
         this.credentials = null;
         this.patch({ phase: "error", status: "伺服器終止連線，請重新登入", room: null, characters: [] });
@@ -241,7 +312,10 @@ export class BcLiteClient {
     }
     this.loginAccepted = true;
     const player: PlayerSummary = { AccountName: value.AccountName, ID: value.ID, MemberNumber: value.MemberNumber!, Name: value.Name, Nickname: value.Nickname,
-      Environment: typeof value.Environment === "string" ? value.Environment : undefined };
+      Environment: typeof value.Environment === "string" ? value.Environment : undefined,
+      FriendList: Array.isArray(value.FriendList) && value.FriendList.every(Number.isSafeInteger) ? value.FriendList : undefined,
+      Appearance: Array.isArray(value.Appearance) ? value.Appearance : undefined,
+      OnlineSharedSettings: value.OnlineSharedSettings && typeof value.OnlineSharedSettings === "object" ? value.OnlineSharedSettings : undefined };
     this.patch({ player, phase: "waiting-server", status: "帳密驗證通過，等待伺服器資訊…" });
     if (this.serverReady) this.patch({ phase: "ready", status: this.loginStatus() });
   }
@@ -264,7 +338,7 @@ export class BcLiteClient {
     });
     this.appendMessage({
       id: crypto.randomUUID(), sender: message.Sender ?? null, senderName: displayName(sender),
-      targetName: message.Type === "Whisper" ? displayName(target) : undefined,
+      targetName: message.Type === "Whisper" ? displayName(target || this.state.player || undefined) : undefined,
       text: formatServerText(message.Content, dictionary), type: message.Type, time: new Date(),
     });
   }
