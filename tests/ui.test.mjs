@@ -4,10 +4,16 @@ import { readFileSync } from 'node:fs';
 import { stripTypeScriptTypes } from 'node:module';
 import vm from 'node:vm';
 import { Window } from 'happy-dom';
+import LZString from 'lz-string';
+
+const bioCode = stripTypeScriptTypes(readFileSync(new URL('../src/biography.ts', import.meta.url), 'utf8')).replace('import LZString from "lz-string";', '').replace('export ', '');
+const decodeBiography = new Function('LZString', bioCode + '; return decodeBiography;')(LZString);
 
 const source = stripTypeScriptTypes(readFileSync(new URL('../src/main.ts', import.meta.url), 'utf8'))
   .replace('import "./style.css";', '')
-  .replace('import { bcClient } from "./protocol";', '');
+  .replace('import { bcClient } from "./protocol";', '')
+  .replace('import { decodeBiography } from "./biography";', '')
+  .replace('import { loadTextCatalog } from "./text-catalog";', '');
 
 function setup(savedAccount) {
   const window = new Window({ url: 'https://lite.example', settings: { disableCSSFileLoading: true, disableJavaScriptFileLoading: true } });
@@ -20,11 +26,12 @@ function setup(savedAccount) {
     subscribe(callback) { listener = callback; listener(current); },
     refreshFriends() { calls.push('friends'); },
     sendChat(text) { calls.push(text); },
+    setTextCatalog() {},
     sendBeep(id, text) { calls.push({ id, text }); },
     async login(account) { calls.push({ login: account }); },
     setFriend() {}, clearBeeps() {}, leave() {}, disconnect() {}, search() {}, join() {}, createRoom() {},
   };
-  vm.runInNewContext(source, { window, document: window.document, localStorage: window.localStorage, bcClient });
+  vm.runInNewContext(source, { window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, loadTextCatalog: async () => ({}) });
   return { window, document: window.document, calls, state: () => current, emit(change) { current = { ...current, ...change }; listener(current); } };
 }
 
@@ -186,5 +193,29 @@ test('profile displays relations and defers biography until expanded', async () 
   assert.doesNotMatch(dialog.textContent, /Long biography/);
   const details = dialog.querySelector('details'); details.open = true; details.dispatchEvent(new f.window.Event('toggle'));
   assert.match(dialog.textContent, /Long biography/);
+  await f.window.happyDOM.close();
+});
+
+test('BIO decodes BC UTF16 marker and leaves old plain profiles untouched', () => {
+  const text = '中文 BIO\n<script>not executable</script>';
+  assert.equal(decodeBiography('\u256c' + LZString.compressToUTF16(text)), text);
+  assert.equal(decodeBiography(text), text);
+  assert.equal(decodeBiography('x'.repeat(12000)).length, 10000);
+  assert.equal(typeof decodeBiography('\u256cgarbage'), 'string');
+});
+
+test('friend whisper opens private conversation and preserves drafts per recipient', async () => {
+  const f = setup();
+  f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, player: { ...f.state().player, FriendList: [55,66] }, characters: [{ Name: 'First', MemberNumber: 55 }, { Name: 'Second', MemberNumber: 66 }] });
+  f.document.getElementById('nav-friends').click();
+  const selectWhisper = index => f.document.querySelectorAll('.contact-card')[index].querySelectorAll('button')[1].click();
+  selectWhisper(0);
+  let input = f.document.getElementById('BeepText'); input.value = 'First draft'; input.dispatchEvent(new f.window.Event('input'));
+  selectWhisper(1);
+  assert.equal(f.document.getElementById('BeepText').value, '');
+  selectWhisper(0);
+  assert.equal(f.document.getElementById('BeepText').value, 'First draft');
+  f.document.querySelector('.beep-compose').dispatchEvent(new f.window.Event('submit', {cancelable:true}));
+  assert.ok(f.calls.includes('/w 55 First draft'));
   await f.window.happyDOM.close();
 });

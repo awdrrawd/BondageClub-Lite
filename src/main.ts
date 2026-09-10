@@ -1,5 +1,7 @@
 import "./style.css";
 import { bcClient } from "./protocol";
+import { decodeBiography } from "./biography";
+import { loadTextCatalog } from "./text-catalog";
 import type { CharacterSummary, ClientSnapshot, DisplayMessage, RoomCreateOptions, RoomSearchRequest, RoomSearchResult } from "./types";
 
 const app = document.querySelector<HTMLDivElement>("#app");
@@ -31,6 +33,9 @@ class LiteApp {
   private friendQuery = "";
   private contact = 0;
   private beepDraft = "";
+  private contactDrafts = new Map<number, string>();
+  private privateMode = "beep";
+  private catalogLoading = false;
   private membersOpen = false;
   private visibleMessages = 100;
   private unread = 0;
@@ -58,6 +63,12 @@ class LiteApp {
     bcClient.subscribe((snapshot) => {
       const previous = this.snapshot;
       this.snapshot = snapshot;
+      if (snapshot.player && !this.catalogLoading) {
+        this.catalogLoading = true;
+        void loadTextCatalog().then(catalog => bcClient.setTextCatalog(catalog)).catch(() => { this.localNotice("互動文字表載入失敗，暫時顯示原始鍵名；重新整理可重試。"); });
+      }
+      if (!snapshot.player) this.contactDrafts.clear();
+      if (previous && snapshot.messages !== previous.messages && snapshot.messages.some((message, index) => message.id === previous.messages[index]?.id && message.text !== previous.messages[index]?.text)) { this.render(); return; }
       if (!["ready", "joining", "in-room"].includes(snapshot.phase)) document.querySelectorAll(".profile-dialog").forEach(dialog => dialog.remove());
       if (!snapshot.player) { this.unread = 0; this.contact = 0; this.beepDraft = ""; this.chatDraft = ""; this.tab = "rooms"; }
       if (snapshot.room && !previous?.room) { this.tab = "chat"; this.visibleMessages = 100; }
@@ -68,7 +79,7 @@ class LiteApp {
       if (previous && snapshot.phase === previous.phase && snapshot.player === previous.player && snapshot.room === previous.room && snapshot.characters === previous.characters && snapshot.rooms === previous.rooms) {
         this.updateHeader();
         this.updateChatLog();
-        if (snapshot.friends !== previous.friends || snapshot.friendsStatus !== previous.friendsStatus || snapshot.beeps !== previous.beeps) this.updateFriendContent();
+        if (snapshot.friends !== previous.friends || snapshot.friendsStatus !== previous.friendsStatus || snapshot.beeps !== previous.beeps || snapshot.messages !== previous.messages) this.updateFriendContent();
         return;
       }
       this.render();
@@ -224,21 +235,30 @@ class LiteApp {
     const form = this.el("form", "beep-compose") as HTMLFormElement;
     const target = this.input("BeepTarget", "玩家編號", "number", this.contact ? String(this.contact) : "");
     target.min = "1"; target.step = "1";
-    target.addEventListener("input", () => { this.contact = Number(target.value); this.updateBeepLog(); });
+    target.addEventListener("change", () => this.openConversation(Number(target.value)));
     const text = document.createElement("textarea"); text.id = "BeepText"; text.placeholder = "BEEP 文字（不公開你的房間位置）"; text.maxLength = 1000; text.required = true; text.value = this.beepDraft;
     text.addEventListener("input", () => { this.beepDraft = text.value; });
     const add = this.button("加入好友", "ghost", "button");
     add.addEventListener("click", () => this.run(() => bcClient.setFriend(this.contact, true)));
-    const send = this.button("送出 BEEP", "primary", "submit");
-    form.append(this.field("對象編號（可直接輸入，不必在同一房間）", target), text, add, send);
+    const channel = this.select("私訊方式", [["beep", "BEEP（跨房間）"], ["whisper", "密語（僅限同房）"]], this.privateMode);
+    channel.addEventListener("change", () => { this.privateMode = channel.value; this.updateBeepLog(); });
+    const send = this.button("送出私訊", "primary", "submit");
+    form.append(this.field("對象編號", target), this.field("私訊方式", channel), text, add, send);
     form.addEventListener("submit", event => {
       event.preventDefault();
-      this.run(() => { bcClient.sendBeep(this.contact, this.beepDraft); this.beepDraft = ""; text.value = ""; });
+      this.run(() => {
+        if (this.privateMode === "whisper") {
+          if (!this.beepDraft.trim()) return;
+          if (!this.snapshot!.characters.some(character => character.MemberNumber === this.contact)) throw new Error("對象不在同房，請改用 BEEP；不會自動改道發送");
+          bcClient.sendChat(`/w ${this.contact} ${this.beepDraft}`);
+        } else bcClient.sendBeep(this.contact, this.beepDraft);
+        this.beepDraft = ""; this.contactDrafts.delete(this.contact); text.value = "";
+      });
     });
     const inbox = this.el("div", "beep-log"); inbox.id = "beep-log"; inbox.setAttribute("role", "log");
     const clear = this.button("清除本次 BEEP 紀錄", "ghost", "button");
     clear.addEventListener("click", () => { if (window.confirm("只清除此頁記憶體中的 BEEP 紀錄？")) bcClient.clearBeeps(); });
-    section.append(toolbar, filters, status, list, this.el("h2", "", "BEEP 對話"), form, inbox, clear);
+    section.append(toolbar, filters, status, list, this.el("h2", "", "好友私訊"), form, inbox, clear);
     // Populate detached containers; later updates only touch list and log, never the composer.
     this.fillFriendList(list);
     status.textContent = this.snapshot!.friendsStatus;
@@ -252,6 +272,14 @@ class LiteApp {
     const status = document.getElementById("friends-status");
     if (status) status.textContent = this.snapshot!.friendsStatus;
     this.updateBeepLog();
+  }
+
+  private openConversation(memberNumber: number, mode = "beep"): void {
+    this.contactDrafts.set(this.contact, this.beepDraft);
+    this.contact = memberNumber;
+    this.beepDraft = this.contactDrafts.get(memberNumber) || "";
+    this.privateMode = mode; this.tab = "friends"; this.unread = 0;
+    this.render(); document.getElementById("BeepText")?.focus();
   }
 
   private fillFriendList(list: HTMLElement): void {
@@ -275,12 +303,7 @@ class LiteApp {
       const info = this.el("div");
       info.append(this.el("strong", "", `${name} #${id}`), this.el("p", "muted", friend && fresh ? `在線 · ${friend.ChatRoomName || "未公開房間"}${friend.Private ? "（隱藏）" : ""} · ${friend.Type}` : inRoom ? "在線 · 同一房間" : presence === "offline" ? "不在線（依最後查詢；可能受隱私限制）" : "尚未確認在線狀態"));
       const chat = this.button("BEEP", "secondary", "button");
-      chat.addEventListener("click", () => {
-        this.contact = id;
-        const target = document.getElementById("BeepTarget") as HTMLInputElement | null;
-        if (target) target.value = String(id);
-        this.updateBeepLog(); document.getElementById("BeepText")?.focus();
-      });
+      chat.addEventListener("click", () => this.openConversation(id));
       row.append(info);
       if (friend?.ChatRoomName) {
         const join = this.button("前往房間", "ghost", "button");
@@ -290,6 +313,10 @@ class LiteApp {
         row.append(join);
       }
       row.append(chat);
+      if (inRoom) {
+        const whisper = this.button("私訊（密語）", "secondary", "button");
+        whisper.addEventListener("click", () => this.openConversation(id, "whisper")); row.append(whisper);
+      }
       if (state.player?.FriendList?.includes(id)) {
         const remove = this.button("移除", "ghost danger", "button");
         remove.addEventListener("click", () => { if (window.confirm(`確定從 BC 好友清單移除 #${id}？`)) this.run(() => bcClient.setFriend(id, false)); });
@@ -305,12 +332,18 @@ class LiteApp {
 
   private fillBeepLog(log: HTMLElement): void {
     log.replaceChildren();
+    if (this.privateMode === "whisper") {
+      const messages = this.snapshot!.messages.filter(message => message.type === "Whisper" && (message.sender === this.contact || (message.sender === this.snapshot!.player?.MemberNumber && message.target === this.contact))).slice(-60);
+      for (const message of messages) log.append(this.messageNode(message));
+      if (!messages.length) log.append(this.el("p", "muted", "尚無本房間的密語紀錄。密語僅限同房；跨房請選 BEEP。"));
+      return;
+    }
     const messages = this.snapshot!.beeps.filter(message => !this.contact || message.memberNumber === this.contact).slice(-60);
     if (!messages.length) log.append(this.el("p", "muted", "尚無本次對話紀錄。最多保留 300 則 BEEP，登出／重新整理即清除。"));
     for (const message of messages.reverse()) {
       const row = this.el("article", `beep-message ${message.incoming ? "incoming" : "outgoing"}`);
       const reply = this.button(`${message.incoming ? "收到" : "已送出，未確認送達"} · ${message.name} #${message.memberNumber}`, "ghost", "button");
-      reply.addEventListener("click", () => { this.contact = message.memberNumber; (document.getElementById("BeepTarget") as HTMLInputElement).value = String(this.contact); this.updateBeepLog(); });
+      reply.addEventListener("click", () => this.openConversation(message.memberNumber));
       row.append(reply, this.el("time", "message-time", message.time.toLocaleTimeString()), this.el("p", "message-text", message.text));
       log.append(row);
     }
@@ -620,7 +653,7 @@ class LiteApp {
     const row = this.el("div", `chat-message type-${message.type.toLowerCase()}`);
     row.dataset.messageId = message.id;
     const time = this.el("time", "message-time", message.time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
-    if (message.type === "Local" || message.type === "ServerMessage" || message.type === "Status") {
+    if (message.type === "Local" || message.type === "ServerMessage") {
       row.append(time, this.el("span", "message-system", message.text));
     } else if (message.type === "Emote") {
       row.append(time, this.el("span", "message-emote", `* ${message.senderName} ${message.text}`));
@@ -639,7 +672,7 @@ class LiteApp {
     dialog.append(this.el("p", "", `主人：${character.Ownership ? relationName(character.Ownership) : character.Owner || "未提供"}`), this.el("p", "", `戀人：${character.Lovership?.length ? character.Lovership.map(relationName).join("、") : "未提供"}`));
     const bio = this.el("details", "profile-bio");
     bio.append(this.el("summary", "", "BIO · 點擊展開"));
-    bio.addEventListener("toggle", () => { if (bio.open && bio.childElementCount === 1) bio.append(this.el("p", "profile-description", character.Description || "未提供個人描述")); });
+    bio.addEventListener("toggle", () => { if (bio.open && bio.childElementCount === 1) bio.append(this.el("p", "profile-description", decodeBiography(character.Description))); });
     dialog.append(bio);
     const actions = this.el("div", "toolbar");
     const close = this.button("關閉", "ghost", "button");
@@ -655,7 +688,7 @@ class LiteApp {
       const friend = this.button("加好友", "ghost", "button");
       friend.addEventListener("click", () => this.run(() => bcClient.setFriend(character.MemberNumber, true)));
       const beep = this.button("私訊（BEEP）", "ghost", "button");
-      beep.addEventListener("click", () => { dismiss(); this.contact = character.MemberNumber; this.tab = "friends"; this.unread = 0; this.render(); document.getElementById("BeepText")?.focus(); });
+      beep.addEventListener("click", () => { dismiss(); this.openConversation(character.MemberNumber); });
       actions.append(whisper, friend, beep);
     }
     actions.append(close); dialog.append(actions); document.body.append(dialog); dialog.showModal();

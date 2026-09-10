@@ -5,3 +5,10 @@
 - ECHO 相容性調查：https://github.com/SugarChain-Studio/echo-clothing-ext 的 `src/main.js`。未嵌入、執行或宣稱載入 ECHO；不支援其自訂資產操作及繪圖。
 
 本機顯示背景預設關閉；只有開啟時瀏覽器才請求圖片。
+
+## BC 文字資料與 BIO
+
+- `lz-string`：MIT，用於解析 BC 帶 U+256C 標記的 UTF16 壓縮 BIO；不執行 BIO 內容。
+- `src/data/bc-messages.json`：由本機 `BCJS/Bondage-College-master/BondageClub` 的 `Screens/Interface`、`Assets/Female3DCG/AssetStrings`、`Screens/Online/ChatRoom/Text_ChatRoom`、`Screens/Character/Preference/ActivityDictionary` 的 CSV 及 TW／CN 翻譯文字機械轉換。BC 文字資料權利屬原作者，不納入 Lite 自有程式的 MIT 授權聲明。
+- 轉換腳本：`node scripts/build-text-catalog.mjs [BondageClub來源目錄]`。產物已隨專案保存，Cloudflare 建置不需要你的本機 BC 倉庫，也不在玩家登入時下載原始倉庫。
+- 只取文字資料，未引入 BC 遊戲執行程式、服裝圖片或人物渲染。

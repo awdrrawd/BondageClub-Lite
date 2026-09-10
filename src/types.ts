@@ -104,12 +104,14 @@ export interface ChatMessage {
 }
 
 export interface DisplayMessage {
+  target?: number;
+  translation?: { content: string; dictionary: DictionaryEntry[] };
   id: string;
   sender: number | null;
   senderName: string;
   targetName?: string;
   text: string;
-  type: Exclude<ChatMessageType, "Hidden"> | "Local";
+  type: Exclude<ChatMessageType, "Hidden" | "Status"> | "Local";
   time: Date;
 }
 

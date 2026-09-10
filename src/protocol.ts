@@ -24,13 +24,14 @@ function dictionaryText(entry: DictionaryEntry): string | null {
 }
 
 export function formatServerText(content: string, dictionary: DictionaryEntry[] = []): string {
-  let text = content;
+  const replacements = new Map<string, string>();
   for (const entry of dictionary) {
     if (!entry.Tag) continue;
     const replacement = dictionaryText(entry);
-    if (replacement) text = text.replaceAll(entry.Tag, replacement);
+    if (replacement !== null) replacements.set(entry.Tag, replacement);
   }
-  return text;
+  const keys = [...replacements.keys()].sort((a, b) => b.length - a.length).map(key => key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  return keys.length ? content.replace(new RegExp(keys.join("|"), "g"), key => replacements.get(key)!) : content;
 }
 
 export class BcLiteClient {
@@ -46,6 +47,18 @@ export class BcLiteClient {
   private friendsTimer: number | null = null;
   private lastBeepAt = 0;
   private lastChatAt = 0;
+  private textCatalog: Record<string, string> = {};
+
+  setTextCatalog(catalog: Record<string, string>): void {
+    this.textCatalog = catalog;
+    this.patch({ messages: this.state.messages.map(message => message.translation ? { ...message, text: this.renderServerMessage(message.translation.content, message.type, message.translation.dictionary) } : message) });
+  }
+
+  private renderServerMessage(content: string, type: string, dictionary: DictionaryEntry[]): string {
+    const key = type === "ServerMessage" ? `ServerMessage${content}` : content;
+    const template = Object.hasOwn(this.textCatalog, key) ? this.textCatalog[key] : Object.hasOwn(this.textCatalog, content) ? this.textCatalog[content] : content;
+    return formatServerText(template, dictionary);
+  }
 
   subscribe(listener: Listener): () => void {
     this.listeners.add(listener);
@@ -337,18 +350,33 @@ export class BcLiteClient {
   }
 
   private handleMessage(message: ChatMessage): void {
-    if (!message || message.Type === "Hidden") return;
+    // BC Status packets (Talk, "null", Wardrobe, etc.) drive character indicators,
+    // not chat history. Filter by packet type, never by user-entered content.
+    if (!message || message.Type === "Hidden" || message.Type === "Status" || typeof message.Content !== "string") return;
     const sender = this.findCharacter(message.Sender);
     const target = this.findCharacter(message.Target);
-    const dictionary = message.Dictionary?.map((entry) => {
+    const dictionary = (Array.isArray(message.Dictionary) ? message.Dictionary : []).filter(entry => entry && typeof entry === "object").map((entry) => {
       if (dictionaryText(entry) || !Number.isFinite(entry.MemberNumber)) return entry;
       const character = this.findCharacter(entry.MemberNumber);
       return character ? { ...entry, CharacterName: character.Nickname?.trim() || character.Name } : entry;
     });
+    const sourceId = dictionary.find(entry => typeof entry.SourceCharacter === "number")?.SourceCharacter;
+    const targetId = dictionary.find(entry => typeof entry.TargetCharacter === "number")?.TargetCharacter;
+    const sourceCharacter = this.findCharacter(typeof sourceId === "number" ? sourceId : message.Sender);
+    const targetCharacter = this.findCharacter(typeof targetId === "number" ? targetId : message.Target);
+    const sourceName = sourceCharacter?.Nickname || sourceCharacter?.Name;
+    const targetEntry = dictionary.find(entry => ["TargetCharacter", "TargetCharacterName", "DestinationCharacter", "DestinationCharacterName"].includes(entry.Tag || ""));
+    const destinationName = (targetEntry ? dictionaryText(targetEntry) : null) || targetCharacter?.Nickname || targetCharacter?.Name;
+    for (const [tags, name] of [[['SourceCharacter', 'SourceCharacterName'], sourceName], [['TargetCharacter', 'TargetCharacterName', 'DestinationCharacter', 'DestinationCharacterName'], destinationName]] as const) {
+      if (name) for (const tag of tags) if (!dictionary.some(entry => entry.Tag === tag)) dictionary.push({ Tag: tag, Text: name });
+    }
+    const translated = ["Action", "Activity", "ServerMessage"].includes(message.Type);
     this.appendMessage({
       id: crypto.randomUUID(), sender: message.Sender ?? null, senderName: displayName(sender),
+      target: message.Type === "Whisper" ? message.Target ?? this.state.player?.MemberNumber : undefined,
       targetName: message.Type === "Whisper" ? displayName(target || this.state.player || undefined) : undefined,
-      text: formatServerText(message.Content, dictionary), type: message.Type, time: new Date(),
+      text: translated ? this.renderServerMessage(message.Content, message.Type, dictionary) : message.Content, type: message.Type, time: new Date(),
+      ...(translated ? { translation: { content: message.Content, dictionary } } : {}),
     });
   }
 

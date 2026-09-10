@@ -42,6 +42,25 @@ async function setup(environment, relayAvailable = true, account = {}) {
 
 const request = { Query: '', Space: 'X', Language: '', Game: '', FullRooms: false, ShowLocked: true, SearchDescs: false };
 
+test('character Status packets never enter history or notify UI; matching chat text remains', async () => {
+  const f = await setup('PROD');
+  let updates = 0;
+  f.client.subscribe(() => updates++);
+  const before = updates;
+  const history = f.state().messages;
+  for (const Content of ['Talk', 'null', 'Wardrobe', 'Struggle', 'Preference', null]) {
+    f.handlers.get('ChatRoomMessage')({ Type: 'Status', Sender: 55, Content });
+  }
+  assert.equal(f.state().messages, history);
+  assert.equal(updates, before);
+  for (const Content of ['Talk', 'null']) {
+    f.handlers.get('ChatRoomMessage')({ Type: 'Chat', Sender: 55, Content });
+    assert.equal(f.state().messages.at(-1).text, Content);
+  }
+  f.handlers.get('ChatRoomMessage')({ Type: 'ServerMessage', Content: 'RealServerNotice' });
+  assert.equal(f.state().messages.at(-1).text, 'RealServerNotice');
+});
+
 test('missing relay does not send credentials or fall back to direct BC connection', async () => {
   const fixture = await setup(undefined, false);
   assert.equal(fixture.state().phase, 'error');
@@ -224,4 +243,20 @@ test('invalid map and unsafe custom URL fail before creating or changing phase',
   assert.throws(() => f.client.createRoom('Test', 'X', 'CN', false, '', 5, { Custom: { ImageURL: 'javascript:alert(1)' } }), /HTTPS/);
   assert.equal(f.state().phase, 'ready');
   assert.equal(f.sent.some(packet => packet.event === 'ChatRoomCreate'), false);
+});
+
+test('activity keys resolve through bundled translations, names and late catalog load', async () => {
+  const f = await setup('PROD');
+  const key = 'ChatOther-ItemEars-Lick';
+  const catalog = JSON.parse(readFileSync(new URL('../src/data/bc-messages.json', import.meta.url), 'utf8'));
+  f.handlers.get('ChatRoomSync')({ Name: 'Test', Character: [{ MemberNumber: 55, Name: 'Alice' }, { MemberNumber: 66, Name: 'Bob' }], Limit: 10 });
+  f.handlers.get('ChatRoomMessage')({ Type: 'Activity', Sender: 55, Content: key, Dictionary: [{ SourceCharacter: 55 }, { TargetCharacter: 66 }] });
+  f.client.setTextCatalog(catalog);
+  assert.match(f.state().messages.at(-1).text, /Alice.*舔.*Bob.*耳/);
+  f.handlers.get('ChatRoomMessage')({ Type: 'Activity', Sender: 55, Content: key, Dictionary: [{ Tag: 'SourceCharacter', MemberNumber: 55 }, { Tag: 'TargetCharacterName', MemberNumber: 66 }] });
+  assert.match(f.state().messages.at(-1).text, /Alice.*舔.*Bob.*耳/);
+  f.handlers.get('ChatRoomMessage')({ Type: 'Chat', Sender: 55, Content: key });
+  assert.equal(f.state().messages.at(-1).text, key);
+  f.handlers.get('ChatRoomMessage')({ Type: 'Activity', Sender: 55, Content: 'UnknownPluginAction' });
+  assert.equal(f.state().messages.at(-1).text, 'UnknownPluginAction');
 });
