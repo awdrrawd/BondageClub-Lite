@@ -31,7 +31,7 @@ Cloudflare 是連線中繼，BC 接收帳密、帳號資料及遊戲封包。兩
 目標不是提供衣櫃，而是不讓 Lite 因不認識 ECHO 物品而清除已有外觀。
 
 - 登入收到的 Appearance 和 OnlineSharedSettings 保留原始結構，不做未知物品過濾、重建、壓縮或欄位清洗。
-- 一般操作不送 Appearance／OnlineSharedSettings 的 AccountUpdate，也不送角色換裝更新；加／移除好友只送 FriendList。**唯一例外：使用者選擇安全詞操作並確認後，才送 Appearance 與角色外觀更新；「回復」另依 BC 規則收緊 AllowedInteractions／ItemPermission。** 不會改寫 OnlineSharedSettings。
+- 一般操作不送 Appearance／OnlineSharedSettings 的 AccountUpdate；加／移除好友只送 FriendList。**外觀寫入例外：確認安全詞後送外觀更新；確認 ECHO 貼貼後只更新自己的 ItemMisc 單件道具，解除配對時只移除該欄的貼貼，不覆蓋其他道具。** 安全詞「回復」另依 BC 規則收緊 AllowedInteractions／ItemPermission。不會改寫 OnlineSharedSettings。
 - 房內收到不同外觀不會觸發「覆蓋存檔」或「還原登入外觀」。後者也可能覆蓋其他合法修改，所以不自動還原。
 - 不載入完整 ECHO、不發送假版本／能力標籤，也不加入外觀備份雲端服務或本機外觀儲存。
 
@@ -41,7 +41,7 @@ Cloudflare 是連線中繼，BC 接收帳密、帳號資料及遊戲封包。兩
 
 Lite 現在會向同房玩家發送版本無關的 `Hidden / BCLiteHello` 自報標記，只有 `client: Lite`，不包含帳密、服裝或插件清單；支援的 LCE 可顯示頭頂 Lite 字樣。這代表同房玩家可以辨識你正在使用 Lite，不是匿名客戶端。`window.BCLite` 只提供同頁靜態名稱，不暴露連線操作或個人資料。
 
-原生活動面板可送出 Activity 封包；預設相容模式會略過尚未實作的本機條件，但保留已知禁止偏好及房間限制。接收方完整版 BC 可能依自己的設定產生活動效果。Lite 不執行自身完整自動興奮／表情／道具效果，也不因此新增 Appearance 或 OnlineSharedSettings 寫入。ECHO 等擴展項目僅發送文字，貼貼目前沒有穿戴或位置配對。詳見 [原生活動與識別限制](chat-native-identity-tests.md)。
+原生活動面板可送出 Activity 封包；預設相容模式會略過尚未實作的本機條件，但保留已知禁止偏好及房間限制。接收方完整版 BC 可能依自己的設定產生活動效果。Lite 不執行自身完整自動興奮／表情／道具效果。一般擴展項目只發送文字；ECHO 貼貼是明確例外，確認後更新自己的貼貼道具，向同房玩家分享配對成員 ID、道具名稱與位置狀態。不安裝或執行 ECHO 程式，也不直接改寫對方外觀。詳見 [貼貼限制與驗收](echo-cuddle-tests.md) 與 [原生活動與識別限制](chat-native-identity-tests.md)。
 
 HTTP(S) 網址以 DOM 文字與連結建立，不解析 HTML。HTTPS 圖片／影片直連須先取得使用者對來源的本次／總是許可才建立內嵌媒體：圖片接近可視範圍時載入，影片預載 metadata、提供播放控制，不自動播放。這些請求直接送往媒體來源，會讓來源收到使用者 IP 等資訊；全站 Referrer-Policy 為 no-referrer。普通網頁與失敗媒體保留連結，另開分頁並設定 noopener／noreferrer。不使用 iframe、外部腳本或預覽 API；這不是惡意網站掃描或安全保證。
 

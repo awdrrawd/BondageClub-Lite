@@ -61,6 +61,10 @@ class LiteApp {
   private settings = { background: false, largeText: false, timestamps: true, locale: "zh" as Locale };
 
   constructor() {
+    // Clear before row/reply handlers run so a reply jump can select its destination.
+    document.addEventListener("click", () => {
+      document.querySelectorAll(".chat-message.message-selected").forEach(row => row.classList.remove("message-selected"));
+    }, true);
     document.addEventListener("click", event => {
       const target = event.target as HTMLElement;
       if (this.membersOpen && !target.closest(".member-panel, .mobile-members, .profile-dialog")) {
@@ -106,6 +110,7 @@ class LiteApp {
     bcClient.subscribe((snapshot) => {
       const previous = this.snapshot;
       this.snapshot = snapshot;
+      if (snapshot.cuddleRequest !== previous?.cuddleRequest) this.showCuddleRequest();
       if (!snapshot.player || snapshot.phase === "error") this.stability.stop();
       if (snapshot.player && !this.catalogLoading) {
         this.refreshCatalog();
@@ -179,7 +184,7 @@ class LiteApp {
     const privateTab = document.getElementById("nav-private");
     if (privateTab) privateTab.textContent = `${t("private.title")}${this.unread ? ` · ${this.unread}` : ""}`;
     const chat = document.getElementById("nav-chat");
-    if (chat) chat.textContent = t("m006", [this.roomUnread ? ` · ${this.roomUnread}` : ""]);
+    if (chat) chat.textContent = `${t("nav.room")}${this.roomUnread ? ` · ${this.roomUnread}` : ""}`;
   }
 
   private updateChatLog(force = false): void {
@@ -288,7 +293,7 @@ class LiteApp {
   private buildNavigation(): HTMLElement {
     const nav = this.el("nav", "app-nav");
     nav.setAttribute("aria-label", t("m009"));
-    for (const [key, label] of [["rooms", t("m010")], ["chat", t("m011")], ["friends", t("m012")], ["private", t("private.title")], ["settings", t("m013")]] as const) {
+    for (const [key, label] of [["rooms", t("nav.search")], ["chat", t("nav.room")], ["private", t("private.title")], ["friends", t("m012")], ["settings", t("m013")]] as const) {
       const button = this.button(label, this.tab === key ? "active" : "ghost", "button");
       button.id = `nav-${key}`;
       button.setAttribute("aria-current", this.tab === key ? "page" : "false");
@@ -307,9 +312,9 @@ class LiteApp {
   }
 
   private buildFriends(privatePage = false): HTMLElement {
-    const section = this.el("section", "friends-view");
+    const section = this.el("section", privatePage ? "friends-view private-page" : "friends-view");
     section.append(this.el("p", "eyebrow", t("m015")), this.el("h1", "", privatePage ? t("private.title") : t("m016")));
-    section.append(this.el("p", "muted", t("m017")));
+    if (!privatePage) section.append(this.el("p", "muted", t("m017")));
     const toolbar = this.el("div", "toolbar");
     const refresh = this.button(t("m018"), "secondary", "button");
     refresh.addEventListener("click", () => this.run(() => bcClient.refreshFriends()));
@@ -323,7 +328,7 @@ class LiteApp {
       button.addEventListener("click", () => { if (privatePage) this.privateFilter = value; else this.friendFilter = value; this.render(); });
       filters.append(button);
     }
-    const status = this.el("p", "muted"); status.id = "friends-status";
+    const status = this.el("p", privatePage ? "private-status" : "muted"); status.id = "friends-status";
     const list = this.el("div", "contact-list"); list.id = "contact-list";
     if (!privatePage) {
       section.append(toolbar, filters, status, list);
@@ -331,9 +336,6 @@ class LiteApp {
       return section;
     }
     const form = this.el("form", "beep-compose") as HTMLFormElement;
-    const target = this.input("BeepTarget", t("m024"), "number", this.contact ? String(this.contact) : "");
-    target.min = "1"; target.step = "1";
-    target.addEventListener("change", () => this.openConversation(Number(target.value)));
     const text = document.createElement("textarea"); text.id = "BeepText"; text.placeholder = t("m025"); text.maxLength = 1000; text.required = true; text.value = this.beepDraft;
     text.addEventListener("input", () => { this.beepDraft = text.value; });
     const add = this.button(t("m026"), "ghost", "button");
@@ -341,7 +343,8 @@ class LiteApp {
     const channel = this.select(t("m027"), [["beep", t("m028")], ["whisper", t("m029")]], this.privateMode);
     channel.addEventListener("change", () => { this.replyTarget = null; form.querySelector(".reply-preview")?.remove(); this.privateMode = channel.value; this.updateBeepLog(); });
     const send = this.button(t("m030"), "primary", "submit");
-    form.append(this.field(t("m031"), target), this.field(t("m027"), channel), text, add, send);
+    send.disabled = !this.contact;
+    channel.className = "private-channel"; form.append(channel, text, send);
     if (this.replyTarget) form.prepend(this.replyIndicator());
     form.addEventListener("submit", event => {
       event.preventDefault();
@@ -355,8 +358,6 @@ class LiteApp {
       });
     });
     const inbox = this.el("div", "beep-log"); inbox.id = "beep-log"; inbox.setAttribute("role", "log");
-    const clear = this.button(t("m033"), "ghost", "button");
-    clear.addEventListener("click", () => { if (window.confirm(t("m034"))) bcClient.clearBeeps(); });
     const contacts = this.el("aside", "private-contacts");
     contacts.append(this.el("h2", "private-heading", t("private.contacts")), toolbar, filters, status, list);
     const conversation = this.el("section", "private-conversation");
@@ -364,7 +365,10 @@ class LiteApp {
     back.addEventListener("click", () => { this.privateListOpen = true; this.render(); });
     const peer = this.snapshot!.characters.find(c => c.MemberNumber === this.contact);
     const peerName = peer?.Nickname || peer?.Name || this.snapshot!.friends.find(c => c.MemberNumber === this.contact)?.MemberName;
-    conversation.append(back, this.el("h2", "private-heading", this.contact ? `${peerName || t("private.title")} · #${this.contact}` : t("m035")), inbox, form, clear);
+    const heading = this.el("div", "private-heading");
+    add.disabled = !this.contact;
+    heading.append(back, this.el("h2", "", this.contact ? `${peerName || t("private.title")} · #${this.contact}` : t("m035")), add);
+    conversation.append(heading, inbox, form);
     const split = this.el("div", `private-split ${this.privateListOpen ? "show-contacts" : "show-conversation"}`);
     split.append(contacts, conversation); section.append(split);
     // Populate detached containers; later updates only touch list and log, never the composer.
@@ -456,15 +460,16 @@ class LiteApp {
         const whisper = this.button(t("m046"), "secondary", "button");
         whisper.addEventListener("click", () => this.openConversation(id, "whisper")); row.append(whisper);
       }
-      if (state.player?.FriendList?.includes(id)) {
+      if (this.tab !== "private" && state.player?.FriendList?.includes(id)) {
         const remove = this.button(t("m047"), "ghost danger", "button");
         remove.addEventListener("click", () => { if (window.confirm(t("m048", [id]))) this.run(() => bcClient.setFriend(id, false)); });
         row.append(remove);
       }
       list.append(row);
+      if (this.tab === "private") for (const node of row.querySelectorAll(".muted")) node.classList.remove("muted");
     }
     if (!total) list.append(this.el("p", "empty-state", t("m049")));
-    if (total > 80) list.append(this.el("p", "muted", t("m050", [total])));
+    if (total > 80) list.append(this.el("p", this.tab === "private" ? "private-status" : "muted", t("m050", [total])));
   }
 
   private updateBeepLog(): void { const log = document.getElementById("beep-log"); if (log) this.fillBeepLog(log); }
@@ -474,11 +479,7 @@ class LiteApp {
     const follow = log.scrollHeight - log.clientHeight - scrollTop < 60;
     try {
     const rows: DisplayMessage[] = [];
-    if (this.privateMode === "whisper") {
-      const messages = (this.snapshot!.whispers || this.snapshot!.messages).filter(message => message.type === "Whisper" && (message.sender === this.contact || (message.sender === this.snapshot!.player?.MemberNumber && message.target === this.contact))).slice(-this.privateVisible);
-      this.syncPrivateRows(log, messages, t("m051"));
-      return;
-    }
+    rows.push(...(this.snapshot!.whispers || this.snapshot!.messages).filter(message => message.type === "Whisper" && (message.sender === this.contact || (message.sender === this.snapshot!.player?.MemberNumber && message.target === this.contact))));
     const messages = this.snapshot!.beeps.filter(message => !this.contact || message.memberNumber === this.contact).slice(-this.privateVisible);
     for (const message of messages) {
       const self = this.snapshot!.player!;
@@ -487,7 +488,7 @@ class LiteApp {
         target: message.incoming ? self.MemberNumber : message.memberNumber, targetName: message.incoming ? self.Name : message.name,
         text: message.text, type: "Beep", time: message.time });
     }
-    this.syncPrivateRows(log, rows, t("m052"));
+    this.syncPrivateRows(log, rows.sort((a, b) => a.time.getTime() - b.time.getTime()).slice(-this.privateVisible), t("m052"));
     } finally { log.scrollTop = follow ? log.scrollHeight : scrollTop; }
   }
 
@@ -498,10 +499,14 @@ class LiteApp {
     let cursor: ChildNode | null = log.firstChild;
     for (const message of messages) {
       const node = existing.get(message.id) || this.messageNode(message);
+      const element = node as HTMLElement;
+      element.classList.toggle("private-outgoing", message.sender === this.snapshot!.player?.MemberNumber);
+      element.classList.toggle("private-incoming", message.sender !== this.snapshot!.player?.MemberNumber);
+      if (!element.querySelector(".private-channel-label")) element.querySelector(".message-meta")?.prepend(this.el("span", "private-channel-label", message.type === "Whisper" ? t("m029") : t("m028")));
       if (node !== cursor) log.insertBefore(node, cursor);
       cursor = node.nextSibling;
     }
-    if (!messages.length) log.append(this.el("p", "muted", empty));
+    if (!messages.length) log.append(this.el("p", "private-status", empty));
   }
 
   private buildSettings(): HTMLElement {
@@ -951,6 +956,20 @@ class LiteApp {
     const node = Array.from(log?.querySelectorAll<HTMLElement>("[data-message-id]") || []).find(node => node.dataset.messageId === message.id);
     if (!node) { this.localNotice(t("reply.unavailable")); return; }
     node.scrollIntoView?.({ block: "center" }); node.focus({ preventScroll: true }); node.classList.add("message-selected");
+  }
+
+  private showCuddleRequest(): void {
+    document.querySelector(".cuddle-request")?.remove();
+    const request = this.snapshot?.cuddleRequest;
+    if (!request) return;
+    const dialog = this.el("dialog", "profile-dialog cuddle-request");
+    dialog.append(this.el("h2", "", t("cuddle.request", [request.sender])), this.el("p", "", t("cuddle.confirm")));
+    const accept = this.button(t("cuddle.accept"), "primary", "button");
+    const reject = this.button(t("safety.cancel"), "ghost", "button");
+    accept.addEventListener("click", () => this.run(() => bcClient.respondCuddle(true)));
+    reject.addEventListener("click", () => bcClient.respondCuddle(false));
+    dialog.addEventListener("cancel", () => bcClient.respondCuddle(false));
+    dialog.append(accept, reject); document.body.append(dialog); dialog.showModal();
   }
 
   private showSafeword(): void {

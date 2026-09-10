@@ -26,7 +26,7 @@
           <article><code>src/main.ts</code><h3>瀏覽器入口</h3><p>只啟動 UI，不保存帳密、不處理遊戲協定。</p></article>
           <article><code>src/ui/</code><h3>介面與版面</h3><p>app.ts 訂閱快照、管理分頁；activity-dialog.ts 獨立管理互動面板與 BC 部位熱區，不載入人物貼圖；style.css 管理手機版面。其餘頁面仍集中於 LiteApp。</p></article>
           <article><code>src/network/</code><h3>唯一的 Socket 擁有者</h3><p>client.ts：登入、重連、房間、好友、私聊、召喚授權與送出驗證。模組重排不改變協定行為。</p></article>
-          <article><code>src/action/</code><h3>動作與文字管線</h3><p>catalog.ts 載入基底／差異；embedded.ts 讀取插件原文；render.ts 代入字典。native.ts 判定原生活動；extensions.ts 與 extension-data.json 管理擴展文字互動，不執行插件效果。</p></article>
+          <article><code>src/action/</code><h3>動作與文字管線</h3><p>catalog.ts 載入基底／差異；embedded.ts 讀取插件原文；render.ts 代入字典。labels.ts 統一標籤與身體別名；native.ts 判定原生活動；extensions.ts 管理擴展文字互動。cuddle.ts 集中 ECHO 貼貼條件與配對資料，不載入插件程式。</p></article>
           <article><code>src/translations/ + src/i18n/</code><h3>資料與翻譯函數分離</h3><p>翻譯者編輯 JSON；i18n/index.ts 管理 UI 語言、參數及狀態重譯。不呼叫外部翻譯服務。</p></article>
           <article><code>src/profile/ · media/ · safety/ · platform/</code><h3>邊界功能</h3><p>AFC／BIO、媒體來源許可、安全詞外觀規則、行動裝置連線輔助分開維護。shared/types.ts 定義共用資料。</p></article>
         </div>
@@ -70,7 +70,7 @@
         <p>手機回前景以既有好友查詢檢查連線。常亮／本機音訊由使用者選擇；無法保證瀏覽器在背景或鎖屏持續執行。</p>
       </section>
       <section id="security"><p class="eyebrow">06 / TRUST BOUNDARIES</p><h2>維持原有的資料界線。</h2>
-        <div class="table-wrap"><table><thead><tr><th>資料／操作</th><th>保存與限制</th></tr></thead><tbody><tr><td>密碼、聊天、外觀快照、召喚名單</td><td>分頁記憶體；不新增永久儲存或雲端 API。</td></tr><tr><td>記住帳號、顯示偏好、永久媒體許可</td><td>自選 localStorage；並非加密保管庫。</td></tr><tr><td>插件動作與 AFC</td><td>讀取文字／共享關係資料，不安裝插件或改寫其設定。擴展互動只發送文字，ECHO 貼貼尚無位置配對／穿戴效果。</td></tr><tr><td>媒體載入</td><td>先許可來源，再設定 src；來源可看到連線資訊，瀏覽器仍會跟隨重新導向。</td></tr><tr><td>安全詞</td><td>使用者確認後的外觀改寫例外；不保證完整插件連動效果。</td></tr><tr><td>BCX 召喚／個人資料互動</td><td>召喚採允許名單＋接受確認。原生活動預設相容發送，略過未實作的本機條件；已知禁止偏好與房間限制仍阻擋。可取消相容模式恢復保守判定，不代表完整 BC 引擎。</td></tr></tbody></table></div>
+        <div class="table-wrap"><table><thead><tr><th>資料／操作</th><th>保存與限制</th></tr></thead><tbody><tr><td>密碼、聊天、外觀快照、召喚名單</td><td>分頁記憶體；不新增永久儲存或雲端 API。</td></tr><tr><td>記住帳號、顯示偏好、永久媒體許可</td><td>自選 localStorage；並非加密保管庫。</td></tr><tr><td>插件動作與 AFC</td><td>讀取文字／共享關係資料，不安裝插件。一般擴展互動只發送文字；ECHO 貼貼確認後只更新自己的 ItemMisc 道具並分享位置配對，不覆蓋既有道具，不支援跨房跟隨。</td></tr><tr><td>媒體載入</td><td>先許可來源，再設定 src；來源可看到連線資訊，瀏覽器仍會跟隨重新導向。</td></tr><tr><td>安全詞</td><td>使用者確認後的外觀改寫例外；不保證完整插件連動效果。</td></tr><tr><td>BCX 召喚／個人資料互動</td><td>召喚採允許名單＋接受確認。原生活動預設相容發送，略過未實作的本機條件；已知禁止偏好與房間限制仍阻擋。可取消相容模式恢復保守判定，不代表完整 BC 引擎。</td></tr></tbody></table></div>
         <p>第三方文字沿用各來源授權：詳見 <code>docs/third-party-dialogues.md</code> 與 <code>docs/licenses/</code>，不可一律視為 MIT。</p>
       </section>
       <section id="workflow"><p class="eyebrow">07 / DEVELOPMENT</p><h2>修改來源，讓建置處理產物。</h2>

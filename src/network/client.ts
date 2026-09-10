@@ -3,6 +3,8 @@ import { afcLovers } from "../profile/afc";
 import { renderAction, dictionaryText } from "../action/render";
 import { nativeActivities, activityReason } from "../action/native";
 import { extensionActivities, extensionText } from "../action/extensions";
+import { activityLabel, hasPenis, physicalGroup, textGroup } from "../action/labels";
+import { cuddleNames, cuddleReason, cuddleState } from "../action/cuddle";
 import { validAppearance, copyAppearance, releaseAppearance, type BundledItem } from "../safety/safeword";
 import { io, type Socket } from "socket.io-client";
 import type { CharacterSummary, ChatMessage, ClientSnapshot, DictionaryEntry, DisplayMessage, OnlineFriend, PlayerSummary, RoomCreateOptions, RoomSearchRequest, RoomSearchResult, RoomSync } from "../shared/types";
@@ -47,6 +49,41 @@ export class BcLiteClient {
   private lastChatAt = 0;
   private lastIdentityReply = 0;
   private departed = new Map<number, CharacterSummary>();
+  private cuddlePair: { peer: number; room: string; state: ReturnType<typeof cuddleState> } | null = null;
+  private cuddleRequestAt = 0;
+  private cuddleSelf(): CharacterSummary {
+    return { ...this.state.player!, Appearance: this.safetyCurrent ?? undefined, ActivePose: this.state.characters.find(c => c.MemberNumber === this.state.player?.MemberNumber)?.ActivePose ?? this.state.player?.ActivePose };
+  }
+  private syncCuddle(target?: number): void {
+    if (!this.canSend() || !this.state.room) return;
+    this.socket!.emit("ChatRoomChat", { Type: "Hidden", Content: "Luzi_XCharacterDrawState", Dictionary: [this.cuddlePair?.state || {}], ...(target ? { Target: target } : {}) });
+  }
+  private wearCuddle(peer: CharacterSummary, name: string, receiving = false): void {
+    const reason = cuddleReason(this.cuddleSelf(), peer, receiving);
+    if (reason || !this.canSend() || !this.state.room) throw new Error(t((reason || "native.data") as Parameters<typeof t>[0]));
+    const item = { Group: "ItemMisc", Name: "贴贴", Color: "Default", Difficulty: 0 };
+    this.safetyCurrent = [...copyAppearance(this.safetyCurrent!), item];
+    this.cuddlePair = { peer: peer.MemberNumber, room: this.state.room.Name, state: cuddleState(name, peer.MemberNumber, receiving) };
+    this.socket!.emit("ChatRoomCharacterItemUpdate", { Target: this.state.player!.MemberNumber, ...item });
+    this.syncCuddle();
+    this.patch({ characters: this.state.characters.map(c => c.MemberNumber === this.state.player?.MemberNumber ? { ...c, Appearance: copyAppearance(this.safetyCurrent!) } : c) });
+  }
+  stopCuddle(): void {
+    if (!this.canSend() || !this.state.room) return;
+    if (!this.cuddlePair && !this.safetyCurrent?.some(item => item.Group === "ItemMisc" && item.Name === "贴贴")) return;
+    if (this.safetyCurrent?.some(item => item.Group === "ItemMisc" && item.Name === "贴贴")) {
+      this.safetyCurrent = this.safetyCurrent.filter(item => !(item.Group === "ItemMisc" && item.Name === "贴贴"));
+      this.socket!.emit("ChatRoomCharacterItemUpdate", { Target: this.state.player!.MemberNumber, Group: "ItemMisc", Color: "Default", Difficulty: 0 });
+      this.patch({ characters: this.state.characters.map(c => c.MemberNumber === this.state.player?.MemberNumber ? { ...c, Appearance: copyAppearance(this.safetyCurrent!) } : c) });
+    }
+    this.cuddlePair = null; this.syncCuddle();
+  }
+  respondCuddle(accept: boolean): void {
+    const request = this.state.cuddleRequest; this.patch({ cuddleRequest: null });
+    if (!accept || !request || request.expires < Date.now()) return;
+    const peer = this.state.characters.find(c => c.MemberNumber === request.sender);
+    if (peer && !this.state.room?.BlockCategory?.includes("Arousal")) this.wearCuddle(peer, request.name, true);
+  }
   clearMessages(): void { this.patch({ messages: [] }); }
   private textCatalog: Record<string, string> = {};
   private safetyBaseline: { appearance: BundledItem[]; pose: string[] | null } | null = null;
@@ -173,6 +210,7 @@ export class BcLiteClient {
   }
 
   disconnect(): void {
+    this.cuddlePair = null;
     this.departed.clear();
     this.summonRule = { enabled: false, members: [], text: "Come to my room immediately" };
     this.clearRecovery();
@@ -281,6 +319,7 @@ export class BcLiteClient {
   }
 
   leave(): void {
+    this.stopCuddle(); this.patch({ cuddleRequest: null });
     this.returnRoom = null;
     this.rememberLastRoom(null);
     if (this.socket?.connected && this.state.room) this.socket.emit("ChatRoomLeave", "");
@@ -331,8 +370,8 @@ export class BcLiteClient {
     const target = this.state.characters.find(c => c.MemberNumber === memberNumber);
     if (!target || !actor.MemberNumber || !this.state.room) return [];
     const native = nativeActivities.flatMap(activity => (memberNumber === actor.MemberNumber ? activity.self : activity.target).map(group => ({
-      group, name: activity.name, groupLabel: this.textCatalog[`Group.${group}`] || group,
-      label: this.textCatalog[`Label-Chat${memberNumber === actor.MemberNumber ? "Self" : "Other"}-${group}-${activity.name}`] || activity.name,
+      group, name: activity.name, groupLabel: this.textCatalog[`DialogGroupName${textGroup(group, target)}`] || this.textCatalog[`Group.${group}`] || group,
+      label: activityLabel(activity.name, group, target, memberNumber === actor.MemberNumber, this.textCatalog),
       reason: !this.canSend() ? "native.data" : activityReason(actor, target, group, activity.name, this.state.room!),
       warning: "", source: "BC",
     })));
@@ -341,18 +380,32 @@ export class BcLiteClient {
         option.warning = option.reason; option.reason = null;
       }
     }
-    const extensions = extensionActivities.filter(entry => entry.self === (actor.MemberNumber === memberNumber) && Object.hasOwn(this.textCatalog, entry.key)).map(entry => ({
-      group: entry.group, name: `text:${entry.key}`, groupLabel: this.textCatalog[`Group.${entry.group}`] || entry.group,
-      label: entry.name === "钻进怀里" ? t("interaction.cuddleIn") : entry.name === "抱入怀中" ? t("interaction.cuddleHold") : entry.name,
+    const extensions = extensionActivities.filter(entry => entry.self === (actor.MemberNumber === memberNumber) && Object.hasOwn(this.textCatalog, entry.key) && (!["ItemPenis", "ItemGlans"].includes(entry.group) || hasPenis(target))).map(entry => ({
+      group: physicalGroup(entry.group), name: `${entry.source === "echo" && cuddleNames.includes(entry.name) ? "cuddle" : "text"}:${entry.key}`, groupLabel: this.textCatalog[`DialogGroupName${textGroup(physicalGroup(entry.group), target)}`] || this.textCatalog[`Group.${physicalGroup(entry.group)}`] || entry.group,
+      label: entry.name === "钻进怀里" ? t("interaction.cuddleIn") : entry.name === "抱入怀中" ? t("interaction.cuddleHold") : activityLabel(entry.name, physicalGroup(entry.group), target, entry.self, this.textCatalog),
       reason: !this.canSend() ? "native.data" : this.state.room!.BlockCategory?.includes("Arousal") || target.ArousalSettings?.Active === "Inactive" ? "native.permission" : null,
-      warning: "interaction.textOnly", source: entry.source,
+      warning: entry.source === "echo" && cuddleNames.includes(entry.name) ? "cuddle.help" : "interaction.textOnly", source: entry.source,
     }));
+    for (const option of extensions) if (option.name.startsWith("cuddle:") && !option.reason) option.reason = cuddleReason(this.cuddleSelf(), target);
+    if (this.safetyCurrent?.some(item => item.Group === "ItemMisc" && item.Name === "贴贴")) extensions.unshift({ group: "ItemTorso", name: "cuddle:stop", groupLabel: this.textCatalog["Group.ItemTorso"] || "ItemTorso", label: t("cuddle.stop"), reason: null, warning: "", source: "echo" });
     return [...native, ...extensions];
   }
 
   sendActivity(memberNumber: number, group: string, name: string, compatibility = false): void {
     const option = this.activityOptions(memberNumber, compatibility).find(value => value.group === group && value.name === name);
     if (!option || option.reason) throw new Error(t((option?.reason || "native.target") as Parameters<typeof t>[0]));
+    if (name === "cuddle:stop") { this.stopCuddle(); return; }
+    if (name.startsWith("cuddle:")) {
+      if (Date.now() - this.lastChatAt < 350) throw new Error(t("m210"));
+      const entry = extensionActivities.find(entry => entry.key === name.slice(7) && cuddleNames.includes(entry.name));
+      const peer = this.state.characters.find(c => c.MemberNumber === memberNumber);
+      if (!entry || !peer) throw new Error(t("native.target"));
+      this.wearCuddle(peer, entry.name); this.lastChatAt = Date.now();
+      this.socket!.emit("ChatRoomChat", { Type: "Activity", Content: entry.key, Dictionary: [
+        { SourceCharacter: this.state.player!.MemberNumber }, { TargetCharacter: memberNumber }, { FocusGroupName: group }, { ActivityName: entry.name },
+        { Tag: `MISSING ACTIVITY DESCRIPTION FOR KEYWORD ${entry.key}`, Text: extensionText(entry.key, group, this.state.player!, peer, this.textCatalog) },
+      ] }); return;
+    }
     if (name.startsWith("text:")) {
       const target = this.state.characters.find(c => c.MemberNumber === memberNumber)!;
       this.sendChat(`.a ${extensionText(name.slice(5), group, this.state.player!, target, this.textCatalog)}`);
@@ -360,7 +413,8 @@ export class BcLiteClient {
     }
     if (Date.now() - this.lastChatAt < 350) throw new Error(t("m210"));
     this.lastChatAt = Date.now();
-    this.socket!.emit("ChatRoomChat", { Type: "Activity", Content: `Chat${memberNumber === this.state.player!.MemberNumber ? "Self" : "Other"}-${group}-${name}`, Dictionary: [
+    const target = this.state.characters.find(c => c.MemberNumber === memberNumber)!;
+    this.socket!.emit("ChatRoomChat", { Type: "Activity", Content: `Chat${memberNumber === this.state.player!.MemberNumber ? "Self" : "Other"}-${textGroup(group, target)}-${name}`, Dictionary: [
       { SourceCharacter: this.state.player!.MemberNumber },
       { TargetCharacter: memberNumber }, { FocusGroupName: group }, { ActivityName: name },
     ] });
@@ -473,21 +527,26 @@ export class BcLiteClient {
       if (this.validRoomName(room.Name)) this.rememberLastRoom(room.Name);
       const characters = Array.isArray(room.Character) ? room.Character : [];
       const sameRoom = this.state.room?.Name === room.Name;
+      if (!sameRoom) this.patch({ cuddleRequest: null });
       if (!sameRoom) this.departed.clear();
       const self = characters.find(character => character.MemberNumber === this.state.player?.MemberNumber);
+      if (this.cuddlePair && (this.cuddlePair.room !== room.Name || !characters.some(c => c.MemberNumber === this.cuddlePair?.peer) || !validAppearance(self?.Appearance) || !self.Appearance.some(i => i.Group === "ItemMisc" && i.Name === "贴贴"))) this.cuddlePair = null;
       this.safetyCurrent = validAppearance(self?.Appearance) ? copyAppearance(self.Appearance) : null;
       this.patch({ phase: "in-room", room, characters, messages: sameRoom ? this.state.messages : [], status: t("m223", [room.Name]) });
       if (!sameRoom) this.localMessage(t("m223", [room.Name]));
       if (!sameRoom) this.announceLite();
+      if (this.cuddlePair) this.syncCuddle();
     });
     this.socket.on("ChatRoomSyncMemberJoin", (data: { Character?: CharacterSummary }) => {
       if (!data?.Character) return;
       this.patch({ characters: this.upsertCharacter(data.Character) });
       this.departed.delete(data.Character.MemberNumber);
       this.announceLite(data.Character.MemberNumber);
+      if (this.cuddlePair) this.syncCuddle(data.Character.MemberNumber);
     });
     this.socket.on("ChatRoomSyncMemberLeave", (data: { SourceMemberNumber?: number }) => {
       const character = this.findCharacter(data?.SourceMemberNumber);
+      if (this.cuddlePair?.peer === data?.SourceMemberNumber) this.stopCuddle();
       if (character) { this.departed.set(character.MemberNumber, character); if (this.departed.size > 100) this.departed.delete(this.departed.keys().next().value!); }
       this.patch({ characters: this.state.characters.filter((item) => item.MemberNumber !== data?.SourceMemberNumber) });
       // Native ServerLeave/Disconnect supplies the single visible notification.
@@ -502,14 +561,20 @@ export class BcLiteClient {
     }
     this.socket.on("ChatRoomSyncItem", (data: { Item?: Record<string, unknown> }) => {
       const item = data?.Item;
-      if (!item || item.Target !== this.state.player?.MemberNumber || !this.safetyCurrent) return;
-      if (typeof item.Group !== "string" || (item.Name !== undefined && typeof item.Name !== "string")) { this.safetyCurrent = null; return; }
-      const next = this.safetyCurrent.filter(entry => entry.Group !== item.Group);
+      if (!item || typeof item.Target !== "number") return;
+      const own = item.Target === this.state.player?.MemberNumber;
+      if (typeof item.Group !== "string" || (item.Name !== undefined && typeof item.Name !== "string")) { if (own) this.safetyCurrent = null; return; }
+      const character = this.state.characters.find(c => c.MemberNumber === item.Target);
+      const appearance = own ? this.safetyCurrent : character?.Appearance;
+      if (!validAppearance(appearance)) return;
+      const next = appearance.filter(entry => entry.Group !== item.Group);
       if (typeof item.Name === "string") {
         const { Target: _target, ...bundle } = item;
         next.push(bundle as BundledItem);
       }
-      this.safetyCurrent = copyAppearance(next);
+      if (own) this.safetyCurrent = copyAppearance(next);
+      this.patch({ characters: this.state.characters.map(c => c.MemberNumber === item.Target ? { ...c, Appearance: copyAppearance(next) } : c) });
+      if (this.cuddlePair && item.Group === "ItemMisc" && (own || item.Target === this.cuddlePair.peer) && item.Name !== "贴贴") this.stopCuddle();
     });
     this.socket.on("ChatRoomSyncRoomProperties", (room: Partial<RoomSync>) => {
       if (this.state.room) this.patch({ room: { ...this.state.room, ...room } });
@@ -621,6 +686,10 @@ export class BcLiteClient {
       if (name) for (const tag of tags) if (!dictionary.some(entry => entry.Tag === tag)) dictionary.push({ Tag: tag, Text: name });
     }
     const translated = ["Action", "Activity", "ServerMessage"].includes(message.Type);
+    const cuddle = /^ChatOther-(ItemTorso|ItemTorso2|ItemArms)-(钻进怀里|抱入怀中)$/.exec(message.Content);
+    if (message.Type === "Activity" && cuddle && sourceId === message.Sender && targetId === this.state.player?.MemberNumber && sender && sender.MemberNumber !== this.state.player?.MemberNumber && this.canSend() && this.state.room && !this.state.room.BlockCategory?.includes("Arousal") && !cuddleReason(this.cuddleSelf(), sender, true) && Date.now() - this.cuddleRequestAt > 10000) {
+      this.cuddleRequestAt = Date.now(); this.patch({ cuddleRequest: { sender: sender.MemberNumber, name: cuddle[2], expires: Date.now() + 60000 } });
+    }
     this.appendMessage({
       id: crypto.randomUUID(), sender: message.Sender ?? null, senderName: displayName(sender),
       presence, labelColor: sender?.LabelColor,

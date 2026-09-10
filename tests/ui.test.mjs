@@ -36,6 +36,7 @@ function setup(savedAccount, savedPerformance) {
     activityOptions() { return [{ group: 'ItemHead', groupLabel: '頭部', name: 'Pet', label: '撫摸', reason: null }]; },
     sendActivity(id, group, name) { calls.push({ activity: name, group, id }); },
     setTextCatalog() {},
+    respondCuddle(accept) { calls.push({ cuddle: accept }); current = { ...current, cuddleRequest: null }; listener(current); },
     setMessageLimit(value) { calls.push({ historyLimit: value }); if (current.messages.length > value) { current = { ...current, messages: current.messages.slice(-value) }; listener?.(current); } },
     clearMessages() { current = { ...current, messages: [] }; listener(current); },
     configureSummons() {}, dismissSummon() {}, acceptSummon() {}, requestLoverRoom(id) { calls.push({ lover: id }); }, sendInteraction(id, action) { calls.push({ interaction: action, id }); },
@@ -55,6 +56,37 @@ function setup(savedAccount, savedPerformance) {
 function messages(count) {
   return Array.from({ length: count }, (_, index) => ({ id: `id-${index}`, sender: 55, senderName: 'Friend', text: `message ${index}`, time: new Date(), type: 'Chat' }));
 }
+
+test('private composer and navigation follow the compact layout, mixed channels retain direction', async () => {
+  const f = setup();
+  f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, characters: [{ MemberNumber: 55, Name: 'Friend' }] });
+  assert.deepEqual([...f.document.querySelectorAll('.app-nav button')].map(b => b.id), ['nav-rooms','nav-chat','nav-private','nav-friends','nav-settings']);
+  assert.equal(f.document.getElementById('nav-rooms').textContent, '搜尋');
+  f.document.getElementById('nav-private').click();
+  [...f.document.querySelectorAll('#contact-list button')].find(b => b.textContent === t('m177')).click();
+  const input = f.document.getElementById('BeepText');
+  assert.equal(input.previousElementSibling.className, 'private-channel');
+  assert.ok(input.nextElementSibling.classList.contains('primary'));
+  assert.equal(f.document.getElementById('BeepTarget'), null);
+  assert.ok(f.document.querySelector('.private-conversation .private-heading > .ghost:last-child'));
+  assert.equal(f.document.querySelector('.private-page .muted'), null);
+  assert.equal(f.document.querySelector('.private-page .danger'), null);
+  f.emit({ beeps: [{ id:'b', memberNumber:55, name:'Friend', incoming:true, text:'beep', time:new Date(1) }], whispers: [{ id:'w', sender:123, target:55, senderName:'Me', text:'whisper', type:'Whisper', time:new Date(2) }] });
+  assert.ok(f.document.querySelector('#beep-log .type-beep.private-incoming'));
+  assert.ok(f.document.querySelector('#beep-log .type-whisper.private-outgoing'));
+  await f.window.happyDOM.close();
+});
+
+test('incoming cuddle opens explicit consent without auto acceptance', async () => {
+  const f = setup();
+  f.emit({ cuddleRequest: { sender:55, name:'抱入怀中', expires:Date.now()+60000 } });
+  assert.ok(f.document.querySelector('.cuddle-request'));
+  assert.ok(!f.calls.some(c => c.cuddle));
+  f.document.querySelector('.cuddle-request .primary').click();
+  assert.deepEqual(f.calls.at(-1), { cuddle:true });
+  assert.equal(f.document.querySelector('.cuddle-request'), null);
+  await f.window.happyDOM.close();
+});
 
 test('3000 retained messages page in bounded batches and performance preferences persist without messages', async () => {
   const f = setup(undefined, JSON.stringify({ history: 3000, visible: 50 }));
@@ -93,6 +125,23 @@ test('reply preview sits inside composer, jumps to retained history and clear pr
   f.window.confirm = () => true; f.document.querySelector('.clear-messages').click();
   assert.equal(f.document.querySelectorAll('#TextAreaChatLog .chat-message').length, 0);
   assert.equal(input.value, 'draft');
+  await f.window.happyDOM.close();
+});
+
+test('message selection clears when clicking outside and moves between rows', async () => {
+  const f = setup();
+  f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, messages: messages(2) });
+  const rows = f.document.querySelectorAll('#TextAreaChatLog .chat-message');
+  rows[0].querySelector('.message-text').click();
+  assert.ok(rows[0].classList.contains('message-selected'));
+  rows[1].click();
+  assert.equal(rows[0].classList.contains('message-selected'), false);
+  assert.ok(rows[1].classList.contains('message-selected'));
+  f.document.getElementById('InputChat').click();
+  assert.equal(f.document.querySelector('.message-selected'), null);
+  rows[0].click();
+  f.document.body.click();
+  assert.equal(f.document.querySelector('.message-selected'), null);
   await f.window.happyDOM.close();
 });
 
@@ -202,7 +251,8 @@ test('native reply selection stays in private channel; private reply previews ne
   assert.doesNotMatch(publicRow.querySelector('.reply-preview').textContent, /SECRET/);
   f.document.querySelector('[data-message-id=p] .message-reply').click();
   assert.equal(f.document.getElementById('nav-private').getAttribute('aria-current'), 'page');
-  assert.equal(f.document.getElementById('BeepTarget').value, '55');
+  assert.equal(f.document.getElementById('BeepTarget'), null);
+  assert.match(f.document.querySelector('.private-conversation .private-heading').textContent, /55/);
   assert.ok(f.document.querySelector('.beep-compose .reply-preview'));
   await f.window.happyDOM.close();
 });
@@ -317,7 +367,7 @@ test('language selection persists locally, translates navigation and preserves c
   select.value = 'en'; select.dispatchEvent(new f.window.Event('change'));
   assert.equal(f.document.documentElement.lang, 'en');
   assert.equal(JSON.parse(f.window.localStorage.getItem('bc-lite-display-v1')).locale, 'en');
-  assert.equal(f.document.getElementById('nav-chat').textContent, 'Chat');
+  assert.equal(f.document.getElementById('nav-chat').textContent, 'Room');
   f.document.getElementById('nav-chat').click();
   assert.equal(f.document.getElementById('InputChat').value, '中文 draft');
   assert.equal(f.document.querySelector('.room-title').textContent, 'Long room name');

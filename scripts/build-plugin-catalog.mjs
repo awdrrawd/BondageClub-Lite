@@ -22,6 +22,9 @@ function scan(file, callback) { walk(parse(readFileSync(file, 'utf8'), { sourceT
 function add(locale, mode, group, name, text) {
   if ([group, name, text].every(v => typeof v === 'string' && v)) catalogs[locale][`Chat${mode}-${group}-${name}`] = text;
 }
+function label(locale, mode, group, name, text) {
+  if ([group, name, text].every(v => typeof v === 'string' && v)) catalogs[locale][`Label-Chat${mode}-${group}-${name}`] = text;
+}
 const xiao = Object.fromEntries(['zh', 'en'].map(locale => [locale, JSON.parse(readFileSync(`../XiaoSuActivity/translation/${locale === 'zh' ? 'TW' : 'EN'}.json`, 'utf8')).Activity]));
 scan('../XiaoSuActivity/src/Modules/MActivity.ts', object => {
   if (!object.act?.Name?.startsWith('XSAct_')) return;
@@ -29,6 +32,7 @@ scan('../XiaoSuActivity/src/Modules/MActivity.ts', object => {
   for (const locale of ['zh', 'en']) for (const [mode, targets, index] of [['Other', object.act.Target, 0], ['Self', object.act.TargetSelf, 1]]) {
     if (!Array.isArray(targets)) continue;
     for (const group of targets) {
+      label(locale, mode, group, name, xiao[locale][key]);
       const text = xiao[locale][`${key}.Desc.${index}`];
       if (typeof text === 'string') add(locale, mode, group, name, text.replace(/\{([012])\}/g, (_, n) => ['SourceCharacter', 'TargetCharacter', xiao[locale][group] || group][n]));
     }
@@ -37,6 +41,8 @@ scan('../XiaoSuActivity/src/Modules/MActivity.ts', object => {
 scan('../BCJS/LSCG-main/src/Modules/activities.ts', object => {
   if (!object.Activity?.Name || !Array.isArray(object.Targets)) return;
   for (const target of object.Targets) if (target) for (const locale of ['zh', 'en']) {
+    label(locale, 'Other', target.Name, `LSCG_${object.Activity.Name}`, target.TargetLabel || object.Activity.Name);
+    if (target.SelfAllowed) label(locale, 'Self', target.Name, `LSCG_${object.Activity.Name}`, target.TargetSelfLabel || target.TargetLabel || object.Activity.Name);
     add(locale, 'Other', target.Name, `LSCG_${object.Activity.Name}`, target.TargetAction);
     if (target.SelfAllowed) add(locale, 'Self', target.Name, `LSCG_${object.Activity.Name}`, target.TargetSelfAction || target.TargetAction);
   }
@@ -50,7 +56,11 @@ function echo(dir) {
       for (const locale of ['zh', 'en']) for (const [mode, groups, dialogs] of [['Other', object.activity.Target, object.dialog], ['Self', object.activity.TargetSelf, object.dialogSelf]]) {
         if (!Array.isArray(groups)) continue;
         const text = typeof dialogs === 'string' ? dialogs : dialogs?.[locale === 'zh' ? 'CN' : 'EN'] || dialogs?.EN || dialogs?.CN;
-        for (const group of groups) add(locale, mode, group, object.activity.Name, text);
+        for (const group of groups) {
+          add(locale, mode, group, object.activity.Name, text);
+          const labels = mode === 'Self' ? object.labelSelf || object.label : object.label;
+          label(locale, mode, group, object.activity.Name, typeof labels === 'string' ? labels : labels?.[locale === 'zh' ? 'CN' : 'EN'] || labels?.EN || labels?.CN);
+        }
       }
     });
   }

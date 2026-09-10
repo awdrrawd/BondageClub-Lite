@@ -134,6 +134,7 @@ export interface DisplayMessage {
 }
 
 export interface ClientSnapshot {
+  cuddleRequest?: { sender: number; name: string; expires: number } | null;
   whispers?: DisplayMessage[];
   summon?: { sender: number; room: string; space: string; expires: number } | null;
   loverRooms?: Record<number, { name: string; space: string }>;

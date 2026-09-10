@@ -1,6 +1,7 @@
 import { renderAction, dictionaryText } from './action-helper.mjs';
 import { nativeActivities, activityReason, definitions } from './native-helper.mjs';
 import { extensionActivities, extensionText } from './extensions-helper.mjs';
+import { hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState } from './activity-helper.mjs';
 import { gameCatalog } from './catalog-helper.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -26,6 +27,7 @@ async function setup(environment, relayAvailable = true, account = {}, storage =
     disconnect() { this.connected = false; handlers.get('disconnect')?.('io client disconnect'); return this; },
   };
   const context = {
+    hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState,
     localStorage: { getItem(key) { return storage.get(key) ?? null; }, setItem(key, value) { storage.set(key, value); } },
     io: () => socket, nativeActivities, activityReason, extensionActivities, extensionText, renderAction, dictionaryText, t, localizeStatus, validAppearance, copyAppearance, releaseAppearance, afcLovers, embeddedAction,
     exports: {},
@@ -52,6 +54,37 @@ async function setup(environment, relayAvailable = true, account = {}, storage =
 }
 
 const request = { Query: '', Space: 'X', Language: '', Game: '', FullRooms: false, ShowLocked: true, SearchDescs: false };
+
+test('incoming cuddle requires explicit acceptance and releases only own cuddle item', async () => {
+  const base = [{ Group: 'BodyUpper', Name: 'Normal', Unknown: 'keep' }];
+  const f = await setup('PROD');
+  f.handlers.get('ChatRoomSync')({ Name: 'Room', Character: [{ MemberNumber: 123, Name: 'Me', Appearance: base }, { MemberNumber: 55, Name: 'Peer', Appearance: [...base, { Group: 'ItemMisc', Name: '贴贴' }] }] });
+  const packet = { Type: 'Activity', Content: 'ChatOther-ItemTorso-抱入怀中', Sender: 55, Dictionary: [{ SourceCharacter: 55 }, { TargetCharacter: 123 }, { ActivityName: '抱入怀中' }] };
+  f.handlers.get('ChatRoomMessage')(packet);
+  assert.equal(f.state().cuddleRequest.sender, 55);
+  assert.ok(!f.sent.some(p => p.event === 'ChatRoomCharacterItemUpdate'));
+  f.client.respondCuddle(true);
+  const state = f.sent.find(p => p.payload?.Content === 'Luzi_XCharacterDrawState').payload.Dictionary[0];
+  assert.equal(state.prevCharacter, 55); assert.equal(state.leash, 'lead');
+  f.handlers.get('ChatRoomSyncItem')({ Item: { Target: 123, Group: 'Cloth', Name: 'NewDress', Craft: { Name: 'KeepMe' } } });
+  f.client.stopCuddle();
+  const own = f.state().characters.find(c => c.MemberNumber === 123).Appearance;
+  assert.ok(own.some(i => i.Group === 'Cloth' && i.Craft.Name === 'KeepMe'));
+  assert.ok(!own.some(i => i.Group === 'ItemMisc'));
+  assert.ok(f.sent.filter(p => p.event === 'ChatRoomCharacterItemUpdate').every(p => p.payload.Target === 123 && p.payload.Group === 'ItemMisc'));
+  assert.ok(!f.sent.some(p => p.event === 'AccountUpdate'));
+});
+
+test('anatomical aliases use existing body groups and require actual Penis appearance', async () => {
+  const f = await setup('PROD'); f.client.setTextCatalog(gameCatalog('zh'));
+  const base = { MemberNumber: 55, Name: 'Peer', Appearance: [{ Group: 'Pussy', Name: 'Pussy1' }] };
+  f.handlers.get('ChatRoomSync')({ Name: 'Room', Character: [base] });
+  assert.ok(!f.client.activityOptions(55, true).some(o => /ItemPenis|ItemGlans/.test(o.name)));
+  f.handlers.get('ChatRoomSyncItem')({ Item: { Target: 55, Group: 'Pussy', Name: 'Penis' } });
+  const options = f.client.activityOptions(55, true);
+  assert.ok(options.some(o => /ItemPenis/.test(o.name) && o.group === 'ItemVulva'));
+  assert.ok(!options.some(o => ['ItemPenis', 'ItemGlans'].includes(o.group)));
+});
 
 test('fresh login rejoins server LastChatRoom once and failed joins do not loop', async () => {
   const f = await setup('PROD', true, { LastChatRoom: { Name: 'Previous' } });
@@ -148,20 +181,26 @@ test('compatibility sends clothed online activity but never overrides explicit p
   assert.ok(!f.sent.some(packet => ['AccountUpdate', 'ChatRoomCharacterUpdate'].includes(packet.event)));
 });
 
-test('ECHO cuddle dialogue is readable without plugin effects, pairing packets or appearance writes', async () => {
+test('ECHO cuddle wears only the own slot and shares native activity plus reciprocal draw state', async () => {
   const f = await setup('PROD');
   f.client.setTextCatalog(gameCatalog('zh'));
-  f.handlers.get('ChatRoomSync')({ Name: 'Room', Character: [{ MemberNumber: 55, Name: 'Friend' }] });
-  const option = f.client.activityOptions(55).find(option => option.name === 'text:ChatOther-ItemTorso-钻进怀里');
-  assert.ok(option); assert.equal(option.warning, 'interaction.textOnly');
+  const appearance = [{ Group: 'BodyUpper', Name: 'Normal', Custom: 'preserve' }];
+  f.handlers.get('ChatRoomSync')({ Name: 'Room', Character: [{ MemberNumber: 123, Name: 'Test', Appearance: appearance }, { MemberNumber: 55, Name: 'Friend', Appearance: appearance }] });
+  const option = f.client.activityOptions(55).find(option => option.name === 'cuddle:ChatOther-ItemTorso-钻进怀里');
+  assert.ok(option); assert.equal(option.warning, 'cuddle.help');
   f.client.sendActivity(55, option.group, option.name);
   const packet = f.sent.at(-1).payload;
-  assert.equal(packet.Type, 'Action');
-  assert.equal(packet.Content, 'BCX_PLAYER_CUSTOM_DIALOG');
+  assert.equal(packet.Type, 'Activity');
+  assert.equal(packet.Content, 'ChatOther-ItemTorso-钻进怀里');
   const text = packet.Dictionary.find(entry => entry.Text)?.Text;
   assert.match(text, /Test.*Friend/);
   assert.doesNotMatch(text, /SourceCharacter|DestinationCharacter|TargetCharacter/);
-  assert.ok(!packet.Dictionary.some(entry => entry.ActivityName));
+  assert.ok(packet.Dictionary.some(entry => entry.ActivityName === '钻进怀里'));
+  const wear = f.sent.find(p => p.event === 'ChatRoomCharacterItemUpdate').payload;
+  assert.equal(wear.Target, 123); assert.equal(wear.Group, 'ItemMisc'); assert.equal(wear.Name, '贴贴');
+  const state = f.sent.find(p => p.payload?.Content === 'Luzi_XCharacterDrawState').payload.Dictionary[0];
+  assert.equal(state.prevCharacter, 55); assert.equal(state.leash, 'lead');
+  assert.equal(f.state().characters.find(c => c.MemberNumber === 123).Appearance[0].Custom, 'preserve');
   assert.ok(!f.sent.some(packet => ['AccountUpdate', 'ChatRoomCharacterUpdate'].includes(packet.event)));
   f.handlers.get('ChatRoomSyncMemberLeave')({ SourceMemberNumber: 55 });
   assert.throws(() => f.client.sendActivity(55, option.group, option.name));

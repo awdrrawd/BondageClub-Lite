@@ -33,6 +33,7 @@ export function openActivityDialog(name: string, getOptions: (compatibility: boo
       const action = document.createElement("button"); action.type = "button"; action.className = "button secondary";
       action.textContent = `${option.source && option.source !== "BC" ? `${option.source} · ` : ""}${option.label}`; action.disabled = Boolean(option.reason);
       action.addEventListener("click", () => {
+        if (option.name.startsWith("cuddle:") && option.name !== "cuddle:stop" && !window.confirm(t("cuddle.confirm"))) return;
         try { send(group, option.name, compatibility.checked); status.textContent = t("interaction.sent"); }
         catch (error) { status.textContent = error instanceof Error ? error.message : String(error); }
       }); row.append(action);
