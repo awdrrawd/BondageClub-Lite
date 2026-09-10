@@ -1,5 +1,7 @@
 # BondageClub-Lite
 
+手機連線改善：回前景主動檢查、暫時斷線後嘗試回原房一次。設定頁提供可選螢幕常亮、本機背景音訊及不含帳密／聊天的記憶體診斷。不能保證系統背景執行；詳見 [手機連線驗收](docs/mobile-connection-tests.md)。
+
 一個保留聊天、好友與 BEEP 的 Bondage Club 非官方輕量入口；不載入完整人物繪圖與服裝圖片。使用 Cloudflare Pages 提供前端，搭配同站 Pages Worker 中繼 BC WebSocket，不需要自行維護常駐主機。
 
 **Relay v1：** BC 依 WebSocket Origin 分配 PROD/DEV。中繼參考 ShuangClient，在伺服器端設定官方來源；瀏覽器只連同站 `/socket.io/`。登入前先檢查中繼存在，登入後以真實 `LoginResponse.Environment` 驗證 PROD，不會自動退回直連 DEV。

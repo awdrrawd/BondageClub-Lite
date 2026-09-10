@@ -53,6 +53,45 @@ export class BcLiteClient {
   private safetyBaseline: { appearance: BundledItem[]; pose: string[] | null } | null = null;
   private safetyCurrent: BundledItem[] | null = null;
   private lastSafewordAt = 0;
+  private returnRoom: string | null = null;
+  private recoveryTimer: number | null = null;
+  private lastResumeCheck = 0;
+  private diagnostics: Array<{ time: string; event: string }> = [];
+
+  recordLifecycle(event: "visible" | "hidden" | "online" | "offline" | "pageshow"): void {
+    this.recordConnection(event);
+    if (event === "hidden" || event === "offline") { this.clearRecovery(); this.lastResumeCheck = 0; }
+  }
+  connectionDiagnostics(): string { return this.diagnostics.map(row => `${row.time} ${row.event}`).join("\n"); }
+  private recordConnection(event: string): void {
+    this.diagnostics.push({ time: new Date().toISOString(), event });
+    this.diagnostics = this.diagnostics.slice(-80);
+  }
+  private clearRecovery(): void {
+    if (this.recoveryTimer !== null) window.clearTimeout(this.recoveryTimer);
+    this.recoveryTimer = null;
+  }
+  resumeConnection(): void {
+    if (!this.credentials || this.manualDisconnect || !this.socket || this.recoveryTimer !== null || Date.now() - this.lastResumeCheck < 15000) return;
+    this.lastResumeCheck = Date.now();
+    this.recordConnection("resume-check");
+    if (!this.socket.connected) { this.socket.connect(); return; }
+    // Use an existing BC read-only request, not invented heartbeat packets.
+    if (!this.canSend()) return;
+    this.recoveryTimer = window.setTimeout(() => {
+      this.recoveryTimer = null;
+      if (!this.credentials || this.manualDisconnect) return;
+      this.recordConnection("resume-probe-timeout");
+      this.socket?.disconnect().connect();
+    }, 12000);
+    if (this.friendsTimer === null) this.refreshFriends();
+  }
+  private finishLogin(): void {
+    this.patch({ phase: "ready", status: this.loginStatus() });
+    const room = this.returnRoom;
+    this.returnRoom = null;
+    if (room) { this.recordConnection("rejoin-attempt"); this.join(room); }
+  }
 
   setTextCatalog(catalog: Record<string, string>): void {
     this.textCatalog = catalog;
@@ -115,6 +154,10 @@ export class BcLiteClient {
   }
 
   disconnect(): void {
+    this.clearRecovery();
+    this.returnRoom = null;
+    this.lastResumeCheck = 0;
+    this.diagnostics = [];
     this.safetyBaseline = null;
     this.safetyCurrent = null;
     this.lastSafewordAt = 0;
@@ -217,6 +260,7 @@ export class BcLiteClient {
   }
 
   leave(): void {
+    this.returnRoom = null;
     if (this.socket?.connected && this.state.room) this.socket.emit("ChatRoomLeave", "");
     this.patch({ phase: "ready", room: null, characters: [], messages: [], status: t("m207") });
   }
@@ -277,6 +321,8 @@ export class BcLiteClient {
       reconnectionDelay: 1_000, reconnectionDelayMax: 15_000, timeout: 20_000,
     });
     this.socket.on("connect", () => {
+      this.clearRecovery();
+      this.recordConnection("connected");
       if (!this.credentials) return;
       this.loginAccepted = false;
       this.serverReady = false;
@@ -287,6 +333,8 @@ export class BcLiteClient {
     this.socket.on("LoginResponse", (data: unknown) => this.handleLogin(data));
     this.socket.on("AccountQueryResult", (data: { Query?: string; Result?: OnlineFriend[] }) => {
       if (data?.Query !== "OnlineFriends") return;
+      this.clearRecovery();
+      this.recordConnection("probe-response");
       this.clearFriendsTimer();
       if (!Array.isArray(data.Result)) { this.patch({ friendsQueryState: "error", friendsStatus: t("m214") }); return; }
       const friends = data.Result.filter(friend => friend && Number.isSafeInteger(friend.MemberNumber) && typeof friend.MemberName === "string");
@@ -301,7 +349,7 @@ export class BcLiteClient {
     this.socket.on("ServerInfo", (info: { OnlinePlayers?: number }) => {
       this.serverReady = true;
       this.patch({ onlinePlayers: typeof info?.OnlinePlayers === "number" ? info.OnlinePlayers : undefined });
-      if (this.loginAccepted && this.state.phase === "waiting-server") this.patch({ phase: "ready", status: this.loginStatus() });
+      if (this.loginAccepted && this.state.phase === "waiting-server") this.finishLogin();
     });
     this.socket.on("ChatRoomSearchResult", (rooms: RoomSearchResult[]) => {
       this.clearSearchTimer();
@@ -360,6 +408,9 @@ export class BcLiteClient {
     });
     this.socket.on("ChatRoomMessage", (message: ChatMessage) => this.handleMessage(message));
     this.socket.on("ForceDisconnect", (reason: unknown) => {
+      this.clearRecovery();
+      this.returnRoom = null;
+      this.recordConnection(reason === "ErrorDuplicatedLogin" ? "duplicate-login" : "forced-disconnect");
       const status = reason === "ErrorDuplicatedLogin" ? t("m226") : t("m227", [String(reason)]);
       this.credentials = null;
       this.loginAccepted = false;
@@ -371,7 +422,10 @@ export class BcLiteClient {
       this.socket?.disconnect();
     });
     this.socket.on("disconnect", (reason) => {
+      this.clearRecovery();
+      this.recordConnection(["ping timeout", "transport close", "transport error", "io server disconnect", "io client disconnect"].includes(reason) ? reason : "disconnected");
       if (this.manualDisconnect || !this.credentials) return;
+      if (reason !== "io server disconnect" && this.state.room) this.returnRoom = this.state.room.Name;
       this.serverReady = false;
       this.loginAccepted = false;
       this.clearSearchTimer();
@@ -379,6 +433,7 @@ export class BcLiteClient {
       this.clearFriendsTimer();
       this.patch({ friends: [], friendsQueryState: "idle", friendsStatus: t("m228") });
       if (reason === "io server disconnect") {
+        this.returnRoom = null;
         this.credentials = null;
         this.patch({ phase: "error", status: t("m229"), room: null, characters: [] });
       } else this.patch({ phase: "reconnecting", status: t("m230", [reason]), room: null, characters: [] });
@@ -414,7 +469,7 @@ export class BcLiteClient {
     this.safetyBaseline = validAppearance(player.Appearance) ? { appearance: copyAppearance(player.Appearance), pose: player.ActivePose ? [...player.ActivePose] : null } : null;
     this.safetyCurrent = null;
     this.patch({ player, phase: "waiting-server", status: t("m236") });
-    if (this.serverReady) this.patch({ phase: "ready", status: this.loginStatus() });
+    if (this.serverReady) this.finishLogin();
   }
 
   private loginStatus(): string {

@@ -17,7 +17,8 @@ async function setup(environment, relayAvailable = true, account = {}) {
     on(event, callback) { handlers.set(event, callback); },
     emit(event, payload) { sent.push({ event, payload }); },
     removeAllListeners() { handlers.clear(); },
-    disconnect() { this.connected = false; },
+    connect() { this.connected = true; handlers.get('connect')?.(); return this; },
+    disconnect() { this.connected = false; handlers.get('disconnect')?.('io client disconnect'); return this; },
   };
   const context = {
     t, localizeStatus, validAppearance, copyAppearance, releaseAppearance,
@@ -47,6 +48,71 @@ async function setup(environment, relayAvailable = true, account = {}) {
 }
 
 const request = { Query: '', Space: 'X', Language: '', Game: '', FullRooms: false, ShowLocked: true, SearchDescs: false };
+
+test('temporary disconnect rejoins the last room once after both login and server readiness', async () => {
+  const f = await setup('PROD');
+  f.handlers.get('ChatRoomSync')({ Name: 'Private Room', Character: [], Limit: 10 });
+  f.handlers.get('disconnect')('ping timeout');
+  f.handlers.get('connect')();
+  f.handlers.get('LoginResponse')({ AccountName: 'test', Name: 'Test', ID: 'socket-new', MemberNumber: 123, Environment: 'PROD' });
+  assert.equal(f.sent.filter(p => p.event === 'ChatRoomJoin').length, 0);
+  f.handlers.get('ServerInfo')({ OnlinePlayers: 1 });
+  assert.equal(f.sent.filter(p => p.event === 'ChatRoomJoin').length, 1);
+  assert.equal(f.sent.at(-1).payload.Name, 'Private Room');
+  f.handlers.get('ChatRoomSearchResponse')('RoomFull');
+  f.handlers.get('ServerInfo')({ OnlinePlayers: 2 });
+  assert.equal(f.sent.filter(p => p.event === 'ChatRoomJoin').length, 1);
+  assert.doesNotMatch(f.client.connectionDiagnostics(), /Private Room|AccountName|Password/);
+});
+
+test('resume checks use one bounded native query; backgrounding cancels the watchdog', async () => {
+  const f = await setup('PROD');
+  f.client.resumeConnection(); f.client.resumeConnection();
+  assert.equal(f.sent.filter(p => p.event === 'AccountQuery').length, 1);
+  f.client.recordLifecycle('hidden');
+  // The ordinary friends timeout may remain; the recovery watchdog was cancelled.
+  for (const callback of [...f.timers.values()]) callback();
+  assert.equal(f.sent.filter(p => p.event === 'AccountLogin').length, 0);
+});
+
+test('a foreground probe response avoids reconnect; a missing response restarts transport', async () => {
+  const good = await setup('PROD');
+  good.client.resumeConnection();
+  good.handlers.get('AccountQueryResult')({ Query: 'OnlineFriends', Result: [] });
+  for (const callback of [...good.timers.values()]) callback();
+  assert.equal(good.sent.filter(p => p.event === 'AccountLogin').length, 0);
+  const bad = await setup('PROD');
+  bad.handlers.get('ChatRoomSync')({ Name: 'Test', Character: [], Limit: 10 });
+  bad.client.resumeConnection();
+  // Recovery watchdog is registered before the friends query timer.
+  [...bad.timers.values()][0]();
+  assert.equal(bad.sent.filter(p => p.event === 'AccountLogin').length, 1);
+  assert.match(bad.client.connectionDiagnostics(), /resume-probe-timeout/);
+});
+
+test('logout, server disconnect and duplicate login never resume or reclaim a session', async () => {
+  for (const stop of ['logout', 'server', 'duplicate']) {
+    const f = await setup('PROD');
+    f.handlers.get('ChatRoomSync')({ Name: 'Test', Character: [], Limit: 10 });
+    f.client.resumeConnection();
+    if (stop === 'logout') f.client.disconnect();
+    else if (stop === 'server') f.handlers.get('disconnect')('io server disconnect');
+    else f.handlers.get('ForceDisconnect')('ErrorDuplicatedLogin');
+    const count = f.sent.length;
+    f.client.recordLifecycle('hidden'); f.client.resumeConnection();
+    for (const callback of [...f.timers.values()]) callback();
+    assert.equal(f.sent.length, count);
+  }
+});
+
+test('connection diagnostics are bounded and exclude account data and arbitrary server reasons', async () => {
+  const f = await setup('PROD');
+  for (let i = 0; i < 100; i++) f.client.recordLifecycle('visible');
+  f.handlers.get('disconnect')('secret-user-message');
+  const log = f.client.connectionDiagnostics();
+  assert.equal(log.split('\n').length, 80);
+  assert.doesNotMatch(log, /secret-user-message|not-a-real-password/);
+});
 
 const safetyAccount = () => ({ AssetFamily: 'Female3DCG', GameplaySettings: { EnableSafeword: true }, AllowedInteractions: 1, ActivePose: ['Kneel'], Appearance: [{ Group: 'Cloth', Name: 'Dress', Color: 'Red' }, { Group: 'ECHO-custom', Name: 'Custom', Property: { opaque: true } }] });
 

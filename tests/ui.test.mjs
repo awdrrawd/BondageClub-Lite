@@ -7,6 +7,7 @@ import { Window } from 'happy-dom';
 import LZString from 'lz-string';
 import { t, getLocale, setLocale } from './i18n-helper.mjs';
 import { appendChatLinks } from './links-helper.mjs';
+const stabilitySource = stripTypeScriptTypes(readFileSync(new URL('../src/stability.ts', import.meta.url), 'utf8')).replace('import { t } from "./i18n";', '').replace('export ', '');
 
 const bioCode = stripTypeScriptTypes(readFileSync(new URL('../src/biography.ts', import.meta.url), 'utf8')).replace('import LZString from "lz-string";', '').replace('import { t } from "./i18n";', '').replace('export ', '');
 const decodeBiography = new Function('LZString', 't', bioCode + '; return decodeBiography;')(LZString, t);
@@ -17,11 +18,13 @@ const source = stripTypeScriptTypes(readFileSync(new URL('../src/main.ts', impor
   .replace('import { bcClient } from "./protocol";', '')
   .replace('import { decodeBiography } from "./biography";', '')
   .replace('import { appendChatLinks } from "./chat-links";', '')
+  .replace('import { StabilityControls } from "./stability";', '')
   .replace('import { loadTextCatalog } from "./text-catalog";', '');
 
 function setup(savedAccount) {
   setLocale('zh');
   const window = new Window({ url: 'https://lite.example', settings: { disableCSSFileLoading: true, disableJavaScriptFileLoading: true } });
+  const StabilityControls = new Function('document', 'window', 't', 'URL', stabilitySource + ';return StabilityControls;')(window.document, window, t, window.URL);
   window.document.body.innerHTML = '<div id="app"></div>';
   if (savedAccount) window.localStorage.setItem('bc-lite-account-v1', savedAccount);
   let current = { phase: 'ready', status: 'Ready', player: { Name: 'Tester', MemberNumber: 123, FriendList: [55], Appearance: [] }, room: null, rooms: [], characters: [], messages: [], friends: [], friendsQueryState: 'idle', friendsStatus: '尚未查詢', beeps: [] };
@@ -32,19 +35,76 @@ function setup(savedAccount) {
     refreshFriends() { calls.push('friends'); },
     sendChat(text) { calls.push(text); },
     setTextCatalog() {},
+    recordLifecycle(event) { calls.push({ lifecycle: event }); },
+    resumeConnection() { calls.push('resume'); },
+    connectionDiagnostics() { return 'test-event'; },
     activateSafeword(mode) { calls.push({ safeword: mode }); },
     relocalize() {},
     sendBeep(id, text) { calls.push({ id, text }); },
     async login(account) { calls.push({ login: account }); },
     setFriend() {}, clearBeeps() {}, leave() {}, disconnect() {}, search() {}, join() {}, createRoom() {},
   };
-  vm.runInNewContext(source, { window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
+  vm.runInNewContext(source, { window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, StabilityControls, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
   return { window, document: window.document, calls, state: () => current, emit(change) { if (change.friendsStatus === '查詢完成') change.friendsQueryState = 'ready'; current = { ...current, ...change }; listener(current); } };
 }
 
 function messages(count) {
   return Array.from({ length: count }, (_, index) => ({ id: `id-${index}`, sender: 55, senderName: 'Friend', text: `message ${index}`, time: new Date(), type: 'Chat' }));
 }
+
+test('foreground lifecycle checks do not replace an active chat draft', async () => {
+  const f = setup();
+  f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, messages: [] });
+  const input = f.document.getElementById('InputChat');
+  input.value = 'draft'; input.dispatchEvent(new f.window.Event('input'));
+  Object.defineProperty(f.document, 'visibilityState', { value: 'visible', configurable: true });
+  f.document.dispatchEvent(new f.window.Event('visibilitychange'));
+  assert.ok(f.calls.includes('resume'));
+  assert.equal(f.document.getElementById('InputChat'), input);
+  assert.equal(input.value, 'draft');
+  await f.window.happyDOM.close();
+});
+
+test('stability controls expose local audio, handle wake lock denial, and show local diagnostics', async () => {
+  const f = setup();
+  f.document.getElementById('nav-settings').click();
+  assert.equal(f.document.querySelector('input[type=file]').accept, 'audio/*');
+  const label = [...f.document.querySelectorAll('label')].find(n => n.textContent.includes('保持螢幕'));
+  Object.defineProperty(f.document, 'visibilityState', { value: 'visible', configurable: true });
+  Object.defineProperty(f.window.navigator, 'wakeLock', { value: { request: async () => { throw new Error('denied'); } } });
+  label.querySelector('input').click();
+  await new Promise(resolve => setTimeout(resolve, 0));
+  assert.match(f.document.body.textContent, /系統拒絕/);
+  [...f.document.querySelectorAll('button')].find(n => n.textContent === '查看本機連線紀錄').click();
+  assert.equal(f.document.querySelector('textarea[readonly]').value, 'test-event');
+  assert.equal(f.window.localStorage.length, 0);
+  await f.window.happyDOM.close();
+});
+
+test('local audio stays mounted across navigation and is released on logout', async () => {
+  const f = setup();
+  let revoked = '';
+  f.window.URL.createObjectURL = () => 'blob:https://lite.example/local-audio';
+  f.window.URL.revokeObjectURL = value => { revoked = value; };
+  f.document.getElementById('nav-settings').click();
+  const input = f.document.querySelector('input[type=file]');
+  Object.defineProperty(input, 'files', { value: [new f.window.File(['audio'], 'local.mp3', { type: 'audio/mpeg' })] });
+  input.dispatchEvent(new f.window.Event('change'));
+  const audio = f.document.querySelector('audio');
+  assert.ok(audio.src.startsWith('blob:'));
+  assert.equal(audio.loop, true);
+  let played = 0;
+  audio.play = async () => { played++; };
+  [...f.document.querySelectorAll('button')].find(n => n.textContent === '播放背景音訊').click();
+  assert.equal(played, 1);
+  f.document.getElementById('nav-rooms').click();
+  assert.equal(f.document.querySelector('audio'), audio);
+  f.emit({ player: null, phase: 'idle' });
+  assert.equal(f.document.querySelector('audio'), null);
+  assert.ok(revoked.startsWith('blob:'));
+  assert.equal(f.window.localStorage.length, 0);
+  await f.window.happyDOM.close();
+});
 
 test('room safeword requires choosing an operation and accepting explicit confirmation', async () => {
   const f = setup();

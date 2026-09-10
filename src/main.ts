@@ -3,6 +3,7 @@ import "./style.css";
 import { bcClient } from "./protocol";
 import { decodeBiography } from "./biography";
 import { appendChatLinks } from "./chat-links";
+import { StabilityControls } from "./stability";
 import { loadTextCatalog } from "./text-catalog";
 import type { CharacterSummary, ClientSnapshot, DisplayMessage, RoomCreateOptions, RoomSearchRequest, RoomSearchResult } from "./types";
 
@@ -11,6 +12,7 @@ if (!app) throw new Error(t("m001"));
 
 const escapeText = (value: unknown): string => String(value ?? "");
 class LiteApp {
+  private stability = new StabilityControls();
   private snapshot: Readonly<ClientSnapshot> | null = null;
   private accountName = "";
   private rememberAccount = false;
@@ -48,6 +50,17 @@ class LiteApp {
   private settings = { background: false, largeText: false, timestamps: true, locale: "zh" as Locale };
 
   constructor() {
+    const resume = (event: "visible" | "online" | "pageshow") => {
+      bcClient.recordLifecycle(event);
+      if (document.visibilityState === "visible" && window.navigator.onLine !== false) bcClient.resumeConnection();
+    };
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") resume("visible");
+      else bcClient.recordLifecycle("hidden");
+    });
+    window.addEventListener("pageshow", () => resume("pageshow"));
+    window.addEventListener("online", () => resume("online"));
+    window.addEventListener("offline", () => bcClient.recordLifecycle("offline"));
     app!.addEventListener("compositionstart", () => { this.composing = true; });
     app!.addEventListener("compositionend", () => {
       this.composing = false;
@@ -67,6 +80,7 @@ class LiteApp {
     bcClient.subscribe((snapshot) => {
       const previous = this.snapshot;
       this.snapshot = snapshot;
+      if (!snapshot.player || snapshot.phase === "error") this.stability.stop();
       if (snapshot.player && !this.catalogLoading) {
         this.refreshCatalog();
       }
@@ -401,7 +415,7 @@ class LiteApp {
     compatibility.append(this.el("p", "muted", t("m069")));
     const disconnect = this.button(t("m070"), "ghost danger", "button");
     disconnect.addEventListener("click", () => { if (window.confirm(t("m071"))) bcClient.disconnect(); });
-    section.append(panel, privacy, compatibility, disconnect);
+    section.append(panel, this.stability.build(() => bcClient.connectionDiagnostics(), () => bcClient.resumeConnection()), privacy, compatibility, disconnect);
     return section;
   }
 
