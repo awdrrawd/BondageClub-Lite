@@ -331,6 +331,7 @@
   "interaction.back": "← Body parts",
   "private.back": "← Contacts",
   "chat.clear": "Clear messages",
+  "privacy.lastRoom": "Login attempts to rejoin your previous room. The last successfully joined room name is stored in localStorage per player ID and server environment, without passwords or chat content. Leaving manually or a rejected join stops automatic return to that room. If storage is blocked, only BC's last-room data is available.",
   "performance.title": "Performance settings",
   "performance.history": "Room history limit (messages)",
   "performance.visible": "Messages per batch",

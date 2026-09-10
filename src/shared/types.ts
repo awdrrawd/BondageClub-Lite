@@ -10,6 +10,7 @@ export type ConnectionPhase =
   | "error";
 
 export interface PlayerSummary extends CharacterSummary {
+  LastChatRoom?: { Name?: string } | null;
   GameplaySettings?: { EnableSafeword?: boolean };
   AllowedInteractions?: number;
   AssetFamily?: string;

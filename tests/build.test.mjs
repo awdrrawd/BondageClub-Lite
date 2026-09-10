@@ -24,5 +24,7 @@ test("client is WebSocket-only and does not persist credentials", async () => {
   const protocol = await readFile(new URL("src/network/client.ts", root), "utf8");
   assert.match(protocol, /transports:\s*\["websocket"\]/);
   assert.match(protocol, /upgrade:\s*false/);
-  assert.doesNotMatch(protocol, /localStorage|sessionStorage|indexedDB|document\.cookie/);
+  assert.doesNotMatch(protocol, /sessionStorage|indexedDB|document\.cookie/);
+  assert.equal((protocol.match(/localStorage\.setItem\(/g) || []).length, 1);
+  assert.match(protocol, /localStorage\.setItem\(key, JSON\.stringify\(name === null \? null : this\.validRoomName\(name\)\)\)/);
 });

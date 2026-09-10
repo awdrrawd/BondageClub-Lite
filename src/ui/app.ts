@@ -520,7 +520,7 @@ class LiteApp {
     privacy.append(this.el("h2", "", t("m062")), this.accountPrivacyNote());
     const forget = this.button(t("m063"), "ghost", "button");
     forget.addEventListener("click", () => { this.rememberAccount = false; this.saveAccountPreference(); });
-    privacy.append(forget, this.el("p", "muted", t("m064")));
+    privacy.append(forget, this.el("p", "muted", t("m064")), this.el("p", "muted", t("privacy.lastRoom")));
     const compatibility = this.el("div", "settings-card");
     compatibility.append(this.el("h2", "", t("m065")), this.el("p", "", t("m066", [this.snapshot!.player?.Appearance?.length ?? t("m067")])), this.el("p", "muted", t("m068")));
     compatibility.append(this.el("p", "muted", t("m069")));

@@ -102,9 +102,32 @@ export class BcLiteClient {
   }
   private finishLogin(): void {
     this.patch({ phase: "ready", status: this.loginStatus() });
-    const room = this.returnRoom;
+    const remembered = this.readLastRoom();
+    const room = this.returnRoom || (remembered === undefined ? this.validRoomName(this.state.player?.LastChatRoom?.Name) : remembered);
     this.returnRoom = null;
     if (room) { this.recordConnection("rejoin-attempt"); this.join(room); }
+  }
+
+  private validRoomName(value: unknown): string | null {
+    return typeof value === "string" && value.trim() && value.length <= 100 && !/[\u0000-\u001f\u007f]/.test(value) ? value.trim() : null;
+  }
+  private lastRoomKey(): string | null {
+    const player = this.state.player;
+    if (!player) return null;
+    return `bc-lite-last-room-v1:${encodeURIComponent(player.Environment || "unknown")}:${player.MemberNumber}`;
+  }
+  private readLastRoom(): string | null | undefined {
+    try {
+      const key = this.lastRoomKey(); if (!key) return undefined;
+      const raw = localStorage.getItem(key); if (raw === null) return undefined;
+      const saved = JSON.parse(raw);
+      if (saved === null) return null; // Explicit leave or rejected join: do not reuse stale server data.
+      return this.validRoomName(saved) || undefined;
+    } catch { return undefined; }
+  }
+  private rememberLastRoom(name: string | null): void {
+    try { const key = this.lastRoomKey(); if (key) localStorage.setItem(key, JSON.stringify(name === null ? null : this.validRoomName(name))); }
+    catch { /* Joining still works if browser storage is unavailable. */ }
   }
 
   setTextCatalog(catalog: Record<string, string>): void {
@@ -259,6 +282,7 @@ export class BcLiteClient {
 
   leave(): void {
     this.returnRoom = null;
+    this.rememberLastRoom(null);
     if (this.socket?.connected && this.state.room) this.socket.emit("ChatRoomLeave", "");
     this.patch({ phase: "ready", room: null, characters: [], messages: [], status: t("m207") });
   }
@@ -433,8 +457,12 @@ export class BcLiteClient {
       this.patch({ rooms: safeRooms, status: t("m218", [safeRooms.length]) });
     });
     this.socket.on("ChatRoomSearchResponse", (result: unknown) => {
+      if (result === "RoomKicked") {
+        this.returnRoom = null; this.rememberLastRoom(null); this.clearRoomTimer();
+        this.patch({ phase: "ready", room: null, characters: [], status: t("m220", [String(result)]) }); return;
+      }
       if (this.state.phase !== "joining") { this.patch({ status: t("m219", [String(result)]) }); return; }
-      if (result !== "JoinedRoom") { this.clearRoomTimer(); this.patch({ phase: "ready", room: null, characters: [], status: t("m220", [String(result)]) }); }
+      if (result !== "JoinedRoom") { this.rememberLastRoom(null); this.clearRoomTimer(); this.patch({ phase: "ready", room: null, characters: [], status: t("m220", [String(result)]) }); }
     });
     this.socket.on("ChatRoomCreateResponse", (result: unknown) => {
       if (result === "ChatRoomCreated") this.patch({ status: t("m221") });
@@ -442,6 +470,7 @@ export class BcLiteClient {
     });
     this.socket.on("ChatRoomSync", (room: RoomSync) => {
       this.clearRoomTimer();
+      if (this.validRoomName(room.Name)) this.rememberLastRoom(room.Name);
       const characters = Array.isArray(room.Character) ? room.Character : [];
       const sameRoom = this.state.room?.Name === room.Name;
       if (!sameRoom) this.departed.clear();
@@ -540,6 +569,7 @@ export class BcLiteClient {
     const player: PlayerSummary = { AccountName: value.AccountName, ID: value.ID, MemberNumber: value.MemberNumber!, Name: value.Name, Nickname: value.Nickname,
       Description: value.Description, Owner: value.Owner, Ownership: value.Ownership, Lovership: value.Lovership,
       AssetFamily: value.AssetFamily, LabelColor: value.LabelColor,
+      LastChatRoom: value.LastChatRoom && typeof value.LastChatRoom === "object" ? { Name: this.validRoomName(value.LastChatRoom.Name) || undefined } : null,
       ArousalSettings: value.ArousalSettings,
       GameplaySettings: value.GameplaySettings,
       AllowedInteractions: Number.isInteger(value.AllowedInteractions) ? value.AllowedInteractions : undefined,

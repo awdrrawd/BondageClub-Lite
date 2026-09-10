@@ -331,6 +331,7 @@
   "interaction.back": "← 返回部位",
   "private.back": "← 聯絡人",
   "chat.clear": "清除訊息",
+  "privacy.lastRoom": "登入後會嘗試回到上次房間。最近成功加入的房名會依玩家 ID 與伺服器環境存在本機 localStorage，不含密碼或聊天內容。主動離房或加入遭拒後不再自動回該房；瀏覽器禁止儲存時僅能使用 BC 提供的上次房間資料。",
   "performance.title": "減壓設定",
   "performance.history": "聊天室保存上限（則）",
   "performance.visible": "每批顯示數量（則）",

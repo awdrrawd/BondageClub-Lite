@@ -11,7 +11,7 @@ import { t, setLocale, localizeStatus } from './i18n-helper.mjs';
 import { afcLovers, embeddedAction } from './community-helper.mjs';
 import { validAppearance, copyAppearance, releaseAppearance } from './safety-helper.mjs';
 
-async function setup(environment, relayAvailable = true, account = {}) {
+async function setup(environment, relayAvailable = true, account = {}, storage = new Map()) {
   setLocale('zh');
   const handlers = new Map();
   const sent = [];
@@ -26,6 +26,7 @@ async function setup(environment, relayAvailable = true, account = {}) {
     disconnect() { this.connected = false; handlers.get('disconnect')?.('io client disconnect'); return this; },
   };
   const context = {
+    localStorage: { getItem(key) { return storage.get(key) ?? null; }, setItem(key, value) { storage.set(key, value); } },
     io: () => socket, nativeActivities, activityReason, extensionActivities, extensionText, renderAction, dictionaryText, t, localizeStatus, validAppearance, copyAppearance, releaseAppearance, afcLovers, embeddedAction,
     exports: {},
     require: () => ({ io: () => socket }),
@@ -51,6 +52,44 @@ async function setup(environment, relayAvailable = true, account = {}) {
 }
 
 const request = { Query: '', Space: 'X', Language: '', Game: '', FullRooms: false, ShowLocked: true, SearchDescs: false };
+
+test('fresh login rejoins server LastChatRoom once and failed joins do not loop', async () => {
+  const f = await setup('PROD', true, { LastChatRoom: { Name: 'Previous' } });
+  assert.equal(f.sent.filter(p => p.event === 'ChatRoomJoin').length, 1);
+  assert.equal(f.sent.at(-1).payload.Name, 'Previous');
+  f.handlers.get('ServerInfo')({ OnlinePlayers: 123 });
+  assert.equal(f.sent.filter(p => p.event === 'ChatRoomJoin').length, 1);
+  f.handlers.get('ChatRoomSearchResponse')('RoomNotFound');
+  assert.equal(f.state().phase, 'ready');
+  assert.match(f.state().status, /RoomNotFound/);
+  assert.equal(f.sent.filter(p => p.event === 'ChatRoomCreate').length, 0);
+});
+
+test('successful room is remembered across clients; account/environment isolated and manual leave suppresses stale fallback', async () => {
+  const storage = new Map();
+  const f = await setup('PROD', true, {}, storage);
+  f.handlers.get('ChatRoomSync')({ Name: 'MyRoom', Character: [] });
+  f.client.disconnect();
+  assert.deepEqual([...storage], [['bc-lite-last-room-v1:PROD:123', '"MyRoom"']]);
+  const g = await setup('PROD', true, {}, storage);
+  assert.equal(g.sent.at(-1).event, 'ChatRoomJoin'); assert.equal(g.sent.at(-1).payload.Name, 'MyRoom');
+  const other = await setup('PROD', true, { MemberNumber: 456 }, storage);
+  const dev = await setup('DEV', true, {}, storage);
+  assert.ok(!other.sent.some(p => p.event === 'ChatRoomJoin'));
+  assert.ok(!dev.sent.some(p => p.event === 'ChatRoomJoin'));
+  g.handlers.get('ChatRoomSync')({ Name: 'MyRoom', Character: [] }); g.client.leave();
+  const h = await setup('PROD', true, { LastChatRoom: { Name: 'Stale' } }, storage);
+  assert.ok(!h.sent.some(p => p.event === 'ChatRoomJoin'));
+  assert.ok(!JSON.stringify([...storage]).includes('not-a-real-password'));
+});
+
+test('invalid last room or unavailable browser storage never prevents login', async () => {
+  const invalid = await setup('PROD', true, { LastChatRoom: { Name: { bad: true } } });
+  assert.equal(invalid.state().phase, 'ready');
+  const denied = { get() { throw new Error('blocked'); }, set() { throw new Error('blocked'); } };
+  const f = await setup('PROD', true, { LastChatRoom: { Name: 'ServerRoom' } }, denied);
+  assert.equal(f.sent.at(-1).payload.Name, 'ServerRoom');
+});
 
 test('room history defaults to 3000, trims oldest on reduction and keeps the limit across reconnects', async () => {
   const f = await setup('PROD');
