@@ -11,7 +11,7 @@ test('offline preview client supports UI flows without network or browser storag
   preview.client.subscribe(value => { snapshot=value; });
   assert.equal(snapshot.player.MemberNumber,101);
   preview.client.search({ Space:'', Query:'' });
-  assert.equal(snapshot.rooms.length,4);
+  assert.equal(snapshot.rooms.length,28);
   preview.client.join('測試房間');
   preview.client.sendChat('hello');
   assert.equal(snapshot.messages.at(-1).text,'hello');

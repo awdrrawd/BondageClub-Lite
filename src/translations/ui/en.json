@@ -101,7 +101,6 @@
   "m100": "Room list",
   "m101": "{0} rooms",
   "m102": "Search for rooms. Leave the name blank to find public rooms.",
-  "m103": "Show more ({0}/{1})",
   "m104": "Enter room name",
   "m105": "Room description",
   "m106": "Member limit",
@@ -109,8 +108,6 @@
   "m108": "5 members",
   "m109": "10 members",
   "m110": "Create & join",
-  "m111": "Join exact name",
-  "m112": "Enter the full room name first",
   "m113": "Room name",
   "m114": "Description",
   "m115": "New room language",
@@ -361,5 +358,14 @@
   "native.blocked": "Current equipment effects or body-zone restrictions prevent this activity",
   "stability.gap": "Connection interrupted: messages may be missing. Reconnecting does not restore missed history.",
   "media.open": "Open {0} player",
-  "media.close": "Close player"
+  "media.close": "Close player",
+  "rooms.filters": "Filters",
+  "rooms.sort": "Sort rooms",
+  "rooms.sortFriends": "Friends first",
+  "rooms.sortName": "Name",
+  "rooms.sortCount": "Most populated",
+  "rooms.pagination": "Room pages",
+  "rooms.previous": "Previous page",
+  "rooms.next": "Next page",
+  "rooms.allowed": "Restricted room, access granted"
 }

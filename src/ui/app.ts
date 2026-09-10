@@ -67,6 +67,10 @@ export class LiteApp {
   private settings = { background: false, largeText: false, timestamps: true, locale: "zh" as Locale };
 
   constructor(client: UiClient = bcClient) {
+    window.matchMedia("(max-width: 760px)").addEventListener("change", () => {
+      this.roomPage = 0;
+      if (this.snapshot && this.tab === "rooms") this.render();
+    });
     this.client = client;
     // Delegate selection before controls run; reply jumps may then select their destination.
     document.addEventListener("click", event => {
@@ -711,7 +715,10 @@ export class LiteApp {
       this.checkbox(t("m097"), this.searchDescriptions, (value) => { this.searchDescriptions = value; }),
     );
     const search = this.button(t("m098"), "primary", "submit");
-    form.append(options, search);
+    const filters = this.el("details", "room-filters") as HTMLDetailsElement;
+    filters.open = !isMobileLayout();
+    filters.append(this.el("summary", "", t("rooms.filters")), options);
+    form.append(filters, search);
     form.addEventListener("submit", (event) => {
       event.preventDefault();
       this.searchRooms();
@@ -742,7 +749,7 @@ export class LiteApp {
       const status = this.el("span", "", `${this.roomPage + 1} / ${pages}`); status.setAttribute("aria-live", "polite");
       pager.append(previous, status, next);
     };
-    drawPage(); bindPageSwipe(rooms, turn);
+    drawPage(); bindPageSwipe(rooms, turn); resultHeader.append(pager);
     const create = this.el("form", "room-controls create-controls") as HTMLFormElement;
     const roomName = this.input("NewRoomName", t("m104"), "text", this.newRoomName);
     roomName.maxLength = 20;
@@ -769,7 +776,7 @@ export class LiteApp {
       catch (error) { this.localNotice(error instanceof Error ? error.message : t("m121")); }
     });
     section.append(heading);
-    if (this.roomMode === "search") section.append(form, resultHeader, rooms, pager);
+    if (this.roomMode === "search") section.append(form, resultHeader, rooms);
     else section.append(create);
     return section;
   }

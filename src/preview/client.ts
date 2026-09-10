@@ -25,7 +25,7 @@ export function createPreviewClient() {
     subscribe(fn) { listeners.add(fn); fn(state); return () => { listeners.delete(fn); }; },
     async login() { patch({ phase:"in-room", player:{ ...people[0], AccountName:"preview", ID:"preview" }, room:room(), characters:people }); },
     disconnect() { patch({ phase:"idle", player:null, room:null, characters:[] }); },
-    search(request) { patch({ rooms: ["夜間休息室", "午後茶會", "Quiet conversations", "週末小聚"].filter(name => !request.Query || name.toLowerCase().includes(request.Query.toLowerCase())).map((Name, i) => ({ Name, Description:i ? "歡迎坐下來聊聊。" : "聊天、休息，分享今天的小事。", Creator:"Preview", CreatorMemberNumber:101, CanJoin:true, MemberCount:i + 3, MemberLimit:20, Language:"CN", Space:request.Space, Friends:i === 0 ? [{ MemberNumber:202, MemberName:"Mira" }] : [] })) }); },
+    search(request) { patch({ rooms: ["夜間休息室", "午後茶會", "Quiet conversations", "週末小聚", ...Array.from({ length:24 }, (_,i) => `測試房間 ${i + 1}`)].map((Name, i) => ({ Name, Description:i ? "歡迎坐下來聊聊。" : "聊天、休息，分享今天的小事。", Creator:"Preview", CreatorMemberNumber:101, CanJoin:i !== 27, MemberCount:i === 26 ? 20 : (i % 17) + 1, MemberLimit:20, Language:"CN", Space:request.Space, Access:i === 2 || i === 27 ? ["Whitelist"] : ["All"], MapType:i === 3 ? "Always" : "Never", Friends:i === 0 ? [{ MemberNumber:202, MemberName:"Mira" }] : [] })).filter(room => (!request.Query || room.Name.toLowerCase().includes(request.Query.toLowerCase())) && (request.FullRooms !== false || room.MemberCount < room.MemberLimit) && (request.ShowLocked !== false || room.CanJoin)) }); },
     join(name) { patch({ phase:"in-room", room:room(name), characters:people }); },
     createRoom(name) { this.join(name); },
     leave() { patch({ phase:"ready", room:null, characters:[] }); },

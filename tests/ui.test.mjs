@@ -17,6 +17,9 @@ const bioCode = stripTypeScriptTypes(readFileSync(new URL('../src/profile/biogra
 const decodeBiography = new Function('LZString', 't', bioCode + '; return decodeBiography;')(LZString, t);
 
 const source = stripTypeScriptTypes(readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8')).replace(/^import .*;\r?\n/gm, '').replaceAll('export ', '');
+const roomListSource = stripTypeScriptTypes(readFileSync('src/ui/room-list.ts', 'utf8')).replace(/^import .*;\r?\n/gm, '').replaceAll('export ', '');
+const { sortRooms, canJoinRoom } = new Function(roomListSource + ';return {sortRooms,canJoinRoom};')();
+const mobileSource = stripTypeScriptTypes(readFileSync('src/platform/mobile.ts', 'utf8')).replaceAll('export ', '');
 
 function setup(savedAccount, savedPerformance) {
   setLocale('zh');
@@ -49,13 +52,60 @@ function setup(savedAccount, savedPerformance) {
     async login(account) { calls.push({ login: account }); },
     setFriend() {}, clearBeeps() {}, leave() {}, disconnect() {}, search(request) { calls.push({ search:request }); }, join() {}, createRoom() {},
   };
-  vm.runInNewContext(source, { window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, openActivityDialog, nameColor, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
+  const {isMobileLayout, bindPageSwipe} = new Function('window', mobileSource + ';return {isMobileLayout,bindPageSwipe};')(window);
+  vm.runInNewContext(source, { window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, openActivityDialog, nameColor, sortRooms, canJoinRoom, isMobileLayout, bindPageSwipe, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
   return { window, document: window.document, calls, state: () => current, emit(change) { if (change.friendsStatus === '查詢完成') change.friendsQueryState = 'ready'; current = { ...current, ...change }; listener(current); } };
 }
 
 function messages(count) {
   return Array.from({ length: count }, (_, index) => ({ id: `id-${index}`, sender: 55, senderName: 'Friend', text: `message ${index}`, time: new Date(), type: 'Chat' }));
 }
+
+test('room sorting puts unavailable rooms last without mutating server results', () => {
+  const room = (Name, MemberCount, extra = {}) => ({Name, MemberCount, MemberLimit:10, CanJoin:true, ...extra});
+  const rooms = [room('A full',10,{Friends:[{}]}),room('Z friend',2,{Friends:[{}]}),room('B popular',8),room('A locked',1,{CanJoin:false}),room('A quiet',1)];
+  const original = [...rooms];
+  assert.deepEqual(sortRooms(rooms,'friends','en').map(r => r.Name), ['Z friend','A quiet','B popular','A full','A locked']);
+  assert.deepEqual(sortRooms(rooms,'count','en').slice(0,3).map(r => r.Name), ['B popular','Z friend','A quiet']);
+  assert.deepEqual(sortRooms(rooms,'name','en').slice(0,3).map(r => r.Name), ['A quiet','B popular','Z friend']);
+  assert.deepEqual(rooms,original);
+});
+
+test('room pagination replaces pages, icons reflect access and mobile swipe ignores vertical movement', async () => {
+  const f = setup();
+  f.window.happyDOM.setWindowSize({width:390,height:844});
+  const rooms = Array.from({length:19}, (_,i) => ({ Name:`Room ${i + 1}`, Description:'Room description', Creator:'Test', MemberCount:i === 17 ? 20 : 1, MemberLimit:20, CanJoin:i !== 18, Space:'X', Language:'EN', Access:i === 1 ? ['Whitelist'] : ['All'], MapType:i === 2 ? 'Always' : 'Never' }));
+  f.emit({rooms});
+  assert.equal(f.document.querySelectorAll('.room-card').length,8);
+  assert.ok(f.document.querySelector('.room-list').textContent.includes('🗝️'));
+  assert.ok(f.document.querySelector('.room-list').textContent.includes('🗺️'));
+  assert.ok(!f.document.querySelector('.search-view').textContent.includes('按完整房名加入'));
+  const list = f.document.querySelector('.room-list');
+  const touch = (type,x,y) => {
+    const point = {clientX:x,clientY:y,identifier:1};
+    const event = new f.window.Event(type,{cancelable:true});
+    Object.defineProperties(event,{touches:{value:type === 'touchstart' ? [point] : []},changedTouches:{value:[point]}});
+    list.dispatchEvent(event); return event;
+  };
+  touch('touchstart',200,100); touch('touchend',210,280);
+  assert.equal(f.document.querySelector('.room-pagination span').textContent,'1 / 3');
+  touch('touchstart',280,100); assert.equal(touch('touchend',100,110).defaultPrevented,true);
+  assert.equal(f.document.querySelector('.room-pagination span').textContent,'2 / 3');
+  f.document.querySelector('[aria-label="下一頁"]').click();
+  assert.equal(f.document.querySelectorAll('.room-card').length,3);
+  assert.ok(f.document.querySelector('.room-list').textContent.includes('🔒'));
+  assert.equal(f.document.querySelector('[aria-label="下一頁"]').disabled,true);
+  const sort = f.document.querySelector('[aria-label="房間排序"]'); sort.value='count'; sort.dispatchEvent(new f.window.Event('change'));
+  assert.equal(f.document.querySelector('.room-pagination span').textContent,'1 / 3');
+  f.emit({rooms:[]});
+  assert.equal(f.document.querySelector('.room-pagination span').textContent,'1 / 1');
+  f.window.happyDOM.setWindowSize({width:1200,height:900});
+  f.emit({rooms:Array.from({length:50}, (_,i) => ({...rooms[0],Name:`Room ${i}`}))});
+  assert.equal(f.document.querySelectorAll('.room-card').length,24);
+  assert.equal(f.document.querySelector('.room-pagination span').textContent,'1 / 3');
+  assert.equal(f.document.querySelector('.room-filters').open,true);
+  await f.window.happyDOM.close();
+});
 
 test('room list loads automatically and changing region clears the keyword and searches immediately', async () => {
   const f = setup();
