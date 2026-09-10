@@ -920,22 +920,26 @@ class LiteApp {
     meta.append(this.el("time", "message-time", message.time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })));
     if (message.sender) meta.append(this.el("span", "message-id", "#" + message.sender));
     row.append(content, meta);
-    if (message.type !== "Local" && !message.presence) {
+    if (this.canReply(message)) {
       const reply = this.button(t("reply.button"), "ghost message-reply", "button");
-      reply.addEventListener("click", () => {
-        if (message.type === "Beep") {
-          const peer = message.sender === this.snapshot!.player?.MemberNumber ? message.target! : message.sender!;
-          this.openConversation(peer);
-          this.replyTarget = message;
-          this.render(); document.getElementById("BeepText")?.focus(); return;
-        }
-        if (message.type === "Whisper") this.openConversation(message.sender === this.snapshot!.player?.MemberNumber ? message.target! : message.sender!, "whisper");
-        else this.tab = "chat";
-        this.replyTarget = message;
-        this.render(); document.getElementById(message.type === "Whisper" ? "BeepText" : "InputChat")?.focus();
-      }); meta.append(reply);
+      reply.addEventListener("click", () => this.selectReply(message)); meta.append(reply);
     }
     return row;
+  }
+
+  private canReply(message: DisplayMessage): boolean {
+    return !message.presence && ["Chat", "Emote", "Whisper", "Beep"].includes(message.type);
+  }
+
+  private selectReply(message: DisplayMessage): void {
+    if (!this.canReply(message)) return;
+    const privateMessage = message.type === "Whisper" || message.type === "Beep";
+    if (privateMessage) {
+      const peer = message.sender === this.snapshot!.player?.MemberNumber ? message.target! : message.sender!;
+      this.openConversation(peer, message.type === "Whisper" ? "whisper" : "beep");
+    } else this.tab = "chat";
+    this.replyTarget = message;
+    this.render(); document.getElementById(privateMessage ? "BeepText" : "InputChat")?.focus();
   }
 
   private composeWhisper(id: number): void {

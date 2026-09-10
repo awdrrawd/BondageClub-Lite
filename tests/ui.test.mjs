@@ -161,6 +161,18 @@ test('message selection clears when clicking outside and moves between rows', as
   await f.window.happyDOM.close();
 });
 
+test('only chat, emote, whisper and beep expose reply controls', async () => {
+  const f = setup();
+  const types = ['Chat', 'Emote', 'Whisper', 'Beep', 'Action', 'Activity', 'Local', 'Hidden', 'Unknown'];
+  f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, messages: types.map(type => ({ ...messages(1)[0], id: type, type })) });
+  for (const type of types) {
+    assert.equal(Boolean(f.document.querySelector(`[data-message-id="${type}"] .message-reply`)), ['Chat', 'Emote', 'Whisper', 'Beep'].includes(type), type);
+  }
+  f.document.querySelector('[data-message-id="Emote"] .message-reply').click();
+  assert.match(f.document.getElementById('chat-room-reply-indicator').textContent, /message 0/);
+  await f.window.happyDOM.close();
+});
+
 test('presence has no duplicate author and private incoming messages reuse existing DOM', async () => {
   const f = setup();
   f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, messages: [{ ...messages(1)[0], type: 'Action', presence: true, text: 'Friend left.' }] });
