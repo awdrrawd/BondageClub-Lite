@@ -1,7 +1,7 @@
 import { t, localizeStatus } from "../i18n";
 import { afcLovers } from "../profile/afc";
 import { renderAction, dictionaryText } from "../action/render";
-import { nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck } from "../action/native";
+import { nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, activityAsset } from "../action/native";
 import { receivedSpeech } from "./speech";
 import { extensionActivities, extensionText } from "../action/extensions";
 import { activityLabel, hasPenis, physicalGroup, textGroup } from "../action/labels";
@@ -55,6 +55,21 @@ export class BcLiteClient {
   private departed = new Map<number, CharacterSummary>();
   private cuddlePair: { peer: number; room: string; state: ReturnType<typeof cuddleState> } | null = null;
   private cuddleRequestAt = 0;
+  private cuddlePeers = new Map<number, number>();
+  cuddleInfo(memberNumber: number): { token: string; text: string } {
+    const self = this.cuddleSelf(), peer = this.state.characters.find(c => c.MemberNumber === memberNumber);
+    if (!peer || !this.canSend() || !this.state.room || cuddleReason(self, peer)) throw new Error(t("native.data"));
+    const slots = [self, peer].map(character => {
+      const item = (character.Appearance as BundledItem[]).find(item => item.Group === "ItemMisc");
+      const partner = character.MemberNumber === self.MemberNumber ? this.cuddlePair?.peer : this.cuddlePeers.get(character.MemberNumber);
+      const label = !item ? t("cuddle.empty") : item.Name === "贴贴" ? `${t("cuddle.item")} · ${partner ? `#${partner}` : t("cuddle.unknownPartner")}` : this.textCatalog[`Asset.ItemMisc.${item.Name}`] || item.Name;
+      return { id: character.MemberNumber, item, partner, text: `${displayName(character)} · ItemMisc: ${label}` };
+    });
+    return { token: JSON.stringify([this.state.room.Name, slots.map(({ id, item, partner }) => ({ id, item, partner }))]), text: `${slots.map(slot => slot.text).join("\n")}\n\n${t("cuddle.confirm")}` };
+  }
+  private confirmCuddle(memberNumber: number, token?: string): void {
+    if (!token || token !== this.cuddleInfo(memberNumber).token) throw new Error(t("cuddle.changed"));
+  }
   private cuddleSelf(): CharacterSummary {
     return { ...this.state.player!, Appearance: this.safetyCurrent ?? undefined, ActivePose: this.state.characters.find(c => c.MemberNumber === this.state.player?.MemberNumber)?.ActivePose ?? this.state.player?.ActivePose };
   }
@@ -68,13 +83,14 @@ export class BcLiteClient {
     this.socket!.emit("ChatRoomChat", { Type: "Hidden", Content: "Luzi_XCharacterDrawState", Dictionary: [this.cuddlePair?.state || {}], ...(target ? { Target: target } : {}) });
   }
   private wearCuddle(peer: CharacterSummary, name: string, receiving = false): void {
-    const reason = cuddleReason(this.cuddleSelf(), peer, receiving);
+    const reason = cuddleReason(this.cuddleSelf(), peer);
     if (reason || !this.canSend() || !this.state.room) throw new Error(t((reason || "native.data") as Parameters<typeof t>[0]));
     const item = { Group: "ItemMisc", Name: "贴贴", Color: "Default", Difficulty: 0 };
-    this.safetyCurrent = [...copyAppearance(this.safetyCurrent!), item];
+    this.safetyCurrent = [...copyAppearance(this.safetyCurrent!).filter(item => item.Group !== "ItemMisc"), item];
     this.cuddlePair = { peer: peer.MemberNumber, room: this.state.room.Name, state: cuddleState(name, peer.MemberNumber, receiving) };
     this.socket!.emit("ChatRoomCharacterItemUpdate", { Target: this.state.player!.MemberNumber, ...item });
     this.syncCuddle();
+    this.patch({ cuddlePartner: peer.MemberNumber });
     this.updateCharacterAppearance(this.state.player!.MemberNumber, this.safetyCurrent);
   }
   stopCuddle(): void {
@@ -85,13 +101,15 @@ export class BcLiteClient {
       this.socket!.emit("ChatRoomCharacterItemUpdate", { Target: this.state.player!.MemberNumber, Group: "ItemMisc", Color: "Default", Difficulty: 0 });
       this.updateCharacterAppearance(this.state.player!.MemberNumber, this.safetyCurrent);
     }
-    this.cuddlePair = null; this.syncCuddle();
+    this.cuddlePair = null; this.patch({ cuddlePartner: null, characters: [...this.state.characters] }); this.syncCuddle();
   }
-  respondCuddle(accept: boolean): void {
-    const request = this.state.cuddleRequest; this.patch({ cuddleRequest: null });
-    if (!accept || !request || request.expires < Date.now()) return;
+  respondCuddle(accept: boolean, token?: string): void {
+    const request = this.state.cuddleRequest;
+    if (!accept || !request || request.expires < Date.now()) { this.patch({ cuddleRequest: null }); return; }
+    this.confirmCuddle(request.sender, token);
     const peer = this.state.characters.find(c => c.MemberNumber === request.sender);
-    if (peer && !this.state.room?.BlockCategory?.includes("Arousal")) this.wearCuddle(peer, request.name, true);
+    if (peer) this.wearCuddle(peer, request.name, true);
+    this.patch({ cuddleRequest: null });
   }
   clearMessages(): void { this.patch({ messages: [] }); }
   private textCatalog: Record<string, string> = {};
@@ -222,7 +240,7 @@ export class BcLiteClient {
 
   disconnect(): void {
     this.recoverySearch = null; this.queuedSearch = null; this.searchPending = false;
-    this.cuddlePair = null;
+    this.cuddlePair = null; this.cuddlePeers.clear();
     this.departed.clear();
     this.summonRule = { enabled: false, members: [], text: "Come to my room immediately" };
     this.clearRecovery();
@@ -399,7 +417,11 @@ export class BcLiteClient {
       ...activityAvailability(!this.canSend() ? "native.data" : activityReason(actor, target, group, activity.name, this.state.room!, checkInventory), compatibility),
       source: "BC",
     })));
-    for (const option of native) if (!option.reason && !option.warning && (actor.ArousalSettings?.Active !== "Manual" || nativeActivities.find(activity => activity.name === option.name)?.special)) option.warning = "native.effects";
+    for (const option of native) {
+      const item = activityAsset(actor, target, option.name);
+      if (item) option.label += ` · ${this.textCatalog[`Asset.${item.GroupName}.${item.AssetName}`] || item.AssetName}`;
+      if (!option.reason && !option.warning && (actor.ArousalSettings?.Active !== "Manual" || nativeActivities.find(activity => activity.name === option.name)?.special)) option.warning = "native.effects";
+    }
     const extensions = extensionActivities.filter(entry => entry.self === (actor.MemberNumber === memberNumber) && Object.hasOwn(this.textCatalog, entry.key) && (!["ItemPenis", "ItemGlans"].includes(entry.group) || hasPenis(target))).map(entry => ({
       group: physicalGroup(entry.group), name: `${entry.source === "echo" && cuddleNames.includes(entry.name) ? "cuddle" : "text"}:${entry.key}`, groupLabel: this.textCatalog[`DialogGroupName${textGroup(physicalGroup(entry.group), target)}`] || this.textCatalog[`Group.${physicalGroup(entry.group)}`] || entry.group,
       label: entry.name === "钻进怀里" ? t("interaction.cuddleIn") : entry.name === "抱入怀中" ? t("interaction.cuddleHold") : activityLabel(entry.name, physicalGroup(entry.group), target, entry.self, this.textCatalog),
@@ -410,13 +432,13 @@ export class BcLiteClient {
       const availability = activityAvailability(option.reason, compatibility);
       option.reason = availability.reason;
       if (availability.warning) option.warning = availability.warning;
-      if (option.name.startsWith("cuddle:") && !option.reason) option.reason = cuddleReason(this.cuddleSelf(), target);
+      if (option.name.startsWith("cuddle:")) { option.reason = this.canSend() ? cuddleReason(this.cuddleSelf(), target) : "native.data"; option.warning = "cuddle.help"; }
     }
     if (this.safetyCurrent?.some(item => item.Group === "ItemMisc" && item.Name === "贴贴")) extensions.unshift({ group: "ItemTorso", name: "cuddle:stop", groupLabel: this.textCatalog["Group.ItemTorso"] || "ItemTorso", label: t("cuddle.stop"), reason: null, warning: "", source: "echo" });
     return [...native, ...extensions];
   }
 
-  sendActivity(memberNumber: number, group: string, name: string, compatibility = false): void {
+  sendActivity(memberNumber: number, group: string, name: string, compatibility = false, cuddleToken?: string): void {
     const option = this.activityOptions(memberNumber, compatibility).find(value => value.group === group && value.name === name);
     if (!option || option.reason) throw new Error(t((option?.reason || "native.target") as Parameters<typeof t>[0]));
     if (name === "cuddle:stop") { this.stopCuddle(); return; }
@@ -425,6 +447,7 @@ export class BcLiteClient {
       const entry = extensionActivities.find(entry => entry.key === name.slice(7) && cuddleNames.includes(entry.name));
       const peer = this.state.characters.find(c => c.MemberNumber === memberNumber);
       if (!entry || !peer) throw new Error(t("native.target"));
+      this.confirmCuddle(memberNumber, cuddleToken);
       this.wearCuddle(peer, entry.name); this.lastChatAt = Date.now();
       this.socket!.emit("ChatRoomChat", { Type: "Activity", Content: entry.key, Dictionary: [
         { SourceCharacter: this.state.player!.MemberNumber }, { TargetCharacter: memberNumber }, { FocusGroupName: group }, { ActivityName: entry.name },
@@ -439,9 +462,12 @@ export class BcLiteClient {
     if (Date.now() - this.lastChatAt < 350) throw new Error(t("m210"));
     this.lastChatAt = Date.now();
     const target = this.state.characters.find(c => c.MemberNumber === memberNumber)!;
+    const actor = { ...this.state.player!, ...this.state.characters.find(c => c.MemberNumber === this.state.player?.MemberNumber) };
+    const asset = activityAsset(actor, target, name);
     this.socket!.emit("ChatRoomChat", { Type: "Activity", Content: `Chat${memberNumber === this.state.player!.MemberNumber ? "Self" : "Other"}-${textGroup(group, target)}-${name}`, Dictionary: [
       { SourceCharacter: this.state.player!.MemberNumber },
       { TargetCharacter: memberNumber }, { FocusGroupName: group }, { ActivityName: name },
+      ...(asset ? [asset] : []),
     ] });
   }
 
@@ -562,11 +588,11 @@ export class BcLiteClient {
       const characters = Array.isArray(room.Character) ? room.Character : [];
       const sameRoom = this.state.room?.Name === room.Name;
       if (!sameRoom) this.patch({ cuddleRequest: null });
-      if (!sameRoom) this.departed.clear();
+      if (!sameRoom) { this.departed.clear(); this.cuddlePeers.clear(); }
       const self = characters.find(character => character.MemberNumber === this.state.player?.MemberNumber);
       if (this.cuddlePair && (this.cuddlePair.room !== room.Name || !characters.some(c => c.MemberNumber === this.cuddlePair?.peer) || !validAppearance(self?.Appearance) || !self.Appearance.some(i => i.Group === "ItemMisc" && i.Name === "贴贴"))) this.cuddlePair = null;
       this.safetyCurrent = validAppearance(self?.Appearance) ? copyAppearance(self.Appearance) : null;
-      this.patch({ phase: "in-room", room, characters, messages: sameRoom ? this.state.messages : [], status: t("m223", [room.Name]) });
+      this.patch({ phase: "in-room", room, characters, cuddlePartner: this.cuddlePair?.peer ?? null, messages: sameRoom ? this.state.messages : [], status: t("m223", [room.Name]) });
       if (!sameRoom) this.localMessage(t("m223", [room.Name]));
       if (!sameRoom) this.announceLite();
       if (this.cuddlePair) this.syncCuddle();
@@ -579,6 +605,7 @@ export class BcLiteClient {
       if (this.cuddlePair) this.syncCuddle(data.Character.MemberNumber);
     });
     this.socket.on("ChatRoomSyncMemberLeave", (data: { SourceMemberNumber?: number }) => {
+      if (data?.SourceMemberNumber) this.cuddlePeers.delete(data.SourceMemberNumber);
       const character = this.findCharacter(data?.SourceMemberNumber);
       if (this.cuddlePair?.peer === data?.SourceMemberNumber) this.stopCuddle();
       if (character) { this.departed.set(character.MemberNumber, character); if (this.departed.size > 100) this.departed.delete(this.departed.keys().next().value!); }
@@ -692,6 +719,15 @@ export class BcLiteClient {
   }
 
   private handleMessage(message: ChatMessage): void {
+    if (message?.Type === "Hidden" && message.Content === "Luzi_XCharacterDrawState" && this.state.characters.some(character => character.MemberNumber === message.Sender)) {
+      const state = message.Dictionary?.[0] as { prevCharacter?: number; nextCharacter?: number; associatedAsset?: { group?: string; asset?: string } } | undefined;
+      const peer = state?.prevCharacter ?? state?.nextCharacter;
+      if (Number.isSafeInteger(peer) && peer! > 0 && peer !== message.Sender && state?.associatedAsset?.group === "ItemMisc" && state.associatedAsset.asset === "贴贴") this.cuddlePeers.set(message.Sender!, peer!);
+      else this.cuddlePeers.delete(message.Sender!);
+      if (this.cuddlePair?.peer === message.Sender && this.cuddlePeers.get(message.Sender!) !== this.state.player?.MemberNumber) this.stopCuddle();
+      this.patch({ characters: [...this.state.characters] });
+      return;
+    }
     if (message?.Type === "Hidden" && ["BCEMsg", "LCEMsg"].includes(message.Content) && Array.isArray(message.Dictionary)) {
       const hello = message.Dictionary.find(entry => entry && typeof entry === "object" && "message" in entry) as { message?: { type?: string; lce?: string } } | undefined;
       if (hello?.message?.type === "Hello" && (message.Content === "LCEMsg" || typeof hello.message.lce === "string") && message.Sender !== this.state.player?.MemberNumber && this.state.characters.some(character => character.MemberNumber === message.Sender) && Date.now() - this.lastIdentityReply > 3000) {
@@ -722,7 +758,7 @@ export class BcLiteClient {
     }
     const translated = ["Action", "Activity", "ServerMessage"].includes(message.Type);
     const cuddle = /^ChatOther-(ItemTorso|ItemTorso2|ItemArms)-(钻进怀里|抱入怀中)$/.exec(message.Content);
-    if (message.Type === "Activity" && cuddle && sourceId === message.Sender && targetId === this.state.player?.MemberNumber && sender && sender.MemberNumber !== this.state.player?.MemberNumber && this.canSend() && this.state.room && !this.state.room.BlockCategory?.includes("Arousal") && !cuddleReason(this.cuddleSelf(), sender, true) && Date.now() - this.cuddleRequestAt > 10000) {
+    if (message.Type === "Activity" && cuddle && sourceId === message.Sender && targetId === this.state.player?.MemberNumber && sender && sender.MemberNumber !== this.state.player?.MemberNumber && this.canSend() && this.state.room && !cuddleReason(this.cuddleSelf(), sender) && Date.now() - this.cuddleRequestAt > 10000) {
       this.cuddleRequestAt = Date.now(); this.patch({ cuddleRequest: { sender: sender.MemberNumber, name: cuddle[2], expires: Date.now() + 60000 } });
     }
     this.appendMessage({

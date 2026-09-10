@@ -40,9 +40,14 @@ export function createPreviewClient() {
     setFriend(member, add) { if (state.player) patch({ player:{ ...state.player, FriendList:add ? [...new Set([...(state.player.FriendList || []),member])] : state.player.FriendList?.filter(id => id !== member) } }); },
     requestLoverRoom() {}, setMessageLimit(limit) { patch({ messages:state.messages.slice(-limit) }); }, setTextCatalog() {}, relocalize() {},
     recordLifecycle() {}, resumeConnection() { patch({ status:"離線預覽 · 不會連接 BC" }); }, connectionDiagnostics() { return "OFFLINE UI PREVIEW — NO NETWORK SESSION"; },
-    activityOptions() { return [ { group:"ItemHead", name:"Pet", label:"撫摸", groupLabel:"頭部", reason:null, warning:"", source:"BC" }, { group:"ItemHands", name:"Hold", label:"握手", groupLabel:"手部", reason:null, warning:"", source:"BC" } ]; },
-    sendActivity(_member, _group, name) { append(`測試互動：${name}`,"Activity"); },
+    activityOptions() { return [
+      ...[["ItemHead","頭部"],["ItemHands","手部"],["ItemMouth","嘴巴"],["ItemTorso","軀幹"],["ItemTorso2","軀幹"],["ItemNipples","乳頭"]].map(([group,groupLabel]) => ({group,groupLabel,name:"Pet",label:"撫摸",reason:null,warning:"native.effects",source:"BC"})),
+      {group:"ItemHead",groupLabel:"頭部",name:"BrushItem",label:"梳頭 · 梳子",reason:"native.blocked",warning:"",source:"BC"},
+      {group:"ItemTorso",groupLabel:"軀幹",name:"cuddle:preview",label:"貼貼（虛構）",reason:null,warning:"cuddle.help",source:"echo"},
+    ]; },
+    sendActivity(member, _group, name) { if (name.startsWith("cuddle:")) patch({cuddlePartner:member,characters:[...state.characters]}); append(`測試互動：${name}`,"Activity"); },
     activateSafeword() { append("離線安全詞測試：沒有改寫任何真實外觀。", "Local"); },
+    cuddleInfo(member) { return { token: "preview", text: `離線模擬（不改寫外觀）\nLiko #101 · ItemMisc: 空\n#${member} · ItemMisc: 貼貼 + #404（虛構既有配對）\n\n是否模擬替換自己的格子並貼貼？` }; },
     configureSummons() {}, dismissSummon() { patch({ summon:null }); }, acceptSummon() { patch({ summon:null }); }, respondCuddle() { patch({ cuddleRequest:null }); },
   };
   return { client, inject: () => append("這是新收到的測試訊息。", "Chat",202), stress: () => patch({ messages:Array.from({ length:3000 }, (_,i) => message(`歷史訊息 ${i + 1} · 測試捲動、回覆及分批顯示。`,"Chat",i % 2 ? 101 : 202)) }), simulateDisconnect: () => patch({ phase:"reconnecting", status:"模擬斷線 · 不會連線", room:null, characters:[] }) };

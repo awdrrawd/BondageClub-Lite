@@ -1,8 +1,9 @@
 import { t } from "../i18n";
 import definitions from "../action/native-data.json";
+import { canonicalPartGroup } from "../action/labels";
 
 type ActivityOption = { group: string; groupLabel: string; name: string; label: string; reason: string | null; warning?: string; source?: string };
-export function openActivityDialog(name: string, getOptions: (compatibility: boolean) => ActivityOption[], send: (group: string, name: string, compatibility: boolean) => void): HTMLDialogElement {
+export function openActivityDialog(name: string, getOptions: (compatibility: boolean) => ActivityOption[], send: (group: string, name: string, compatibility: boolean) => void | boolean): HTMLDialogElement {
   const dialog = document.createElement("dialog"); dialog.className = "profile-dialog activity-dialog";
   const heading = document.createElement("h2"); heading.textContent = `${t("interaction.title")} · ${name}`;
   const close = document.createElement("button"); close.type = "button"; close.className = "button ghost dialog-close"; close.textContent = "×"; close.setAttribute("aria-label", t("m173"));
@@ -25,27 +26,34 @@ export function openActivityDialog(name: string, getOptions: (compatibility: boo
   back.addEventListener("click", () => { dialog.classList.remove("show-actions"); svg.querySelector<SVGElement>('[aria-pressed="true"]')?.focus(); });
   let selectedGroup = "";
   const select = (group: string, label: string, focus = true) => {
+    group = canonicalPartGroup(group);
     selectedGroup = group; selected.textContent = label; activities.replaceChildren(); status.textContent = "";
     dialog.classList.add("show-actions");
-    for (const control of body.querySelectorAll("[data-body-group]")) control.setAttribute("aria-pressed", String(control.getAttribute("data-body-group") === group));
-    for (const option of getOptions(compatibility.checked).filter(option => option.group === group && !["native.blocked", "native.permission", "native.target"].includes(option.reason || ""))) {
+    for (const control of body.querySelectorAll("[data-body-group]")) control.setAttribute("aria-pressed", String(canonicalPartGroup(control.getAttribute("data-body-group") || "") === group));
+    const seen = new Set<string>();
+    for (const option of getOptions(compatibility.checked).filter(option => canonicalPartGroup(option.group) === group && !option.reason)) {
+      const identity = `${option.source}:${option.name.replace(/(Chat(?:Self|Other))-Item\w+-/, "$1-")}`;
+      if (seen.has(identity)) continue;
+      seen.add(identity);
       const row = document.createElement("div"); row.className = "activity-option";
       const action = document.createElement("button"); action.type = "button"; action.className = "button secondary";
       action.textContent = `${option.source && option.source !== "BC" ? `${option.source} · ` : ""}${option.label}`; action.disabled = Boolean(option.reason);
       action.addEventListener("click", () => {
-        if (option.name.startsWith("cuddle:") && option.name !== "cuddle:stop" && !window.confirm(t("cuddle.confirm"))) return;
-        try { send(group, option.name, compatibility.checked); status.textContent = t("interaction.sent"); }
+        try { if (send(option.group, option.name, compatibility.checked) !== false) status.textContent = t("interaction.sent"); }
         catch (error) { status.textContent = error instanceof Error ? error.message : String(error); }
       }); row.append(action);
       const explanation = option.reason || option.warning;
-      if (explanation) { const note = document.createElement("small"); note.className = "muted"; note.textContent = t(explanation as Parameters<typeof t>[0]); row.append(note); }
+      if (explanation) action.title = t(explanation as Parameters<typeof t>[0]);
       activities.append(row);
     }
     if (!activities.childElementCount) status.textContent = t("interaction.noAvailable");
     if (focus && window.matchMedia("(max-width: 760px)").matches) back.focus();
   };
   let extraRegion = 0;
-  for (const [group, label] of new Map(getOptions(true).map(option => [option.group, option.groupLabel]))) {
+  const groups = new Map(getOptions(true).map(option => [option.group, option.groupLabel]));
+  const families = new Map([...groups].map(([group, label]) => [canonicalPartGroup(group), groups.get(canonicalPartGroup(group)) || label]));
+  for (const group of Object.keys(definitions.geometry)) if (families.has(canonicalPartGroup(group))) groups.set(group, families.get(canonicalPartGroup(group))!);
+  for (const [group, label] of groups) {
     // Plugin-only groups without native geometry get auxiliary tiles, not invented body zones.
     const regions = (definitions.geometry as Record<string, number[][]>)[group] || [[370, 750 + extraRegion++ * 75, 125, 65]];
     for (const [x, y, width, height] of regions) {

@@ -1,11 +1,9 @@
 import { validAppearance } from "../safety/safeword";
 import type { CharacterSummary } from "../shared/types";
 export const cuddleNames = ["钻进怀里", "抱入怀中"];
-export function cuddleReason(self: CharacterSummary, peer: CharacterSummary, receiving = false): string | null {
+export function cuddleReason(self: CharacterSummary, peer: CharacterSummary): string | null {
   if (self.MemberNumber === peer.MemberNumber || !validAppearance(self.Appearance) || !self.Appearance.length || !validAppearance(peer.Appearance) || !peer.Appearance.length) return "native.data";
-  if (self.Appearance.some(item => item.Group === "ItemMisc") || peer.Appearance.some(item => item.Group === "ItemMisc" && !(receiving && item.Name === "贴贴"))) return "cuddle.occupied";
-  // Avoid claiming full movement validation without the inventory engine.
-  if (self.Appearance.some(item => ["ItemFeet", "ItemLegs", "ItemDevices"].includes(item.Group)) || self.ActivePose?.length) return "cuddle.movement";
+  // Occupancy is a consent decision, not activity eligibility. Each client changes only its own slot.
   return null;
 }
 export function cuddleState(name: string, peer: number, receiving = false) {

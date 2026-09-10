@@ -59,10 +59,20 @@ function inventoryState(character: CharacterSummary) {
   const needs = (activity: string): boolean | undefined => {
     const values = items.map(item => property(item, "AllowActivity"));
     if (values.some(value => value?.includes(activity))) return true;
-    return values.some(value => value === null) ? undefined : false;
+    // Unknown unrelated assets are not evidence of owning the required tool.
+    return false;
   };
+  const activityItem = (activity: string) => items.find(item => property(item, "AllowActivity")?.includes(activity));
   const hasItem = (group: string, names?: string[]) => items.some(item => item.group === group && (!names || names.includes(item.name)));
-  return { effects, groups, naked, needs, hasItem, blocked: (group: string, activity = false) => blocked.has(group) && !(activity && accessible.has(group)) };
+  return { effects, groups, naked, needs, hasItem, activityItem, blocked: (group: string, activity = false) => blocked.has(group) && !(activity && accessible.has(group)) };
+}
+
+/** Resolve the actual worn item again at send time; never use an inventory-only item. */
+export function activityAsset(actor: CharacterSummary, target: CharacterSummary, name: string) {
+  const pre = nativeActivities.find(activity => activity.name === name)?.prerequisites.find(pre => /^(Target)?Needs-/.test(pre));
+  if (!pre) return null;
+  const item = inventoryState(pre.startsWith("TargetNeeds-") ? target : actor).activityItem(pre.replace(/^(Target)?Needs-/, ""));
+  return item ? { Tag: "ActivityAsset", AssetName: item.name, GroupName: item.group } : null;
 }
 
 /** Check known item effects; unknown assets never invalidate unrelated activities. */
@@ -113,10 +123,11 @@ export function createActivityInventoryCheck(actor: CharacterSummary, target: Ch
         allowed = wearer.hasItem("TailStraps", ["Tentacles"]) || wearer.hasItem("ItemButt", ["Tentacles"]); break;
       }
       default:
-        if (pre.startsWith("Needs-")) allowed = a.needs(pre.slice(6));
+        // Lite also offers ordinary bare-hand scratching; tool variants still carry ActivityAsset.
+        if (pre === "Needs-Scratch" && a.naked("ItemHands")) allowed = true;
+        else if (pre.startsWith("Needs-")) allowed = a.needs(pre.slice(6));
         else if (pre.startsWith("TargetNeeds-")) allowed = b.needs(pre.slice(12));
-        // Item-specific packet expansion and plugin-only rules are not fully emulated.
-        unsupported = true;
+        if (allowed === undefined) unsupported = true;
     }
     if (allowed === false) return "native.blocked";
   }

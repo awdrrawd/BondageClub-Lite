@@ -3,6 +3,23 @@ import assert from 'node:assert/strict';
 import { activityReason, activityAvailability, activityInventoryReason, definitions } from './native-helper.mjs';
 const character = id => ({ MemberNumber: id, Name: 'Test', AssetFamily: 'Female3DCG', Appearance: [{ Group: 'BodyUpper', Name: definitions.bodies.BodyUpper[0] }], ArousalSettings: { Active: 'Manual', Activity: 'z'.repeat(100), Zone: 'f'.repeat(30) } });
 
+test('barehand scratch and care differ from comb use; wings require the correct wearer', () => {
+  const a=character(1), b=character(2);
+  assert.equal(activityReason(a,b,'ItemHead','Scratch',{}),null);
+  assert.equal(activityReason(a,b,'ItemHead','TakeCare',{}),null);
+  assert.equal(activityReason(a,b,'ItemHead','BrushItem',{}),'native.blocked');
+  a.Appearance.push({Group:'Cloth',Name:'UnknownDress'});
+  assert.equal(activityAvailability(activityReason(a,b,'ItemHead','BrushItem',{}),true).reason,'native.blocked');
+  a.Appearance.push({Asset:{Name:'Comb',Group:{Name:'ItemHandheld'},AllowActivity:['BrushItem']}});
+  assert.equal(activityReason(a,b,'ItemHead','BrushItem',{}),null);
+  assert.equal(activityInventoryReason(a,b,'ItemArms',['Luzi_HasWings']),'native.blocked');
+  b.Appearance.push({Group:'Wings',Name:'AnyPluginWing'});
+  assert.equal(activityInventoryReason(a,b,'ItemArms',['Luzi_HasWings']),'native.blocked');
+  assert.equal(activityInventoryReason(a,b,'ItemArms',['Luzi_TargetHasWings']),null);
+  a.Appearance.push({Asset:{Group:{Name:'Wings'},Name:'AnyWing'}});
+  assert.equal(activityInventoryReason(a,b,'ItemArms',['Luzi_HasWings']),null);
+});
+
 test('bundled and loaded Asset items both supply effects, blocks and activity exceptions', () => {
   const actor=character(1),target=character(2);
   actor.Appearance.push({Asset:{Name:'PluginGag',Group:{Name:'ItemMouth'},Effect:['BlockMouth']},Property:{Effect:['MergedFingers']}});
@@ -28,12 +45,12 @@ test('item-required activities inspect the correct wearer and runtime AllowActiv
   const actor=character(1),target=character(2);
   assert.equal(activityInventoryReason(actor,target,'ItemTorso',['Needs-SpankItem']),'native.blocked');
   actor.Appearance.push({Asset:{Name:'Paddle',Group:{Name:'ItemHands'},AllowActivity:['SpankItem']}});
-  assert.equal(activityInventoryReason(actor,target,'ItemTorso',['Needs-SpankItem']),'native.unsupported');
+  assert.equal(activityInventoryReason(actor,target,'ItemTorso',['Needs-SpankItem']),null);
   assert.equal(activityInventoryReason(actor,target,'ItemTorso',['TargetNeeds-SpankItem']),'native.blocked');
   actor.Appearance.at(-1).Property={AllowActivity:[]};
   assert.equal(activityInventoryReason(actor,target,'ItemTorso',['Needs-SpankItem']),'native.blocked');
   actor.Appearance.push({Group:'ItemHands',Name:'UnknownPluginItem'});
-  assert.equal(activityInventoryReason(actor,target,'ItemTorso',['Needs-SpankItem']),'native.unsupported');
+  assert.equal(activityInventoryReason(actor,target,'ItemTorso',['Needs-SpankItem']),'native.blocked');
 });
 
 test('clothing exposure is property-first and naked-zone checks use actual equipped objects', () => {

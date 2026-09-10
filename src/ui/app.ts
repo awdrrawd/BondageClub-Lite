@@ -16,7 +16,7 @@ const app = document.querySelector<HTMLDivElement>("#app");
 if (!app) throw new Error(t("m001"));
 
 const escapeText = (value: unknown): string => String(value ?? "");
-export type UiClient = Pick<typeof bcClient, "recordLifecycle" | "resumeConnection" | "setMessageLimit" | "subscribe" | "setTextCatalog" | "relocalize" | "disconnect" | "refreshFriends" | "setFriend" | "sendChat" | "sendBeep" | "requestLoverRoom" | "connectionDiagnostics" | "acceptSummon" | "dismissSummon" | "configureSummons" | "search" | "leave" | "join" | "login" | "createRoom" | "clearMessages" | "respondCuddle" | "activateSafeword" | "activityOptions" | "sendActivity">;
+export type UiClient = Pick<typeof bcClient, "recordLifecycle" | "resumeConnection" | "setMessageLimit" | "subscribe" | "setTextCatalog" | "relocalize" | "disconnect" | "refreshFriends" | "setFriend" | "sendChat" | "sendBeep" | "requestLoverRoom" | "connectionDiagnostics" | "acceptSummon" | "dismissSummon" | "configureSummons" | "search" | "leave" | "join" | "login" | "createRoom" | "clearMessages" | "respondCuddle" | "cuddleInfo" | "activateSafeword" | "activityOptions" | "sendActivity">;
 export class LiteApp {
   private client: UiClient;
   private mediaConsent = new MediaConsent(document);
@@ -133,7 +133,7 @@ export class LiteApp {
           if (member && this.snapshot?.player?.MemberNumber === member && ["ready", "joining", "in-room"].includes(this.snapshot.phase)) this.searchRooms(true);
         }, 0);
       }
-      if (snapshot.cuddleRequest !== previous?.cuddleRequest) this.showCuddleRequest();
+      if (snapshot.cuddleRequest !== previous?.cuddleRequest || (snapshot.cuddleRequest && snapshot.characters !== previous?.characters)) this.showCuddleRequest();
       if (!snapshot.player || snapshot.phase === "error") this.stability.stop();
       if (snapshot.player && !this.catalogLoading) {
         this.refreshCatalog();
@@ -874,11 +874,12 @@ export class LiteApp {
     roomInfo.append(leave);
     sidebar.append(roomInfo, this.el("h2", "member-title", t("m158", [state.characters.length])));
     const members = this.el("div", "member-list");
-    state.characters.forEach((character) => {
+    [...state.characters].sort((a, b) => Number(b.MemberNumber === state.player?.MemberNumber) - Number(a.MemberNumber === state.player?.MemberNumber)).forEach((character) => {
       const member = this.el("button", "member-row") as HTMLButtonElement;
       member.type = "button";
       member.append(this.el("span", "member-avatar", (character.Nickname || character.Name || "?").slice(0, 1).toUpperCase()), this.el("span", "member-name", character.Nickname || character.Name), this.el("span", "member-number", `#${character.MemberNumber}`));
       member.title = t("m159");
+      if (character.MemberNumber === state.cuddlePartner) member.append(this.el("span", "member-cuddle", t("cuddle.badge")));
       (member.querySelector(".member-name") as HTMLElement).style.color = nameColor(character.LabelColor, character.MemberNumber);
       member.addEventListener("click", () => this.showMember(character));
       members.append(member);
@@ -1040,11 +1041,13 @@ export class LiteApp {
     document.querySelector(".cuddle-request")?.remove();
     const request = this.snapshot?.cuddleRequest;
     if (!request) return;
+    let info: ReturnType<UiClient["cuddleInfo"]>;
+    try { info = this.client.cuddleInfo(request.sender); } catch { this.client.respondCuddle(false); return; }
     const dialog = this.el("dialog", "profile-dialog cuddle-request");
-    dialog.append(this.el("h2", "", t("cuddle.request", [request.sender])), this.el("p", "", t("cuddle.confirm")));
+    dialog.append(this.el("h2", "", t("cuddle.request", [request.sender])), this.el("p", "cuddle-details", info.text));
     const accept = this.button(t("cuddle.accept"), "primary", "button");
     const reject = this.button(t("safety.cancel"), "ghost", "button");
-    accept.addEventListener("click", () => this.run(() => this.client.respondCuddle(true)));
+    accept.addEventListener("click", () => this.run(() => this.client.respondCuddle(true, info.token)));
     reject.addEventListener("click", () => this.client.respondCuddle(false));
     dialog.addEventListener("cancel", () => this.client.respondCuddle(false));
     dialog.append(accept, reject); document.body.append(dialog); dialog.showModal();
@@ -1117,7 +1120,15 @@ export class LiteApp {
       const interact = this.button(t("interaction.title"), "secondary interaction-open", "button");
       interact.addEventListener("click", () => {
         dismiss();
-        openActivityDialog(character.Nickname || character.Name, compatibility => this.client.activityOptions(character.MemberNumber, compatibility), (group, name, compatibility) => this.client.sendActivity(character.MemberNumber, group, name, compatibility));
+        openActivityDialog(character.Nickname || character.Name, compatibility => this.client.activityOptions(character.MemberNumber, compatibility), (group, name, compatibility) => {
+          let token: string | undefined;
+          if (name.startsWith("cuddle:") && name !== "cuddle:stop") {
+            const info = this.client.cuddleInfo(character.MemberNumber);
+            if (!window.confirm(info.text)) return false;
+            token = info.token;
+          }
+          this.client.sendActivity(character.MemberNumber, group, name, compatibility, token);
+        });
       });
       actions.append(interact);
     }

@@ -113,6 +113,9 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); box-sha
 .member-list { overflow-y: auto; padding: 0 .5rem 1rem; }
 .member-row { width: 100%; display: grid; grid-template-columns: 34px 1fr auto; align-items: center; gap: .65rem; padding: .55rem; color: #fff; text-align: left; border: 0; background: transparent; }
 .member-row:hover { background: #ffffff08; }
+.member-row { position: relative; }
+.member-cuddle { position: absolute; top: 0; right: .2rem; font-size: .7rem; color: var(--accent, #ff9abd); }
+.cuddle-details { white-space: pre-wrap; overflow-wrap: anywhere; }
 .member-avatar { display: grid; place-items: center; aspect-ratio: 1; border-radius: 9px; color: #211520; background: linear-gradient(135deg, #f69ab8, #b499e3); font-weight: 900; }
 .member-name { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .member-number { color: #85798b; font-size: .68rem; }

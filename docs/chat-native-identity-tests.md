@@ -21,7 +21,7 @@
 
 `src/action/extension-data.json` 收錄 407 個已擷取的「對象／部位／文字鍵」選項，不代表 407 個完整活動引擎。`scripts/build-extension-data.mjs` 只從本庫翻譯來源建立索引；`catalog:plugins` 更新擷取資料後同步索引。`extensions.ts` 代入玩家名稱與部位，透過既有自訂 Action 通道發送，不安裝插件、不調用插件 hook、不送出 ActivityName。
 
-軀幹／手臂包含「貼貼 · 鑽進懷裡」與「貼貼 · 抱入懷中」。這兩項確認後更新自己的 ItemMisc/贴贴，發送 Activity 與 ECHO 配對狀態；收到邀請的 Lite 玩家另需確認。已有 ItemMisc 道具不覆蓋，不實作跨房跟隨或完整 ECHO 引擎。詳見 [貼貼驗收](echo-cuddle-tests.md)。其他擴展項目的道具／數值／移動效果不執行。句子依中英文表渲染；沒有翻譯的名稱保留原文。
+軀幹／手臂包含「貼貼 · 鑽進懷裡」與「貼貼 · 抱入懷中」。這兩項確認後更新自己的 ItemMisc/贴贴，發送 Activity 與 ECHO 配對狀態；收到邀請的 Lite 玩家另需確認。先顯示雙方 ItemMisc 與已知配對 ID，確認後可替換自己的格子，對方需自行同意；不實作跨房跟隨或完整 ECHO 引擎。詳見 [貼貼驗收](echo-cuddle-tests.md)。其他擴展項目的道具／數值／移動效果不執行。句子依中英文表渲染；沒有翻譯的名稱保留原文。
 
 `labels.ts` 統一 Self／Other 標籤、子部位回退與缺字哨兵處理；插件擷取同時保留選單標籤及動作句子。ItemPenis／ItemGlans 是文字別名，只有目標 Appearance 含 Pussy/Penis 時使用，實際部位仍為 ItemVulva／ItemVulvaPiercings。LSCG 未提供中文的標籤仍使用英文，不能視為完整中文覆蓋。
 

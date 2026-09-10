@@ -9,6 +9,7 @@ import { t, getLocale, setLocale } from './i18n-helper.mjs';
 import { appendChatLinks, MediaConsent } from './links-helper.mjs';
 import { afcLovers } from './community-helper.mjs';
 import { definitions } from './native-helper.mjs';
+import { canonicalPartGroup } from './activity-helper.mjs';
 const activitySource = stripTypeScriptTypes(readFileSync('src/ui/activity-dialog.ts', 'utf8')).replace(/^import .*;\r?\n/gm, '').replaceAll('export ', '');
 const nameColor = new Function(stripTypeScriptTypes(readFileSync('src/ui/name-color.ts', 'utf8')).replaceAll('export ', '') + ';return nameColor;')();
 const stabilitySource = stripTypeScriptTypes(readFileSync(new URL('../src/platform/stability.ts', import.meta.url), 'utf8')).replace('import { t } from "../i18n";', '').replace('export ', '');
@@ -24,7 +25,7 @@ const mobileSource = stripTypeScriptTypes(readFileSync('src/platform/mobile.ts',
 function setup(savedAccount, savedPerformance) {
   setLocale('zh');
   const window = new Window({ url: 'https://lite.example', settings: { disableCSSFileLoading: true, disableJavaScriptFileLoading: true } });
-  const openActivityDialog = new Function('document', 'window', 't', 'definitions', activitySource + ';return openActivityDialog;')(window.document, window, t, definitions);
+  const openActivityDialog = new Function('document', 'window', 't', 'definitions', 'canonicalPartGroup', activitySource + ';return openActivityDialog;')(window.document, window, t, definitions, canonicalPartGroup);
   const StabilityControls = new Function('document', 'window', 't', 'URL', stabilitySource + ';return StabilityControls;')(window.document, window, t, window.URL);
   window.document.body.innerHTML = '<div id="app"></div>';
   if (savedAccount) window.localStorage.setItem('bc-lite-account-v1', savedAccount);
@@ -39,6 +40,7 @@ function setup(savedAccount, savedPerformance) {
     activityOptions() { return [{ group: 'ItemHead', groupLabel: '頭部', name: 'Pet', label: '撫摸', reason: null }]; },
     sendActivity(id, group, name) { calls.push({ activity: name, group, id }); },
     setTextCatalog() {},
+    cuddleInfo() { return {token:'test',text:'Both ItemMisc slots'}; },
     respondCuddle(accept) { calls.push({ cuddle: accept }); current = { ...current, cuddleRequest: null }; listener(current); },
     setMessageLimit(value) { calls.push({ historyLimit: value }); if (current.messages.length > value) { current = { ...current, messages: current.messages.slice(-value) }; listener?.(current); } },
     clearMessages() { current = { ...current, messages: [] }; listener(current); },
@@ -57,6 +59,25 @@ function setup(savedAccount, savedPerformance) {
   return { window, document: window.document, calls, client:bcClient, state: () => current, emit(change) { if (change.friendsStatus === '查詢完成') change.friendsQueryState = 'ready'; current = { ...current, ...change }; listener(current); } };
 }
 
+test('body families light together, merge actions and show warnings only in tooltips', async () => {
+  const f=setup();
+  f.client.activityOptions=()=>['ItemMouth','ItemTorso','ItemTorso2','ItemNipples'].map(group=>({group,groupLabel:group,name:'Pet',label:'撫摸',reason:null,warning:'native.effects'}));
+  f.emit({phase:'in-room',room:{Name:'Room',Limit:10},cuddlePartner:55,characters:[{MemberNumber:55,Name:'Friend'},{MemberNumber:123,Name:'Me'}]});
+  const members=f.document.querySelectorAll('.member-row');
+  assert.match(members[0].textContent,/Me/);
+  assert.equal(members[1].querySelector('.member-cuddle').textContent,'貼');
+  members[1].click(); f.document.querySelector('.interaction-open').click();
+  const dialog=f.document.querySelector('.activity-dialog');
+  for (const [group,count] of [['ItemMouth3',3],['ItemTorso2',2],['ItemNipplesPiercings',2]]) {
+    dialog.querySelector(`[data-body-group="${group}"]`).dispatchEvent(new f.window.Event('click'));
+    assert.equal(dialog.querySelectorAll('[aria-pressed="true"]').length,count);
+    assert.equal(dialog.querySelectorAll('.activity-option').length,1);
+    assert.equal(dialog.querySelector('.activity-option small'),null);
+    assert.ok(dialog.querySelector('.activity-option button').title);
+  }
+  await f.window.happyDOM.close();
+});
+
 test('activity mode toggles incomplete checks and an open panel refreshes after character updates', async () => {
   const f=setup();
   let blocked=false;
@@ -69,7 +90,7 @@ test('activity mode toggles incomplete checks and an open panel refreshes after 
   assert.equal(dialog.querySelector('.activity-option button').disabled,false);
   const mode=dialog.querySelector('input[type=checkbox]');
   mode.checked=false; mode.dispatchEvent(new f.window.Event('change'));
-  assert.equal(dialog.querySelector('.activity-option button').disabled,true);
+  assert.equal(dialog.querySelector('.activity-option button'),null);
   mode.checked=true; mode.dispatchEvent(new f.window.Event('change'));
   assert.equal(dialog.querySelector('.activity-option button').disabled,false);
   blocked=true; f.emit({characters:[{MemberNumber:55,Name:'Friend',Appearance:[]}]});

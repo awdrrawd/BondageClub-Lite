@@ -1,6 +1,6 @@
 import { renderAction, dictionaryText } from './action-helper.mjs';
 import { receivedSpeech } from './speech-helper.mjs';
-import { nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, definitions } from './native-helper.mjs';
+import { nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, definitions, activityAsset } from './native-helper.mjs';
 import { extensionActivities, extensionText } from './extensions-helper.mjs';
 import { hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState } from './activity-helper.mjs';
 import { gameCatalog } from './catalog-helper.mjs';
@@ -29,7 +29,7 @@ async function setup(environment, relayAvailable = true, account = {}, storage =
     disconnect() { this.connected = false; handlers.get('disconnect')?.('io client disconnect'); return this; },
   };
   const context = {
-    hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState, receivedSpeech,
+    hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState, receivedSpeech, activityAsset,
     localStorage: { getItem(key) { return storage.get(key) ?? null; }, setItem(key, value) { storage.set(key, value); } },
     io: () => socket, nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, extensionActivities, extensionText, renderAction, dictionaryText, t, localizeStatus, validAppearance, copyAppearance, releaseAppearance, afcLovers, embeddedAction,
     exports: {},
@@ -57,6 +57,44 @@ async function setup(environment, relayAvailable = true, account = {}, storage =
 
 const request = { Query: '', Space: 'X', Language: '', Game: '', FullRooms: false, ShowLocked: true, SearchDescs: false };
 
+test('cuddle previews both slots and pairing IDs; stale consent cannot replace any item', async () => {
+  const f=await setup('PROD'); f.client.setTextCatalog(gameCatalog('zh'));
+  const base=[{Group:'BodyUpper',Name:'Normal'}];
+  f.handlers.get('ChatRoomSync')({Name:'Room',BlockCategory:['Arousal'],Character:[
+    {MemberNumber:123,Name:'Me',Appearance:[...base,{Group:'ItemMisc',Name:'OwnItem',Property:{Custom:'keep'}}],ActivePose:['Kneel']},
+    {MemberNumber:55,Name:'Peer',Appearance:[...base,{Group:'ItemMisc',Name:'贴贴'}]},
+  ]});
+  f.handlers.get('ChatRoomMessage')({Type:'Hidden',Content:'Luzi_XCharacterDrawState',Sender:55,Dictionary:[{prevCharacter:99,associatedAsset:{group:'ItemMisc',asset:'贴贴'}}]});
+  const info=f.client.cuddleInfo(55);
+  assert.match(info.text,/OwnItem/); assert.match(info.text,/#99/);
+  const option=f.client.activityOptions(55,false).find(o=>o.name==='cuddle:ChatOther-ItemTorso-钻进怀里');
+  assert.equal(option.reason,null);
+  assert.throws(()=>f.client.sendActivity(55,option.group,option.name));
+  f.handlers.get('ChatRoomSyncItem')({Item:{Target:55,Group:'ItemMisc',Name:'Replacement'}});
+  assert.throws(()=>f.client.sendActivity(55,option.group,option.name,false,info.token),/重新/);
+  assert.ok(!f.sent.some(p=>p.event==='ChatRoomCharacterItemUpdate'));
+  const current=f.client.cuddleInfo(55); assert.match(current.text,/Replacement/);
+  f.client.sendActivity(55,option.group,option.name,false,current.token);
+  const own=f.state().characters.find(c=>c.MemberNumber===123).Appearance;
+  assert.equal(own.filter(i=>i.Group==='ItemMisc').length,1);
+  assert.equal(own.find(i=>i.Group==='ItemMisc').Name,'贴贴');
+  assert.equal(f.state().cuddlePartner,55);
+  assert.ok(f.sent.filter(p=>p.event==='ChatRoomCharacterItemUpdate').every(p=>p.payload.Target===123));
+  assert.equal(f.state().characters.find(c=>c.MemberNumber===55).Appearance.at(-1).Name,'Replacement');
+  f.client.stopCuddle(); assert.equal(f.state().cuddlePartner,null);
+});
+
+test('comb activity publishes the actual worn tool and rechecks it after item removal', async () => {
+  const base={Appearance:[{Group:'BodyUpper',Name:'Normal'},{Group:'ItemHandheld',Name:'Hairbrush'}],ArousalSettings:{Active:'Manual',Zone:'f'.repeat(30),Activity:'z'.repeat(100)}};
+  const f=await setup('PROD',true,base); f.client.setTextCatalog(gameCatalog('zh'));
+  f.handlers.get('ChatRoomSync')({Name:'Room',Character:[{...base,MemberNumber:123,Name:'Me'},{...base,MemberNumber:55,Name:'Peer'}]});
+  f.client.sendActivity(55,'ItemHead','BrushItem');
+  const asset=f.sent.at(-1).payload.Dictionary.find(entry=>entry.Tag==='ActivityAsset');
+  assert.equal(asset.AssetName,'Hairbrush'); assert.equal(asset.GroupName,'ItemHandheld');
+  f.handlers.get('ChatRoomSyncItem')({Item:{Target:123,Group:'ItemHandheld'}});
+  assert.equal(f.client.activityOptions(55,true).find(o=>o.name==='BrushItem').reason,'native.blocked');
+});
+
 test('incoming cuddle requires explicit acceptance and releases only own cuddle item', async () => {
   const base = [{ Group: 'BodyUpper', Name: 'Normal', Unknown: 'keep' }];
   const f = await setup('PROD');
@@ -65,7 +103,7 @@ test('incoming cuddle requires explicit acceptance and releases only own cuddle 
   f.handlers.get('ChatRoomMessage')(packet);
   assert.equal(f.state().cuddleRequest.sender, 55);
   assert.ok(!f.sent.some(p => p.event === 'ChatRoomCharacterItemUpdate'));
-  f.client.respondCuddle(true);
+  f.client.respondCuddle(true, f.client.cuddleInfo(55).token);
   const state = f.sent.find(p => p.payload?.Content === 'Luzi_XCharacterDrawState').payload.Dictionary[0];
   assert.equal(state.prevCharacter, 55); assert.equal(state.leash, 'lead');
   f.handlers.get('ChatRoomSyncItem')({ Item: { Target: 123, Group: 'Cloth', Name: 'NewDress', Craft: { Name: 'KeepMe' } } });
@@ -260,7 +298,7 @@ test('ECHO cuddle wears only the own slot and shares native activity plus recipr
   f.handlers.get('ChatRoomSync')({ Name: 'Room', Character: [{ MemberNumber: 123, Name: 'Test', Appearance: appearance }, { MemberNumber: 55, Name: 'Friend', Appearance: appearance }] });
   const option = f.client.activityOptions(55).find(option => option.name === 'cuddle:ChatOther-ItemTorso-钻进怀里');
   assert.ok(option); assert.equal(option.warning, 'cuddle.help');
-  f.client.sendActivity(55, option.group, option.name);
+  f.client.sendActivity(55, option.group, option.name, false, f.client.cuddleInfo(55).token);
   const packet = f.sent.at(-1).payload;
   assert.equal(packet.Type, 'Activity');
   assert.equal(packet.Content, 'ChatOther-ItemTorso-钻进怀里');

@@ -38,6 +38,12 @@
 
 UI 文案不同於動作差異檔：`ui/en.json` 與 `ui/zh.json` 的鍵與 `{0}` 等數字佔位符必須一致。UI 的鍵型別及語言選擇由 `src/i18n/index.ts` 管理。
 
+### 動作選單共用名稱與部位回退
+
+`src/action/labels.ts` 共用 QuickInteraction 的主部位映射：Mouth2/3 → Mouth、Torso2 → Torso、NipplesPiercings → Nipples、NeckAccessories/Restraints → Neck、Handheld → Hands。先查共用覆寫 `Label-Activity-動作名`，再查實際部位／解剖別名與主部位的 `Label-ChatOther/ChatSelf`，最後保留可讀的原名。無須為每個子部位複製字典。
+
+例如 `overrides/zh.json` 中 `"Label-Activity-LSCG_Nuzzle": "蹭蹭"` 可翻譯所有部位的同一動作名稱。本輪補上 30 個 LSCG 共用中文名稱。這是人工翻譯資料，不是程式內硬編碼；若不同部位需要不同名稱，改用原有完整 Label 鍵並移除共用覆寫。共用名稱不會取代聊天句子，後者仍使用完整 Chat 鍵及佔位符；來源沒有中文或封包自帶動態句子時，繼續回退原文。
+
 ## 新增語言
 
 文字編譯器遞迴發現 `bc/`、`action/`、`items/`、`groups/` 內含 `en.json` 的來源目錄，以及 `overrides/` 下的語言 JSON，使用小寫標籤（例如 `fr`、`pt-br`）。只需補有翻譯的鍵。
