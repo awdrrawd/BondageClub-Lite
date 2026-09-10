@@ -5,21 +5,24 @@ import { stripTypeScriptTypes } from 'node:module';
 import vm from 'node:vm';
 import { Window } from 'happy-dom';
 import LZString from 'lz-string';
+import { t, getLocale, setLocale } from './i18n-helper.mjs';
 
-const bioCode = stripTypeScriptTypes(readFileSync(new URL('../src/biography.ts', import.meta.url), 'utf8')).replace('import LZString from "lz-string";', '').replace('export ', '');
-const decodeBiography = new Function('LZString', bioCode + '; return decodeBiography;')(LZString);
+const bioCode = stripTypeScriptTypes(readFileSync(new URL('../src/biography.ts', import.meta.url), 'utf8')).replace('import LZString from "lz-string";', '').replace('import { t } from "./i18n";', '').replace('export ', '');
+const decodeBiography = new Function('LZString', 't', bioCode + '; return decodeBiography;')(LZString, t);
 
 const source = stripTypeScriptTypes(readFileSync(new URL('../src/main.ts', import.meta.url), 'utf8'))
+  .replace(/import .* from "\.\/i18n";/, '')
   .replace('import "./style.css";', '')
   .replace('import { bcClient } from "./protocol";', '')
   .replace('import { decodeBiography } from "./biography";', '')
   .replace('import { loadTextCatalog } from "./text-catalog";', '');
 
 function setup(savedAccount) {
+  setLocale('zh');
   const window = new Window({ url: 'https://lite.example', settings: { disableCSSFileLoading: true, disableJavaScriptFileLoading: true } });
   window.document.body.innerHTML = '<div id="app"></div>';
   if (savedAccount) window.localStorage.setItem('bc-lite-account-v1', savedAccount);
-  let current = { phase: 'ready', status: 'Ready', player: { Name: 'Tester', MemberNumber: 123, FriendList: [55], Appearance: [] }, room: null, rooms: [], characters: [], messages: [], friends: [], friendsStatus: '尚未查詢', beeps: [] };
+  let current = { phase: 'ready', status: 'Ready', player: { Name: 'Tester', MemberNumber: 123, FriendList: [55], Appearance: [] }, room: null, rooms: [], characters: [], messages: [], friends: [], friendsQueryState: 'idle', friendsStatus: '尚未查詢', beeps: [] };
   let listener;
   const calls = [];
   const bcClient = {
@@ -27,17 +30,36 @@ function setup(savedAccount) {
     refreshFriends() { calls.push('friends'); },
     sendChat(text) { calls.push(text); },
     setTextCatalog() {},
+    relocalize() {},
     sendBeep(id, text) { calls.push({ id, text }); },
     async login(account) { calls.push({ login: account }); },
     setFriend() {}, clearBeeps() {}, leave() {}, disconnect() {}, search() {}, join() {}, createRoom() {},
   };
-  vm.runInNewContext(source, { window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, loadTextCatalog: async () => ({}) });
-  return { window, document: window.document, calls, state: () => current, emit(change) { current = { ...current, ...change }; listener(current); } };
+  vm.runInNewContext(source, { window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
+  return { window, document: window.document, calls, state: () => current, emit(change) { if (change.friendsStatus === '查詢完成') change.friendsQueryState = 'ready'; current = { ...current, ...change }; listener(current); } };
 }
 
 function messages(count) {
   return Array.from({ length: count }, (_, index) => ({ id: `id-${index}`, sender: 55, senderName: 'Friend', text: `message ${index}`, time: new Date(), type: 'Chat' }));
 }
+
+test('language selection persists locally, translates navigation and preserves chat draft', async () => {
+  const f = setup();
+  f.emit({ phase: 'in-room', room: { Name: 'Long room name', Limit: 10 }, messages: messages(1) });
+  const input = f.document.getElementById('InputChat');
+  input.value = '中文 draft'; input.dispatchEvent(new f.window.Event('input'));
+  f.document.getElementById('nav-settings').click();
+  const select = f.document.getElementById('InterfaceLocale');
+  select.value = 'en'; select.dispatchEvent(new f.window.Event('change'));
+  assert.equal(f.document.documentElement.lang, 'en');
+  assert.equal(JSON.parse(f.window.localStorage.getItem('bc-lite-display-v1')).locale, 'en');
+  assert.equal(f.document.getElementById('nav-chat').textContent, 'Chat');
+  f.document.getElementById('nav-chat').click();
+  assert.equal(f.document.getElementById('InputChat').value, '中文 draft');
+  assert.equal(f.document.querySelector('.room-title').textContent, 'Long room name');
+  assert.ok(f.document.body.classList.contains('chat-active'));
+  await f.window.happyDOM.close();
+});
 
 test('incoming chat preserves textarea identity, draft, focus, and a bounded log', async () => {
   const f = setup();
@@ -105,7 +127,7 @@ test('display preferences persist alone and background starts disabled', async (
   const checkbox = f.document.querySelector('.settings-card input[type=checkbox]');
   checkbox.click();
   assert.equal(f.document.body.classList.contains('scenic'), true);
-  assert.deepEqual(JSON.parse(f.window.localStorage.getItem('bc-lite-display-v1')), { background: true, largeText: false, timestamps: true });
+  assert.deepEqual(JSON.parse(f.window.localStorage.getItem('bc-lite-display-v1')), { background: true, largeText: false, timestamps: true, locale: 'zh' });
   assert.equal(f.window.localStorage.length, 1);
   await f.window.happyDOM.close();
 });

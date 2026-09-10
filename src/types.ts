@@ -116,6 +116,7 @@ export interface DisplayMessage {
 }
 
 export interface ClientSnapshot {
+  friendsQueryState: "idle" | "loading" | "ready" | "error";
   friends: OnlineFriend[];
   friendsStatus: string;
   beeps: BeepMessage[];

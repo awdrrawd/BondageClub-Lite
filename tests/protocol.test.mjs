@@ -3,8 +3,10 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { stripTypeScriptTypes } from 'node:module';
+import { t, setLocale, localizeStatus } from './i18n-helper.mjs';
 
 async function setup(environment, relayAvailable = true, account = {}) {
+  setLocale('zh');
   const handlers = new Map();
   const sent = [];
   const timers = new Map();
@@ -17,6 +19,7 @@ async function setup(environment, relayAvailable = true, account = {}) {
     disconnect() { this.connected = false; },
   };
   const context = {
+    t, localizeStatus,
     exports: {},
     require: () => ({ io: () => socket }),
     window: { setTimeout(fn) { timers.set(++timerId, fn); return timerId; }, clearTimeout(id) { timers.delete(id); } },
@@ -27,6 +30,7 @@ async function setup(environment, relayAvailable = true, account = {}) {
   };
   const source = readFileSync(new URL('../src/protocol.ts', import.meta.url), 'utf8');
   const javascript = stripTypeScriptTypes(source)
+    .replace(/import .* from "\.\/i18n";/, '')
     .replace(/import .* from "socket.io-client";/, 'const { io } = require("socket.io-client");')
     .replaceAll('export ', '');
   vm.runInNewContext(`${javascript}\nexports.BcLiteClient = BcLiteClient;`, context);
@@ -243,6 +247,32 @@ test('invalid map and unsafe custom URL fail before creating or changing phase',
   assert.throws(() => f.client.createRoom('Test', 'X', 'CN', false, '', 5, { Custom: { ImageURL: 'javascript:alert(1)' } }), /HTTPS/);
   assert.equal(f.state().phase, 'ready');
   assert.equal(f.sent.some(packet => packet.event === 'ChatRoomCreate'), false);
+});
+
+test('item actions resolve assets, craft names, focus groups and language changes', async () => {
+  const f = await setup('PROD');
+  const zh = JSON.parse(readFileSync(new URL('../src/data/bc-messages.json', import.meta.url), 'utf8'));
+  const en = JSON.parse(readFileSync(new URL('../src/data/bc-messages-en.json', import.meta.url), 'utf8'));
+  const assetKey = Object.keys(en).find(key => key.startsWith('Asset.ItemArms.'));
+  const asset = assetKey.split('.').at(-1);
+  f.handlers.get('ChatRoomSync')({ Name: 'Test', Character: [{ MemberNumber: 55, Name: 'Alice' }, { MemberNumber: 66, Name: 'Bob' }], Limit: 10 });
+  const receive = f.handlers.get('ChatRoomMessage');
+  for (const action of ['ActionUse', 'ActionRemove']) {
+    receive({ Type: 'Action', Sender: 55, Content: action, Dictionary: [{ SourceCharacter: 55 }, { Tag: 'DestinationCharacter', MemberNumber: 66 }, { TargetCharacter: 66 }, { Tag: action === 'ActionUse' ? 'NextAsset' : 'PrevAsset', GroupName: 'ItemArms', AssetName: asset }, { Tag: 'FocusAssetGroup', FocusGroupName: 'ItemArms' }] });
+    assert.doesNotMatch(f.state().messages.at(-1).text, /ActionUse|ActionRemove/);
+  }
+  f.client.setTextCatalog(zh);
+  assert.ok(f.state().messages.at(-1).text.includes(zh[assetKey]));
+  assert.ok(f.state().messages.at(-1).text.includes(zh['Group.ItemArms']));
+  setLocale('en'); f.client.relocalize(); f.client.setTextCatalog(en);
+  assert.match(f.state().messages.at(-1).text, /Alice.*removes.*Bob/);
+  assert.ok(f.state().messages.at(-1).text.includes(en[assetKey]));
+  receive({ Type: 'Action', Sender: 55, Content: 'ActionUse', Dictionary: [{ SourceCharacter: 55 }, { Tag: 'DestinationCharacter', MemberNumber: 66 }, { Tag: 'NextAsset', GroupName: 'ItemArms', AssetName: 'Unknown', CraftName: 'My <custom> item' }, { Tag: 'FocusAssetGroup', FocusGroupName: 'ItemArms' }] });
+  assert.ok(f.state().messages.at(-1).text.includes('My <custom> item'));
+  receive({ Type: 'Chat', Sender: 55, Content: 'ActionUse' });
+  f.client.setTextCatalog(zh);
+  assert.equal(f.state().messages.at(-1).text, 'ActionUse');
+  setLocale('zh');
 });
 
 test('activity keys resolve through bundled translations, names and late catalog load', async () => {

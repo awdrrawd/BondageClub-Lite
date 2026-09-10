@@ -23,13 +23,24 @@ function translation(path) {
   } catch (error) { if (error.code === 'ENOENT') return new Map(); throw error; }
 }
 const catalog = {};
+const englishCatalog = {};
 for (const file of ['Screens/Interface', 'Assets/Female3DCG/AssetStrings', 'Screens/Online/ChatRoom/Text_ChatRoom', 'Screens/Character/Preference/ActivityDictionary']) {
   const cn = translation(resolve(root, file + '_CN.txt'));
   const tw = translation(resolve(root, file + '_TW.txt'));
   for (const [key, english] of csv(readFileSync(resolve(root, file + '.csv'), 'utf8'))) {
-    if (key && english) catalog[key] = tw.get(english.trim()) || cn.get(english.trim()) || english;
+    if (key && english) { catalog[key] = tw.get(english.trim()) || cn.get(english.trim()) || english; englishCatalog[key] = english; }
   }
+}
+const assetFile = 'Assets/Female3DCG/Female3DCG';
+const cnAssets = translation(resolve(root, assetFile + '_CN.txt'));
+const twAssets = translation(resolve(root, assetFile + '_TW.txt'));
+for (const [group, asset, english] of csv(readFileSync(resolve(root, assetFile + '.csv'), 'utf8'))) {
+  if (!group || !english) continue;
+  const key = asset ? `Asset.${group}.${asset}` : `Group.${group}`;
+  catalog[key] = twAssets.get(english.trim()) || cnAssets.get(english.trim()) || english;
+  englishCatalog[key] = english;
 }
 mkdirSync('src/data', { recursive: true });
 writeFileSync('src/data/bc-messages.json', JSON.stringify(catalog));
+writeFileSync('src/data/bc-messages-en.json', JSON.stringify(englishCatalog));
 console.log(`Generated ${Object.keys(catalog).length} text entries`);
