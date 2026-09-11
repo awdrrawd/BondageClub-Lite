@@ -8,7 +8,10 @@ test('architecture document is standalone, internally navigable and included in 
   const doc = window.document;
   doc.body.innerHTML = readFileSync('docs/architecture.html', 'utf8');
   for (const link of doc.querySelectorAll('nav a')) assert.ok(doc.querySelector(link.getAttribute('href')));
-  assert.equal(doc.querySelectorAll('main section').length, 7);
+  const sections = [...doc.querySelectorAll('main section')].map(section => section.id);
+  assert.deepEqual([...doc.querySelectorAll('nav a')].map(link => link.getAttribute('href').slice(1)), sections);
+  assert.ok(sections.includes('rendering'));
+  assert.ok(sections.includes('history'));
   assert.equal(doc.querySelectorAll('script,iframe,img,video').length, 0);
   const built = readFileSync('dist/docs/architecture.html', 'utf8');
   assert.match(built, /src\/action\/generated/);

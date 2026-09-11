@@ -6,6 +6,11 @@
 
 本機顯示背景預設關閉；只有開啟時瀏覽器才請求圖片。
 
+## 本機 SVG 圖示
+
+- Phosphor Icons Core 的 regular SVG 保存在 `src/ui/icons/`，不用遠端圖示服務或整套字型。來源记录日期為 2026-09-11；MIT 與 Copyright (c) 2023 Phosphor Icons 保留於 [完整授權](licenses/phosphor-icons-MIT.txt)，並透過 `public/licenses/phosphor-icons-MIT.txt` 隨部署分發。
+- flag-icons 的國旗 SVG 隨站打包，搭配語言文字標籤；MIT 授權保存於 `public/licenses/flag-icons-MIT.txt`。實际使用項目以 `src/ui/icons/` 與 `icons.ts` 為準，不固定抄寫圖示數量。
+
 ## BC 文字資料與 BIO
 
 - `lz-string`：MIT，用於解析 BC 帶 U+256C 標記的 UTF16 壓縮 BIO；不執行 BIO 內容。

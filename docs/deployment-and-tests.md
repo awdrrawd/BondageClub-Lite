@@ -1,6 +1,6 @@
 # Relay v1 部署與驗收
 
-## 本次改變
+## 部署結構
 
 沿用現有 Cloudflare Pages，使用進階模式的 `dist/_worker.js`。不必建立另一個 Worker 網址、修改 DNS 或提供 API token。`_routes.json` 只把 `/socket.io/*` 和 `/api/relay-status` 交給 Worker，其餘頁面和素材由 Pages 直接提供。
 
@@ -10,20 +10,20 @@
 
 ## 你要做的部署設定
 
-1. GitHub Desktop 選擇 BondageClub-Lite，Commit 本次變更並 Push origin。包含 `public/_worker.js`、`public/_routes.json`、src、package.json 和 lockfile；不用提交 dist/node_modules。
-2. Cloudflare 現有 Pages 專案保留：Production branch `Mater`；Build command `npm run build`；Output directory `dist`；Root directory 預設根目錄；Node 版本使用 `NODE_VERSION=22`。
+1. 將要部署的版本提交至你的 Git 倉庫。包含 `public/_worker.js`、`public/_routes.json`、src、package.json 和 lockfile；不用提交 dist/node_modules。
+2. Cloudflare Pages 選擇實際要發布的 Production branch；Build command `npm run build`，Output directory `dist`，Root directory 指向本專案根目錄；Node 版本使用 `NODE_VERSION=22`。不要把歷史部署的分支名稱當成固定要求。
 3. 不用建立獨立 Workers 專案。Pages 會識別輸出根目錄中的 `_worker.js`，部署為 Pages Functions 進階模式。這一版已經有雲端運算部分；舊文件的「純靜態、不需要 Functions」不再適用。
 4. 若曾設定 `SKIP_DEPENDENCY_INSTALL` 或只安裝 production dependencies，取消該自訂設定，以便建置 Vite/TypeScript。
 5. 不需要設定 `BC_ORIGIN`，程式有預設值。若你曾自行設定，先移除錯誤值，或將 Production 及 Preview 的該值設為 `https://bondageprojects.elementfx.com`（無 www、版本路徑或尾斜線）。它不是 BC 帳密。變更後重新部署。
 6. 等新部署成功，關掉舊 Lite 分頁，再開正式網址。清除舊頁面快取或強制重新整理，頁尾應顯示 `Relay v1`。
 
-Cloudflare 文件：[Pages 進階模式](https://developers.cloudflare.com/pages/functions/advanced-mode/)、[WebSocket](https://developers.cloudflare.com/workers/runtime-apis/websockets/)。Functions 使用 Workers 額度，不保證無限用量或永不斷線；先沿用免費方案並觀察用量，不需要先升級付費。
+相關平台文件：[Pages 進階模式](https://developers.cloudflare.com/pages/functions/advanced-mode/)、[WebSocket](https://developers.cloudflare.com/workers/runtime-apis/websockets/)。部署配額與服務限制請依實際平台設定核對；本文件不保證無限用量或永不斷線。
 
 ## 測試順序與通過標準
 
 ### 1. 確認 Worker 已部署（不用登入）
 
-開啟 `https://bondageclub-lite.pages.dev/api/relay-status`。應顯示 JSON，包含：
+在你的部署網址開啟 `/api/relay-status`。應顯示 JSON，包含：
 
 ```json
 {"service":"bc-lite-relay","version":1,"transport":"websocket","bcOrigin":"https://bondageprojects.elementfx.com"}
@@ -60,7 +60,7 @@ JSON 另有 upstream 與 note。這只證明中繼程式存在，不能證明 PR
 
 ### 7. 重連、維持連線與登出
 
-- 暫時斷網約 10 秒再恢復，應重新登入並確認 PROD。目前重連後回搜尋頁，需要手動回房，不承諾自動回房。
+- 暫時斷網約 10 秒再恢復，應重新登入並確認 PROD，嘗試回原房一次；失敗停止，不循環加入。完整優先序與抑制條件見[登入回房](mobile-connection-tests.md#登入回房)。
 - 在測試房保持前景 10–15 分鐘，檢查雙向訊息仍能傳送。
 - 測試另一處登入同帳號：Lite 應停止重試並顯示重複登入，而不是反覆搶登。
 - 登出後 WebSocket 應關閉，好友列表刷新後顯示離線。
@@ -83,7 +83,7 @@ JSON 另有 upstream 與 note。這只證明中繼程式存在，不能證明 PR
 
 ## 本機檢查
 
-本次已通過 TypeScript/Vite 建置、Worker 邊界與協定單元測試，以及 Wrangler 本機 Worker → 真實 BC 的 Socket.IO 握手與 ServerInfo 接收。握手測試未登入帳號；Cloudflare 正式部署、PROD 登入與長連線測試尚需按上方步驟驗收。
+每次要部署的版本都應重新執行建置及測試。自動測試不登入帳號；握手 smoke test 也不代表 PROD 登入或長連線已驗收。真人測試請記錄部署 commit、裝置、時間、實際結果與未通過項目，不能沿用舊文件的「已通過」敘述。
 
 `npm run dev` 只用於前端排版，沒有 Pages 中繼，登入檢查會失敗。要測完整流程：
 

@@ -1,5 +1,7 @@
 # URL 與安全詞驗收
 
+[文件導覽](README.md) · [保存與資料流向](privacy-and-appearance.md)
+
 ## 共用 Lite 確認與通知
 
 `src/platform/dialogs.ts` 提供網頁內確認／提示，沿用 Lite 外觀與中英翻譯，不使用瀏覽器 alert、confirm 或 prompt。換房、登出、移除好友、清除聊天室／已存歷史、縮短保存期限、降低訊息上限皆須按確認才執行；取消或 Escape 不執行。換房確認開啟期間若帳號／所在房間改變，舊確認失效。媒體來源許可保存失敗與一般操作錯誤也使用 Lite 提示窗。
@@ -8,9 +10,11 @@
 
 ## 網址
 
-- 參考 LCE `src/features/chat/chat-augments.js` 的文字節點連結化與 HTTP(S) 限制；Lite 支援 HTTPS 圖片／影片直連在訊息內顯示，使用本次／永久來源許可，不嵌入任意网页 iframe。
+- `src/media/providers.ts` 分類 URL，`chat-links.ts` 管理實際播放器來源許可。支援 HTTPS 圖片／影片／音訊直連及部分 YouTube、Vimeo、Spotify 網址；後三者使用限定格式的服務 iframe，不嵌入任意網頁，也不載入 ACV 插件或執行定時 DOM 掃描。
 - 測試一般聊天、密語、/me、動作及 BEEP 內的 `https://example.org/`、多個連結、帶參數連結及括號／中文句號。可點擊、另開分頁、原文保持不變。
-- `javascript:`、`data:`、含帳密 URL、HTML 標籤不得成為可執行內容。測試 JPG／PNG／GIF／WebP／AVIF 與 MP4／WebM 直連（含查詢參數）：未許可前沒有媒體請求；許可後圖片內嵌、影片有播放控制且不自動播放；故意失效網址应移除媒體並保留連結。來源獲許可後，後續同來源媒體可直接請求；請測試設定頁撤銷，以及本次許可在重新整理／登出後失效。普通网页、HTTP 媒體、SVG 及不帶可辨識副檔名的網址只保留連結。
+- `javascript:`、`data:`、含帳密 URL、HTML 標籤不得成為可執行內容。測試 JPG／PNG／GIF／WebP／AVIF、MP4／WebM、MP3／OGG 等直連（含查詢參數）：未許可前没有媒體請求；圖片許可後可載入，影音須再點擊開啟，不自動播放；失效媒體保留原始連結。普通網頁、HTTP 媒體、SVG、非支援服務格式或無法辨識的網址只保留連結，分類細節以 providers.ts 為準。
+- 許可以實際播放器 origin 判斷：YouTube 轉到 youtube-nocookie.com、Vimeo 轉到 player.vimeo.com。核對「本次／總是許可」、設定頁撤銷、登出／刷新；來源跳轉仍由瀏覽器處理，來源可能使用 Cookie 或載入其他資源，no-referrer 不等於匿名。
+- 同時只保留一個影音播放器，開第二個應釋放第一個；關閉、撤銷許可或訊息移出 DOM 時釋放。一般同房同步不重建未變訊息列，不應重新載入既有播放器。預覽入口阻擋外部媒體，實際播放要在正式入口另測。
 - 手機長網址應可折行，不撑寬聊天室；收到連結訊息時草稿與中文輸入不能被重建。
 
 ## 安全詞：請先以可恢復的外觀測試
@@ -26,7 +30,7 @@
 
 ## 同步與限制
 
-- 只有確認安全詞才寫 `AccountUpdate`（Appearance／AssetFamily，以及回復時的權限）、`ChatRoomCharacterUpdate`（自己的 ID／Appearance／ActivePose）及原生安全詞 Action。OnlineSharedSettings 不改動。
+- 安全詞確認後寫 `AccountUpdate`（Appearance／AssetFamily，以及回復時的權限）、`ChatRoomCharacterUpdate`（自己的 ID／Appearance／ActivePose）及原生安全詞 Action。OnlineSharedSettings 不改動。這裡描述安全詞路徑；[貼貼](echo-cuddle-tests.md)也會提交房間外觀，但不送 AccountUpdate。
 - 送出並非伺服器保存成功回執；沒有把本機改變稱為已驗證成功。請以重登入和同房玩家觀察驗收。此次自動測試使用模擬 socket，未動用真實帳號。
 - 原生流程參考本機 BC `ChatRoomSafewordRevert`、`ChatRoomSafewordRelease`、`CharacterReleaseTotal`、`ServerPlayerAppearanceSync`。已知 Item 分類取自 Female3DCG 資產表；新增分類時須同步 `src/safety/safeword.ts`。不引入完整 BC 執行程式或圖片。
 - 不使用 LCE 的「保留互動權限」hook：安全詞回復採 BC 預設收緊權限，避免靜默取消保護。

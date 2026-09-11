@@ -1,4 +1,6 @@
-# 貼貼與本輪 UI 驗收
+# ECHO 貼貼與配對驗收
+
+[文件導覽](README.md) · [活動條件](chat-native-identity-tests.md) · [外觀保存界線](privacy-and-appearance.md)
 
 ## 實作範圍
 

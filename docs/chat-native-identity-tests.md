@@ -1,56 +1,55 @@
-# 聊天、原生活動與 Lite 識別驗收
+# 活動、社群協定與 Lite 識別
 
-## 已接上的 UI
+[文件導覽](README.md) · [第三方動作文字](third-party-dialogues.md)
 
-- 好友卡片對自己的 AFC 擴展戀人提供查詢房間；個人資料不再重複放查詢按鈕。房間卡片依搜尋結果的 Friends 成員編號，或自己的 AFC 房間回覆（名稱＋區域）標示擴展戀人。不是掃描全部玩家；資料未分享或不在好友名單時無法保證查得到。
-- 聊天採名稱／內容與右側時間、ID、Reply 分區。手機窄螢幕 metadata 換到右下，不擠壓內容。聊天、emote、Action／Activity、悄悄話、私訊及 OOC 分別有文字樣式。
-- 點名稱預填 `/W 編號`，保留現有草稿，**不會直接發送**。目標不在同房時提示改用私訊，不自行改道。玩家資料仍從成員面板開啟。
-- 私聊對象清單可收合，訊息由舊到新排列，輸入區在下方，共用聊天室訊息列。名稱顯示統一為「悄悄話」／「私訊」，協定仍是 Whisper／AccountBeep，並未新增外部私訊伺服器。
+## 原生活動與擴展文字
 
-## 原生活動：已接入，但不是完整 BC 引擎
+個人資料 → 互動 → SVG 部位格子／名稱 → 活動。沒有可繪製人物；桌面並列部位與動作，手机分頁選擇。嘴巴、乳頭、軀幹的連動格子共用去重清單。labels.ts 管理 Self／Other 標籤與別名；ItemPenis／ItemGlans 僅在目標具有對應身體資料時使用，實際群組仍映射回原生部位。
 
-`src/action/native-data.json` 從本機 BC `ActivityFemale3DCG` 與部位資料擷取 67 個活動定義及 18 個區域 ID，只含判定資料，不載入人物圖像。`scripts/build-native-activities.mjs` 可重新擷取。此資料沿用 BC 原作者權利，不重新宣稱為 Lite 自有文字。
+native-data.json 由本機 BC 定義靜態擷取活動、部位與物品條件；extension-data.json 由本庫翻譯及 extension-rules.json 產生。條目數以建置輸出為準；資料存在不表示已實作完整活動引擎。正常 build 不需要下載上游或執行插件。
 
-點個人資料工具列「互動」→ 人物線框或部位名稱 → 選活動。`src/ui/activity-dialog.ts` 使用 BC AssetGroup.Zone 矩形作為熱區，不載入人物圖片。個人資料不提供房間查詢／加入按鈕，右上角 X 關閉。
+原生項目送 Type: Activity 與 SourceCharacter／TargetCharacter／FocusGroupName／ActivityName，工具活動可附 ActivityAsset。一般 ECHO／小酥／LSCG 擴展項目送可讀 Action，不執行工具／數值／移動效果。**貼貼另走確認與外觀同步流程**，見[貼貼驗收](echo-cuddle-tests.md)。
 
-**「全部動作」預設不勾選；勾選才顯示全部及啟用不完整判定相容發送：**原始線上封包缺少 AssetFamily 時比照 BC CharacterLoadOnline 使用 Female3DCG。相容模式將未實作條件與不完整偏好資料改為警告；自身自動效果未模擬僅作提示，不影響兩種模式的使用資格；已知裝備封鎖、禁止偏好、房間限制及缺失角色外觀仍不放行。角色／房間更新時刷新面板，發送時再次檢查。取消相容模式採嚴格判定。Lite 不更改偏好，也不宣稱完整 BC 引擎。詳見 [目前篩選範圍與驗收](activity-search-recovery-tests.md)。
+## 判定邊界
 
-原生項目仍以 SourceCharacter／TargetCharacter／FocusGroupName／ActivityName 字典發出 `Type: Activity`。一般擴展項目以可讀 Action 文字送出，標示「文字模式」；ECHO 貼貼另走明確確認的道具／配對流程。
+- 「全部動作」預設不勾選，只顯示可用項目。勾選後顯示受限項目並啟用對未實作條件的相容判定；已知禁止条件仍停用。
+- inventory 支援線上 Group／Name／Property 與完整 Asset 格式。Effect／活動 Block 合併 Asset 和 Property；Expose／Block／AllowActivity 等按實作優先序取值。同次列舉共用一次解析，不修改外觀。
+- 未知插件物品略過無法辨識的部分，不讓無關活動全部停用，也不能作為已持有某工具的證據。
+- 已知 Needs／TargetNeeds、梳子、項圈、ZoneNaked／TargetZoneNaked、目標部位封鎖、偏好與房間禁止仍有效。自己翅膀與目標翅膀、自己貓爪與目標貓爪分別判定。
+- Lite actor policy 明確略過自己的 UseHands／UseArms／UseFeet／UseMouth／UseTongue／TargetZoneAccessible 與自身 Enclose 禁令；CantUse*／IsGagged 仍用於特殊變體。不是完整 BC 的角色限制模擬。
+- 徒手 TakeCare 與 Lite 徒手抓撓可用；BrushItem 必須有 AllowActivity 包含 BrushItem 的實際物品。徒手抓撓是放寬原生 Needs-Scratch 的例外。
+- 自身 Automatic／Hybrid 興奮與表情效果未模擬，僅提示；關係條件、動態插件條件與完整需求展開仍不齊全，地圖房仍限制活動。
+- 角色／房間同步會刷新開啟的活動面板；點擊送出時再驗證，不能沿用舊資格。
 
-### ECHO／小酥／LSCG
+更新上游才執行 build-native-activities.mjs／build-extension-rules.mjs；一般翻譯編譯走 catalog:compile。詳見[翻譯貢獻](../src/translations/README.md)。
 
-`src/action/extension-data.json` 收錄 407 個已擷取的「對象／部位／文字鍵」選項，不代表 407 個完整活動引擎。`scripts/build-extension-data.mjs` 只從本庫翻譯來源建立索引；`catalog:plugins` 更新擷取資料後同步索引。`extensions.ts` 代入玩家名稱與部位，透過既有自訂 Action 通道發送，不安裝插件、不調用插件 hook、不送出 ActivityName。
+## AFC 與 BCX 相容召喚
 
-軀幹／手臂包含「貼貼 · 鑽進懷裡」與「貼貼 · 抱入懷中」。這兩項確認後更新自己的 ItemMisc/贴贴，發送 Activity 與 ECHO 配對狀態；收到邀請的 Lite 玩家另需確認。先顯示雙方 ItemMisc 與已知配對 ID，確認後可替換自己的格子，對方需自行同意；不實作跨房跟隨或完整 ECHO 引擎。詳見 [貼貼驗收](echo-cuddle-tests.md)。其他擴展項目的道具／數值／移動效果不執行。句子依中英文表渲染；沒有翻譯的名稱保留原文。
+AFC 擴展戀人讀取公開共享關係。只向自己的 AFC 戀人且在好友名單內的人查詢房間，並只接受相應回覆。房間卡片比對搜尋 Friends 或 AFC 房名＋區域；不掃描其他玩家，不回傳自己的房間、不改 AFC 設定。查不到不等於沒有關係或已離線。
 
-`labels.ts` 統一 Self／Other 標籤、子部位回退與缺字哨兵處理；插件擷取同時保留選單標籤及動作句子。ItemPenis／ItemGlans 是文字別名，只有目標 Appearance 含 Pussy/Penis 時使用，實際部位仍為 ItemVulva／ItemVulvaPiercings。LSCG 未提供中文的標籤仍使用英文，不能視為完整中文覆蓋。
+BCX 相容召喚接收普通 BEEP，依本次登入允許名單、關鍵字、有效房名／區域判斷。收到後顯示接受確認，未接受不離房；60 秒到期、關閉規則或登出後失效。不實作 BCX 私有強制規則、倒數或跨房自動跟隨。
 
-對方的完整版 BC 可按自己的設定處理接收活動效果；若對方也是 Lite，沒有完整接收端興奮／表情引擎，不能保證產生相同效果。這一輪**尚未完成**自身 Automatic／Hybrid 興奮、表情計時、懲罰、道具變化、鏡像部位及所有插件活動引擎。灰色按鈕會說明原因。不要把封包送出視為接收端已成功執行的回執。
+## Lite 識別
 
-### 原生活動測試
-
-1. 一般穿衣角色開啟個人資料，確認無房間按鈕、右上角 X 可關閉。點工具列「互動」，點人物線框或「耳朵」名稱；相容模式下 Whisper 活動應可送出（這是 BC 活動名稱，與 `/W` 通道不同）。取消相容模式時，僅剩未實作的活動效果等限制，不應因未知衣物全面禁用。
-2. 同房完整版 BC 玩家確認收到的是 Activity，而不是文字 Action；若接收端為 Automatic／Hybrid，核對原生效果。不應修改自己的 Appearance 或 OnlineSharedSettings。
-3. 關閉目標部位／該活動偏好或加入 Arousal 禁止房間，相容模式仍應禁用。先開面板再讓目標離房，送出仍須拒絕。
-4. 按 [貼貼驗收](echo-cuddle-tests.md) 分別測試 Lite／Lite 與 Lite／ECHO。未裝 ECHO 的完整版只能驗證文字，不能驗證插件道具與位置渲染。
-5. 切換中英文，核對部位、貼貼標籤及提示。在手機測試熱區、小部位的名稱按鈕、面板捲動；按鈕／導航不應被長按圈選，但聊天、私訊、BIO、輸入框仍能選取複製。鍵盤 Tab／Enter／空白鍵也應能選部位。
-
-## 無版本 Lite 標記與 LCE
-
-Lite 進房／新成員進房時發送：
+進房、新成員加入及受限頻的 LCE Hello 回應可發送：
 
 ```json
 {"Type":"Hidden","Content":"BCLiteHello","Dictionary":[{"client":"Lite"}]}
 ```
 
-定向訊息可有 Target；Sender 由 BC 伺服器決定。收到同房 LCE Hello 可限頻回報，沒有自訂命令執行、插件版本、帳號清單、服裝或密碼。同頁只讀標記為 `window.BCLite.client === "Lite"`，不是遠端存取 API。識別是玩家自報，**不是身分驗證或防偽保證**。
+定向訊息可有 Target；Sender 由伺服器指定。沒有版本、帳密、服裝或插件清單。同頁只讀標記為 window.BCLite.client，不是遠端存取 API。
 
-本機 `../BC-LCE` 已修改 `features/social/hello.js`、`lite-identity.js` 及 `badges.js`，接收 BCLiteHello 並只畫「Lite」，不畫版本，也不設定 LCE／FBC 欄位。資料僅限當前房間記憶體，離房／斷線清除。
+徽章需要觀看端支援 BCLiteHello；Lite 倉庫的修改不代表 LCE 已發布相容版本。原版 BC／不支援的版本不保證顯示。識別僅自報，不是身分驗證。
 
-**需要兩邊更新：**部署 Lite，並讓觀看端更新這次建置的 LCE。只有 Lite 更新、觀看者仍使用舊 LCE 時不會自動出現徽章；原版 BC 也不會畫這個標記。LCE 的 `dist/assets/app.js` 已在本機重建，尚未發布。
+## 雙人與手機驗收
 
-驗收時讓 LCE 玩家先進房、Lite 後進房，再反向測試；確認只有 Lite 字樣、沒有版本、公開聊天沒有 Hidden 雜訊。重登其他客戶端後不應殘留 Lite 身分。
+1. 一般穿衣角色測原生活動，完整版觀看端確認 Activity 封包及接收端效果；不要把送出當成功回執。
+2. 開啟面板後改變工具、目標偏好、房間禁止或讓目標離房，送出時應再阻擋；「全部動作」不能略過已知禁止。
+3. 自己有束縛／口塞時測 Lite actor policy；移除梳子、翅膀、貓爪後，對應工具活動仍停用。雙方皆無貓爪時猫爪梳毛／捏猫爪皆不可用；再分別由自己／目標穿戴驗證方向。
+4. 讓小酥、LSCG、ECHO 觀看端發送帶名字／物品／部位／內嵌原文的動作，兩種語言皆可辨識；缺翻譯保留原文。普通 Chat 不套用文字表。
+5. 檢查有／無原生及 AFC 關係的個人資料；在好友頁查 AFC 房名，關閉分享或離線不能冒充已確認在線。
+6. 允許的會員送出符合召喚文字的普通 BEEP；先取消再接受。未允許會員、無房名、控制型 BEEP、過期邀請與關閉規則不得加入。
+7. 支援識別的 LCE 觀看端先進房、Lite 後進房，再反向測試；只見 Lite、不見版本，Hidden 不進公開聊天。重新登入其他客戶端後不應殘留識別。
+8. 手機與鍵盤測部位格子、聯動部位、動作清單、返回／Esc／Tab／Enter。操作說明不應只靠懸停；聊天、BIO 與輸入框仍可選字。
 
-## 手機回歸
-
-測試名稱點擊保留中文草稿、悄悄話 Reply 不洩漏到公開頻道、跨房私訊、長名稱／長網址換行、鍵盤開合，以及翻閱舊私訊時新訊息不把捲軸拉到底。AFC 查詢回來時不得重建正在輸入的房間搜尋框。這些仍需部署後實機核對；自動測試使用模擬 Socket 與 DOM。
+自動測試採模擬協定與 DOM；ECHO 貼貼另有專門雙人清單。Lite 不提供完整活動、服裝、興奮、表情、懲罰或插件引擎。

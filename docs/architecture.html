@@ -10,84 +10,44 @@
 <body>
   <header class="hero">
     <p class="eyebrow">BC LITE / ENGINEERING NOTES</p>
-    <h1>輕量的是執行環境，<br>清楚的是模組邊界。</h1>
-    <p class="lede">文字客戶端的架構導覽：連線、動作、翻譯與畫面各司其職。不安裝遊戲插件，也不載入角色繪圖引擎。</p>
-    <div class="tags"><span>TypeScript + DOM</span><span>Socket.IO</span><span>Cloudflare Pages</span><span>2026-09 重構</span></div>
+    <h1>文字客戶端的資料流<br>與更新邊界。</h1>
+    <p class="lede">連線、局部 DOM 更新、本機歷史、活動與翻譯。描述現行實作，不代表已通過真實伺服器或手機驗收。</p>
+    <div class="tags"><span>TypeScript + DOM</span><span>Socket.IO</span><span>IndexedDB v2</span><span>Cloudflare Pages</span><span>核對：2026-09-11</span></div>
   </header>
   <div class="layout">
-    <nav aria-label="架構章節"><a href="#overview">01 · 系統邊界</a><a href="#modules">02 · 原始碼目錄</a><a href="#actions">03 · 動作資料流</a><a href="#translations">04 · 翻譯擴充</a><a href="#lifecycle">05 · 連線與狀態</a><a href="#security">06 · 安全與限制</a><a href="#workflow">07 · 開發驗證</a></nav>
+    <nav aria-label="架構章節"><a href="#overview">01 · 系統邊界</a><a href="#modules">02 · 模組責任</a><a href="#lifecycle">03 · 登入與恢復</a><a href="#rendering">04 · DOM 更新</a><a href="#history">05 · 本機歷史</a><a href="#actions">06 · 文字與活動</a><a href="#translations">07 · 翻譯建置</a><a href="#security">08 · 資料與權限</a><a href="#workflow">09 · 開發驗證</a></nav>
     <main>
-      <section id="overview"><p class="eyebrow">01 / OVERVIEW</p><h2>靜態前端，不代表沒有中繼。</h2>
-        <div class="flow" aria-label="網路資料流"><article><small>下載介面</small><h3>Pages 靜態資源</h3><p>HTML、CSS、應用程式與按需文字表。</p></article><span class="arrow" aria-hidden="true">→</span><article><small>玩家裝置</small><h3>瀏覽器</h3><p>DOM 聊天畫面、短期連線狀態、來源許可。</p></article><span class="arrow" aria-hidden="true">↔</span><article><small>同站 WebSocket</small><h3>Pages Worker ↔ BC</h3><p>固定上游與 Origin；BC 負責帳號、房間及遊戲規則。</p></article></div>
-        <p>帳密與後續遊戲封包都經過 Cloudflare 中繼，並非只有登入那次請求。程式不新增封包日誌或資料庫，但不能承諾平台及部署者完全不處理資料。</p>
-      </section>
-      <section id="modules"><p class="eyebrow">02 / MODULE MAP</p><h2>先按責任找檔案。</h2>
-        <div class="module-grid">
-          <article><code>src/main.ts</code><h3>瀏覽器入口</h3><p>只啟動 UI，不保存帳密、不處理遊戲協定。</p></article>
-          <article><code>src/ui/</code><h3>介面與版面</h3><p>app.ts 訂閱快照、管理分頁與帳戶切換清理；history-settings.ts 管理保存設定／匯出，contact-card.ts 建立好友卡片，private-messages.ts 共用私聊排序快取，dom.ts 提供介面元件。activity-dialog.ts 管理互動面板與 BC 部位熱區，不載入人物貼圖；style.css 管理手機版面。</p></article>
-          <article><code>src/network/</code><h3>唯一的 Socket 擁有者</h3><p>client.ts：登入、重連、房間、好友、私聊、召喚授權與送出驗證。模組重排不改變協定行為。</p></article>
-          <article><code>src/storage/</code><h3>本機歷史</h3><p>history.ts 負責 IndexedDB v2 索引、帳戶／環境分區、有限筆數查詢、到期清理與按日 TXT 匯出。history-session.ts 合併增量寫入、保留失敗批次重試、更新更正文字及隔離帳戶切換；不操作 Socket、不上傳歷史副本。</p></article>
-          <article><code>src/action/</code><h3>動作與文字管線</h3><p>catalog.ts 載入基底／差異；embedded.ts 讀取插件原文；render.ts 代入字典。labels.ts 統一標籤與身體別名；native.ts 判定原生活動；extensions.ts 管理擴展文字互動。cuddle.ts 集中 ECHO 貼貼條件與配對資料，不載入插件程式。</p></article>
-          <article><code>src/translations/ + src/i18n/</code><h3>資料與翻譯函數分離</h3><p>翻譯者編輯 JSON；i18n/index.ts 管理 UI 語言、參數及狀態重譯。不呼叫外部翻譯服務。</p></article>
-          <article><code>src/profile/ · media/ · safety/ · platform/</code><h3>邊界功能</h3><p>AFC／BIO、媒體來源許可、安全詞外觀規則、行動裝置連線輔助分開維護。shared/types.ts 定義共用資料。</p></article>
-        </div>
-      </section>
-      <section id="actions"><p class="eyebrow">03 / ACTION PIPELINE</p><h2>擴充文字，不擴大執行權限。</h2>
-        <ol class="steps"><li><strong>接收與過濾</strong><span>network/client 接收 BC 封包，排除 Hidden／Status 等控制訊息，補齊玩家字典。</span></li><li><strong>選取句子</strong><span>action/embedded 優先保留合規的封包附帶原文；沒有原文才使用文字表，最後退回通用文案或原始鍵。</span></li><li><strong>字典代入</strong><span>action/render 解析角色、Asset／Group、CraftName 與 FocusAssetGroup，純文字替換，不執行插件程式。</span></li><li><strong>呈現</strong><span>UI 以 textContent 建立訊息，再經媒體許可機制處理網址。原文聊天、BIO、房名不自動翻譯。</span></li></ol>
-        <aside>插件封包自带的原文目前優先於靜態翻譯，因此為了保留動態內容，有些插件訊息不會隨 UI 語言切換。新增動作資料不等於新增活動效果或原生互動引擎。</aside>
-      </section>
-      <section id="translations"><p class="eyebrow">04 / TRANSLATION CONTRIBUTIONS</p><h2>英文基底一次維護，其他語言只寫差異。</h2>
-        <pre aria-label="翻譯目錄"><code>src/translations/
-├─ ui/                     # 介面文字，en.json / zh.json
-├─ bc/                     # 每類皆為 en 基底、zh 差異
-│  ├─ messages/            # 系統與介面訊息
-│  ├─ actions/             # 動作句子
-│  ├─ items/               # Asset.部位.物品
-│  └─ groups/              # Group.部位
-├─ action/
-│  ├─ xiaosu/              # 小酥動作
-│  ├─ lscg/                # 英文原文；無翻譯時 zh 為空
-│  └─ echo/                # ECHO 活動文字
-├─ items/echo/             # ECHO 物品名稱與已辨識舊名
-├─ groups/echo/            # ECHO 自訂部位名稱
-└─ overrides/              # 人工修正，不被擷取腳本覆寫
-   ├─ en.json
-   └─ zh.json</code></pre>
-        <h3>只想補一條翻譯？</h3><p>編輯 <code>src/translations/overrides/zh.json</code>，保留 BC 的鍵與佔位符。例如：</p><pre><code>{
-  "ChatOther-ItemHead-LSCG_Bap": "SourceCharacter輕拍了TargetCharacter的頭。"
-}</code></pre>
-        <p>一般來源檔以「英文＋所選語言」合併；人工 overrides 最後套用（英文，再所選語言）。缺少翻譯時保留英文，不必複製整份 bc-messages。UI 仍要求中英文鍵與數字佔位符一致。</p>
-        <div class="flow compact"><article><h3>可讀的來源 JSON</h3><p>按插件／責任拆檔，保留來源授權。</p></article><span class="arrow" aria-hidden="true">→</span><article><h3>建置時合併</h3><p>compile-action-catalogs 檢查格式及重複基底鍵。</p></article><span class="arrow" aria-hidden="true">→</span><article><h3>按需下載</h3><p>一份英文基底＋所選語言差異，不為每個插件多發請求。</p></article></div>
-        <p><code>src/action/generated/</code> 是忽略版控的建置產物，不要手改。差異檔使用共用基底的鍵索引，避免每種語言重複長動作名稱；<code>merge.ts</code> 在執行時還原鍵。<code>npm run build</code> 會自動重建，Cloudflare 不需要那些本機插件倉庫。中文覆蓋率高時差異檔仍然很大；這是維護及共用基底的改善，不保證首次中文載入更小。</p>
-        <h3>新增插件或語言</h3><p>插件動作新增 <code>action/插件名稱/en.json</code>，物品名稱新增 <code>items/插件名稱/en.json</code>，部位名稱新增 <code>groups/插件名稱/en.json</code>；每類可選 <code>zh.json</code> 差異，建置器遞迴發現。名稱資料不會載入服裝圖片或改寫外觀。特殊封包格式在 action/ 加入純文字解析與測試。新增完整 UI 語言還需調整 i18n 的 Locale、字典登錄與 UI 語言選單，只有新增 JSON 不會自動新增選單。</p>
-        <p>ECHO 衣物目前靜態擷取 465 個物品鍵（含部分舊名別名）及 11 個部位；動態生成、鏡像部位或執行期修改並非完整涵蓋，未知名稱保留原文。玩家 CraftName 永遠保留自訂名稱。</p>
-      </section>
-      <section id="lifecycle"><p class="eyebrow">05 / SESSION LIFECYCLE</p><h2>先驗證就緒，再開放操作。</h2>
-        <pre><code>idle → connecting → authenticating → waiting-server → ready
-                                                        ↕
-                                                   joining → in-room
-暫時斷線 → Socket.IO 重連 → 重新登入／ServerInfo → 嘗試回原房一次</code></pre>
-        <p>LoginResponse 與 ServerInfo 必須完成；PROD／DEV 以伺服器回覆為準。UI 訂閱唯讀快照，所有送出操作由 client 再驗證。登出、強制斷線及帳號被別處登入不會無限搶回連線。</p>
-        <p>手機回前景以既有好友查詢檢查連線。常亮／本機音訊由使用者選擇；無法保證瀏覽器在背景或鎖屏持續執行。</p>
-      </section>
-      <section id="security"><p class="eyebrow">06 / TRUST BOUNDARIES</p><h2>維持原有的資料界線。</h2>
-        <div class="table-wrap"><table><thead><tr><th>資料／操作</th><th>保存與限制</th></tr></thead><tbody><tr><td>密碼、外觀快照、召喚名單</td><td>分頁記憶體，不寫入歷史資料庫。</td></tr><tr><td>訊息與最近聯絡人</td><td>瀏覽器 IndexedDB 明文，按環境及帳戶 ID 分區。訊息最長 7 天，聯絡人最長 30 天，可縮短或關閉；啟動及使用時逐筆清理，不保證關閉期間清理。按日 TXT 匯出預設排除私人訊息。不新增雲端歷史 API。</td></tr><tr><td>記住帳號、顯示偏好、永久媒體許可</td><td>自選 localStorage；並非加密保管庫。</td></tr><tr><td>插件動作與 AFC</td><td>讀取文字／共享關係資料，不安裝插件。一般擴展互動只發送文字；ECHO 貼貼確認後只更新自己的 ItemMisc 道具並分享位置配對，先顯示雙方格子與已知配對 ID，確認後可替換自己的既有道具，絕不代替對方覆寫；不支援跨房跟隨。</td></tr><tr><td>媒體載入</td><td>先許可來源，再設定 src；來源可看到連線資訊，瀏覽器仍會跟隨重新導向。</td></tr><tr><td>安全詞</td><td>使用者確認後的外觀改寫例外；不保證完整插件連動效果。</td></tr><tr><td>BCX 召喚／個人資料互動</td><td>召喚採允許名單＋接受確認。原生活動預設只顯示可用項目，「全部動作」預設不勾選。勾選後顯示受限項目並略過未實作條件，但已知道具、偏好與房間限制仍停用，不代表完整 BC 引擎。</td></tr></tbody></table></div>
-        <p>第三方文字沿用各來源授權：詳見 <code>docs/third-party-dialogues.md</code> 與 <code>docs/licenses/</code>，不可一律視為 MIT。</p>
-      </section>
-      <section id="workflow"><p class="eyebrow">07 / DEVELOPMENT</p><h2>修改來源，讓建置處理產物。</h2>
-        <pre><code>npm run catalog:compile     # 僅重新合併翻譯
-npm run build               # 自動合併＋型別檢查＋Vite
-npm test                    # 模擬 socket、DOM、翻譯與中繼測試
-npm run dev                 # 正常入口與 /docs/architecture.html
-npm run dev:ui              # 免登入的離線 UI 測試入口</code></pre>
-        <p><code>src/preview/client.ts</code> 透過 <code>UiClient</code> 介面注入虛構資料，重用正式 UI；<code>ui-preview.html</code> 不進入正式建置。預覽 CSP 禁止外部媒體與 iframe，不驗證真實連線或活動效果。</p>
-        <p><code>src/ui/icons.ts</code> 載入本地 Phosphor MIT SVG，<code>icon-select.ts</code> 共用桌面與手機 SVG 選單；桌面顯示圖示＋區域，手機使用精簡圖示；導航未讀數只更新文字。<code>src/safety/plugin-appearance.ts</code> 保護 AEE／SCA 純裝飾資料，外觀仍以未解析 bundle 保留，不載入插件引擎或素材。Lite 行動政策略過自己的束縛能力限制，仍檢查實際工具、對方偏好與房間規則；詳見 <code>docs/mobile-controls-and-assets.md</code>。</p>
-        <p><code>src/ui/room-list.ts</code> 集中處理房間可加入狀態與非破壞性排序；UI 只呈現當頁房間。<code>src/platform/mobile.ts</code> 依 760px 響應式斷點判斷手機布局，封裝橫向翻頁手勢；不依賴完整版 BC 的 CommonIsMobile，也不攔截垂直捲動。</p>
-        <p><code>src/media/providers.ts</code> 負責純 URL 分類；<code>chat-links.ts</code> 負責實際播放器來源許可、按需建立及釋放。支援部分 YouTube／Vimeo／Spotify 網址與直連影音，不載入 ACV 插件或執行定時 DOM 掃描；iframe 服務仍可能載入自己的次級資源。</p>
-        <p>更新上游資料才需要 <code>npm run catalog:bc -- 上游BC目錄</code>／<code>npm run catalog:plugins</code>／<code>npm run catalog:items</code>（ECHO 衣物）。擷取只覆寫對應來源資料，不覆寫 overrides。build／dev 啟動前會自動執行 catalog:compile；dev 運行期間修改翻譯後需再執行一次。</p>
-        <p>自動測試不能取代手機、真實 BC 房间及插件觀看端驗收。部署後請依 <code>docs/community-features-tests.md</code>、<code>docs/mobile-connection-tests.md</code> 檢查。</p>
-      </section>
-      <footer>Architecture is a map, not a promise. · 本文件描述目前實作與明確限制。</footer>
+      <section id="overview"><p class="eyebrow">01 / 系統邊界</p><h2>靜態前端與 WebSocket 中繼。</h2><div class="flow"><article><h3>Pages 靜態資源</h3><p>HTML、CSS、JS 與按需文字表。</p></article><span class="arrow">→</span><article><h3>瀏覽器 LiteApp</h3><p>DOM、連線狀態、草稿、本機 IndexedDB。</p></article><span class="arrow">↔</span><article><h3>Worker ↔ BC</h3><p>固定上游、指定 Origin；Cloudflare 橋接 101 升級連線。</p></article></div><p>帳密與所有遊戲封包都經 Cloudflare。Worker 不新增封包日誌或資料庫；瀏覽器另外保存本機歷史。登入前檢查 <code>/api/relay-status</code>，正式環境依 <code>LoginResponse.Environment</code> 驗證，ServerInfo 人數不能代替 PROD 認證。</p></section>
+      <section id="modules"><p class="eyebrow">02 / 模組責任</p><h2>按責任找原始碼。</h2><div class="module-grid"><article><code>src/main.ts · src/ui/</code><h3>入口與 UI</h3><p>app.ts 訂閱快照與導覽；room-list.ts 排序房間，private-messages.ts 快取私訊視圖；activity-dialog.ts 活動選單，history-settings.ts 保存設定與匯出。dom.ts／contact-card.ts／icons.ts／icon-select.ts／style.css 提供元件與版面。</p></article><article><code>src/network/ · src/shared/</code><h3>協定與快照</h3><p>client.ts 唯一擁有 Socket.IO，管理登入、搜尋、房間、好友與送出驗證。speech.ts 只附加發送者分享的 Original。types.ts 定義 Lite 所用資料子集。</p></article><article><code>src/storage/</code><h3>本機紀錄</h3><p>history.ts 提供白名單、IndexedDB v2、索引查詢與清理；history-session.ts 增量收集、批次重試、快取視窗及競態隔離，不操作 Socket。</p></article><article><code>src/action/</code><h3>文字與活動</h3><p>catalog／merge 載入文字表；embedded／render 處理替代文字與字典；native／extensions／labels 判定與標籤；cuddle 管理確認配對。</p></article><article><code>src/translations/ · src/i18n/</code><h3>翻譯</h3><p>可編輯 JSON 與 UI 翻譯函數分離。玩家聊天、BIO、房名與 CraftName 不自動翻譯，不呼叫遠端翻譯。</p></article><article><code>src/profile/ · media/ · safety/ · platform/</code><h3>邊界功能</h3><p>BIO／好友名稱／AFC；媒體來源許可與生命週期；安全詞與裝飾資料保護；手機手勢、常亮／本機音訊及確認對話框。</p></article><article><code>src/preview/ · scripts/ · tests/ · public/</code><h3>開發與部署</h3><p>虛構 UiClient 重用正式介面；腳本編譯／擷取資料；測試模擬協定、DOM、儲存；public 包含 Worker、標頭、路由與公開授權。</p></article></div></section>
+      <section id="lifecycle"><p class="eyebrow">03 / 登入與恢復</p><h2>先認證，再操作。</h2><pre><code>idle → connecting → authenticating → waiting-server → ready
+                                                        │
+                                                     joining → in-room
+                                                               │
+                                                            ready（離房）
+暫時斷線 → reconnecting → 認證／ServerInfo → 嘗試回房一次</code></pre><p>回房順序：斷線前記憶體房名 → 本機帳戶／環境房名 → BC LastChatRoom。主動離房等操作寫入 null，阻止舊房名回退；失敗不循環加入、不創建房間。手動登出／強制下線不搶回帳號。</p><p>搜尋序列化，只保留最後待查條件；逾時且有新查詢意圖時重新連線認證，隔離沒有請求 ID 的舊回覆。前景 OnlineFriends 探測可由任何正常已認證事件完成，12 秒無回應才重啟傳輸。不補傳聊天。</p><p>常亮與本機音訊預設關閉，不保證手機背景執行。同帳戶自動重連保留既有安全詞基準；手動登出再登入、刷新或身分改變才建立新基準。</p></section>
+      <section id="rendering"><p class="eyebrow">04 / DOM 更新</p><h2>資料同步不等於重建畫面。</h2><pre><code>BC 事件 → client.patch → 新快照
+                           ├→ HistorySession.observe → 待寫批次
+                           └→ LiteApp → 結構判斷／局部 DOM 更新</code></pre><div class="table-wrap"><table><thead><tr><th>觸發</th><th>更新方式</th></tr></thead><tbody><tr><td>同帳戶／連線階段／房名不變</td><td>保留 shell，只更新標頭、成員、房間、好友、搜尋結果及訊息。</td></tr><tr><td>角色外觀／道具或重複同房同步</td><td>成員按會員編號更新，未變節點不替換；點擊時讀最新快照。</td></tr><tr><td>新訊息／修正</td><td>按 ID 維持順序，僅替換更正列；沒有陣列改變時跳過聊天處理。</td></tr><tr><td>抽屜／公開翻頁／公開回覆與取消／引用跳轉</td><td>局部操作，保留輸入框與重疊訊息列。</td></tr><tr><td>首次掛載、帳戶／連線階段／房間切換、主動切頁／對話／語言／部分設定</td><td>仍可能結構重建；中文組字期間延後。</td></tr><tr><td>每分鐘歷史觀察</td><td>不是 UI 重建計時器；約每小時檢查到期清理。</td></tr></tbody></table></div><p>房間 live ring 可選 600／1500／3000 則，DOM 每批 50／100／200（預設 100）；私訊 DOM 每頁 60 則。閱讀舊頁不強制跳底，移除節點前釋放媒體，未變的播放器保留掛載。</p></section>
+      <section id="history"><p class="eyebrow">05 / 本機歷史</p><h2>顯示上限、快取與磁碟期限分開。</h2><ol class="steps"><li><strong>不可變訊息版本</strong><span>新物件代表新增／修正；弱參照集合跳過已處理版本，只對變動內容建立白名單並序列化。陣列身分檢查仍有成本。</span></li><li><strong>350ms 批次寫入</strong><span>按 ID 去重，失敗批次保留並最多自動重試三次；世代與請求序號隔離舊帳戶／舊載入結果，清除與寫入序列化。</span></li><li><strong>IndexedDB v2</strong><span>bc-lite-history 的 messages／contacts 按環境與玩家 ID 分區；訊息預設 7 天、聯絡人 30 天，可縮短或關閉。只保存顯示欄位，不含 Dictionary、BIO、外觀或帳密。</span></li><li><strong>有上限的私訊視窗</strong><span>啟動各讀最多 3000 筆房間／私訊；私訊快取共最多 3000 筆，開啟對象 600 筆、其他對象共 2400 筆。雙向每批 60 筆，以時間＋唯一鍵處理同時刻訊息。</span></li><li><strong>磁碟查詢與匯出</strong><span>淘汰不刪磁碟，舊視窗不插入最新訊息；向後翻頁可回最新。按日 TXT 匯出讀完整未過期磁碟紀錄，預設排除私人訊息。</span></li></ol></section>
+      <section id="actions"><p class="eyebrow">06 / 文字與活動</p><h2>文字相容與活動效果分開。</h2><ol class="steps"><li><strong>過濾控制訊息</strong><span>Hidden／Status 不顯示為普通聊天；Chat／Whisper 可附加發送者提供的 Original，並非破解。</span></li><li><strong>選句與字典代入</strong><span>embedded 處理可讀插件原文；render 代入玩家、物品與部位，UI 用 textContent／安全連結呈現。插件原文可能不隨介面重譯。</span></li><li><strong>送出前再判定</strong><span>原生活動送 Activity，一般擴展項目送文字 Action；已知工具、目標偏好與房間規則仍檢查。Lite actor policy／相容模式不是完整 BC 引擎。</span></li></ol><aside>安全詞與 ECHO 貼貼是明確確認的外觀寫入例外。貼貼只改自己的 ItemMisc 並提交房間外觀，不替對方操作。沒有角色繪圖、衣櫃、完整興奮／表情或插件效果引擎。</aside><p>AFC 只查自己的共享關係；BCX 相容召喚使用允許名單與手動接受，不強制跟隨。BCLiteHello 只有 client: Lite；徽章需要觀看端支援，自報不等於身分驗證。</p></section>
+      <section id="translations"><p class="eyebrow">07 / 翻譯建置</p><h2>編輯來源，編譯基底與差異。</h2><pre><code>src/translations/
+├─ ui/                 # en.json / zh.json，UI 字典
+├─ bc/                 # messages / actions / items / groups
+├─ action/             # xiaosu / lscg / echo
+├─ items/echo/         # ECHO 名稱
+├─ groups/echo/        # ECHO 部位
+└─ overrides/          # 人工覆寫，最後套用
+
+compile-action-catalogs → src/action/generated/
+catalog.ts → 英文基底 + 所選語言差異 → merge.ts</code></pre><p>generated/ 是忽略版控的產物，不手改。build／dev 前置步驟重新編譯；dev 運行中修改翻譯需另跑 catalog:compile。新增插件資料由編譯器發現；完整 UI 新語言仍需更新 Locale、字典登錄與選單。</p><p>首次中文登入需英文基底與中文差異，不是只下載單一中文包。體積與條目數以當次建置為準；沒有翻譯時保留英文／原文。上游擷取才需要本機 BC／插件來源，正式部署不執行插件腳本。</p></section>
+      <section id="security"><p class="eyebrow">08 / 資料與權限</p><h2>說清楚保存位置與例外。</h2><div class="table-wrap"><table><thead><tr><th>資料</th><th>界線</th></tr></thead><tbody><tr><td>密碼／外觀基準／草稿／召喚名單</td><td>分頁記憶體；不存歷史資料庫。</td></tr><tr><td>帳號、偏好、許可、最近房名</td><td>localStorage 明文；記住帳號為自選，其他項目各依自身操作保存。</td></tr><tr><td>訊息／最近聯絡人</td><td>IndexedDB 明文，預設啟用期限保存；登出不等於刪除磁碟紀錄，不新增雲端歷史 API。</td></tr><tr><td>外觀更新</td><td>一般操作保留未知 bundle；安全詞與確認貼貼可寫入，OnlineSharedSettings 不改動。AEE／SCA 裝飾保護不等於插件渲染。</td></tr><tr><td>媒體</td><td>以實際播放器 origin 許可，影音另點擊開啟，同時一個播放器。支援指定服務 iframe；来源可接收 IP、Cookie 或載入次級資源。</td></tr></tbody></table></div><p>帳戶分區不是加密；匯出檔不受網站期限管理。第三方文字、圖片與圖示沿用各來源授權，不能一律視為 Lite 的 MIT。授權全文留於倉庫 docs/licenses/ 與相應 public/licenses/。</p></section>
+      <section id="workflow"><p class="eyebrow">09 / 開發驗證</p><h2>先本機檢查，再真人驗收。</h2><pre><code>npm ci
+npm run build              # 文字編譯、型別檢查、Vite
+npm test                   # 協定、DOM、儲存、文件／建置
+npm run dev:ui             # 免登入虛構資料
+npm run dev:relay           # 先 build；本機 Pages Worker
+node scripts/smoke-relay.mjs # 不登入的握手測試</code></pre><p>UI 預覽透過 UiClient 注入資料，不開歷史 IndexedDB、外部媒體受預覽 CSP 阻擋，ui-preview.html 不進正式建置。Vite dev 本身不提供 Worker。</p><p>happy-dom、fake-indexeddb 與模擬 socket 驗證節點身分、排序及競態，不能取代實機排版、軟鍵盤、背景恢復、Cloudflare PROD 或雙人插件驗收。測試數與 bundle 體積不固定抄寫，使用當次輸出。</p><p>倉庫的 docs/README.md 是文件入口，architecture.md 是維護基準；本 HTML 為可獨立部署摘要，無腳本與外部資源。Markdown 不假設隨站部署。</p></section>
+      <footer>維護基準：docs/architecture.md · 文件導覽：docs/README.md · 第三方來源及授權另依倉庫文件。</footer>
     </main>
   </div>
 </body>
