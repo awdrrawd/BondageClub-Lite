@@ -69,6 +69,7 @@ function setup(savedAccount, savedPerformance, indexedDBFactory) {
   const dom = new Function('document',uiSource('src/ui/dom.ts')+';return {el,select,field,button,checkbox,input};')(window.document);
   const modal=dialogs(window.document);
   const deps = {...history,...dom,...modal,t,window,document:window.document};
+  Object.assign(deps,new Function('localDay',uiSource('src/storage/history-export.ts')+';return {exportHistoryHTML,exportHistoryXLSX};')(history.localDay));
   const buildHistorySettings = new Function(...Object.keys(deps),uiSource('src/ui/history-settings.ts')+';return buildHistorySettings;')(...Object.values(deps));
   const MessageSounds = new Function('window','localStorage',uiSource('src/platform/message-sounds.ts')+';return MessageSounds;')(window,window.localStorage);
   const openHistorySearch = new Function(...Object.keys(deps),uiSource('src/ui/history-search.ts')+';return openHistorySearch;')(...Object.values(deps));

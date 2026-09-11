@@ -28,7 +28,7 @@
   "history.count": "已保存 {0} 則訊息",
   "history.empty": "尚無已保存的訊息",
   "history.date": "日期（裝置當地時間）",
-  "history.export": "匯出當日 TXT",
+  "history.export": "匯出當日紀錄",
   "history.includePrivate": "匯出包含私訊與悄悄話（檔案含私人內容）",
   "history.clear": "清除此帳戶已存紀錄",
   "history.clearConfirm": "刪除此帳戶在目前環境的已存訊息與最近聯絡人？不影響其他帳戶或目前畫面上的訊息。此操作無法復原。",
@@ -441,5 +441,16 @@
   "searchHistory.help": "只搜尋此帳戶尚未過期的本機紀錄，預設排除私訊。結果不會切換房間或送出文字。",
   "searchHistory.resultHelp": "點選結果查看同房間／同對象的上下文。",
   "searchHistory.dates": "開始日期不可晚於結束日期。",
-  "searchHistory.unavailable": "這則紀錄已過期、刪除或未保存。"
+  "searchHistory.unavailable": "這則紀錄已過期、刪除或未保存。",
+  "history.format": "匯出格式",
+  "history.exported": "匯出檔已產生。",
+  "history.exportError": "匯出失敗。若訊息超過 Excel 長度限制，請改用 HTML 或 TXT。",
+  "history.column.time": "時間（本機）",
+  "history.column.room": "房間／對話",
+  "history.column.channel": "頻道",
+  "history.column.senderId": "發送者編號",
+  "history.column.senderName": "發送者名稱",
+  "history.column.targetId": "接收者編號",
+  "history.column.targetName": "接收者名稱",
+  "history.column.text": "訊息"
 }

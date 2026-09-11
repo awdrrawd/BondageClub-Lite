@@ -28,7 +28,7 @@
   "history.count": "{0} saved messages",
   "history.empty": "No saved messages yet",
   "history.date": "Date (device local time)",
-  "history.export": "Export day as TXT",
+  "history.export": "Export selected day",
   "history.includePrivate": "Include private messages and whispers (file contains private content)",
   "history.clear": "Clear this account's saved history",
   "history.clearConfirm": "Delete saved messages and recent contacts for this account and environment? Other accounts and currently displayed messages are unaffected. This cannot be undone.",
@@ -441,5 +441,16 @@
   "searchHistory.help": "Search this account's unexpired local history. Private messages are excluded by default. Results never change rooms or send text.",
   "searchHistory.resultHelp": "Select a result to view context from the same room or conversation.",
   "searchHistory.dates": "The start date must not be after the end date.",
-  "searchHistory.unavailable": "This message expired, was deleted, or was not saved."
+  "searchHistory.unavailable": "This message expired, was deleted, or was not saved.",
+  "history.format": "Export format",
+  "history.exported": "Export file created.",
+  "history.exportError": "Export failed. If a message exceeds Excel limits, use HTML or TXT.",
+  "history.column.time": "Time (local)",
+  "history.column.room": "Room / conversation",
+  "history.column.channel": "Channel",
+  "history.column.senderId": "Sender ID",
+  "history.column.senderName": "Sender name",
+  "history.column.targetId": "Recipient ID",
+  "history.column.targetName": "Recipient name",
+  "history.column.text": "Message"
 }

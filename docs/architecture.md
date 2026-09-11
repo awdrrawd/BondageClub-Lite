@@ -36,7 +36,8 @@ Cloudflare Pages 靜態資源 → 瀏覽器 LiteApp
 | src/platform/message-sounds.ts | BEEP／悄悄話獨立開關；Web Audio 本機短音，使用者手勢解鎖與 700ms 合併 |
 | src/ui/activity-dialog.ts、history-settings.ts | 活動選單與送出前條件刷新；保存設定與按日匯出 |
 | src/ui/dom.ts、contact-card.ts、icons.ts、icon-select.ts、style.css | 安全 DOM 元件、卡片、本機 SVG、選單及響應式版面 |
-| src/storage/history.ts | 白名單資料、IndexedDB v2、雙向索引分頁、到期清理及 TXT 匯出 |
+| src/storage/history.ts | 白名單資料、IndexedDB v2、雙向索引分頁、到期清理及 TXT／HTML／Excel 匯出 |
+| src/storage/history-export.ts | 獨立 HTML 閱讀頁與固定 OOXML／ZIP 結構的 XLSX 產生器；所有儲存格明確為文字 |
 | src/storage/history-session.ts | 增量收集、批次寫入、失敗重試、有上限的私訊快取、跨帳戶／請求競態隔離 |
 | src/action/ | catalog／merge 文字表；render／embedded 句子處理；native／extensions／labels 活動條件與標籤；cuddle 貼貼 |
 | src/translations/、src/i18n/ | 可編輯翻譯來源；UI 語言、參數及狀態重譯 |
