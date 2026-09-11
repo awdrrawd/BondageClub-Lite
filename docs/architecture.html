@@ -24,9 +24,9 @@
       <section id="modules"><p class="eyebrow">02 / MODULE MAP</p><h2>先按責任找檔案。</h2>
         <div class="module-grid">
           <article><code>src/main.ts</code><h3>瀏覽器入口</h3><p>只啟動 UI，不保存帳密、不處理遊戲協定。</p></article>
-          <article><code>src/ui/</code><h3>介面與版面</h3><p>app.ts 訂閱快照、管理分頁；activity-dialog.ts 獨立管理互動面板與 BC 部位熱區，不載入人物貼圖；style.css 管理手機版面。其餘頁面仍集中於 LiteApp。</p></article>
+          <article><code>src/ui/</code><h3>介面與版面</h3><p>app.ts 訂閱快照、管理分頁與帳戶切換清理；history-settings.ts 管理保存設定／匯出，contact-card.ts 建立好友卡片，private-messages.ts 共用私聊排序快取，dom.ts 提供介面元件。activity-dialog.ts 管理互動面板與 BC 部位熱區，不載入人物貼圖；style.css 管理手機版面。</p></article>
           <article><code>src/network/</code><h3>唯一的 Socket 擁有者</h3><p>client.ts：登入、重連、房間、好友、私聊、召喚授權與送出驗證。模組重排不改變協定行為。</p></article>
-          <article><code>src/storage/</code><h3>本機歷史</h3><p>history.ts 負責 IndexedDB、按帳戶／環境分區、逐筆到期與按日 TXT 匯出。history-session.ts 合併增量寫入、恢復私聊並隔離帳戶切換；不操作 Socket、不上傳歷史副本。</p></article>
+          <article><code>src/storage/</code><h3>本機歷史</h3><p>history.ts 負責 IndexedDB v2 索引、帳戶／環境分區、有限筆數查詢、到期清理與按日 TXT 匯出。history-session.ts 合併增量寫入、保留失敗批次重試、更新更正文字及隔離帳戶切換；不操作 Socket、不上傳歷史副本。</p></article>
           <article><code>src/action/</code><h3>動作與文字管線</h3><p>catalog.ts 載入基底／差異；embedded.ts 讀取插件原文；render.ts 代入字典。labels.ts 統一標籤與身體別名；native.ts 判定原生活動；extensions.ts 管理擴展文字互動。cuddle.ts 集中 ECHO 貼貼條件與配對資料，不載入插件程式。</p></article>
           <article><code>src/translations/ + src/i18n/</code><h3>資料與翻譯函數分離</h3><p>翻譯者編輯 JSON；i18n/index.ts 管理 UI 語言、參數及狀態重譯。不呼叫外部翻譯服務。</p></article>
           <article><code>src/profile/ · media/ · safety/ · platform/</code><h3>邊界功能</h3><p>AFC／BIO、媒體來源許可、安全詞外觀規則、行動裝置連線輔助分開維護。shared/types.ts 定義共用資料。</p></article>
@@ -81,7 +81,7 @@ npm test                    # 模擬 socket、DOM、翻譯與中繼測試
 npm run dev                 # 正常入口與 /docs/architecture.html
 npm run dev:ui              # 免登入的離線 UI 測試入口</code></pre>
         <p><code>src/preview/client.ts</code> 透過 <code>UiClient</code> 介面注入虛構資料，重用正式 UI；<code>ui-preview.html</code> 不進入正式建置。預覽 CSP 禁止外部媒體與 iframe，不驗證真實連線或活動效果。</p>
-        <p><code>src/ui/icons.ts</code> 載入本地 Phosphor MIT SVG，<code>icon-select.ts</code> 共用桌面原生選單與手機圖示選單；導航未讀數只更新文字。<code>src/safety/plugin-appearance.ts</code> 保護 AEE／SCA 純裝飾資料，外觀仍以未解析 bundle 保留，不載入插件引擎或素材。Lite 行動政策略過自己的束縛能力限制，仍檢查實際工具、對方偏好與房間規則；詳見 <code>docs/mobile-controls-and-assets.md</code>。</p>
+        <p><code>src/ui/icons.ts</code> 載入本地 Phosphor MIT SVG，<code>icon-select.ts</code> 共用桌面與手機 SVG 選單；桌面顯示圖示＋區域，手機使用精簡圖示；導航未讀數只更新文字。<code>src/safety/plugin-appearance.ts</code> 保護 AEE／SCA 純裝飾資料，外觀仍以未解析 bundle 保留，不載入插件引擎或素材。Lite 行動政策略過自己的束縛能力限制，仍檢查實際工具、對方偏好與房間規則；詳見 <code>docs/mobile-controls-and-assets.md</code>。</p>
         <p><code>src/ui/room-list.ts</code> 集中處理房間可加入狀態與非破壞性排序；UI 只呈現當頁房間。<code>src/platform/mobile.ts</code> 依 760px 響應式斷點判斷手機布局，封裝橫向翻頁手勢；不依賴完整版 BC 的 CommonIsMobile，也不攔截垂直捲動。</p>
         <p><code>src/media/providers.ts</code> 負責純 URL 分類；<code>chat-links.ts</code> 負責實際播放器來源許可、按需建立及釋放。支援部分 YouTube／Vimeo／Spotify 網址與直連影音，不載入 ACV 插件或執行定時 DOM 掃描；iframe 服務仍可能載入自己的次級資源。</p>
         <p>更新上游資料才需要 <code>npm run catalog:bc -- 上游BC目錄</code>／<code>npm run catalog:plugins</code>／<code>npm run catalog:items</code>（ECHO 衣物）。擷取只覆寫對應來源資料，不覆寫 overrides。build／dev 啟動前會自動執行 catalog:compile；dev 運行期間修改翻譯後需再執行一次。</p>

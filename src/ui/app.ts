@@ -3,7 +3,11 @@ import "./style.css";
 import { bcClient } from "../network/client";
 import { decodeBiography } from "../profile/biography";
 import { contactName } from "../profile/friend-names";
-import { HistoryStore, exportHistory, localDay, privateRows, type HistoryMessage, type HistoryPolicy } from "../storage/history";
+import { HistoryStore, historyOwner } from "../storage/history";
+import { buildHistorySettings } from "./history-settings";
+import { el, select, field, button, checkbox, input } from "./dom";
+import { PrivateMessages } from "./private-messages";
+import { contactCard } from "./contact-card";
 import { HistorySession } from "../storage/history-session";
 import { appendChatLinks, MediaConsent } from "../media/chat-links";
 import { afcLovers } from "../profile/afc";
@@ -20,18 +24,22 @@ import type { CharacterSummary, ClientSnapshot, DisplayMessage, RoomCreateOption
 const app = document.querySelector<HTMLDivElement>("#app");
 if (!app) throw new Error(t("m001"));
 
-const escapeText = (value: unknown): string => String(value ?? "");
+const roomLanguageIcons: Record<string, IconName> = { CN:'zh', EN:'en', DE:'de', FR:'fr', ES:'es', RU:'ru', UA:'ua' };
 export type UiClient = Pick<typeof bcClient, "restoreMessages" | "recordLifecycle" | "resumeConnection" | "setMessageLimit" | "subscribe" | "setTextCatalog" | "relocalize" | "disconnect" | "refreshFriends" | "setFriend" | "sendChat" | "sendBeep" | "requestLoverRoom" | "connectionDiagnostics" | "acceptSummon" | "dismissSummon" | "configureSummons" | "search" | "leave" | "join" | "login" | "createRoom" | "clearMessages" | "respondCuddle" | "cuddleInfo" | "activateSafeword" | "activityOptions" | "sendActivity">;
 export class LiteApp {
   private client: UiClient;
   private history: HistorySession;
   private historyError = false;
+  private restoringHistory = false;
   private mediaConsent = new MediaConsent(document);
   private privateFilter = "room";
   private replyTarget: DisplayMessage | null = null;
   private privateListOpen = true;
   private privateVisible = 60;
   private privateEndId: string | null = null;
+  private privateMessagesView = new PrivateMessages();
+  private privatePaging = false;
+  private privateRendered = new WeakMap<Element, DisplayMessage>();
   private summonConfig = { enabled: false, members: "", text: "Come to my room immediately" };
   private stability = new StabilityControls();
   private snapshot: Readonly<ClientSnapshot> | null = null;
@@ -84,7 +92,10 @@ export class LiteApp {
     this.historyError = !persist && !document.documentElement.hasAttribute("data-ui-preview");
     this.history = new HistorySession(persist ? new HistoryStore(window.indexedDB) : null, () => {
       if (this.snapshot?.player) this.updateFriendContent();
-    }, () => { if (!this.historyError) { this.historyError = true; this.localNotice(t("history.error")); } }, (owner, messages) => this.client.restoreMessages(owner, messages));
+    }, () => { if (!this.historyError) { this.historyError = true; this.localNotice(t("history.error")); } }, (owner, messages) => {
+      this.restoringHistory=true;
+      try { this.client.restoreMessages(owner,messages); } finally { this.restoringHistory=false; }
+    });
     window.addEventListener("pagehide", () => { void this.history.flush(); });
     window.setInterval(() => { if (this.snapshot) this.history.observe(this.snapshot); }, 60000);
     // Delegate selection before controls run; reply jumps may then select their destination.
@@ -139,17 +150,18 @@ export class LiteApp {
     this.client.subscribe((snapshot) => {
       const previous = this.snapshot;
       this.snapshot = snapshot;
+      const ownerChanged = (previous ? historyOwner(previous) : '') !== historyOwner(snapshot);
+      if (ownerChanged) this.resetAccountView();
       this.history.observe(snapshot);
       if (this.privateMode === "whisper" && !snapshot.characters.some(c => c.MemberNumber === this.contact)) { this.privateMode = "beep"; this.replyTarget = null; }
       if (previous && (snapshot.characters !== previous.characters || snapshot.player !== previous.player || snapshot.room !== previous.room)) {
         document.querySelector('.activity-dialog')?.dispatchEvent(new window.Event('activity-refresh'));
       }
-      if (!snapshot.player) this.roomSearchInitialized = false;
       if (snapshot.phase === "ready" && !this.roomSearchInitialized) {
         this.roomSearchInitialized = true;
-        const member = snapshot.player?.MemberNumber;
+        const owner = historyOwner(snapshot);
         window.setTimeout(() => {
-          if (member && this.snapshot?.player?.MemberNumber === member && ["ready", "joining", "in-room"].includes(this.snapshot.phase)) this.searchRooms(true);
+          if (owner && this.snapshot && historyOwner(this.snapshot) === owner && ["ready", "joining", "in-room"].includes(this.snapshot.phase)) this.searchRooms(true);
         }, 0);
       }
       if (snapshot.cuddleRequest !== previous?.cuddleRequest || (snapshot.cuddleRequest && snapshot.characters !== previous?.characters)) this.showCuddleRequest();
@@ -157,16 +169,14 @@ export class LiteApp {
       if (snapshot.player && !this.catalogLoading) {
         this.refreshCatalog();
       }
-      if (!snapshot.player) { this.contactDrafts.clear(); this.mediaConsent.resetSession(); this.replyTarget = null; this.summonConfig.enabled = false; }
       if (snapshot.summon !== previous?.summon) this.updateSummon();
       if (previous && snapshot.messages !== previous.messages && snapshot.messages.some((message, index) => message.id === previous.messages[index]?.id && message.text !== previous.messages[index]?.text)) { this.render(); return; }
       if (!["ready", "joining", "in-room"].includes(snapshot.phase)) document.querySelectorAll(".profile-dialog").forEach(dialog => dialog.remove());
-      if (!snapshot.player) { this.unread = 0; this.contact = 0; this.beepDraft = ""; this.chatDraft = ""; this.tab = "rooms"; }
       if (snapshot.room && snapshot.room.Name !== previous?.room?.Name) { this.tab = "chat"; this.visibleMessages = this.performance.visible; this.historyEndId = null; }
       if (!snapshot.room && previous?.room && this.tab === "chat") this.tab = "rooms";
-      if (previous && snapshot.beeps !== previous.beeps && snapshot.beeps.at(-1)?.incoming && this.tab !== "private") this.unread++;
-      if (previous && snapshot.whispers !== previous.whispers && snapshot.whispers?.at(-1)?.sender !== snapshot.player?.MemberNumber && snapshot.whispers?.length && this.tab !== "private") this.unread++;
-      if (previous && snapshot.messages !== previous.messages && snapshot.messages.length && this.tab !== "chat") this.roomUnread++;
+      if (previous && !ownerChanged && snapshot.beeps !== previous.beeps && snapshot.beeps.at(-1)?.incoming && this.tab !== "private" && snapshot.beeps.at(-1)?.id !== previous.beeps.at(-1)?.id) this.unread++;
+      if (previous && !ownerChanged && snapshot.whispers !== previous.whispers && snapshot.whispers?.at(-1)?.sender !== snapshot.player?.MemberNumber && snapshot.whispers?.length && this.tab !== "private" && snapshot.whispers.at(-1)?.id !== previous.whispers?.at(-1)?.id) this.unread++;
+      if (previous && !ownerChanged && !this.restoringHistory && snapshot.messages !== previous.messages && snapshot.messages.length && this.tab !== "chat" && snapshot.messages.at(-1)?.id !== previous.messages.at(-1)?.id) this.roomUnread++;
       // Chat packets and server population updates never replace an active composer (including IME input).
       if (previous && snapshot.phase === previous.phase && snapshot.player === previous.player && snapshot.room === previous.room && snapshot.characters === previous.characters && snapshot.rooms === previous.rooms) {
         this.updateHeader();
@@ -177,6 +187,17 @@ export class LiteApp {
       }
       this.render();
     });
+  }
+
+  private resetAccountView(): void {
+    this.contactDrafts.clear(); this.mediaConsent.resetSession(); this.replyTarget=null;
+    this.summonConfig={enabled:false,members:'',text:'Come to my room immediately'};
+    this.unread=0; this.roomUnread=0; this.contact=0; this.beepDraft=''; this.chatDraft=''; this.password=''; this.notice='';
+    this.tab='rooms'; this.friendFilter='online'; this.friendQuery=''; this.privateFilter='room'; this.privateMode='beep';
+    this.privateListOpen=true; this.privateVisible=60; this.privateEndId=null; this.privatePaging=false; this.privateMessagesView.reset();
+    this.membersOpen=false; this.historyEndId=null; this.visibleMessages=this.performance.visible; this.roomPage=0; this.roomSearchInitialized=false; this.query='';
+    this.composing=false; this.renderPending=false;
+    document.querySelectorAll('.profile-dialog, .activity-dialog').forEach(dialog=>dialog.remove());
   }
 
   private applySettings(): void {
@@ -474,6 +495,7 @@ export class LiteApp {
     this.beepDraft = this.contactDrafts.get(memberNumber) || "";
     this.privateMode = mode === "whisper" && this.snapshot!.characters.some(c => c.MemberNumber === memberNumber) ? "whisper" : "beep"; this.tab = "private"; this.unread = 0;
     this.render(); document.getElementById("BeepText")?.focus();
+    void this.history.loadPrivate(memberNumber).catch(()=>this.localNotice(t('history.error')));
   }
 
   private fillFriendList(list: HTMLElement): void {
@@ -504,24 +526,11 @@ export class LiteApp {
       if (!`${name} ${id}`.toLowerCase().includes(this.friendQuery.trim().toLowerCase())) continue;
       total++;
       if (total > 80) continue;
-      const row = this.el("article", "contact-card");
-      row.dataset.member = String(id);
-      row.tabIndex = 0; row.setAttribute("role", "button"); row.setAttribute("aria-label", `${name} #${id} · ${t("m028")}`);
-      row.classList.toggle("contact-offline", presence !== "online");
-      const activate = () => this.openConversation(id);
-      row.addEventListener("click", event => { if (!(event.target as HTMLElement).closest("button")) activate(); });
-      row.addEventListener("keydown", event => { if (event.target === row && ["Enter", " "].includes(event.key)) { event.preventDefault(); activate(); } });
-      if (this.tab === "private" && this.contact === id) row.classList.add("selected-contact");
-      const info = this.el("div");
       const relationship = friend?.Type || (state.player?.Ownership?.MemberNumber === id ? "Owner" : state.player?.Lovership?.some(lover => lover.MemberNumber === id) ? "Lover" : state.player?.FriendList?.includes(id) ? "Friend" : "");
       const relation = ({ Friend: t("relation.friend"), Lover: t("relation.lover"), Owner: t("relation.owner"), Submissive: t("relation.submissive") }[relationship] || relationship);
-      const title = this.el("div", "contact-title");
-      title.append(this.el("strong", "", name), this.el("span", "contact-id", `#${id}`), this.el("span", "contact-relation", relation));
-      info.append(title);
       const sharedRoom = inRoom ? state.room?.Name : fresh ? friend?.ChatRoomName || state.loverRooms?.[id]?.name : undefined;
       const roomLabel = inRoom ? t("contact.sameRoom") : fresh && friend?.Private ? t("contact.privateRoom") : sharedRoom;
-      if (roomLabel) info.append(this.el("p", "contact-room", roomLabel));
-      row.append(info);
+      const {row,info}=contactCard({id,name,online:presence==='online',selected:this.tab==='private' && this.contact===id,relation,room:roomLabel,activate:()=>this.openConversation(id)});
       if (afcLovers(state.player).some(lover => lover.memberNumber === id)) {
         info.append(this.el("span", "tag afc-tag", t("afc.title")));
         const queryRoom = this.button(t("afc.query"), "ghost afc-query", "button");
@@ -557,6 +566,20 @@ export class LiteApp {
     return index >= 0 ? index + 1 : rows.length;
   }
   private pagePrivate(direction: number): void {
+    if (this.privatePaging) return;
+    const current=this.allPrivateMessages();
+    if (direction<0 && this.privatePageEnd(current)<=this.privateVisible && this.contact && this.history.hasOlderPrivate(this.contact)) {
+      const owner=historyOwner(this.snapshot!), peer=this.contact;
+      this.privatePaging=true;
+      if (!this.privateEndId) this.privateEndId=current.at(-1)?.id || null;
+      void this.history.loadPrivate(peer,true).then(()=> {
+        if (this.snapshot && owner===historyOwner(this.snapshot) && peer===this.contact) { this.privatePaging=false; this.movePrivatePage(direction); }
+      }).catch(()=>this.localNotice(t('history.error'))).finally(()=>{ if (this.snapshot && owner===historyOwner(this.snapshot) && peer===this.contact) this.privatePaging=false; });
+      return;
+    }
+    this.movePrivatePage(direction);
+  }
+  private movePrivatePage(direction: number): void {
     const rows = this.allPrivateMessages();
     const end = Math.min(rows.length, Math.max(Math.min(this.privateVisible, rows.length), this.privatePageEnd(rows) + direction * this.privateVisible));
     this.privateEndId = end === rows.length ? null : rows[end - 1]?.id || null;
@@ -565,9 +588,10 @@ export class LiteApp {
   private updatePrivatePaging(paging: Element | null): void {
     if (!paging) return;
     const rows = this.allPrivateMessages(), end = this.privatePageEnd(rows);
-    (paging as HTMLElement).hidden = rows.length <= this.privateVisible;
+    const more=!!this.contact && this.history.hasOlderPrivate(this.contact);
+    (paging as HTMLElement).hidden = rows.length <= this.privateVisible && !more;
     const older = paging.querySelector<HTMLButtonElement>('[data-history="older"]'), newer = paging.querySelector<HTMLButtonElement>('[data-history="newer"]');
-    if (older) older.disabled = end <= this.privateVisible;
+    if (older) older.disabled = end <= this.privateVisible && !more;
     if (newer) newer.disabled = end >= rows.length;
   }
 
@@ -583,10 +607,7 @@ export class LiteApp {
     return rows.slice(Math.max(0, end - this.privateVisible), end);
   }
   private allPrivateMessages(): DisplayMessage[] {
-    const state = this.snapshot!;
-    const rows = new Map([...this.history.messages.map(row => row.message), ...privateRows(state)].map(message => [message.id, message]));
-    return [...rows.values()].filter(message => !this.contact || message.sender === this.contact || (message.sender === state.player!.MemberNumber && message.target === this.contact))
-      .sort((a, b) => +a.time - +b.time);
+    return this.privateMessagesView.get(this.snapshot!,this.history.messages,this.contact);
   }
 
   private syncPrivateRows(log: HTMLElement, messages: DisplayMessage[], empty: string): void {
@@ -595,7 +616,16 @@ export class LiteApp {
     const existing = new Map(Array.from(log.children).map(node => [(node as HTMLElement).dataset.messageId, node]));
     let cursor: ChildNode | null = log.firstChild;
     for (const message of messages) {
-      const node = existing.get(message.id) || this.messageNode(message);
+      let node = existing.get(message.id);
+      const prior=node ? this.privateRendered.get(node) : undefined;
+      if (node && prior && (prior.text!==message.text || prior.senderName!==message.senderName || prior.labelColor!==message.labelColor)) {
+        const replacement=this.messageNode(message);
+        this.mediaConsent.dispose(node as HTMLElement);
+        if (node===cursor) cursor=replacement;
+        node.replaceWith(replacement); node=replacement;
+      }
+      node ??= this.messageNode(message);
+      this.privateRendered.set(node,message);
       const element = node as HTMLElement;
       element.classList.toggle("private-outgoing", message.sender === this.snapshot!.player?.MemberNumber);
       element.classList.toggle("private-incoming", message.sender !== this.snapshot!.player?.MemberNumber);
@@ -650,51 +680,8 @@ export class LiteApp {
   }
 
   private buildHistorySettings(): HTMLElement {
-    const panel = this.el("section", "settings-card history-settings");
-    panel.append(this.el("h2", "", t("history.title")), this.el("p", "", t("history.privacy")), this.el("p", "muted", t("history.cleanup")));
-    for (const [key, choices] of [["recentDays", [0,7,14,30]], ["roomDays", [0,1,3,7]], ["privateDays", [0,1,3,7]]] as const) {
-      const select = this.select(t(`history.${key}`), choices.map(days => [String(days), days ? t("history.days", [days]) : t("history.off")]), String(this.history.policy[key]));
-      select.id = `History-${key}`;
-      select.addEventListener("change", () => {
-        const value = Number(select.value), policy: HistoryPolicy = {...this.history.policy, [key]: value};
-        if (value < this.history.policy[key] && !window.confirm(t("history.shorten"))) { select.value = String(this.history.policy[key]); return; }
-        select.disabled = true;
-        void this.history.configure(policy).then(() => refresh()).catch(() => { this.localNotice(t("history.error")); }).finally(() => { select.disabled = false; });
-      }); panel.append(this.field(t(`history.${key}`), select));
-    }
-    const status = this.el("p", "muted", this.historyError ? t("history.error") : t("history.loading")); status.setAttribute("role", "status");
-    const dates = this.select(t("history.date"), [], ""); dates.id = "HistoryDate";
-    let records: HistoryMessage[] = [], includePrivate = false;
-    const download = this.button(t("history.export"), "secondary", "button"); download.disabled = true;
-    const updateDates = () => {
-      const selected = dates.value;
-      dates.replaceChildren();
-      for (const date of [...new Set(records.filter(row => includePrivate || row.kind === 'room').map(row => localDay(row.timestamp)))].sort().reverse()) {
-        const option = document.createElement("option"); option.value = date; option.textContent = date; dates.append(option);
-      }
-      if ([...dates.options].some(option => option.value === selected)) dates.value = selected;
-      download.disabled = !dates.options.length;
-      status.textContent = this.historyError ? t("history.error") : records.length ? t("history.count", [records.length]) : t("history.empty");
-    };
-    const refresh = async () => { try { const data = await this.history.read(); if (panel.isConnected) { records = data.messages; updateDates(); } } catch { status.textContent = t("history.error"); } };
-    download.addEventListener("click", () => {
-      // Re-read on click so expired records or a changed retention policy cannot leak into export.
-      const day = dates.value, owner = this.snapshot?.player?.MemberNumber;
-      void this.history.read().then(data => {
-        if (!panel.isConnected || this.snapshot?.player?.MemberNumber !== owner) return;
-        const labels: Record<string,string> = {Chat:t("history.chat"),Emote:t("history.emote"),Action:t("history.action"),Activity:t("history.action"),Whisper:t("m029"),Beep:t("m028"),Local:t("history.system"),ServerMessage:t("history.system")};
-        const content = exportHistory(data.messages, day, includePrivate, type => labels[type] || type);
-        const url = URL.createObjectURL(new Blob(["\uFEFF", content], {type:"text/plain;charset=utf-8"}));
-        const a = document.createElement("a"); a.href = url; a.download = `BC-Lite-${owner}-${day}.txt`; document.body.append(a); a.click(); a.remove();
-        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-      }).catch(() => { status.textContent = t("history.error"); });
-    });
-    const clear = this.button(t("history.clear"), "ghost danger", "button");
-    clear.addEventListener("click", () => { if (window.confirm(t("history.clearConfirm"))) { clear.disabled = true; void this.history.clear().then(refresh).catch(() => { status.textContent = t("history.error"); }).finally(() => { clear.disabled = false; }); } });
-    panel.append(status, this.field(t("history.date"), dates), this.checkbox(t("history.includePrivate"), false, value => { includePrivate = value; updateDates(); }), download, clear);
-    void refresh(); return panel;
+    return buildHistorySettings({history:this.history, owner:()=>this.snapshot ? historyOwner(this.snapshot) : '', hasError:()=>this.historyError, notice:message=>this.localNotice(message)});
   }
-
   private run(action: () => void): void { try { action(); } catch (error) { this.localNotice(error instanceof Error ? error.message : t("m072")); } }
 
   private buildPerformanceSettings(): HTMLElement {
@@ -834,8 +821,8 @@ export class LiteApp {
     const space = this.select(t("m090"), [["X", t("m091")], ["", t("m092")], ["M", t("m093")]], this.space);
     space.addEventListener("change", () => { this.space = space.value as RoomSearchRequest["Space"]; this.searchRooms(true); });
     const queryField = this.field(t("m094"), query); queryField.classList.add("room-query");
-    const languageField = this.el("div", "field room-language"); languageField.append(this.el("span", "field-label", t("m089")), iconSelect(language, {}, "translate", true));
-    const spaceField = this.el("div", "field room-space"); spaceField.append(this.el("span", "field-label", t("m090")), iconSelect(space, {X:"mixed", M:"male", "":"female"}, "mixed"));
+    const languageField = this.el("div", "field room-language"); languageField.append(this.el("span", "field-label", t("m089")), iconSelect(language, roomLanguageIcons, "translate", true));
+    const spaceField = this.el("div", "field room-space"); spaceField.append(this.el("span", "field-label", t("m090")), iconSelect(space, {X:"mixed", M:"male", "":"female"}, "mixed", true));
     const options = this.el("div", "search-options");
     options.append(
       this.checkbox(t("m095"), this.showFull, (value) => { this.showFull = value; }),
@@ -897,7 +884,7 @@ export class LiteApp {
     createLanguage.addEventListener("change", () => { this.language = createLanguage.value as RoomSearchRequest["Language"]; });
     const createSpace = this.select(t("m116"), [["X", t("m117")], ["", t("m118")], ["M", t("m119")]], this.space);
     createSpace.addEventListener("change", () => { this.space = createSpace.value as RoomSearchRequest["Space"]; });
-    create.append(this.field(t("m089"), createLanguage), this.field(t("m090"), createSpace), this.buildRoomOptions());
+    create.append(this.field(t("m089"), iconSelect(createLanguage, roomLanguageIcons, "translate", true)), this.field(t("m090"), iconSelect(createSpace, {X:"mixed", M:"male", "":"female"}, "mixed", true)), this.buildRoomOptions());
     if (state.room) create.append(this.el("p", "muted", t("m120")));
     create.append(createButton);
     create.addEventListener("submit", event => {
@@ -921,7 +908,9 @@ export class LiteApp {
     card.dataset.roomName = room.Name; card.dataset.roomSpace = room.Space;
     const top = this.el("div", "room-card-top");
     const meta = this.el("div", "room-tags");
-    meta.append(this.el("span", "tag", room.Language || "—"), this.el("span", "tag", `${room.MemberCount}/${room.MemberLimit}`));
+    const languageTag = this.el("span", "tag room-language-tag", room.Language || "—");
+    languageTag.prepend(icon(roomLanguageIcons[room.Language?.toUpperCase()] || "translate"));
+    meta.append(languageTag, this.el("span", "tag", `${room.MemberCount}/${room.MemberLimit}`));
     const restricted = room.Access && !room.Access.includes("All");
     if (!room.CanJoin || restricted) {
       const access = this.el("span", "tag locked", room.CanJoin ? "🗝️" : "🔒");
@@ -997,6 +986,7 @@ export class LiteApp {
     const close = this.button(t("m160"), "ghost mobile-members", "button");
     close.addEventListener("click", () => { this.membersOpen = false; this.render(); });
     roomInfo.append(close, this.el("p", "eyebrow", state.room!.Language || t("m085")), this.el("h1", "", state.room!.Name), this.el("p", "", state.room!.Description || t("m127")));
+    roomInfo.querySelector('.eyebrow')?.prepend(icon(roomLanguageIcons[state.room!.Language?.toUpperCase()] || 'translate'));
     const leave = this.button(t("m157"), "ghost danger", "button");
     leave.addEventListener("click", () => this.client.leave());
     roomInfo.append(leave);
@@ -1296,13 +1286,13 @@ export class LiteApp {
     return footer;
   }
 
-  private field(label: string, control: HTMLElement): HTMLElement { const field = this.el("label", "field"); field.append(this.el("span", "field-label", label), control); return field; }
-  private input(id: string, placeholder: string, type: string, value: string): HTMLInputElement { const input = document.createElement("input"); input.id = id; input.name = id; input.type = type; input.placeholder = placeholder; input.value = value; input.required = type !== "search"; return input; }
-  private select(label: string, options: string[][], value: string): HTMLSelectElement { const select = document.createElement("select"); select.setAttribute("aria-label", label); for (const [key, text] of options) { const option = document.createElement("option"); option.value = key; option.textContent = text; select.append(option); } if (options.some(([key]) => key === value)) select.value = value; return select; }
-  private checkbox(label: string, checked: boolean, change: (value: boolean) => void): HTMLElement { const wrap = this.el("label", "checkbox"); const input = document.createElement("input"); input.type = "checkbox"; input.checked = checked; input.addEventListener("change", () => change(input.checked)); wrap.append(input, this.el("span", "", label)); return wrap; }
-  private button(text: string, className: string, type: "button" | "submit"): HTMLButtonElement { const button = this.el("button", `button ${className}`, text) as HTMLButtonElement; button.type = type; return button; }
+  private field = field;
+  private input = input;
+  private select = select;
+  private checkbox = checkbox;
+  private button = button;
+  private el = el;
   private localNotice(message: string): void { this.notice = message; window.alert(message); }
-  private el<K extends keyof HTMLElementTagNameMap>(tag: K, className = "", text?: string): HTMLElementTagNameMap[K] { const node = document.createElement(tag); if (className) node.className = className; if (text !== undefined) node.textContent = escapeText(text); return node; }
 }
 
 if (!document.documentElement.hasAttribute("data-ui-preview")) new LiteApp();

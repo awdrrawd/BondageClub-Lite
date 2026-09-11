@@ -8,6 +8,8 @@ export function historyPolicy(value: Partial<HistoryPolicy> = {}): HistoryPolicy
 }
 export interface HistoryMessage {
   expiresAt?: number;
+  day?: string;
+  peer?: number;
   key: string; owner: string; timestamp: number; kind: 'room' | 'private'; room: string;
   message: DisplayMessage;
 }
@@ -48,7 +50,7 @@ export function historyBatch(state: Readonly<ClientSnapshot>, seen?: Set<string>
       }
     }
   };
-  if (state.room) state.messages.filter(m => m.type !== 'Whisper' && m.type !== 'Beep').forEach(m => collect(m, 'room'));
+  state.messages.filter(m => (state.room || m.roomName) && m.type !== 'Whisper' && m.type !== 'Beep').forEach(m => collect(m, 'room'));
   privateRows(state).forEach(m => collect(m, 'private'));
   return {messages, contacts: [...contacts.values()]};
 }
@@ -77,6 +79,10 @@ export function exportHistory(records: HistoryMessage[], day: string, includePri
 function complete(tx: IDBTransaction): Promise<void> {
   return new Promise((resolve, reject) => { tx.oncomplete = () => resolve(); tx.onabort = () => reject(tx.error || new Error('History transaction aborted')); tx.onerror = () => reject(tx.error); });
 }
+function historyPeer(row: HistoryMessage): number {
+  const self = Number(row.owner.slice(row.owner.lastIndexOf(':') + 1));
+  return row.kind === 'private' ? (row.message.sender === self ? row.message.target || 0 : row.message.sender || 0) : 0;
+}
 /** Account/environment-scoped IndexedDB. Expiration deletes cursor records, never the database. */
 export class HistoryStore {
   private db: Promise<IDBDatabase> | null = null;
@@ -84,17 +90,32 @@ export class HistoryStore {
   constructor(factory: IDBFactory = indexedDB) { this.factory = factory; }
   private open(): Promise<IDBDatabase> {
     if (!this.db) this.db = new Promise<IDBDatabase>((resolve, reject) => {
-      const request = this.factory.open('bc-lite-history', 1);
+      let blocked = false;
+      const request = this.factory.open('bc-lite-history', 2);
       request.onupgradeneeded = () => {
         for (const name of ['messages', 'contacts']) {
-          const store = request.result.createObjectStore(name, {keyPath: 'key'});
-          store.createIndex('owner', 'owner'); store.createIndex('timestamp', 'timestamp');
-          if (name === 'messages') store.createIndex('ownerKind', ['owner', 'kind']);
+          const store = request.result.objectStoreNames.contains(name) ? request.transaction!.objectStore(name) : request.result.createObjectStore(name, {keyPath: 'key'});
+          if (!store.indexNames.contains('owner')) store.createIndex('owner', 'owner');
+          if (!store.indexNames.contains('timestamp')) store.createIndex('timestamp', 'timestamp');
+          if (!store.indexNames.contains('expiresAt')) store.createIndex('expiresAt', 'expiresAt');
+          if (name === 'messages') {
+            if (!store.indexNames.contains('ownerKind')) store.createIndex('ownerKind', ['owner', 'kind']);
+            store.createIndex('ownerKindTime', ['owner', 'kind', 'timestamp', 'key']);
+            store.createIndex('ownerDay', ['owner', 'day', 'kind']);
+            store.createIndex('ownerPeerTime', ['owner', 'peer', 'timestamp', 'key']);
+          }
+          const migration = store.openCursor();
+          migration.onsuccess = () => {
+            const cursor = migration.result; if (!cursor) return;
+            const row = cursor.value;
+            cursor.update({...row, ...(name === 'messages' ? {day:localDay(row.timestamp),peer:historyPeer(row)} : {}), expiresAt:row.expiresAt ?? row.timestamp + (name === 'contacts' ? 30 : 7) * DAY});
+            cursor.continue();
+          };
         }
       };
-      request.onsuccess = () => { const db = request.result; db.onversionchange = () => { db.close(); this.db = null; }; resolve(db); };
+      request.onsuccess = () => { const db = request.result; if (blocked) { db.close(); return; } db.onversionchange = () => { db.close(); this.db = null; }; resolve(db); };
       request.onerror = () => { this.db = null; reject(request.error); };
-      request.onblocked = () => { this.db = null; reject(new Error('History database upgrade blocked')); };
+      request.onblocked = () => { blocked = true; this.db = null; reject(new Error('History database upgrade blocked')); };
     });
     return this.db;
   }
@@ -102,7 +123,15 @@ export class HistoryStore {
     const db = await this.open(), tx = db.transaction(['messages','contacts'], 'readwrite'), done = complete(tx);
     for (const row of batch.messages) {
       const days = row.kind === 'room' ? policy.roomDays : policy.privateDays;
-      if (retained(row.timestamp, days, now)) tx.objectStore('messages').put({...row, expiresAt: row.timestamp + days * DAY});
+      if (retained(row.timestamp, days, now)) {
+        const store = tx.objectStore('messages'), request = store.get(row.key);
+        request.onsuccess = () => {
+          const previous: HistoryMessage | undefined = request.result;
+          const timestamp = previous?.timestamp ?? row.timestamp;
+          const expiresAt = previous?.expiresAt ?? timestamp + days * DAY;
+          if (expiresAt > now) store.put({...row, timestamp, day:localDay(timestamp), peer:historyPeer(row), message:{...row.message,time:new Date(timestamp)}, expiresAt});
+        };
+      }
     }
     for (const row of batch.contacts) if (retained(row.timestamp, policy.recentDays, now)) {
       const store = tx.objectStore('contacts'), request = store.get(row.key);
@@ -116,6 +145,34 @@ export class HistoryStore {
     const contacts = tx.objectStore('contacts').index('owner').getAll(owner);
     await done; return { messages: messages.result, contacts: contacts.result };
   }
+  /** Reverse indexed cursor stops at the requested page, including equal-time messages. */
+  async page(owner: string, kind: 'room' | 'private', limit = 3000, before?: HistoryMessage, peer?: number): Promise<HistoryMessage[]> {
+    const db = await this.open(), tx = db.transaction('messages', 'readonly'), done = complete(tx);
+    const prefix = peer === undefined ? kind : peer;
+    const upper = before ? [owner,prefix,before.timestamp,before.key] : [owner,prefix,Number.MAX_SAFE_INTEGER,[]];
+    const request = tx.objectStore('messages').index(peer === undefined ? 'ownerKindTime' : 'ownerPeerTime').openCursor(IDBKeyRange.bound([owner,prefix,0],upper,false,!!before), 'prev');
+    const rows: HistoryMessage[] = [];
+    request.onsuccess = () => { const cursor = request.result; if (!cursor) return; if (cursor.value.expiresAt > Date.now()) rows.push(cursor.value); if (rows.length < limit) cursor.continue(); };
+    await done; return rows.reverse();
+  }
+  async initial(owner: string, limit = 3000): Promise<HistoryBatch> {
+    const db = await this.open(), tx = db.transaction('contacts', 'readonly'), done = complete(tx);
+    const contacts = tx.objectStore('contacts').index('owner').getAll(owner);
+    const [room, privateMessages] = await Promise.all([this.page(owner,'room',limit),this.page(owner,'private',limit),done]);
+    return {messages:[...room,...privateMessages],contacts:contacts.result};
+  }
+  async days(owner: string, includePrivate: boolean): Promise<Array<{day:string;count:number}>> {
+    const db = await this.open(), tx = db.transaction('messages','readonly'), done = complete(tx), counts = new Map<string,number>();
+    const request = tx.objectStore('messages').index('ownerDay').openKeyCursor(IDBKeyRange.bound([owner],[owner,[]]));
+    request.onsuccess = () => { const cursor = request.result; if (!cursor) return; const [,day,kind] = cursor.key as string[]; if (includePrivate || kind === 'room') counts.set(day,(counts.get(day)||0)+1); cursor.continue(); };
+    await done; return [...counts].map(([day,count])=>({day,count})).sort((a,b)=>b.day.localeCompare(a.day));
+  }
+  async day(owner: string, day: string, includePrivate: boolean): Promise<HistoryMessage[]> {
+    const db = await this.open(), tx = db.transaction('messages','readonly'), done = complete(tx);
+    const range = includePrivate ? IDBKeyRange.bound([owner,day],[owner,day,[]]) : IDBKeyRange.only([owner,day,'room']);
+    const request = tx.objectStore('messages').index('ownerDay').getAll(range);
+    await done; return request.result;
+  }
   async clearRoom(owner: string): Promise<void> {
     const db = await this.open(), tx = db.transaction('messages', 'readwrite'), done = complete(tx);
     const request = tx.objectStore('messages').index('ownerKind').openCursor([owner, 'room']);
@@ -125,14 +182,18 @@ export class HistoryStore {
   async prune(owner: string, policy: HistoryPolicy, now = Date.now(), clear = false): Promise<void> {
     const db = await this.open(), tx = db.transaction(['messages','contacts'], 'readwrite'), done = complete(tx);
     for (const name of ['messages','contacts']) {
-      // Scan all records for the hard maximum, including accounts not currently logged in.
-      const request = tx.objectStore(name).openCursor();
+      // Routine expiration only visits expired index entries, not every saved body.
+      const store = tx.objectStore(name);
+      const expired = store.index('expiresAt').openCursor(IDBKeyRange.upperBound(now));
+      expired.onsuccess = () => { const cursor = expired.result; if (cursor) { cursor.delete(); cursor.continue(); } };
+      if (!owner) continue;
+      const request = store.index('owner').openCursor(owner);
       request.onsuccess = () => {
         const cursor = request.result; if (!cursor) return;
         const row = cursor.value;
         const days = row.owner !== owner ? (name === 'contacts' ? 30 : 7) : clear ? 0 : name === 'contacts' ? policy.recentDays : row.kind === 'room' ? policy.roomDays : policy.privateDays;
         if (!retained(row.timestamp, days, now) || row.expiresAt <= now) cursor.delete();
-        else if (row.owner === owner) cursor.update({...row, expiresAt: row.timestamp + days * DAY});
+        else if (row.expiresAt !== row.timestamp + days * DAY) cursor.update({...row, expiresAt: row.timestamp + days * DAY});
         cursor.continue();
       };
     }

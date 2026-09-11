@@ -58,7 +58,13 @@ function setup(savedAccount, savedPerformance) {
     setFriend() {}, clearBeeps() {}, leave() {}, disconnect() {}, search(request) { calls.push({ search:request }); }, join() {}, createRoom() {},
   };
   const {isMobileLayout, bindPageSwipe} = new Function('window', mobileSource + ';return {isMobileLayout,bindPageSwipe};')(window);
-  vm.runInNewContext(source, { ...history, HistorySession:sessionClass(window), contactName, window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, openActivityDialog, icon, iconSelect, nameColor, sortRooms, canJoinRoom, isMobileLayout, bindPageSwipe, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
+  const uiSource = path => stripTypeScriptTypes(readFileSync(path,'utf8')).replace(/^import .*;\r?\n/gm,'').replaceAll('export ','');
+  const dom = new Function('document',uiSource('src/ui/dom.ts')+';return {el,select,field,button,checkbox,input};')(window.document);
+  const deps = {...history,...dom,t,window,document:window.document};
+  const buildHistorySettings = new Function(...Object.keys(deps),uiSource('src/ui/history-settings.ts')+';return buildHistorySettings;')(...Object.values(deps));
+  const contactCard = new Function('t','el',uiSource('src/ui/contact-card.ts')+';return contactCard;')(t,dom.el);
+  const PrivateMessages = new Function(...Object.keys(history),uiSource('src/ui/private-messages.ts')+';return PrivateMessages;')(...Object.values(history));
+  vm.runInNewContext(source, { ...history, ...dom, buildHistorySettings, contactCard, PrivateMessages, HistorySession:sessionClass(window), contactName, window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, openActivityDialog, icon, iconSelect, nameColor, sortRooms, canJoinRoom, isMobileLayout, bindPageSwipe, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
   return { window, document: window.document, calls, client:bcClient, state: () => current, emit(change) { if (change.friendsStatus === '查詢完成') change.friendsQueryState = 'ready'; current = { ...current, ...change }; listener(current); } };
 }
 
@@ -75,7 +81,8 @@ test('contact cards use cached names with live-room priority, room-only subtitle
   assert.equal(f.document.querySelectorAll('.contact-toolbar button svg').length,2);
   const card=f.document.querySelector('[data-member="55"]');
   assert.match(card.textContent,/Cached name/); assert.equal(card.querySelector('.contact-room').textContent,'私人');
-  assert.equal(card.querySelector('.contact-id').nextElementSibling.className,'contact-relation');
+  assert.equal(card.querySelector('.contact-id').previousElementSibling.tagName,'STRONG');
+  assert.equal(card.querySelector('.contact-identity').nextElementSibling.className,'contact-relation');
   assert.equal(f.document.querySelector('[data-member="66"] .contact-room').textContent,'同一房間');
   assert.match(f.document.querySelector('[data-member="66"]').textContent,/Live nickname/);
   card.click();
@@ -88,6 +95,33 @@ test('contact cards use cached names with live-room priority, room-only subtitle
   assert.ok(offline.classList.contains('contact-offline')); assert.equal(offline.querySelector('button'),null);
   offline.click(); assert.ok(f.document.querySelector('[data-member="77"]').classList.contains('selected-contact'));
   f.document.querySelector('.friend-refresh').click(); assert.equal(f.calls.at(-1),'friends');
+  await f.window.happyDOM.close();
+});
+
+test('direct account/environment changes reset drafts and selection but same-owner reconnect preserves them', async () => {
+  const f=setup();
+  f.emit({room:{Name:'Here'},characters:[{MemberNumber:55,Name:'Friend'}],friends:[{MemberNumber:55,MemberName:'Friend'}],friendsStatus:'查詢完成'});
+  f.document.getElementById('nav-friends').click(); f.document.querySelector('[data-member="55"]').click();
+  const draft=f.document.getElementById('BeepText'); draft.value='private draft'; draft.dispatchEvent(new f.window.Event('input'));
+  f.emit({player:{...f.state().player},phase:'in-room'});
+  assert.equal(f.document.getElementById('BeepText').value,'private draft');
+  f.emit({player:{...f.state().player,Environment:'DEV'},phase:'ready',room:null,characters:[],beeps:[],messages:[]});
+  f.document.getElementById('nav-private').click();
+  assert.equal(f.document.getElementById('BeepText').value,'');
+  assert.equal(f.document.querySelector('.selected-contact'),null);
+  f.emit({player:{...f.state().player,MemberNumber:999},phase:'ready'});
+  f.document.getElementById('nav-private').click(); assert.equal(f.document.getElementById('BeepText').value,'');
+  await f.window.happyDOM.close();
+});
+
+test('same-ID private corrections update displayed text without changing the composer', async () => {
+  const f=setup(), message={id:'corrected',memberNumber:55,name:'Friend',text:'old text',incoming:true,time:new Date()};
+  f.emit({beeps:[message]}); f.document.getElementById('nav-private').click();
+  const input=f.document.getElementById('BeepText');
+  f.emit({beeps:[{...message,text:'corrected text'}]});
+  assert.match(f.document.getElementById('beep-log').textContent,/corrected text/);
+  assert.doesNotMatch(f.document.getElementById('beep-log').textContent,/old text/);
+  assert.equal(f.document.getElementById('BeepText'),input);
   await f.window.happyDOM.close();
 });
 
@@ -119,6 +153,22 @@ test('private history pages stay bounded and freeze while reading older messages
   assert.equal(f.document.querySelectorAll('#beep-log .chat-message').length,60);
   f.document.querySelector('[data-history="newer"]').click(); f.document.querySelector('[data-history="newer"]').click();
   assert.ok(f.document.querySelector('[data-message-id="newest"]'));
+  await f.window.happyDOM.close();
+});
+
+test('room language flags and desktop region labels share the SVG picker, Chinese uses Hong Kong', async () => {
+  const f=setup();
+  assert.match(f.document.querySelector('.locale-picker summary image').getAttribute('href'),/flag-icons-hk/);
+  const language=f.document.querySelector('.room-language');
+  for (const [code,flag] of [['CN','hk'],['EN','gb'],['DE','de'],['FR','fr'],['ES','es'],['RU','ru'],['UA','ua']]) {
+    assert.match(language.querySelector(`[data-value="${code}"] image`).getAttribute('href'),new RegExp(`flag-icons-${flag}`));
+  }
+  assert.ok(f.document.querySelector('.room-space summary .picker-value').textContent);
+  language.querySelector('[data-value="CN"]').click();
+  assert.equal(f.calls.at(-1).search.Language,'CN');
+  assert.match(language.querySelector('summary image').getAttribute('href'),/flag-icons-hk/);
+  f.emit({rooms:[{Name:'Chinese room',Language:'CN',Space:'X',MemberCount:1,MemberLimit:10,CanJoin:true}]});
+  assert.match(f.document.querySelector('.room-language-tag image').getAttribute('href'),/flag-icons-hk/);
   await f.window.happyDOM.close();
 });
 

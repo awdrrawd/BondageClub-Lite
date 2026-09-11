@@ -108,3 +108,102 @@ test('daily export groups by room, preserves plain text and excludes private con
   assert.equal(exportHistory(batch.messages,'2000-01-01',true,type=>type).includes('secret'),false);
   assert.deepEqual(historyPolicy({recentDays:900,roomDays:30,privateDays:-1}),policy);
 });
+
+test('failed writes retry unchanged snapshots and corrected text upserts without extending expiry', async () => {
+  const window=new Window(), store=new HistoryStore(new IDBFactory()), Session=sessionClass(window), state=snapshot();
+  const write=store.write.bind(store); let attempts=0, errors=0;
+  store.write=async (...args)=>{ if (++attempts===1) throw Error('temporary'); return write(...args); };
+  const session=new Session(store,()=>{},()=>errors++);
+  session.observe(state); await session.flush();
+  assert.equal((await store.read('PROD:123')).messages.length,0);
+  session.observe(state); await session.flush();
+  const first=(await store.read('PROD:123')).messages.find(row=>row.kind==='room');
+  assert.ok(first); assert.equal(errors,1);
+  state.messages=[{...state.messages[0],text:'翻譯完成',time:new Date(+state.messages[0].time+1000)}];
+  session.observe(state); await session.flush();
+  const updated=(await store.read('PROD:123')).messages.find(row=>row.kind==='room');
+  assert.equal(updated.message.text,'翻譯完成'); assert.equal(updated.timestamp,first.timestamp); assert.equal(updated.expiresAt,first.expiresAt);
+  await session.clearRoom();
+  state.messages=[{...state.messages[0],text:'再次翻譯'}]; session.observe(state); await session.flush();
+  assert.equal((await store.read('PROD:123')).messages.some(row=>row.kind==='room'),false);
+  await window.happyDOM.close();
+});
+
+test('a failed in-flight version cannot overwrite a newer queued correction across an account switch', async () => {
+  const window=new Window(), store=new HistoryStore(new IDBFactory()), Session=sessionClass(window), state=snapshot();
+  const write=store.write.bind(store); let fail, entered;
+  const started=new Promise(resolve=>entered=resolve); let first=true;
+  store.write=async (...args)=>{ if (first) { first=false; entered(); await new Promise((resolve,reject)=>fail=reject); } return write(...args); };
+  const session=new Session(store,()=>{},()=>{}); session.observe(state); const initial=session.flush(); await started;
+  state.messages=[{...state.messages[0],text:'new revision'}]; session.observe(state); const second=session.flush();
+  session.observe(snapshot(999)); fail(Error('quota')); await initial; await second; await session.flush(); await session.flush();
+  const old=(await store.read('PROD:123')).messages.find(row=>row.kind==='room');
+  assert.equal(old.message.text,'new revision'); assert.equal((await store.read('PROD:999')).messages.length,2);
+  await window.happyDOM.close();
+});
+
+test('clearing failed pending data preserves messages received after the clear request', async () => {
+  const window=new Window(), store=new HistoryStore(new IDBFactory()), Session=sessionClass(window), state=snapshot();
+  const write=store.write.bind(store); let first=true;
+  store.write=async (...args)=>{ if (first) { first=false; throw Error('quota'); } return write(...args); };
+  const session=new Session(store,()=>{},()=>{}); session.observe(state); await session.flush();
+  const clearing=session.clear();
+  state.messages=[...state.messages,{...state.messages[0],id:'after-clear',text:'new message'}];
+  session.observe(state); await clearing; await session.flush();
+  const data=await store.read('PROD:123'); assert.deepEqual(data.messages.map(row=>row.message.id),['after-clear']);
+  await window.happyDOM.close();
+});
+
+test('indexed startup is bounded, equal-time private pages do not overlap and daily queries stay scoped', async () => {
+  const store=new HistoryStore(new IDBFactory()), state=snapshot(), now=Date.now();
+  state.messages=Array.from({length:205},(_,i)=>({...state.messages[0],id:`r-${String(i).padStart(4,'0')}`,time:new Date(now)}));
+  state.beeps=Array.from({length:125},(_,i)=>({...state.beeps[0],id:`p-${String(i).padStart(4,'0')}`,time:new Date(now)}));
+  await store.write(historyBatch(state),policy); await store.write(historyBatch(snapshot(999)),policy);
+  const initial=await store.initial('PROD:123',100); assert.equal(initial.messages.filter(row=>row.kind==='room').length,100);
+  const newest=await store.page('PROD:123','private',60,undefined,55), older=await store.page('PROD:123','private',60,newest[0],55);
+  assert.equal(newest.length,60); assert.equal(older.length,60); assert.equal(new Set([...newest,...older].map(row=>row.key)).size,120);
+  assert.deepEqual(await store.days('PROD:123',false),[{day:localDay(now),count:205}]);
+  assert.equal((await store.day('PROD:123',localDay(now),false)).length,205);
+  assert.equal((await store.day('PROD:123',localDay(now),true)).length,330);
+});
+
+test('v1 migration preserves original bodies, timestamps and shorter expiry while adding indexes', async () => {
+  const factory=new IDBFactory(), state=snapshot(), batch=historyBatch(state), expiry=+state.messages[0].time+DAY;
+  await new Promise((resolve,reject)=>{
+    const request=factory.open('bc-lite-history',1); request.onerror=()=>reject(request.error);
+    request.onupgradeneeded=()=>{
+      for (const name of ['messages','contacts']) {
+        const store=request.result.createObjectStore(name,{keyPath:'key'}); store.createIndex('owner','owner'); store.createIndex('timestamp','timestamp');
+        if (name==='messages') store.createIndex('ownerKind',['owner','kind']);
+        for (const row of batch[name]) store.put({...row,expiresAt:expiry});
+      }
+    };
+    request.onsuccess=()=>{request.result.close();resolve();};
+  });
+  const store=new HistoryStore(factory), rows=await store.page('PROD:123','private',60,undefined,55);
+  assert.equal(rows[0].message.text,'private secret'); assert.equal(rows[0].expiresAt,expiry);
+  assert.equal(rows[0].timestamp,+state.beeps[0].time); assert.equal((await store.days('PROD:123',true))[0].count,2);
+});
+
+test('clearing during startup cannot restore old private records or contacts', async () => {
+  const window=new Window(), store=new HistoryStore(new IDBFactory()), Session=sessionClass(window);
+  await store.write(historyBatch(snapshot()),policy);
+  const session=new Session(store,()=>{},()=>{},()=>assert.fail('cleared history restored'));
+  session.observe({...snapshot(),messages:[],beeps:[]}); await session.clear();
+  assert.deepEqual(session.messages,[]); assert.deepEqual(session.contacts,[]);
+  assert.equal((await store.read('PROD:123')).messages.length,0);
+  await window.happyDOM.close();
+});
+
+test('private archive loads older per-peer pages and manual clear also removes those loaded rows', async () => {
+  const window=new Window(), store=new HistoryStore(new IDBFactory()), Session=sessionClass(window), state=snapshot(), now=Date.now();
+  state.messages=[]; state.beeps=Array.from({length:125},(_,i)=>({...state.beeps[0],id:`p-${String(i).padStart(4,'0')}`,time:new Date(now)}));
+  await store.write(historyBatch(state),policy);
+  const initial=store.initial.bind(store); store.initial=owner=>initial(owner,60);
+  const session=new Session(store,()=>{},()=>{}); session.observe({...state,beeps:[]}); await session.flush();
+  assert.equal(session.messages.length,60);
+  await session.loadPrivate(55,true); assert.equal(session.messages.length,120);
+  await session.loadPrivate(55,true); assert.equal(session.messages.length,125); assert.equal(session.hasOlderPrivate(55),false);
+  await session.clear(); assert.equal(session.messages.length,0); assert.equal((await store.read('PROD:123')).messages.length,0);
+  await window.happyDOM.close();
+});

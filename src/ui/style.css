@@ -197,9 +197,10 @@ body.scenic {
 .contact-card { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; padding: .85rem; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; }
 .contact-card[role=button] { cursor:pointer; }
 .contact-card:hover,.contact-card:focus-visible { background:var(--panel-2); border-color:var(--accent); outline:none; }
-.contact-title { display:flex; align-items:baseline; gap:.45rem; flex-wrap:wrap; }
-.contact-title strong { flex:1 1 auto; }
-.contact-relation { margin-left:auto; font-size:.8rem; color:var(--accent); }
+.contact-title { display:flex; align-items:baseline; justify-content:space-between; gap:.75rem; }
+.contact-identity { display:flex; align-items:baseline; gap:.45rem; flex-wrap:wrap; min-width:0; }
+.contact-id { white-space:nowrap; }
+.contact-relation { flex-shrink:0; margin-left:auto; font-size:.8rem; color:var(--accent); }
 .contact-id,.contact-room { color:var(--muted); font-size:.85rem; }
 .contact-offline:not(.selected-contact) { filter:grayscale(1); color:var(--muted); }
 .contact-offline:not(.selected-contact) .contact-title strong { font-weight:400; }
@@ -265,9 +266,6 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .header-account { display: flex; align-items: center; gap: .35rem; min-width: 0; }
 .header-status-controls { display: flex; align-items: center; justify-content: flex-end; gap: .6rem; min-width: 0; margin-left: auto; }
 .header-status-controls .connection { flex: 1; }
-.header-locale.field { flex: 0 0 108px; margin: 0; }
-.header-locale .field-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-.header-locale select { min-height: 44px; padding: .4rem; font-size: 16px; }
 .header-account .button { padding: .5rem; font-size: .8rem; }
 .header-account .button:first-child { max-width: 230px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .app-header > .connection { margin-inline: auto 1rem; }
@@ -278,13 +276,16 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .ui-icon { width:1.25rem; height:1.25rem; flex-shrink:0; fill:currentColor; vertical-align:middle; }
 .app-nav .button, .room-search { display:flex; align-items:center; justify-content:center; gap:.35rem; }
 .nav-label { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.mobile-picker { display:none; }
+.icon-select { position:relative; min-width:0; }
+.icon-select > select { display:none; }
+.mobile-picker { display:block; position:relative; }
+.mobile-picker > summary { display:flex; align-items:center; gap:.4rem; list-style:none; cursor:pointer; border:1px solid var(--line); border-radius:9px; padding:.55rem .7rem; min-height:44px; }
+.mobile-picker > summary::-webkit-details-marker { display:none; }
+.language-flag { width:1.5rem; height:1.125rem; }
+.room-language-tag { display:inline-flex; align-items:center; gap:.35rem; }
 .picker-options { position:absolute; right:0; top:calc(100% + .3rem); z-index:20; min-width:10rem; max-height:55dvh; overflow:auto; padding:.35rem; border:1px solid var(--line); border-radius:10px; background:var(--panel); box-shadow:0 8px 20px #0006; }
 .picker-options .button { display:flex; align-items:center; gap:.6rem; width:100%; text-align:left; min-height:44px; }
 .picker-options [aria-pressed=true] { color:var(--accent); background:var(--panel-2); }
-.locale-picker { position:relative; }
-.locale-picker > select { display:none; }
-.locale-picker > .mobile-picker { display:block; }
 .locale-picker summary { display:flex; align-items:center; gap:.4rem; padding:.4rem .55rem; cursor:pointer; }
 .locale-picker .ui-icon { width:1.5rem; height:1.125rem; flex-shrink:0; }
 .room-options { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; padding-top: 1rem; border-top: 1px solid var(--line); }
@@ -326,12 +327,12 @@ summary { cursor: pointer; padding-block: .5rem; }
   .search-view .room-controls:not(.create-controls) .field-label { display:none; }
   .search-view .room-controls:not(.create-controls) > .primary { grid-column:2; grid-row:1; }
   .search-view .room-filters { grid-column:5; grid-row:1; position:static; }
-  .search-view .room-filters > summary, .mobile-picker > summary { display:flex; align-items:center; justify-content:center; gap:.2rem; list-style:none; cursor:pointer; border:1px solid var(--line); border-radius:9px; padding:.4rem; min-height:44px; font-size:.875rem; }
-  .mobile-picker > summary::-webkit-details-marker, .room-filters > summary::-webkit-details-marker { display:none; }
-  .mobile-picker { display:block; position:relative; }
-  .icon-select > select { display:none; }
+  .search-view .room-filters > summary { display:flex; align-items:center; justify-content:center; gap:.2rem; list-style:none; cursor:pointer; border:1px solid var(--line); border-radius:9px; padding:.4rem; min-height:44px; font-size:.875rem; }
+  .mobile-picker > summary { justify-content:center; gap:.2rem; padding:.4rem; font-size:.875rem; }
+  .room-filters > summary::-webkit-details-marker { display:none; }
   .room-controls .control-text { display:none; }
   .room-controls .picker-value { max-width:2.5em; overflow:hidden; white-space:nowrap; }
+  .room-controls .room-space .picker-value { display:none; }
   .room-controls.search-expanded:not(.create-controls) { grid-template-columns:minmax(0,1fr) 44px; }
   .room-controls.search-expanded .room-space, .room-controls.search-expanded .room-language, .room-controls.search-expanded .room-filters { display:none; }
   .search-view .room-filters .search-options { position:absolute; right:0; top:100%; width:230px; z-index:5; padding:.65rem; background:var(--panel); border:1px solid var(--line); border-radius:9px; box-shadow:0 8px 20px #0006; }
@@ -402,9 +403,7 @@ summary { cursor: pointer; padding-block: .5rem; }
   .app-header .brand > div { display:none; }
   .app-header .header-account { margin:0; min-width:0; }
   .header-status-controls { order:0; margin-left:.2rem; gap:.2rem; flex-basis:auto; grid-column:4; }
-  .header-locale.field { flex:0 1 auto; width:4.2rem; }
   .header-status-controls > .button, .header-safety { padding:.35rem; font-size:.875rem; white-space:nowrap; min-height:44px; }
-  .header-locale select { padding:.35rem .15rem; font-size:.875rem; }
   .header-account .button:first-child { max-width: 100%; }
   .summon-notice { order:4; grid-column:1 / -1; }
   .app-nav { gap:.25rem; padding-inline:.4rem; }

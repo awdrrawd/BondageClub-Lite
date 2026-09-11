@@ -1,6 +1,6 @@
 import { icon, type IconName } from './icons';
 
-/** Native desktop select and existing change handler; mobile uses labelled icon buttons. */
+/** Shared SVG picker at every viewport; the select remains the value/change-event source. */
 export function iconSelect(select: HTMLSelectElement, icons: Record<string, IconName>, fallback: IconName, showValue = false): HTMLElement {
   const root = document.createElement('div'); root.className = 'icon-select';
   const picker = document.createElement('details'); picker.className = 'mobile-picker';
