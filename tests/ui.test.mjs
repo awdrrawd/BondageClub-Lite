@@ -12,6 +12,7 @@ import { definitions } from './native-helper.mjs';
 import { canonicalPartGroup } from './activity-helper.mjs';
 import { uiIcons } from './icons-helper.mjs';
 import { history, sessionClass, contactName } from './history-helper.mjs';
+import { dialogs } from './dialogs-helper.mjs';
 const activitySource = stripTypeScriptTypes(readFileSync('src/ui/activity-dialog.ts', 'utf8')).replace(/^import .*;\r?\n/gm, '').replaceAll('export ', '');
 const nameColor = new Function(stripTypeScriptTypes(readFileSync('src/ui/name-color.ts', 'utf8')).replaceAll('export ', '') + ';return nameColor;')();
 const stabilitySource = stripTypeScriptTypes(readFileSync(new URL('../src/platform/stability.ts', import.meta.url), 'utf8')).replace('import { t } from "../i18n";', '').replace('export ', '');
@@ -60,11 +61,12 @@ function setup(savedAccount, savedPerformance) {
   const {isMobileLayout, bindPageSwipe} = new Function('window', mobileSource + ';return {isMobileLayout,bindPageSwipe};')(window);
   const uiSource = path => stripTypeScriptTypes(readFileSync(path,'utf8')).replace(/^import .*;\r?\n/gm,'').replaceAll('export ','');
   const dom = new Function('document',uiSource('src/ui/dom.ts')+';return {el,select,field,button,checkbox,input};')(window.document);
-  const deps = {...history,...dom,t,window,document:window.document};
+  const modal=dialogs(window.document);
+  const deps = {...history,...dom,...modal,t,window,document:window.document};
   const buildHistorySettings = new Function(...Object.keys(deps),uiSource('src/ui/history-settings.ts')+';return buildHistorySettings;')(...Object.values(deps));
   const contactCard = new Function('t','el',uiSource('src/ui/contact-card.ts')+';return contactCard;')(t,dom.el);
   const PrivateMessages = new Function(...Object.keys(history),uiSource('src/ui/private-messages.ts')+';return PrivateMessages;')(...Object.values(history));
-  vm.runInNewContext(source, { ...history, ...dom, buildHistorySettings, contactCard, PrivateMessages, HistorySession:sessionClass(window), contactName, window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, openActivityDialog, icon, iconSelect, nameColor, sortRooms, canJoinRoom, isMobileLayout, bindPageSwipe, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
+  vm.runInNewContext(source, { ...history, ...dom, ...modal, buildHistorySettings, contactCard, PrivateMessages, HistorySession:sessionClass(window), contactName, window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, openActivityDialog, icon, iconSelect, nameColor, sortRooms, canJoinRoom, isMobileLayout, bindPageSwipe, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
   return { window, document: window.document, calls, client:bcClient, state: () => current, emit(change) { if (change.friendsStatus === '查詢完成') change.friendsQueryState = 'ready'; current = { ...current, ...change }; listener(current); } };
 }
 
@@ -409,9 +411,9 @@ test('3000 retained messages page in bounded batches and performance preferences
   assert.match(f.document.querySelector('#TextAreaChatLog').textContent, /new arrival/);
   f.document.getElementById('nav-settings').click();
   const history = f.document.getElementById('HistoryLimit');
-  f.window.confirm = () => false; history.value = '600'; history.dispatchEvent(new f.window.Event('change'));
+  history.value = '600'; history.dispatchEvent(new f.window.Event('change')); f.document.querySelector('[data-dialog-action=cancel]').click();
   assert.equal(history.value, '3000'); assert.equal(f.state().messages.length, 3000);
-  f.window.confirm = () => true; history.value = '600'; history.dispatchEvent(new f.window.Event('change'));
+  history.value = '600'; history.dispatchEvent(new f.window.Event('change')); f.document.querySelector('[data-dialog-action=confirm]').click();
   assert.equal(f.state().messages.length, 600);
   assert.deepEqual(JSON.parse(f.window.localStorage.getItem('bc-lite-performance-v1')), { history: 600, visible: 50 });
   await f.window.happyDOM.close();
@@ -429,7 +431,7 @@ test('reply preview sits inside composer, jumps to retained history and clear pr
   assert.equal(input.previousElementSibling.id, 'chat-room-reply-indicator');
   assert.match(input.previousElementSibling.textContent, /message 0/);
   input.value = 'draft'; input.dispatchEvent(new f.window.Event('input'));
-  f.window.confirm = () => true; f.document.querySelector('.clear-messages').click();
+  f.document.querySelector('.clear-messages').click(); f.document.querySelector('[data-dialog-action=confirm]').click();
   assert.equal(f.document.querySelectorAll('#TextAreaChatLog .chat-message').length, 0);
   assert.equal(input.value, 'draft');
   await f.window.happyDOM.close();
@@ -651,13 +653,65 @@ test('room safeword requires choosing an operation and accepting explicit confir
   f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, messages: [] });
   f.document.getElementById('room-safeword').click();
   assert.ok(f.document.querySelector('.safeword-dialog').open);
-  f.window.confirm = () => false;
+  f.window.confirm = () => assert.fail('safeword must not use browser confirmation');
+  f.window.alert = () => assert.fail('safeword must not use browser alert');
   f.document.querySelector('[data-safeword=revert]').click();
   assert.equal(f.calls.some(call => call?.safeword), false);
-  f.window.confirm = () => true;
+  assert.ok(f.document.querySelector('[data-safeword-confirm=revert]'));
+  f.document.querySelector('[data-safeword-back]').click();
   f.document.querySelector('[data-safeword=release]').click();
+  assert.equal(f.calls.some(call => call?.safeword), false);
+  f.document.querySelector('[data-safeword-confirm=release]').click();
   assert.deepEqual(f.calls.at(-1), { safeword: 'release' });
   assert.equal(f.document.querySelector('.safeword-dialog'), null);
+  await f.window.happyDOM.close();
+});
+
+test('safeword failures stay inside the Lite dialog and cancel never sends an operation', async () => {
+  const f=setup();
+  f.window.confirm=()=>assert.fail('browser confirm'); f.window.alert=()=>assert.fail('browser alert');
+  f.emit({phase:'in-room',room:{Name:'Test'}});
+  f.client.activateSafeword=()=>{throw Error('test failed upload');};
+  f.document.getElementById('room-safeword').click();
+  f.document.querySelector('[data-safeword=revert]').click();
+  f.document.querySelector('[data-safeword-confirm=revert]').click();
+  assert.match(f.document.querySelector('.safeword-dialog [role=alert]').textContent,/test failed upload/);
+  assert.equal(f.document.querySelector('[data-safeword-confirm=revert]').disabled,false);
+  f.document.querySelector('.safeword-dialog > button').click();
+  assert.equal(f.document.querySelector('.safeword-dialog'),null);
+  assert.equal(f.calls.some(call=>call?.safeword),false);
+  await f.window.happyDOM.close();
+});
+
+test('room changes use Lite confirmation, cancel stays put, and stale confirmations cannot move rooms', async () => {
+  const f=setup(), moves=[];
+  f.window.confirm=()=>assert.fail('browser confirm'); f.window.alert=()=>assert.fail('browser alert');
+  f.client.leave=()=>moves.push('leave'); f.client.join=name=>moves.push(name);
+  f.emit({phase:'in-room',room:{Name:'Current'},rooms:[{Name:'Destination',MemberCount:1,MemberLimit:10,CanJoin:true,Friends:[],Language:'EN'}]});
+  f.document.getElementById('nav-rooms').click();
+  const join=()=>f.document.querySelector('.room-card button').click();
+  join(); assert.deepEqual(moves,[]);
+  assert.match(f.document.querySelector('.lite-confirm').textContent,/Current.*Destination/);
+  f.document.querySelector('[data-dialog-action=cancel]').click(); assert.deepEqual(moves,[]);
+  join(); f.document.querySelector('[data-dialog-action=confirm]').click(); assert.deepEqual(moves,['leave','Destination']);
+  moves.length=0; join(); const confirm=f.document.querySelector('[data-dialog-action=confirm]');
+  f.emit({room:{Name:'Different'}}); confirm.click(); assert.deepEqual(moves,[]);
+  await f.window.happyDOM.close();
+});
+
+test('archive deletion and retention shortening wait for Lite confirmation', async () => {
+  const f=setup(); f.window.confirm=()=>assert.fail('browser confirm');
+  f.document.getElementById('nav-settings').click();
+  const retention=f.document.getElementById('History-roomDays');
+  retention.value='1'; retention.dispatchEvent(new f.window.Event('change'));
+  assert.equal(retention.value,'7');
+  f.document.querySelector('[data-dialog-action=cancel]').click(); assert.equal(retention.value,'7');
+  retention.value='1'; retention.dispatchEvent(new f.window.Event('change'));
+  f.document.querySelector('[data-dialog-action=confirm]').click();
+  await new Promise(resolve=>setTimeout(resolve,0));
+  assert.equal(JSON.parse(f.window.localStorage.getItem('bc-lite-history-policy-v1')).roomDays,1);
+  f.document.querySelector('.history-settings .danger').click(); assert.ok(f.document.querySelector('.lite-confirm'));
+  f.document.querySelector('[data-dialog-action=cancel]').click();
   await f.window.happyDOM.close();
 });
 

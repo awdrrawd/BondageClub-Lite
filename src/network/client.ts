@@ -132,7 +132,7 @@ export class BcLiteClient {
     if (next.length !== this.state.messages.length || next.some((row,i) => row.id !== this.state.messages[i]?.id)) this.patch({messages: next});
   }
   private textCatalog: Record<string, string> = {};
-  private safetyBaseline: { appearance: BundledItem[]; pose: string[] | null } | null = null;
+  private safetyBaseline: { appearance: BundledItem[]; pose: string[] | null; assetFamily?: string } | null = null;
   private safetyCurrent: BundledItem[] | null = null;
   private lastSafewordAt = 0;
   private returnRoom: string | null = null;
@@ -392,20 +392,29 @@ export class BcLiteClient {
     const player = this.state.player;
     if (!player || !this.canSend() || this.state.phase !== "in-room" || !this.state.room) throw new Error(t("m208"));
     if (player.GameplaySettings?.EnableSafeword !== true || this.state.room.Game === "GGTS") throw new Error(t("safety.disabled"));
-    if (!this.safetyBaseline || !this.safetyCurrent || !player.ID || player.AssetFamily !== "Female3DCG") throw new Error(t("safety.unavailable"));
+    if (!player.ID) throw new Error(t("m208"));
+    if (mode === "revert" && !this.safetyBaseline) throw new Error(t("safety.noBackup"));
+    if (mode === "release" && !this.safetyCurrent) throw new Error(t("safety.noCurrent"));
+    if (mode === "release" && player.AssetFamily && player.AssetFamily !== "Female3DCG") throw new Error(t("safety.releaseUnsupported"));
     if (Date.now() - this.lastSafewordAt < 2000) throw new Error(t("safety.wait"));
     const owned = Boolean(player.Ownership?.MemberNumber || player.Owner?.startsWith("NPC-"));
-    const appearance = mode === "revert" ? copyAppearance(this.safetyBaseline.appearance) : releaseAppearance(this.safetyCurrent, owned);
-    const pose = mode === "revert" ? this.safetyBaseline.pose : null;
+    const appearance = mode === "revert" ? copyAppearance(this.safetyBaseline!.appearance) : releaseAppearance(this.safetyCurrent!, owned);
+    const pose = mode === "revert" && this.safetyBaseline!.pose ? [...this.safetyBaseline!.pose] : null;
+    const assetFamily = mode === "revert" ? this.safetyBaseline!.assetFamily : player.AssetFamily;
     const permission = mode === "revert" ? Math.max(3, player.AllowedInteractions ?? 3) : player.AllowedInteractions;
-    const update = { Appearance: appearance, AssetFamily: player.AssetFamily,
+    const update = { Appearance: appearance, ...(assetFamily ? {AssetFamily:assetFamily} : {}),
       ...(mode === "revert" ? { AllowedInteractions: permission, ItemPermission: permission } : {}) };
     this.lastSafewordAt = Date.now();
     this.socket!.emit("AccountUpdate", update);
     this.socket!.emit("ChatRoomCharacterUpdate", { ID: player.ID, Appearance: appearance, ActivePose: pose });
+    const paired = !!this.cuddlePair;
+    this.cuddlePair = null;
+    if (paired) this.syncCuddle();
     this.socket!.emit("ChatRoomChat", { Type: "Action", Content: mode === "revert" ? "ActionActivateSafewordRevert" : "ActionActivateSafewordRelease", Dictionary: [{ SourceCharacter: player.MemberNumber }] });
     this.safetyCurrent = copyAppearance(appearance);
-    this.patch({ player: { ...player, Appearance: appearance, ActivePose: pose, AllowedInteractions: permission } });
+    this.patch({ player: { ...player, Appearance: copyAppearance(appearance), ActivePose: pose, AllowedInteractions: permission, ...(assetFamily ? {AssetFamily:assetFamily} : {}) },
+      characters:this.state.characters.map(character=>character.MemberNumber===player.MemberNumber ? {...character,Appearance:copyAppearance(appearance),ActivePose:pose} : character),
+      cuddlePartner:null, cuddleRequest:null });
     if (mode === "release") this.leave();
     this.localMessage(t("safety.sent"));
   }
@@ -734,10 +743,12 @@ export class BcLiteClient {
       // fields. Loading an asset registry here would silently strip plugin items.
       Appearance: validAppearance(value.Appearance) ? copyAppearance(value.Appearance) : Array.isArray(value.Appearance) ? value.Appearance : undefined,
       OnlineSharedSettings: value.OnlineSharedSettings && typeof value.OnlineSharedSettings === "object" ? value.OnlineSharedSettings : undefined };
-    this.safetyBaseline = validAppearance(player.Appearance) ? { appearance: copyAppearance(player.Appearance), pose: player.ActivePose ? [...player.ActivePose] : null } : null;
-    this.safetyCurrent = null;
     const previous = this.state.player;
     const changedAccount = previous && (previous.MemberNumber !== player.MemberNumber || previous.Environment !== player.Environment);
+    // Keep the original login backup during automatic reconnects; never replace it with a changed outfit.
+    if (!previous || changedAccount || !this.safetyBaseline) this.safetyBaseline = validAppearance(player.Appearance)
+      ? { appearance: copyAppearance(player.Appearance), pose: player.ActivePose ? [...player.ActivePose] : null, assetFamily:player.AssetFamily } : null;
+    this.safetyCurrent = null;
     this.patch({ ...(changedAccount ? initialSnapshot() : {}), player, phase: "waiting-server", status: t("m236") });
     if (this.serverReady) this.finishLogin();
   }

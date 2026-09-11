@@ -29,6 +29,9 @@
 .chat-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .chat-media { display: block; width: min(100%, 480px); aspect-ratio: 16 / 9; max-height: 320px; object-fit: contain; background: #0005; border-radius: 8px; margin-block: .5rem; }
 .safeword-dialog { max-height: 85dvh; overflow: auto; }
+.lite-dialog { max-height:85dvh; overflow:auto; }
+.lite-dialog-message { white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.6; }
+.lite-dialog .button { min-height:44px; margin:.4rem .5rem 0 0; }
 .safeword-dialog p { line-height: 1.6; }
 .safeword-dialog .button { display: block; width: 100%; margin-top: .7rem; min-height: 44px; }
 html, body, #app { min-height: 100%; margin: 0; }

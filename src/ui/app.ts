@@ -9,6 +9,7 @@ import { el, select, field, button, checkbox, input } from "./dom";
 import { PrivateMessages } from "./private-messages";
 import { contactCard } from "./contact-card";
 import { HistorySession } from "../storage/history-session";
+import { showConfirm, showNotice } from "../platform/dialogs";
 import { appendChatLinks, MediaConsent } from "../media/chat-links";
 import { afcLovers } from "../profile/afc";
 import { StabilityControls } from "../platform/stability";
@@ -171,7 +172,7 @@ export class LiteApp {
       }
       if (snapshot.summon !== previous?.summon) this.updateSummon();
       if (previous && snapshot.messages !== previous.messages && snapshot.messages.some((message, index) => message.id === previous.messages[index]?.id && message.text !== previous.messages[index]?.text)) { this.render(); return; }
-      if (!["ready", "joining", "in-room"].includes(snapshot.phase)) document.querySelectorAll(".profile-dialog").forEach(dialog => dialog.remove());
+      if (!["ready", "joining", "in-room"].includes(snapshot.phase)) document.querySelectorAll(".profile-dialog:not(.lite-notice)").forEach(dialog => dialog.remove());
       if (snapshot.room && snapshot.room.Name !== previous?.room?.Name) { this.tab = "chat"; this.visibleMessages = this.performance.visible; this.historyEndId = null; }
       if (!snapshot.room && previous?.room && this.tab === "chat") this.tab = "rooms";
       if (previous && !ownerChanged && snapshot.beeps !== previous.beeps && snapshot.beeps.at(-1)?.incoming && this.tab !== "private" && snapshot.beeps.at(-1)?.id !== previous.beeps.at(-1)?.id) this.unread++;
@@ -325,7 +326,7 @@ export class LiteApp {
       const name = this.button(`${state.player.Nickname || state.player.Name} (#${state.player.MemberNumber})`, "ghost", "button");
       name.addEventListener("click", () => this.showMember(state.characters.find(character => character.MemberNumber === state.player!.MemberNumber) || state.player!));
       const logout = this.button(t("m007"), "ghost", "button");
-      logout.addEventListener("click", () => { if (window.confirm(t("m008"))) this.client.disconnect(); });
+      logout.addEventListener("click", () => this.confirmAction(t("m008"),()=>this.client.disconnect()));
       account.append(name); header.append(account);
       const safety = this.button(t("safety.title"), "ghost danger header-safety", "button"); safety.id = "room-safeword";
       safety.disabled = !state.room || state.phase !== "in-room";
@@ -546,7 +547,7 @@ export class LiteApp {
       }
       if (this.tab !== "private" && state.player?.FriendList?.includes(id)) {
         const remove = this.button(t("m047"), "ghost danger", "button");
-        remove.addEventListener("click", () => { if (window.confirm(t("m048", [id]))) this.run(() => this.client.setFriend(id, false)); });
+        remove.addEventListener("click", () => this.confirmAction(t("m048", [id]),()=>this.run(() => this.client.setFriend(id, false))));
         row.append(remove);
       }
       list.append(row);
@@ -661,7 +662,7 @@ export class LiteApp {
     compatibility.append(this.el("h2", "", t("m065")), this.el("p", "", t("m066", [this.snapshot!.player?.Appearance?.length ?? t("m067")])), this.el("p", "muted", t("m068")));
     compatibility.append(this.el("p", "muted", t("m069")));
     const disconnect = this.button(t("m070"), "ghost danger", "button");
-    disconnect.addEventListener("click", () => { if (window.confirm(t("m071"))) this.client.disconnect(); });
+    disconnect.addEventListener("click", () => this.confirmAction(t("m071"),()=>this.client.disconnect()));
     const jumps = this.el("nav", "settings-jumps"); jumps.setAttribute("aria-label", t("settings.jump"));
     const groups: Array<[string, string, HTMLElement[]]> = [
       ["appearance", t("settings.appearance"), [panel]],
@@ -693,9 +694,9 @@ export class LiteApp {
     history.addEventListener("change", () => {
       const value = Number(history.value);
       if (![600, 1500, 3000].includes(value)) return;
-      if (value < this.snapshot!.messages.length && !window.confirm(t("performance.trim"))) { history.value = String(this.performance.history); return; }
-      this.performance.history = value; this.historyEndId = null;
-      this.client.setMessageLimit(value); save();
+      const apply=()=>{ this.performance.history=value; this.historyEndId=null; history.value=String(value); this.client.setMessageLimit(value); save(); };
+      if (value < this.snapshot!.messages.length) { history.value=String(this.performance.history); this.confirmAction(t('performance.trim'),apply); }
+      else apply();
     });
     visible.addEventListener("change", () => {
       const value = Number(visible.value); if (![50, 100, 200].includes(value)) return;
@@ -740,8 +741,8 @@ export class LiteApp {
   private joinRoom(name: string): void {
     if (name === this.snapshot!.room?.Name) { this.tab = "chat"; this.render(); return; }
     if (this.snapshot!.room) {
-      if (!window.confirm(t("m073", [this.snapshot!.room.Name, name]))) return;
-      this.client.leave();
+      this.confirmAction(t("m073", [this.snapshot!.room.Name, name]),()=>this.run(()=>{this.client.leave();this.client.join(name);}));
+      return;
     }
     this.run(() => this.client.join(name));
   }
@@ -1024,7 +1025,7 @@ export class LiteApp {
     jump.addEventListener("click", () => { this.historyEndId = null; this.updateChatLog(true); });
     topMenu.append(toggle, history, jump);
     const clear = this.button(t("chat.clear"), "ghost clear-messages", "button");
-    clear.addEventListener("click", () => { if (window.confirm(t("chat.clearConfirm"))) { this.replyTarget = null; this.historyEndId = null; void this.history.clearRoom().catch(() => this.localNotice(t("history.error"))); this.client.clearMessages(); document.getElementById("chat-room-reply-indicator")?.replaceChildren(); this.updateChatLog(true); } });
+    clear.addEventListener("click", () => this.confirmAction(t("chat.clearConfirm"),()=>{ this.replyTarget = null; this.historyEndId = null; void this.history.clearRoom().catch(() => this.localNotice(t("history.error"))); this.client.clearMessages(); document.getElementById("chat-room-reply-indicator")?.replaceChildren(); this.updateChatLog(true); }));
     topMenu.append(clear);
     const mobileLeave = this.button(t("m164"), "ghost", "button");
     mobileLeave.addEventListener("click", () => this.client.leave());
@@ -1197,20 +1198,35 @@ export class LiteApp {
   }
 
   private showSafeword(): void {
+    if (document.querySelector('.safeword-dialog')) return;
+    const owner=this.snapshot ? historyOwner(this.snapshot) : '', room=this.snapshot?.room?.Name;
     const dialog = this.el("dialog", "profile-dialog safeword-dialog");
     dialog.setAttribute("aria-label", t("safety.title"));
-    dialog.append(this.el("h2", "", t("safety.title")), this.el("p", "", t("safety.help")));
-    for (const mode of ["revert", "release"] as const) {
-      const label = t(mode === "revert" ? "safety.revert" : "safety.release");
-      const action = this.button(label, "ghost danger", "button");
-      action.dataset.safeword = mode;
-      action.addEventListener("click", () => {
-        if (!window.confirm(t("safety.confirm", [label]))) return;
-        try { this.client.activateSafeword(mode); dialog.close(); dialog.remove(); }
-        catch (error) { this.localNotice(error instanceof Error ? error.message : String(error)); }
+    const title=this.el("h2", "", t("safety.title")), content=this.el('div','safeword-content');
+    const choose = () => {
+      content.replaceChildren(this.el('p','',t('safety.help')));
+      for (const mode of ['revert','release'] as const) {
+        const label=t(mode==='revert' ? 'safety.revert' : 'safety.release');
+        const action=this.button(label,'ghost danger','button'); action.dataset.safeword=mode;
+        action.addEventListener('click',()=>confirm(mode,label)); content.append(action);
+      }
+    };
+    const confirm = (mode: 'revert' | 'release', label: string) => {
+      const message=this.el('p','',t('safety.confirm',[label]));
+      const error=this.el('p','status error'); error.setAttribute('role','alert'); error.hidden=true;
+      const execute=this.button(t('safety.execute'),'primary danger','button'); execute.dataset.safewordConfirm=mode;
+      execute.addEventListener('click',()=>{
+        if (!dialog.isConnected) return;
+        execute.disabled=true;
+        try {
+          if (!this.snapshot || historyOwner(this.snapshot)!==owner || this.snapshot.room?.Name!==room) throw new Error(t('m208'));
+          this.client.activateSafeword(mode); dialog.close(); dialog.remove();
+        } catch (failure) { error.textContent=failure instanceof Error ? failure.message : String(failure); error.hidden=false; execute.disabled=false; }
       });
-      dialog.append(action);
-    }
+      const back=this.button(t('safety.back'),'ghost','button'); back.dataset.safewordBack=''; back.addEventListener('click',choose);
+      content.replaceChildren(message,error,execute,back); back.focus();
+    };
+    choose(); dialog.append(title,content);
     const cancel = this.button(t("safety.cancel"), "ghost", "button");
     cancel.addEventListener("click", () => { dialog.close(); dialog.remove(); });
     dialog.addEventListener("close", () => dialog.remove());
@@ -1292,7 +1308,11 @@ export class LiteApp {
   private checkbox = checkbox;
   private button = button;
   private el = el;
-  private localNotice(message: string): void { this.notice = message; window.alert(message); }
+  private confirmAction(message: string, accept:()=>void): void {
+    const owner=this.snapshot ? historyOwner(this.snapshot) : '', room=this.snapshot?.room?.Name;
+    showConfirm(message,accept,{valid:()=>!!this.snapshot && historyOwner(this.snapshot)===owner && this.snapshot.room?.Name===room});
+  }
+  private localNotice(message: string): void { this.notice = message; showNotice(message); }
 }
 
 if (!document.documentElement.hasAttribute("data-ui-preview")) new LiteApp();

@@ -3,6 +3,17 @@ import assert from 'node:assert/strict';
 import { Window } from 'happy-dom';
 import { appendChatLinks, MediaConsent, resolveMedia } from './links-helper.mjs';
 
+test('media permission storage failure uses a Lite notice and does not load the media',async()=>{
+  const window=new Window(); window.alert=()=>assert.fail('browser alert');
+  Object.defineProperty(window,'localStorage',{value:{getItem:()=>null,setItem:()=>{throw Error('quota');}}});
+  const node=window.document.createElement('div'); window.document.body.append(node);
+  appendChatLinks(node,'https://example.org/image.png',new MediaConsent(window.document));
+  node.querySelectorAll('button')[1].click();
+  assert.ok(window.document.querySelector('.lite-notice').open);
+  assert.equal(node.querySelector('img'),null);
+  await window.happyDOM.close();
+});
+
 test('provider matching rejects spoofed hosts and embeds need destination consent plus a click', async () => {
   assert.equal(resolveMedia(new URL('https://youtube.com.evil.test/watch?v=abcdefghijk')),null);
   assert.equal(resolveMedia(new URL('https://youtube.com/watch?v=bad')),null);

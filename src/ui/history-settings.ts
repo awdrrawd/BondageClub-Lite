@@ -2,6 +2,7 @@ import { t } from "../i18n";
 import { exportHistory, type HistoryPolicy } from "../storage/history";
 import type { HistorySession } from "../storage/history-session";
 import { el, select, field, button, checkbox } from "./dom";
+import { showConfirm } from '../platform/dialogs';
 
 interface HistorySettingsContext {
   history: HistorySession; owner:()=>string; hasError:()=>boolean; notice:(message:string)=>void;
@@ -15,10 +16,14 @@ export function buildHistorySettings(context: HistorySettingsContext): HTMLEleme
       const control = select(t(`history.${key}`), choices.map(days => [String(days), days ? t("history.days", [days]) : t("history.off")]), String(history.policy[key]));
       control.id = `History-${key}`;
       control.addEventListener("change", () => {
-        const value = Number(control.value), policy: HistoryPolicy = {...history.policy, [key]: value};
-        if (value < history.policy[key] && !window.confirm(t("history.shorten"))) { control.value = String(history.policy[key]); return; }
-        control.disabled = true;
-        void history.configure(policy).then(() => refresh()).catch(() => { notice(t("history.error")); }).finally(() => { control.disabled = false; });
+        const value = Number(control.value), account=owner();
+        const apply=()=>{
+          control.value=String(value); control.disabled=true;
+          const policy: HistoryPolicy={...history.policy,[key]:value};
+          void history.configure(policy).then(() => refresh()).catch(() => { notice(t("history.error")); }).finally(() => { control.disabled = false; });
+        };
+        if (value < history.policy[key]) { control.value=String(history.policy[key]); showConfirm(t('history.shorten'),apply,{valid:()=>panel.isConnected && owner()===account}); }
+        else apply();
       }); panel.append(field(t(`history.${key}`), control));
     }
     const status = el("p", "muted", hasError() ? t("history.error") : t("history.loading")); status.setAttribute("role", "status");
@@ -50,7 +55,10 @@ export function buildHistorySettings(context: HistorySettingsContext): HTMLEleme
       }).catch(() => { status.textContent = t("history.error"); });
     });
     const clear = button(t("history.clear"), "ghost danger", "button");
-    clear.addEventListener("click", () => { if (window.confirm(t("history.clearConfirm"))) { clear.disabled = true; void history.clear().then(refresh).catch(() => { status.textContent = t("history.error"); }).finally(() => { clear.disabled = false; }); } });
+    clear.addEventListener("click", () => {
+      const account=owner();
+      showConfirm(t('history.clearConfirm'),()=>{clear.disabled=true; void history.clear().then(refresh).catch(()=>{status.textContent=t('history.error');}).finally(()=>{clear.disabled=false;});},{valid:()=>panel.isConnected && owner()===account});
+    });
     panel.append(status, field(t("history.date"), dates), checkbox(t("history.includePrivate"), false, value => { includePrivate = value; void refresh(); }), download, clear);
     void refresh(); return panel;
   }

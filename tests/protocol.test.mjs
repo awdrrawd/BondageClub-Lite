@@ -472,6 +472,28 @@ test('plugin fallback dialogues render without executing plugins or exposing con
   assert.equal(f.state().messages.length, count);
 });
 
+test('LSCG leashing actions survive reception and late catalog changes without leaking msg', async () => {
+  const f = await setup('PROD');
+  f.handlers.get('ChatRoomSync')({ Name: 'Test', Character: [{ MemberNumber: 55, Name: 'Neko' }], Limit: 10 });
+  const text = 'Neko 牽著 W 走出房間.';
+  const dictionary = [
+    ...['Beep', '发送私聊', 'Biep', 'Sonner'].map(Tag => ({ Tag, Text: 'msg' })),
+    { Tag: 'msg', Text: text },
+  ];
+  const packet = { Type: 'Action', Sender: 55, Content: 'Beep', Dictionary: dictionary };
+  f.handlers.get('ChatRoomMessage')(packet);
+  assert.equal(f.state().messages.at(-1).text, text);
+  for (const locale of ['zh', 'en']) {
+    f.client.setTextCatalog(gameCatalog(locale));
+    assert.equal(f.state().messages.at(-1).text, text);
+  }
+  f.handlers.get('ChatRoomMessage')({ ...packet, Type: 'Chat' });
+  assert.equal(f.state().messages.at(-1).text, 'Beep');
+  const count = f.state().messages.length;
+  f.handlers.get('ChatRoomMessage')({ ...packet, Type: 'Hidden' });
+  assert.equal(f.state().messages.length, count);
+});
+
 test('BC input prefixes and native reply IDs survive the wire', async () => {
   for (const [input, type, content] of [['*waves', 'Emote', 'waves'], ['*waves*', 'Emote', 'waves'], ['(hello', 'Chat', '(hello)'], ['.A SourceCharacter nods', 'Action', 'BCX_PLAYER_CUSTOM_DIALOG']]) {
     const f = await setup('PROD'); f.handlers.get('ChatRoomSync')({ Name: 'Test', Character: [], Limit: 10 });
@@ -673,8 +695,8 @@ test('release follows current full and single-item updates, retains clothes and 
   assert.equal(f.state().room, null);
 });
 
-test('safeword refuses disabled, unsupported, incomplete or disconnected sessions without writes', async () => {
-  for (const change of [{ GameplaySettings: { EnableSafeword: false } }, { GameplaySettings: undefined }, { AssetFamily: 'Unknown' }, { Appearance: undefined }]) {
+test('safeword refuses disabled, missing-backup or disconnected sessions without writes', async () => {
+  for (const change of [{ GameplaySettings: { EnableSafeword: false } }, { GameplaySettings: undefined }, { Appearance: undefined }]) {
     const f = await setup('PROD', true, { ...safetyAccount(), ...change });
     f.handlers.get('ChatRoomSync')({ Name: 'Test', Character: [{ MemberNumber: 123, Name: 'Test', Appearance: [] }] });
     const before = f.sent.length;
@@ -685,9 +707,42 @@ test('safeword refuses disabled, unsupported, incomplete or disconnected session
   f.handlers.get('ChatRoomSync')({ Name: 'Test', Game: 'GGTS', Character: [{ MemberNumber: 123, Name: 'Test', Appearance: [] }] });
   assert.throws(() => f.client.activateSafeword('release'), /GGTS/);
   f.handlers.get('ChatRoomSync')({ Name: 'Test', Character: [{ MemberNumber: 123, Name: 'Test' }] });
-  assert.throws(() => f.client.activateSafeword('release'), /完整外觀/);
+  assert.throws(() => f.client.activateSafeword('release'), /目前外觀/);
   f.client.disconnect();
   assert.throws(() => f.client.activateSafeword('revert'));
+});
+
+test('restore uploads the login backup without current appearance or a known asset family', async () => {
+  for (const family of [undefined,'CustomFamily']) {
+    const account={...safetyAccount(),AssetFamily:family};
+    const f=await setup('PROD',true,account);
+    f.handlers.get('ChatRoomSync')({Name:'Test',Character:[{MemberNumber:123,Name:'Test'}]});
+    f.client.activateSafeword('revert');
+    const save=f.sent.find(packet=>packet.event==='AccountUpdate').payload;
+    assert.equal(JSON.stringify(save.Appearance),JSON.stringify(account.Appearance));
+    assert.equal(save.AssetFamily,family);
+    assert.equal('AssetFamily' in save, family!==undefined);
+    const room=f.sent.find(packet=>packet.event==='ChatRoomCharacterUpdate').payload;
+    assert.equal(JSON.stringify(room.Appearance),JSON.stringify(account.Appearance));
+    assert.equal(JSON.stringify(f.state().characters[0].Appearance),JSON.stringify(account.Appearance));
+  }
+});
+
+test('automatic reconnect keeps the first login backup while account changes capture a new backup', async () => {
+  const first=safetyAccount(), f=await setup('PROD',true,first);
+  const changed=[{Group:'ItemArms',Name:'Rope'}];
+  f.handlers.get('disconnect')('transport close');
+  f.handlers.get('connect')();
+  f.handlers.get('LoginResponse')({...first,AccountName:'test',Name:'Test',ID:'new-socket',MemberNumber:123,Environment:'PROD',Appearance:changed});
+  f.handlers.get('ServerInfo')({OnlinePlayers:2});
+  f.handlers.get('ChatRoomSync')({Name:'Test',Character:[{MemberNumber:123,Name:'Test',Appearance:changed}]});
+  f.client.activateSafeword('revert');
+  assert.equal(JSON.stringify(f.sent.find(packet=>packet.event==='AccountUpdate').payload.Appearance),JSON.stringify(first.Appearance));
+  const other=await setup('PROD',true,first);
+  other.handlers.get('LoginResponse')({...first,AccountName:'other',Name:'Other',ID:'other-socket',MemberNumber:999,Environment:'PROD',Appearance:changed});
+  other.handlers.get('ChatRoomSync')({Name:'Test',Character:[{MemberNumber:999,Name:'Other'}]});
+  other.client.activateSafeword('revert');
+  assert.equal(JSON.stringify(other.sent.find(packet=>packet.event==='AccountUpdate').payload.Appearance),JSON.stringify(changed));
 });
 
 test('stricter interaction permissions stay strict and slash safeword never leaks into chat', async () => {

@@ -1,4 +1,5 @@
 import { t } from "../i18n";
+import { showNotice } from "../platform/dialogs";
 import { resolveMedia, type MediaTarget } from "./providers";
 
 export class MediaConsent {
@@ -48,7 +49,7 @@ export class MediaConsent {
         if (permanent) {
           const next = new Set(this.remembered); next.add(origin);
           try { this.document.defaultView!.localStorage.setItem(this.key, JSON.stringify([...next])); this.remembered = next; }
-          catch { this.document.defaultView!.alert(t("media.storageError")); return; }
+          catch { showNotice(t("media.storageError"),this.document); return; }
         } else this.session.add(origin);
         this.refresh(); if (!slot.isConnected) this.render(slot);
       });
@@ -98,7 +99,7 @@ export class MediaConsent {
         remove.addEventListener("click", () => {
           const next = new Set(this.remembered); next.delete(origin);
           try { if (this.remembered.has(origin)) this.document.defaultView!.localStorage.setItem(this.key, JSON.stringify([...next])); }
-          catch { this.document.defaultView!.alert(t("media.storageError")); return; }
+          catch { showNotice(t("media.storageError"),this.document); return; }
           this.remembered = next; this.session.delete(origin); this.refresh(); render();
         }); row.append(remove); list.append(row);
       }

@@ -1,6 +1,6 @@
 import { t } from "../i18n";
 import type { DictionaryEntry } from "../shared/types";
-import { embeddedAction } from "./embedded";
+import { embeddedAction, literalAction } from "./embedded";
 export function dictionaryText(entry: DictionaryEntry): string | null {
   if (typeof entry.Text === "string") return entry.Text;
   if (typeof entry.CharacterName === "string") return entry.CharacterName;
@@ -21,6 +21,8 @@ export function formatServerText(content: string, dictionary: DictionaryEntry[] 
 }
 
 export function renderAction(content: string, type: string, dictionary: DictionaryEntry[], catalog: Record<string, string>): string {
+    const literal = literalAction(content, type, dictionary);
+    if (literal !== undefined) return literal;
     const key = type === "ServerMessage" ? `ServerMessage${content}` : content;
     const fallback = content === "ActionUse" ? t("action.use") : content === "ActionRemove" ? t("action.remove") : content === "ActionSwap" ? t("action.swap") : content;
     const template = embeddedAction(content, type, dictionary) ?? (Object.hasOwn(catalog, key) ? catalog[key] : Object.hasOwn(catalog, content) ? catalog[content] : fallback);
