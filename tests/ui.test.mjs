@@ -70,9 +70,11 @@ function setup(savedAccount, savedPerformance, indexedDBFactory) {
   const modal=dialogs(window.document);
   const deps = {...history,...dom,...modal,t,window,document:window.document};
   const buildHistorySettings = new Function(...Object.keys(deps),uiSource('src/ui/history-settings.ts')+';return buildHistorySettings;')(...Object.values(deps));
+  const MessageSounds = new Function('window','localStorage',uiSource('src/platform/message-sounds.ts')+';return MessageSounds;')(window,window.localStorage);
+  const openHistorySearch = new Function(...Object.keys(deps),uiSource('src/ui/history-search.ts')+';return openHistorySearch;')(...Object.values(deps));
   const contactCard = new Function('t','el',uiSource('src/ui/contact-card.ts')+';return contactCard;')(t,dom.el);
   const PrivateMessages = new Function(...Object.keys(history),uiSource('src/ui/private-messages.ts')+';return PrivateMessages;')(...Object.values(history));
-  vm.runInNewContext(source, { ...history, ...dom, ...modal, buildHistorySettings, contactCard, PrivateMessages, HistorySession:sessionClass(window), contactName, window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, openActivityDialog, icon, iconSelect, nameColor, sortRooms, canJoinRoom, isMobileLayout, bindPageSwipe, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
+  vm.runInNewContext(source, { ...history, ...dom, ...modal, MessageSounds, openHistorySearch, buildHistorySettings, contactCard, PrivateMessages, HistorySession:sessionClass(window), contactName, window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, openActivityDialog, icon, iconSelect, nameColor, sortRooms, canJoinRoom, isMobileLayout, bindPageSwipe, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
   return { window, document: window.document, calls, intervals, client:bcClient, state: () => current, emit(change) { if (change.friendsStatus === '查詢完成') change.friendsQueryState = 'ready'; current = { ...current, ...change }; listener(current); } };
 }
 
@@ -1032,4 +1034,59 @@ test('friend whisper opens private conversation and preserves drafts per recipie
   f.document.querySelector('.beep-compose').dispatchEvent(new f.window.Event('submit', {cancelable:true}));
   assert.ok(f.calls.includes('/w 55 First draft'));
   await f.window.happyDOM.close();
+});
+
+
+test('unread remains per peer until explicitly read and duplicate snapshots do not recount', async () => {
+  const f=setup(), now=new Date();
+  f.emit({characters:[{MemberNumber:55,Name:'A'},{MemberNumber:66,Name:'B'}]});
+  f.emit({beeps:[{id:'u1',memberNumber:55,name:'A',text:'first',incoming:true,time:now},{id:'u2',memberNumber:66,name:'B',text:'other',incoming:true,time:now}]});
+  assert.match(f.document.querySelector('#nav-private').textContent,/2/);
+  f.emit({beeps:[...f.state().beeps]});
+  f.document.getElementById('nav-private').click();
+  f.document.querySelector('[data-member="55"]').click();
+  assert.match(f.document.getElementById('private-unread').textContent,/第一則未讀（1 則）/);
+  f.document.getElementById('private-unread').firstChild.click();
+  assert.ok(f.document.querySelector('[data-message-id="u1"]'));
+  f.document.getElementById('private-unread').lastChild.click();
+  assert.match(f.document.querySelector('#nav-private').textContent,/1/);
+  f.document.querySelector('[data-member="66"]').click();
+  assert.match(f.document.getElementById('private-unread').textContent,/第一則未讀（1 則）/);
+  await f.window.happyDOM.close();
+});
+
+test('disconnect preserves room DOM and draft while disabling sends until the actual room returns', async () => {
+  const f=setup();
+  f.emit({phase:'in-room',room:{Name:'Here'},messages:[{id:'retained',sender:55,senderName:'A',text:'retained',type:'Chat',time:new Date()}]});
+  const input=f.document.getElementById('InputChat'),log=f.document.getElementById('TextAreaChatLog');
+  input.value='unsent draft';input.dispatchEvent(new f.window.Event('input'));
+  f.emit({phase:'reconnecting',room:null,characters:[]});
+  assert.equal(f.document.getElementById('InputChat'),input);
+  assert.equal(f.document.getElementById('TextAreaChatLog'),log);
+  assert.equal(input.value,'unsent draft');
+  assert.equal(f.document.querySelector('#chat-room-bot button[type=submit]').disabled,true);
+  input.closest('form').dispatchEvent(new f.window.Event('submit',{bubbles:true,cancelable:true}));
+  assert.ok(!f.calls.includes('unsent draft'));
+  f.emit({phase:'waiting-server'});f.emit({phase:'ready'});
+  assert.equal(f.document.getElementById('InputChat'),input);
+  f.emit({phase:'in-room',room:{Name:'Here'}});
+  assert.equal(f.document.getElementById('InputChat'),input);
+  assert.equal(f.document.querySelector('#chat-room-bot button[type=submit]').disabled,false);
+  assert.ok(!f.calls.includes('unsent draft'));
+  await f.window.happyDOM.close();
+});
+
+
+test('local search renders literal text and opens isolated context', async context => {
+  const f=setup(undefined,undefined,new IDBFactory());context.after(()=>f.window.happyDOM.close());
+  f.emit({phase:'in-room',room:{Name:'Archive'},messages:[{id:'find-me',sender:55,senderName:'Friend',text:'needle <img src=x>',type:'Chat',time:new Date()}]});
+  [...f.document.querySelectorAll('.chat-room-top-menu button')].find(b=>b.textContent===t('searchHistory.title')).click();
+  f.document.getElementById('HistoryKeyword').value='needle';
+  f.document.querySelector('.history-search-form').dispatchEvent(new f.window.Event('submit',{cancelable:true}));
+  const waitFor=async fn=>{for(let i=0;i<300;i++){if(fn())return;await new Promise(r=>setTimeout(r,5));}assert.fail('search did not settle');};
+  await waitFor(()=>f.document.querySelector('.history-search-result'));
+  const row=f.document.querySelector('.history-search-result');assert.match(row.textContent,/<img src=x>/);assert.equal(row.querySelector('img'),null);
+  row.click();await waitFor(()=>f.document.querySelector('.history-search-context .search-hit'));
+  assert.equal(f.document.getElementById('InputChat').value,'');assert.ok(!f.calls.some(c=>typeof c==='string'&&c.includes('needle')));
+  f.emit({player:{...f.state().player,MemberNumber:999}});assert.equal(f.document.querySelector('.history-search-dialog'),null);
 });

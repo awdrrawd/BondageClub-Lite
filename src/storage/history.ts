@@ -15,6 +15,14 @@ export interface HistoryMessage {
 }
 export interface RecentContact { key: string; owner: string; peer: number; name: string; timestamp: number; expiresAt?: number }
 export interface HistoryBatch { messages: HistoryMessage[]; contacts: RecentContact[] }
+export interface HistoryQuery { keyword?:string; member?:string; room?:string; from?:string; to?:string; channel?:string }
+export function matchesHistory(row: HistoryMessage, query: HistoryQuery): boolean {
+  const m=row.message, day=localDay(row.timestamp), member=(query.member || '').toLowerCase();
+  return (!query.keyword || m.text.toLowerCase().includes(query.keyword.toLowerCase())) &&
+    (!member || ( /^\d+$/.test(member) ? m.sender===Number(member) || m.target===Number(member) : `${m.senderName} ${m.targetName || ''}`.toLowerCase().includes(member))) &&
+    (!query.room || row.room.toLowerCase().includes(query.room.toLowerCase())) && (!query.from || day>=query.from) && (!query.to || day<=query.to) &&
+    (!query.channel || query.channel==='all' || query.channel===row.kind || query.channel===m.type);
+}
 const DAY = 86400000;
 
 export function historyOwner(state: Readonly<ClientSnapshot>): string {
@@ -163,6 +171,39 @@ export class HistoryStore {
     const contacts = tx.objectStore('contacts').index('owner').getAll(owner);
     const [room, privateMessages] = await Promise.all([this.page(owner,'room',limit),this.page(owner,'private',limit),done]);
     return {messages:[...room,...privateMessages],contacts:contacts.result};
+  }
+  async search(owner:string, query:HistoryQuery, before?:HistoryMessage): Promise<{rows:HistoryMessage[];more:boolean}> {
+    const db=await this.open(), tx=db.transaction('messages','readonly'), done=complete(tx), rows:HistoryMessage[]=[];
+    for(const kind of ['room','private']) {
+      if (query.channel==='room' && kind!=='room') continue;
+      if (['private','Whisper','Beep'].includes(query.channel || '') && kind!=='private') continue;
+      const upper=before ? [owner,kind,before.timestamp,before.key] : [owner,kind,Number.MAX_SAFE_INTEGER,[]];
+      const request=tx.objectStore('messages').index('ownerKindTime').openCursor(IDBKeyRange.bound([owner,kind,0],upper,false,!!before),'prev');
+      let count=0;
+      request.onsuccess=()=>{const cursor=request.result;if(!cursor)return;const row=cursor.value as HistoryMessage;
+        if(row.expiresAt!>Date.now() && matchesHistory(row,query)){rows.push(row);count++;}
+        if(count<51)cursor.continue();
+      };
+    }
+    await done;
+    rows.sort((a,b)=>b.timestamp-a.timestamp || (a.key<b.key?1:a.key>b.key?-1:0));
+    return {rows:rows.slice(0,50),more:rows.length>50};
+  }
+  async context(owner:string, hit:HistoryMessage): Promise<HistoryMessage[]> {
+    if(hit.owner!==owner)return [];
+    const db=await this.open(), tx=db.transaction('messages','readonly'), done=complete(tx), rows:HistoryMessage[]=[];
+    const peer=historyPeer(hit), prefix=hit.kind==='private'?peer:'room';
+    const index=tx.objectStore('messages').index(hit.kind==='private'?'ownerPeerTime':'ownerKindTime');
+    const boundary=[owner,prefix,hit.timestamp,hit.key];
+    for(const newer of [false,true]) {
+      const range=newer?IDBKeyRange.bound(boundary,[owner,prefix,Number.MAX_SAFE_INTEGER,[]],true,false):IDBKeyRange.bound([owner,prefix,0],boundary);
+      const request=index.openCursor(range,newer?'next':'prev');let count=0;
+      request.onsuccess=()=>{const cursor=request.result;if(!cursor)return;const row=cursor.value as HistoryMessage;
+        if(row.expiresAt!>Date.now() && (hit.kind==='private' || row.room===hit.room)){rows.push(row);count++;}
+        if(count<(newer?10:11))cursor.continue();
+      };
+    }
+    await done; return rows.sort((a,b)=>a.timestamp-b.timestamp || (a.key<b.key?-1:a.key>b.key?1:0));
   }
   async days(owner: string, includePrivate: boolean): Promise<Array<{day:string;count:number}>> {
     const db = await this.open(), tx = db.transaction('messages','readonly'), done = complete(tx), counts = new Map<string,number>();

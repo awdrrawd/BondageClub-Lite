@@ -32,6 +32,8 @@ Cloudflare Pages 靜態資源 → 瀏覽器 LiteApp
 | src/shared/types.ts | Lite 使用的協定資料子集 |
 | src/ui/app.ts | 訂閱快照、導覽、局部 DOM 更新、草稿、歷史分頁及帳戶切換 |
 | src/ui/room-list.ts、private-messages.ts | 房間排序／可加入狀態；私訊合併與排序快取 |
+| src/ui/history-search.ts | 本機歷史搜尋，每頁 50 筆；同房間／同對話上下文，帳戶與請求序號隔離 |
+| src/platform/message-sounds.ts | BEEP／悄悄話獨立開關；Web Audio 本機短音，使用者手勢解鎖與 700ms 合併 |
 | src/ui/activity-dialog.ts、history-settings.ts | 活動選單與送出前條件刷新；保存設定與按日匯出 |
 | src/ui/dom.ts、contact-card.ts、icons.ts、icon-select.ts、style.css | 安全 DOM 元件、卡片、本機 SVG、選單及響應式版面 |
 | src/storage/history.ts | 白名單資料、IndexedDB v2、雙向索引分頁、到期清理及 TXT 匯出 |
@@ -132,3 +134,11 @@ build／dev 的前置步驟重建文字產物；開發伺服器運行期間修�
 `scripts/legacy/extract-ui-i18n.mjs` 是已完成的一次性遷移工具，不應重新執行來覆寫現行翻譯。
 
 UI 預覽禁止外部媒體，且不包含在正式建置。happy-dom、fake-indexeddb 與模擬 socket 驗證邏輯、節點身分與競態，不能取代真實版面、手機鍵盤、Cloudflare PROD 或雙人插件測試。第三方來源與授權依[文件導覽](README.md)查閱。
+
+## 未讀、搜尋與斷線閱讀
+
+未讀依玩家編號在分頁記憶體累計，只計新收到的 BEEP／Whisper；自身送出、重複 ID 與歷史還原不計入。正在前景對話底部閱讀且沒有既存未讀時不增加。切換對象不自動清除，可定位第一則未讀或手動標記已讀；超出快取時改查本機上下文。這不是伺服器已讀回條，重新載入不保留計數。
+
+搜尋由 HistorySession 等待寫入後交給 HistoryStore 的 ownerKindTime 索引游標，結果每頁最多 50 筆，以時間與唯一鍵排序；不把整個資料庫載入 UI。上下文前 10／後 10 筆限制於同房間或同私訊對象。搜尋與上下文只顯示文字，不載入媒體、不改變房間與草稿。
+
+暫時斷線由 UI 保留 recoveryRoom 作閱讀用途；真實連線快照仍決定發送權限。同帳戶回到同名房間保留 DOM，登出、帳戶變更或換房重新建立對應畫面。草稿不自動重送。BEEP／悄悄話音效偏好存 bc-lite-sounds-v1，預設皆關閉；不請求桌面通知權限。

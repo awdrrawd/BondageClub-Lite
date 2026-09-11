@@ -543,3 +543,5 @@ html[data-ui-preview] .app-nav { bottom:var(--preview-height); }
   .preview-tools { justify-content:flex-start; overflow-x:auto; white-space:nowrap; }
   .preview-tools > * { flex-shrink:0; }
 }
+
+#connection-banner[hidden]{display:none}.history-search-dialog{width:min(900px,94vw)}.history-search-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.history-search-results{display:grid;gap:8px;max-height:40vh;overflow:auto}.history-search-result{text-align:left;white-space:pre-wrap;overflow-wrap:anywhere}.history-search-context{max-height:35vh;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}.search-hit{border-left:3px solid currentColor;padding-left:8px}.private-unread:empty{display:none}@media(max-width:600px){.history-search-form{grid-template-columns:1fr}}

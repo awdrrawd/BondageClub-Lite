@@ -1,4 +1,4 @@
-import { HistoryStore, historyBatch, historyOwner, historyPolicy, retained, localDay, type HistoryBatch, type HistoryMessage, type HistoryPolicy, type RecentContact } from './history';
+import { HistoryStore, historyBatch, historyOwner, historyPolicy, retained, localDay, matchesHistory, type HistoryQuery, type HistoryBatch, type HistoryMessage, type HistoryPolicy, type RecentContact } from './history';
 import type { ClientSnapshot } from '../shared/types';
 
 /** Keeps disk I/O out of the socket and renderer, and rejects stale account loads. */
@@ -158,6 +158,7 @@ export class HistorySession {
     return this.queue;
   }
   async configure(policy: HistoryPolicy): Promise<void> {
+    this.archiveGeneration++;
     const owner = this.owner;
     await this.flush(); this.policy = historyPolicy(policy);
     try { localStorage.setItem('bc-lite-history-policy-v1', JSON.stringify(this.policy)); } catch { this.failed(); }
@@ -186,6 +187,26 @@ export class HistorySession {
     const counts=new Map<string,number>();
     for (const row of this.ephemeral) if (includePrivate || row.kind==='room') { const day=localDay(row.timestamp); counts.set(day,(counts.get(day)||0)+1); }
     return [...counts].map(([day,count])=>({day,count})).sort((a,b)=>b.day.localeCompare(a.day));
+  }
+  async search(query:HistoryQuery, before?:HistoryMessage): Promise<{rows:HistoryMessage[];more:boolean}> {
+    const owner=this.owner, generation=this.generation, revision=this.archiveGeneration;
+    await this.flush();
+    if(!owner || owner!==this.owner)return {rows:[],more:false};
+    const page=this.store ? await this.store.search(owner,query,before) : (()=>{
+      const rows=this.ephemeral.filter(row=>matchesHistory(row,query) && retained(row.timestamp,row.kind==='room'?this.policy.roomDays:this.policy.privateDays) && (!before || row.timestamp<before.timestamp || (row.timestamp===before.timestamp && row.key<before.key))).sort((a,b)=>b.timestamp-a.timestamp || (a.key<b.key?1:-1));
+      return {rows:rows.slice(0,50),more:rows.length>50};
+    })();
+    return generation===this.generation && revision===this.archiveGeneration ? page : {rows:[],more:false};
+  }
+  async context(hit:HistoryMessage): Promise<HistoryMessage[]> {
+    const owner=this.owner, generation=this.generation, revision=this.archiveGeneration;
+    await this.flush();
+    if(!owner || owner!==this.owner || hit.owner!==owner)return [];
+    const rows=this.store ? await this.store.context(owner,hit) : (()=>{
+      const all=this.ephemeral.filter(row=>row.kind===hit.kind && (hit.kind==='private'?this.peer(row)===this.peer(hit):row.room===hit.room) && retained(row.timestamp,row.kind==='room'?this.policy.roomDays:this.policy.privateDays)).sort((a,b)=>a.timestamp-b.timestamp || (a.key<b.key?-1:1));
+      const at=all.findIndex(row=>row.key===hit.key);return at<0?[]:all.slice(Math.max(0,at-10),at+11);
+    })();
+    return generation===this.generation && revision===this.archiveGeneration ? rows : [];
   }
   async day(day: string, includePrivate: boolean): Promise<HistoryMessage[]> {
     const owner=this.owner, generation=this.generation;
@@ -241,7 +262,7 @@ export class HistorySession {
     // Keep seen IDs: clearing saved history must not re-save the existing live message ring.
   }
   async clearRoom(): Promise<void> {
-    const owner = this.owner; this.roomGeneration++;
+    const owner = this.owner; this.roomGeneration++; this.archiveGeneration++;
     const keys=new Set([...this.seen.keys()].filter(key=>key.startsWith(`${owner}:room:`)));
     for (const key of keys) this.suppressed.add(key);
     await this.clearStored(owner, keys, true);

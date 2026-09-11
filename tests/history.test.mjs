@@ -248,3 +248,23 @@ test('private archive loads older per-peer pages and manual clear also removes t
   await session.clear(); assert.equal(session.messages.length,0); assert.equal((await store.read('PROD:123')).messages.length,0);
   await window.happyDOM.close();
 });
+
+
+test('archive search pages equal timestamps without gaps and scopes filters, context and account', async () => {
+  const store=new HistoryStore(new IDBFactory()), state=snapshot(), now=Date.now();
+  state.messages=Array.from({length:110},(_,i)=>({...state.messages[0],id:'search-'+String(i).padStart(3,'0'),text:'needle '+i,time:new Date(now)}));
+  await store.write(historyBatch(state),policy);
+  await store.write(historyBatch(snapshot(999)),policy);
+  const query={keyword:'NEEDLE',member:'55',room:'Room',channel:'room',from:localDay(now),to:localDay(now)};
+  const a=await store.search('PROD:123',query),b=await store.search('PROD:123',query,a.rows.at(-1)),c=await store.search('PROD:123',query,b.rows.at(-1));
+  assert.equal(a.rows.length,50);assert.equal(a.more,true);assert.equal(b.rows.length,50);assert.equal(c.rows.length,10);assert.equal(c.more,false);
+  assert.equal(new Set([...a.rows,...b.rows,...c.rows].map(r=>r.key)).size,110);
+  assert.equal((await store.search('PROD:123',{member:'66'})).rows.length,0);
+  assert.equal((await store.search('PROD:999',{keyword:'needle'})).rows.length,0);
+  const privatePage=await store.search('PROD:123',{channel:'Beep'});
+  assert.equal(privatePage.rows.length,1);
+  const context=await store.context('PROD:123',b.rows[20]);
+  assert.equal(context.length,21);assert.ok(context.every(r=>r.kind==='room'&&r.owner==='PROD:123'));
+  assert.equal((await store.context('PROD:999',b.rows[20])).length,0);
+  assert.equal((await store.context('PROD:123',privatePage.rows[0])).length,1);
+});

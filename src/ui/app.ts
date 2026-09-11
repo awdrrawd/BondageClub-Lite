@@ -14,13 +14,15 @@ import { appendChatLinks, MediaConsent } from "../media/chat-links";
 import { afcLovers } from "../profile/afc";
 import { StabilityControls } from "../platform/stability";
 import { loadTextCatalog } from "../action/catalog";
+import { MessageSounds } from '../platform/message-sounds';
+import { openHistorySearch } from './history-search';
 import { openActivityDialog } from "./activity-dialog";
 import { icon, type IconName } from "./icons";
 import { iconSelect } from "./icon-select";
 import { nameColor } from "./name-color";
 import { isMobileLayout, bindPageSwipe } from "../platform/mobile";
 import { canJoinRoom, sortRooms, type RoomSort } from "./room-list";
-import type { CharacterSummary, ClientSnapshot, DisplayMessage, RoomCreateOptions, RoomSearchRequest, RoomSearchResult } from "../shared/types";
+import type { CharacterSummary, ClientSnapshot, DisplayMessage, RoomCreateOptions, RoomSearchRequest, RoomSearchResult, RoomSync } from "../shared/types";
 
 const app = document.querySelector<HTMLDivElement>("#app");
 if (!app) throw new Error(t("m001"));
@@ -79,6 +81,10 @@ export class LiteApp {
   private historyEndId: string | null = null;
   private performance = { history: 3000, visible: 100 };
   private unread = 0;
+  private unreadPeers = new Map<number,{count:number;first:DisplayMessage}>();
+  private incomingSeen = new Set<string>();
+  private sounds = new MessageSounds();
+  private recoveryRoom: RoomSync | null = null;
   private roomUnread = 0;
   private composing = false;
   private renderPending = false;
@@ -88,6 +94,8 @@ export class LiteApp {
   private settings = { background: false, largeText: false, timestamps: true, locale: "zh" as Locale, theme: "default" };
 
   constructor(client: UiClient = bcClient) {
+    document.addEventListener('pointerdown',()=>{void this.sounds.unlock().catch(()=>{});});
+    document.addEventListener('keydown',()=>{void this.sounds.unlock().catch(()=>{});});
     window.matchMedia("(max-width: 760px)").addEventListener("change", () => {
       this.roomPage = 0;
       if (this.snapshot && this.tab === "rooms") this.render();
@@ -154,11 +162,14 @@ export class LiteApp {
     this.applySettings();
     this.client.subscribe((snapshot) => {
       const previous = this.snapshot;
+      const oldViewRoom = this.viewRoom()?.Name;
       this.snapshot = snapshot;
       const ownerChanged = (previous ? historyOwner(previous) : '') !== historyOwner(snapshot);
       if (ownerChanged) this.resetAccountView();
+      if (!ownerChanged && previous?.room && !snapshot.room && ['reconnecting','authenticating','waiting-server'].includes(snapshot.phase)) this.recoveryRoom=previous.room;
+      if (snapshot.room || !snapshot.player) this.recoveryRoom=null;
       this.history.observe(snapshot);
-      if (this.privateMode === "whisper" && !snapshot.characters.some(c => c.MemberNumber === this.contact)) { this.privateMode = "beep"; this.replyTarget = null; }
+      if (this.privateMode === "whisper" && this.connected() && !snapshot.characters.some(c => c.MemberNumber === this.contact)) { this.privateMode = "beep"; this.replyTarget = null; }
       if (previous && (snapshot.characters !== previous.characters || snapshot.player !== previous.player || snapshot.room !== previous.room)) {
         document.querySelector('.activity-dialog')?.dispatchEvent(new window.Event('activity-refresh'));
       }
@@ -170,25 +181,23 @@ export class LiteApp {
         }, 0);
       }
       if (snapshot.cuddleRequest !== previous?.cuddleRequest || (snapshot.cuddleRequest && snapshot.characters !== previous?.characters)) this.showCuddleRequest();
-      if (!snapshot.player || snapshot.phase === "error") this.stability.stop();
+      if (!snapshot.player || snapshot.phase === "error") { this.stability.stop(); this.sounds.stop(); }
       if (snapshot.player && !this.catalogLoading) {
         this.refreshCatalog();
       }
       if (snapshot.summon !== previous?.summon) this.updateSummon();
       if (!["ready", "joining", "in-room"].includes(snapshot.phase)) document.querySelectorAll(".profile-dialog:not(.lite-notice)").forEach(dialog => dialog.remove());
-      if (snapshot.room && snapshot.room.Name !== previous?.room?.Name) { this.tab = "chat"; this.visibleMessages = this.performance.visible; this.historyEndId = null; }
-      if (!snapshot.room && previous?.room && this.tab === "chat") this.tab = "rooms";
-      if (previous && !ownerChanged && snapshot.beeps !== previous.beeps && snapshot.beeps.at(-1)?.incoming && this.tab !== "private" && snapshot.beeps.at(-1)?.id !== previous.beeps.at(-1)?.id) this.unread++;
-      if (previous && !ownerChanged && snapshot.whispers !== previous.whispers && snapshot.whispers?.at(-1)?.sender !== snapshot.player?.MemberNumber && snapshot.whispers?.length && this.tab !== "private" && snapshot.whispers.at(-1)?.id !== previous.whispers?.at(-1)?.id) this.unread++;
+      if (snapshot.room && snapshot.room.Name !== oldViewRoom) { this.tab = "chat"; this.visibleMessages = this.performance.visible; this.historyEndId = null; }
+      if (!this.viewRoom() && previous?.room && this.tab === "chat") this.tab = "rooms";
+      this.observeIncoming(!previous || ownerChanged || this.restoringHistory);
       if (previous && !ownerChanged && !this.restoringHistory && snapshot.messages !== previous.messages && snapshot.messages.length && this.tab !== "chat" && snapshot.messages.at(-1)?.id !== previous.messages.at(-1)?.id) this.roomUnread++;
-      // Synchronization is data, not navigation. Only account/phase/room transitions
-      // change the mounted view; appearance and population packets must not tear it down.
-      if (previous && !ownerChanged && snapshot.phase === previous.phase && snapshot.room?.Name === previous.room?.Name) {
+      // Preserve the mounted authenticated view across synchronization and reconnection.
+      if (previous && !ownerChanged && !!snapshot.player===!!previous.player && (snapshot.player || snapshot.phase===previous.phase) && this.viewRoom()?.Name === oldViewRoom) {
         this.updateHeader();
         this.updateChatLog();
         if (snapshot.characters !== previous.characters || snapshot.room !== previous.room || snapshot.player !== previous.player || snapshot.cuddlePartner !== previous.cuddlePartner) this.updateRoomInfo();
         if (snapshot.rooms !== previous.rooms) this.refreshRoomResults?.();
-        if (snapshot.friends !== previous.friends || snapshot.loverRooms !== previous.loverRooms || snapshot.friendsStatus !== previous.friendsStatus || snapshot.friendsQueryState !== previous.friendsQueryState || snapshot.beeps !== previous.beeps || snapshot.whispers !== previous.whispers || snapshot.characters !== previous.characters || snapshot.player !== previous.player || snapshot.room !== previous.room) this.updateFriendContent();
+        if (snapshot.phase !== previous.phase || snapshot.messages !== previous.messages || snapshot.friends !== previous.friends || snapshot.loverRooms !== previous.loverRooms || snapshot.friendsStatus !== previous.friendsStatus || snapshot.friendsQueryState !== previous.friendsQueryState || snapshot.beeps !== previous.beeps || snapshot.whispers !== previous.whispers || snapshot.characters !== previous.characters || snapshot.player !== previous.player || snapshot.room !== previous.room) this.updateFriendContent();
         return;
       }
       this.render();
@@ -199,6 +208,7 @@ export class LiteApp {
     this.contactDrafts.clear(); this.mediaConsent.resetSession(); this.replyTarget=null;
     this.summonConfig={enabled:false,members:'',text:'Come to my room immediately'};
     this.unread=0; this.roomUnread=0; this.contact=0; this.beepDraft=''; this.chatDraft=''; this.password=''; this.notice='';
+    this.unreadPeers.clear(); this.incomingSeen.clear(); this.recoveryRoom=null;
     this.tab='rooms'; this.friendFilter='online'; this.friendQuery=''; this.privateFilter='room'; this.privateMode='beep';
     this.privateListOpen=true; this.privateVisible=60; this.privateEndId=null; this.privatePaging=false; this.privateMessagesView.reset();
     this.privateRequest++;
@@ -250,6 +260,7 @@ export class LiteApp {
   }
 
   private updateHeader(): void {
+    this.updateConnectionControls();
     const connection = document.querySelector(".connection span:last-child");
     this.setText(connection, this.snapshot!.status);
     const brand = document.querySelector<HTMLElement>(".brand"); if (brand && brand.title !== this.snapshot!.status) brand.title = this.snapshot!.status;
@@ -260,6 +271,36 @@ export class LiteApp {
     const player = this.snapshot!.player;
     const name = document.querySelector('.header-account button');
     if (name && player) this.setText(name, `${player.Nickname || player.Name} (#${player.MemberNumber})`);
+  }
+  private connected(): boolean { return !!this.snapshot?.player && ['ready','in-room'].includes(this.snapshot.phase); }
+  private viewRoom(): RoomSync | null { return this.snapshot?.room || this.recoveryRoom; }
+  private observeIncoming(baseline:boolean): void {
+    const state=this.snapshot!;
+    if(!state.player)return;
+    const messages:DisplayMessage[]=[...(state.whispers || state.messages.filter(m=>m.type==='Whisper')), ...state.beeps.map(m=>({id:m.id,type:'Beep' as const,sender:m.incoming?m.memberNumber:state.player!.MemberNumber,target:m.incoming?state.player!.MemberNumber:m.memberNumber,senderName:m.name,text:m.text,time:m.time}))];
+    for(const message of messages) {
+      const key=`${message.type}:${message.id}`;
+      if(this.incomingSeen.has(key))continue;
+      this.incomingSeen.add(key);
+      if(baseline || !message.sender || message.sender===state.player.MemberNumber)continue;
+      const log=document.getElementById('beep-log');
+      const reading=this.tab==='private' && this.contact===message.sender && !this.privateEndId && !this.privateListOpen && document.visibilityState==='visible' && !!log && log.scrollHeight-log.scrollTop-log.clientHeight<60 && !this.unreadPeers.has(message.sender);
+      if(!reading) { const item=this.unreadPeers.get(message.sender);this.unreadPeers.set(message.sender,{count:(item?.count || 0)+1,first:item?.first || message}); }
+      void this.sounds.play(message.type==='Beep'?'beep':'whisper').catch(()=>{});
+    }
+    if(this.incomingSeen.size>3000)this.incomingSeen=new Set(messages.map(m=>`${m.type}:${m.id}`));
+    this.unread=[...this.unreadPeers.values()].reduce((n,item)=>n+item.count,0);
+  }
+  private updateConnectionControls(): void {
+    const state=this.snapshot!;
+    const banner=document.getElementById('connection-banner');
+    if(banner){banner.hidden=this.connected();this.setText(banner,`${state.status} · ${t('connection.retained')}`);}
+    for(const control of document.querySelectorAll<HTMLButtonElement>('#chat-room-bot button[type=submit], .chat-room-top-menu .leave-room, .room-info .leave-room'))control.disabled=state.phase!=='in-room' || !state.room;
+    const beep=document.querySelector<HTMLButtonElement>('.beep-compose button[type=submit]');if(beep)beep.disabled=!this.contact || !this.connected() || (this.privateMode==='whisper' && !state.room);
+    const safety=document.getElementById('room-safeword') as HTMLButtonElement|null;if(safety)safety.disabled=state.phase!=='in-room' || !state.room;
+    const create=document.querySelector<HTMLButtonElement>('.create-controls button[type=submit]');if(create)create.disabled=state.phase!=='ready';
+    for(const control of document.querySelectorAll<HTMLButtonElement>('.room-search,.friend-refresh'))control.disabled=!this.connected() || (control.classList.contains('friend-refresh') && state.friendsQueryState==='loading');
+    document.body.classList.toggle('chat-active',this.tab==='chat' && !!this.viewRoom());
   }
 
   private setText(node: Element | null, text: string): void {
@@ -369,7 +410,7 @@ export class LiteApp {
     const summon = this.el("div", "summon-notice"); summon.id = "summon-notice";
 
     const content = this.el("div", "app-content");
-    if (state.phase === "idle" || state.phase === "connecting" || state.phase === "authenticating" || state.phase === "waiting-server" || state.phase === "reconnecting" || state.phase === "error") {
+    if (!state.player) {
       content.append(this.buildLogin());
     } else if (this.tab === "friends") {
       content.append(this.buildFriends());
@@ -377,15 +418,16 @@ export class LiteApp {
       content.append(this.buildFriends(true));
     } else if (this.tab === "settings") {
       content.append(this.buildSettings());
-    } else if (state.room && this.tab === "chat") {
+    } else if (this.viewRoom() && this.tab === "chat") {
       content.append(this.buildRoom());
     } else {
       content.append(this.buildSearch());
     }
     header.append(summon);
     this.fillSummon(summon);
-    shell.append(header, content);
-    if (state.player && ["ready", "joining", "in-room"].includes(state.phase)) shell.append(this.buildNavigation());
+    const banner=this.el('p','notice');banner.id='connection-banner';banner.setAttribute('role','status');
+    shell.append(header, banner, content);
+    if (state.player) shell.append(this.buildNavigation());
     shell.append(this.buildFooter());
     return shell;
   }
@@ -399,11 +441,10 @@ export class LiteApp {
       button.replaceChildren(icon(icons[key]), this.el("span", "nav-label", label));
       button.id = `nav-${key}`;
       button.setAttribute("aria-current", this.tab === key ? "page" : "false");
-      button.disabled = key === "chat" && !this.snapshot!.room;
+      button.disabled = key === "chat" && !this.viewRoom();
       button.addEventListener("click", () => {
         if (this.tab !== key) this.replyTarget = null;
         this.tab = key;
-        if (key === "private") this.unread = 0;
         if (key === "chat") this.roomUnread = 0;
         this.render();
         if ((key === "friends" || key === "private") && this.snapshot!.friendsQueryState === "idle") this.run(() => this.client.refreshFriends());
@@ -468,6 +509,7 @@ export class LiteApp {
     form.addEventListener("submit", event => {
       event.preventDefault();
       this.run(() => {
+        if(!this.connected())throw new Error(t('connection.retained'));
         if (this.privateMode === "whisper") {
           if (!this.beepDraft.trim()) return;
           if (!this.snapshot!.characters.some(character => character.MemberNumber === this.contact)) throw new Error(t("m032"));
@@ -491,7 +533,9 @@ export class LiteApp {
     const newer = this.button(t("history.newer"), "ghost", "button"); newer.dataset.history = "newer";
     older.addEventListener("click", () => this.pagePrivate(-1)); newer.addEventListener("click", () => this.pagePrivate(1));
     paging.append(older, newer);
-    conversation.append(heading, paging, inbox, form);
+    const unread=this.el('div','toolbar private-unread');unread.id='private-unread';
+    this.fillPrivateUnread(unread);
+    conversation.append(heading, unread, paging, inbox, form);
     const split = this.el("div", `private-split ${this.privateListOpen ? "show-contacts" : "show-conversation"}`);
     split.append(contacts, conversation); section.append(split);
     // Populate detached containers; later updates only touch list and log, never the composer.
@@ -503,8 +547,9 @@ export class LiteApp {
   }
 
   private updateFriendContent(): void {
+    const unread=document.getElementById('private-unread');if(unread)this.fillPrivateUnread(unread);
     const whisper = document.querySelector<HTMLButtonElement>('[data-channel="whisper"]');
-    if (whisper) whisper.disabled = !this.snapshot!.characters.some(c => c.MemberNumber === this.contact);
+    if (whisper) whisper.disabled = !this.connected() || !this.snapshot!.characters.some(c => c.MemberNumber === this.contact);
     for (const control of document.querySelectorAll<HTMLElement>('[data-channel]')) control.setAttribute('aria-pressed', String(control.dataset.channel === this.privateMode));
     if (!this.replyTarget) document.querySelector('.beep-compose .reply-preview')?.remove();
     const heading = document.querySelector('.private-conversation .private-heading h2');
@@ -523,6 +568,21 @@ export class LiteApp {
     const refresh = document.querySelector<HTMLButtonElement>(".friend-refresh");
     if (refresh) { refresh.disabled = this.snapshot!.friendsQueryState === "loading"; refresh.setAttribute("aria-busy", String(refresh.disabled)); refresh.title = `${t("m018")} · ${this.snapshot!.friendsStatus}`; }
     this.updateBeepLog();
+    this.updateConnectionControls();
+  }
+  private fillPrivateUnread(node:HTMLElement): void {
+    const item=this.unreadPeers.get(this.contact);
+    if(node.dataset.count===String(item?.count || 0) && node.dataset.peer===String(this.contact))return;
+    node.dataset.count=String(item?.count || 0);node.dataset.peer=String(this.contact);node.replaceChildren();
+    if(!item)return;
+    const first=this.button(t('unread.first',[item.count]),'secondary','button');
+    first.addEventListener('click',()=>{
+      const rows=this.allPrivateMessages(),index=rows.findIndex(m=>m.id===item.first.id && m.type===item.first.type);
+      if(index>=0){this.privateEndId=rows[Math.min(rows.length-1,index+this.privateVisible-1)].id;this.updateBeepLog();Array.from(document.querySelectorAll<HTMLElement>('#beep-log [data-message-id]')).find(node=>node.dataset.messageId===item.first.id)?.scrollIntoView?.({block:'start'});}
+      else { const owner=historyOwner(this.snapshot!); openHistorySearch(this.history,()=>historyOwner(this.snapshot!),{member:String(this.contact),hit:{key:`${owner}:private:${item.first.id}`,owner,kind:'private',room:'',timestamp:+item.first.time,message:item.first}}); }
+    });
+    const read=this.button(t('unread.mark'),'ghost','button');read.addEventListener('click',()=>{this.unreadPeers.delete(this.contact);this.unread=[...this.unreadPeers.values()].reduce((n,v)=>n+v.count,0);this.updateFriendContent();this.updateHeader();});
+    node.append(first,read);
   }
 
   private openConversation(memberNumber: number, mode = "beep"): void {
@@ -532,7 +592,7 @@ export class LiteApp {
     this.contact = memberNumber;
     this.privateListOpen = false; this.privateVisible = 60; this.privateEndId = null;
     this.beepDraft = this.contactDrafts.get(memberNumber) || "";
-    this.privateMode = mode === "whisper" && this.snapshot!.characters.some(c => c.MemberNumber === memberNumber) ? "whisper" : "beep"; this.tab = "private"; this.unread = 0;
+    this.privateMode = mode === "whisper" && this.snapshot!.characters.some(c => c.MemberNumber === memberNumber) ? "whisper" : "beep"; this.tab = "private";
     const owner=historyOwner(this.snapshot!);
     const request=++this.privateRequest;
     this.privatePaging=this.history.hasOlderPrivate(memberNumber);
@@ -575,6 +635,7 @@ export class LiteApp {
       const sharedRoom = inRoom ? state.room?.Name : fresh ? friend?.ChatRoomName || state.loverRooms?.[id]?.name : undefined;
       const roomLabel = inRoom ? t("contact.sameRoom") : fresh && friend?.Private ? t("contact.privateRoom") : sharedRoom;
       const {row,info}=contactCard({id,name,online:presence==='online',selected:this.tab==='private' && this.contact===id,relation,room:roomLabel,activate:()=>this.openConversation(id)});
+      const unread=this.unreadPeers.get(id);if(unread)info.append(this.el('span','tag unread-count',t('unread.count',[unread.count])));
       if (afcLovers(state.player).some(lover => lover.memberNumber === id)) {
         info.append(this.el("span", "tag afc-tag", t("afc.title")));
         const queryRoom = this.button(t("afc.query"), "ghost afc-query", "button");
@@ -727,7 +788,7 @@ export class LiteApp {
     const jumps = this.el("nav", "settings-jumps"); jumps.setAttribute("aria-label", t("settings.jump"));
     const groups: Array<[string, string, HTMLElement[]]> = [
       ["appearance", t("settings.appearance"), [panel]],
-      ["function", t("settings.function"), [this.buildSummonSettings(), compatibility]],
+      ["function", t("settings.function"), [this.buildSoundSettings(), this.buildSummonSettings(), compatibility]],
       ["performance", t("settings.performance"), [this.buildPerformanceSettings(), this.stability.build(() => this.client.connectionDiagnostics(), () => this.client.resumeConnection())]],
       ["storage", t("settings.storage"), [this.buildHistorySettings()]],
       ["privacy", t("settings.privacy"), [privacy, this.mediaConsent.buildSettings()]],
@@ -742,7 +803,16 @@ export class LiteApp {
   }
 
   private buildHistorySettings(): HTMLElement {
-    return buildHistorySettings({history:this.history, owner:()=>this.snapshot ? historyOwner(this.snapshot) : '', hasError:()=>this.historyError, notice:message=>this.localNotice(message)});
+    const panel=buildHistorySettings({history:this.history, owner:()=>this.snapshot ? historyOwner(this.snapshot) : '', hasError:()=>this.historyError, notice:message=>this.localNotice(message)});
+    const search=this.button(t('searchHistory.title'),'secondary','button');search.id='open-history-search';search.addEventListener('click',()=>openHistorySearch(this.history,()=>historyOwner(this.snapshot!)));panel.prepend(search);return panel;
+  }
+  private buildSoundSettings(): HTMLElement {
+    const panel=this.el('section','settings-card sound-settings');panel.append(this.el('h2','',t('sounds.title')),this.el('p','muted',t('sounds.help')));
+    for(const kind of ['beep','whisper'] as const){
+      const toggle=this.checkbox(t(`sounds.${kind}`),this.sounds.enabled[kind],value=>{void this.sounds.enable(kind,value).catch(()=>this.localNotice(t('sounds.failed')));});
+      toggle.querySelector('input')!.id=`sound-${kind}`;panel.append(toggle);
+    }
+    return panel;
   }
   private run(action: () => void): void { try { action(); } catch (error) { this.localNotice(error instanceof Error ? error.message : t("m072")); } }
 
@@ -1089,7 +1159,7 @@ export class LiteApp {
   }
 
   private buildRoom(): HTMLElement {
-    const state = this.snapshot!;
+    const state = {...this.snapshot!,room:this.viewRoom()};
     const layout = this.el("section", `room-view${this.membersOpen ? " members-open" : ""}`);
     const sidebar = this.el("aside", "member-panel");
     const roomInfo = this.el("div", "room-info");
@@ -1099,6 +1169,7 @@ export class LiteApp {
     roomInfo.querySelector('.eyebrow')?.prepend(icon(roomLanguageIcons[state.room!.Language?.toUpperCase()] || 'translate'));
     (roomInfo.querySelector('.eyebrow') as HTMLElement).dataset.language = state.room!.Language || '';
     const leave = this.button(t("m157"), "ghost danger", "button");
+    leave.classList.add('leave-room');
     leave.addEventListener("click", () => this.client.leave());
     roomInfo.append(leave);
     sidebar.append(roomInfo, this.el("h2", "member-title", t("m158", [state.characters.length])));
@@ -1135,10 +1206,12 @@ export class LiteApp {
     const jump = this.button(t("m163"), "secondary", "button"); jump.id = "new-messages"; jump.hidden = !this.historyEndId;
     jump.addEventListener("click", () => { this.historyEndId = null; this.updateChatLog(true); });
     topMenu.append(toggle, history, jump);
+    const search=this.button(t('searchHistory.title'),'ghost','button');search.addEventListener('click',()=>openHistorySearch(this.history,()=>historyOwner(this.snapshot!)));topMenu.append(search);
     const clear = this.button(t("chat.clear"), "ghost clear-messages", "button");
     clear.addEventListener("click", () => this.confirmAction(t("chat.clearConfirm"),()=>{ this.replyTarget = null; this.historyEndId = null; void this.history.clearRoom().catch(() => this.localNotice(t("history.error"))); this.client.clearMessages(); document.getElementById("chat-room-reply-indicator")?.replaceChildren(); this.updateChatLog(true); }));
     topMenu.append(clear);
     const mobileLeave = this.button(t("m164"), "ghost", "button");
+    mobileLeave.classList.add('leave-room');
     mobileLeave.addEventListener("click", () => this.client.leave());
     topMenu.append(mobileLeave);
     const struggle = this.el("div", "chat-room-struggle-bar"); struggle.id = "chat-room-struggle-bar";
@@ -1159,6 +1232,7 @@ export class LiteApp {
     bot.addEventListener("submit", (event) => {
       event.preventDefault();
       if (!this.chatDraft.trim()) return;
+      if(this.snapshot!.phase!=='in-room' || !this.snapshot!.room){this.localNotice(t('connection.retained'));return;}
       try { this.client.sendChat(this.replyContent(this.chatDraft), this.replyTarget?.nativeId); this.replyTarget = null; reply.replaceChildren(); this.chatDraft = ""; input.value = ""; length.textContent = "0/1000"; }
       catch (error) { this.localNotice(error instanceof Error ? error.message : t("m167")); }
     });
