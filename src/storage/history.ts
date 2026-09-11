@@ -146,14 +146,17 @@ export class HistoryStore {
     await done; return { messages: messages.result, contacts: contacts.result };
   }
   /** Reverse indexed cursor stops at the requested page, including equal-time messages. */
-  async page(owner: string, kind: 'room' | 'private', limit = 3000, before?: HistoryMessage, peer?: number): Promise<HistoryMessage[]> {
+  async page(owner: string, kind: 'room' | 'private', limit = 3000, before?: HistoryMessage, peer?: number, newer = false): Promise<HistoryMessage[]> {
     const db = await this.open(), tx = db.transaction('messages', 'readonly'), done = complete(tx);
     const prefix = peer === undefined ? kind : peer;
-    const upper = before ? [owner,prefix,before.timestamp,before.key] : [owner,prefix,Number.MAX_SAFE_INTEGER,[]];
-    const request = tx.objectStore('messages').index(peer === undefined ? 'ownerKindTime' : 'ownerPeerTime').openCursor(IDBKeyRange.bound([owner,prefix,0],upper,false,!!before), 'prev');
+    const boundary = before ? [owner,prefix,before.timestamp,before.key] : undefined;
+    const range = newer
+      ? IDBKeyRange.bound(boundary || [owner,prefix,0], [owner,prefix,Number.MAX_SAFE_INTEGER,[]], !!boundary, false)
+      : IDBKeyRange.bound([owner,prefix,0], boundary || [owner,prefix,Number.MAX_SAFE_INTEGER,[]], false, !!boundary);
+    const request = tx.objectStore('messages').index(peer === undefined ? 'ownerKindTime' : 'ownerPeerTime').openCursor(range, newer ? 'next' : 'prev');
     const rows: HistoryMessage[] = [];
     request.onsuccess = () => { const cursor = request.result; if (!cursor) return; if (cursor.value.expiresAt > Date.now()) rows.push(cursor.value); if (rows.length < limit) cursor.continue(); };
-    await done; return rows.reverse();
+    await done; return newer ? rows : rows.reverse();
   }
   async initial(owner: string, limit = 3000): Promise<HistoryBatch> {
     const db = await this.open(), tx = db.transaction('contacts', 'readonly'), done = complete(tx);

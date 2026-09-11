@@ -12,6 +12,47 @@ function snapshot(member=123, time=Date.now(), environment='PROD') {
     whispers:[],beeps:[{id:'beep',memberNumber:55,name:'Friend',text:'private secret',incoming:true,time:new Date(time)}]};
 }
 
+test('unchanged immutable history records are not serialized again when one message arrives', async () => {
+  const window=new Window(), store=new HistoryStore(new IDBFactory()), Session=sessionClass(window), state=snapshot();
+  state.beeps=[];
+  let reads=0;
+  state.messages=Array.from({length:3000},(_,i)=>({...state.messages[0],id:`incremental-${i}`,get text(){ reads++; return 'old'; }}));
+  const session=new Session(store,()=>{},()=>assert.fail('storage failed'));
+  session.observe(state); await session.flush(); const initialReads=reads;
+  state.messages=[...state.messages.slice(1),{...state.messages[0],id:'new',text:'new'}];
+  const before=reads; session.observe(state); await session.flush();
+  assert.equal(reads,before,'old message fields must not be re-read to build or serialize records');
+  assert.ok(initialReads>=3000);
+  state.messages=[{...state.messages[0],text:'corrected'},...state.messages.slice(1)];
+  session.observe(state); await session.flush();
+  const saved=await store.read('PROD:123'); assert.equal(saved.messages.find(row=>row.message.id==='incremental-1').message.text,'corrected');
+  await window.happyDOM.close();
+});
+
+test('private cache windows stay bounded and traverse both directions without gaps at equal timestamps', async () => {
+  const window=new Window(), store=new HistoryStore(new IDBFactory()), Session=sessionClass(window), state=snapshot(), now=Date.now()-1000;
+  state.messages=[];
+  state.beeps=Array.from({length:725},(_,i)=>({...state.beeps[0],id:`window-${String(i).padStart(4,'0')}`,time:new Date(now)}));
+  await store.write(historyBatch(state),policy);
+  const session=new Session(store,()=>{},()=>assert.fail('storage failed'));
+  session.observe({...state,beeps:[]}); await session.flush(); await session.loadPrivate(55);
+  const seen=new Set(session.messages.map(row=>row.message.id));
+  for (let i=0;i<20 && session.hasOlderPrivate(55);i++) {
+    await session.loadPrivate(55,true);
+    assert.ok(session.messages.length<=600);
+    session.messages.forEach(row=>seen.add(row.message.id));
+  }
+  assert.equal(seen.size,725); assert.equal(session.hasOlderPrivate(55),false); assert.equal(session.hasNewerPrivate(55),true);
+  const end=session.privateWindowEnd(55); assert.ok(end);
+  session.observe({...state,beeps:[{...state.beeps[0],id:'window-new',time:new Date()}]}); await session.flush();
+  assert.equal(session.messages.some(row=>row.message.id==='window-new'),false,'new live messages must not displace a historical window');
+  for (let i=0;i<20 && session.hasNewerPrivate(55);i++) { await session.loadPrivate(55,false,true); assert.ok(session.messages.length<=600); }
+  assert.equal(session.hasNewerPrivate(55),false); assert.equal(session.messages.at(-1).message.id,'window-new');
+  assert.equal(session.hasOlderPrivate(55),true,'evicted older pages must become loadable again');
+  assert.equal((await store.read('PROD:123')).messages.length,726);
+  await window.happyDOM.close();
+});
+
 test('FriendNames decodes BC UTF16 pairs, rejects malformed data and prefers live room names', () => {
   const names=decodeFriendNames(LZString.compressToUTF16(JSON.stringify([[55,'Cached'],[-1,'bad'],['56','bad'],[66,{}]])));
   assert.deepEqual(names,{55:'Cached'});

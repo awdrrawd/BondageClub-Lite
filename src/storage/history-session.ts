@@ -15,7 +15,15 @@ export class HistorySession {
   private revision = 0;
   private unsaved = new Map<string, number>();
   private exhaustedPeers = new Set<number>();
+  private activePeer = 0;
+  private newerPrivate = false;
+  private privateLoad = 0;
   private observed: Readonly<ClientSnapshot> | null = null;
+  // Client message records are immutable; replacement records still pass through
+  // signature comparison so corrections and relocalization remain persistable.
+  private observedRoom = new WeakSet<object>();
+  private observedPrivate = new WeakSet<object>();
+  private observedBeeps = new WeakSet<object>();
   private pending: HistoryBatch = {messages:[], contacts:[]};
   private timer: ReturnType<typeof window.setTimeout> | undefined;
   private maintenance = 0;
@@ -43,6 +51,7 @@ export class HistorySession {
     if (owner !== this.owner) {
       this.flush(); this.owner = owner; const generation = ++this.generation;
       this.messages = []; this.contacts = []; this.ephemeral = []; this.seen.clear(); this.suppressed.clear(); this.exhaustedPeers.clear(); this.maintenance = Date.now();
+      this.activePeer = 0; this.newerPrivate = false; this.privateLoad++;
       const roomGeneration = this.roomGeneration;
       const archiveGeneration = this.archiveGeneration;
       if (owner && this.store) this.enqueue(async () => {
@@ -58,8 +67,17 @@ export class HistorySession {
       });
     }
     if (!owner) return;
-    const unchanged=previous && historyOwner(previous)===owner && previous.messages===state.messages && previous.whispers===state.whispers && previous.beeps===state.beeps && previous.room?.Name===state.room?.Name && previous.player?.Name===state.player?.Name && previous.player?.Nickname===state.player?.Nickname;
-    const batch = unchanged ? {messages:[],contacts:[]} : historyBatch(state, this.suppressed);
+    const sameContext=previous && historyOwner(previous)===owner && previous.room?.Name===state.room?.Name && previous.player?.Name===state.player?.Name && previous.player?.Nickname===state.player?.Nickname;
+    if (!sameContext) { this.observedRoom=new WeakSet(); this.observedPrivate=new WeakSet(); this.observedBeeps=new WeakSet(); }
+    const unseen = <T extends object>(rows: T[], seen: WeakSet<object>): T[] => rows.filter(row => {
+      if (seen.has(row)) return false;
+      seen.add(row); return true;
+    });
+    const batch = historyBatch({...state,
+      messages: sameContext && previous.messages===state.messages ? [] : unseen(state.messages,this.observedRoom),
+      whispers: sameContext && (previous.whispers || previous.messages)===(state.whispers || state.messages) ? [] : unseen(state.whispers || state.messages,this.observedPrivate),
+      beeps: sameContext && previous.beeps===state.beeps ? [] : unseen(state.beeps,this.observedBeeps),
+    }, this.suppressed);
     batch.messages = batch.messages.filter(row => this.seen.get(row.key) !== this.signature(row));
     const changedPrivate = new Set(batch.messages.filter(row=>row.kind==='private').map(row=>row.timestamp));
     batch.contacts = batch.contacts.filter(row=>changedPrivate.has(row.timestamp));
@@ -83,15 +101,35 @@ export class HistorySession {
     }
   }
   private signature(row: HistoryMessage): string { return JSON.stringify([row.room,row.message]); }
-  private merge(batch: HistoryBatch): void {
+  private peer(row: HistoryMessage): number {
+    const self = Number(this.owner.slice(this.owner.lastIndexOf(':')+1));
+    return (row.message.sender === self ? row.message.target : row.message.sender) || 0;
+  }
+  private merge(batch: HistoryBatch, direction: 'live' | 'older' | 'newer' = 'live'): void {
     if (!this.store) {
       const rows = new Map([...this.ephemeral, ...batch.messages].map(row => [row.key, row]));
       this.ephemeral = [...rows.values()].filter(row => retained(row.timestamp, row.kind === 'room' ? this.policy.roomDays : this.policy.privateDays)).slice(-3000);
     }
     // Public history is restored to the client's bounded ring; private pages stay here.
     const messages = new Map(this.messages.map(row => [row.key, row]));
-    for (const row of batch.messages) if (row.kind === 'private') messages.set(row.key, row);
-    this.messages = [...messages.values()].filter(r => retained(r.timestamp, this.policy.privateDays)).sort((a,b) => a.timestamp - b.timestamp || (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
+    const end = this.privateWindowEnd(this.activePeer);
+    for (const row of batch.messages) if (row.kind === 'private') {
+      if (direction === 'live' && end && this.peer(row) === this.activePeer && (row.timestamp > end.timestamp || (row.timestamp === end.timestamp && row.key > end.key))) continue;
+      messages.set(row.key, row);
+    }
+    const ordered = [...messages.values()].filter(r => retained(r.timestamp, this.policy.privateDays)).sort((a,b) => a.timestamp - b.timestamp || (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
+    // Keep a 600-record window for the open conversation, plus 2400 recent
+    // records from other conversations. Disk remains the complete archive.
+    const active = this.activePeer ? ordered.filter(row => this.peer(row) === this.activePeer) : [];
+    const keptActive = direction === 'older' ? active.slice(0,600) : active.slice(-600);
+    if (active.length > 600) {
+      if (direction === 'older') this.newerPrivate = true;
+      else this.exhaustedPeers.delete(this.activePeer);
+    }
+    const other = ordered.filter(row => !this.activePeer || this.peer(row) !== this.activePeer).slice(-(this.activePeer ? 2400 : 3000));
+    const keep = new Set([...keptActive,...other].map(row => row.key));
+    for (const row of ordered) if (!keep.has(row.key) && !(direction === 'older' && this.peer(row) === this.activePeer)) this.exhaustedPeers.delete(this.peer(row));
+    this.messages = ordered.filter(row => keep.has(row.key));
     const contacts = new Map(this.contacts.map(row => [row.peer, row]));
     for (const row of batch.contacts) if (row.timestamp > (contacts.get(row.peer)?.timestamp || 0)) contacts.set(row.peer, row);
     this.contacts = [...contacts.values()].filter(r => retained(r.timestamp, this.policy.recentDays)).sort((a,b) => b.timestamp - a.timestamp);
@@ -159,23 +197,37 @@ export class HistorySession {
     return generation===this.generation ? data : [];
   }
   hasOlderPrivate(peer: number): boolean { return !!this.store && !this.exhaustedPeers.has(peer); }
-  async loadPrivate(peer: number, older = false): Promise<void> {
+  hasNewerPrivate(peer: number): boolean { return !!this.store && peer === this.activePeer && this.newerPrivate; }
+  privateWindowEnd(peer: number): HistoryMessage | undefined {
+    if (this.hasNewerPrivate(peer)) for (let i=this.messages.length-1;i>=0;i--) if (this.peer(this.messages[i])===peer) return this.messages[i];
+    return undefined;
+  }
+  async loadPrivate(peer: number, older = false, newer = false): Promise<void> {
     if (!this.store || !this.owner) return;
-    const owner=this.owner, generation=this.generation, roomGeneration=this.roomGeneration;
+    const owner=this.owner, generation=this.generation, roomGeneration=this.roomGeneration, load=++this.privateLoad;
+    if ((!older && !newer) || peer !== this.activePeer) {
+      this.activePeer=peer; this.newerPrivate=false;
+      this.exhaustedPeers.delete(peer);
+      // Opening a conversation starts at its newest page, not an evicted window.
+      if (!older && !newer) this.messages=this.messages.filter(row=>this.peer(row)!==peer);
+    }
     const self=Number(owner.slice(owner.lastIndexOf(':')+1));
     const rows=this.messages.filter(row=>(row.message.sender===self ? row.message.target : row.message.sender)===peer);
-    const before=older ? rows[0] : undefined;
+    const before=older ? rows[0] : newer ? rows.at(-1) : undefined;
     await this.flush();
-    const page=await this.store.page(owner,'private',60,before,peer);
-    if (generation!==this.generation || roomGeneration!==this.roomGeneration) return;
-    if (page.length<60) this.exhaustedPeers.add(peer);
+    const limit = !older && !newer ? 600 : 60;
+    const page=await this.store.page(owner,'private',limit,before,peer,newer);
+    if (generation!==this.generation || roomGeneration!==this.roomGeneration || load!==this.privateLoad) return;
+    if (newer) { if (page.length<limit) this.newerPrivate=false; }
+    else if (page.length<limit) this.exhaustedPeers.add(peer);
     for (const row of page) if (!this.seen.has(row.key)) this.seen.set(row.key,this.signature(row));
     // Loaded rows must not overwrite newer, locally corrected text.
     const current=new Set(this.messages.map(row=>row.key));
-    this.merge({messages:page.filter(row=>!current.has(row.key) && !this.suppressed.has(row.key)),contacts:[]});
+    this.merge({messages:page.filter(row=>!current.has(row.key) && !this.suppressed.has(row.key)),contacts:[]}, older ? 'older' : 'newer');
     this.changed();
   }
   async clear(): Promise<void> {
+    this.privateLoad++; this.newerPrivate=false;
     this.roomGeneration++;
     this.archiveGeneration++;
     const owner = this.owner, generation = this.generation;

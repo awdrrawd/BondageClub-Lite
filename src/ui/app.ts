@@ -40,6 +40,7 @@ export class LiteApp {
   private privateEndId: string | null = null;
   private privateMessagesView = new PrivateMessages();
   private privatePaging = false;
+  private privateRequest = 0;
   private privateRendered = new WeakMap<Element, DisplayMessage>();
   private summonConfig = { enabled: false, members: "", text: "Come to my room immediately" };
   private stability = new StabilityControls();
@@ -81,6 +82,9 @@ export class LiteApp {
   private roomUnread = 0;
   private composing = false;
   private renderPending = false;
+  private refreshRoomResults: (() => void) | null = null;
+  private renderedMessages = new WeakMap<Element, DisplayMessage>();
+  private renderedLogs = new WeakMap<Element, DisplayMessage[]>();
   private settings = { background: false, largeText: false, timestamps: true, locale: "zh" as Locale, theme: "default" };
 
   constructor(client: UiClient = bcClient) {
@@ -171,19 +175,20 @@ export class LiteApp {
         this.refreshCatalog();
       }
       if (snapshot.summon !== previous?.summon) this.updateSummon();
-      if (previous && snapshot.messages !== previous.messages && snapshot.messages.some((message, index) => message.id === previous.messages[index]?.id && message.text !== previous.messages[index]?.text)) { this.render(); return; }
       if (!["ready", "joining", "in-room"].includes(snapshot.phase)) document.querySelectorAll(".profile-dialog:not(.lite-notice)").forEach(dialog => dialog.remove());
       if (snapshot.room && snapshot.room.Name !== previous?.room?.Name) { this.tab = "chat"; this.visibleMessages = this.performance.visible; this.historyEndId = null; }
       if (!snapshot.room && previous?.room && this.tab === "chat") this.tab = "rooms";
       if (previous && !ownerChanged && snapshot.beeps !== previous.beeps && snapshot.beeps.at(-1)?.incoming && this.tab !== "private" && snapshot.beeps.at(-1)?.id !== previous.beeps.at(-1)?.id) this.unread++;
       if (previous && !ownerChanged && snapshot.whispers !== previous.whispers && snapshot.whispers?.at(-1)?.sender !== snapshot.player?.MemberNumber && snapshot.whispers?.length && this.tab !== "private" && snapshot.whispers.at(-1)?.id !== previous.whispers?.at(-1)?.id) this.unread++;
       if (previous && !ownerChanged && !this.restoringHistory && snapshot.messages !== previous.messages && snapshot.messages.length && this.tab !== "chat" && snapshot.messages.at(-1)?.id !== previous.messages.at(-1)?.id) this.roomUnread++;
-      // Chat packets and server population updates never replace an active composer (including IME input).
-      if (previous && snapshot.phase === previous.phase && snapshot.player === previous.player && snapshot.room === previous.room && snapshot.characters === previous.characters && snapshot.rooms === previous.rooms) {
+      // Synchronization is data, not navigation. Only account/phase/room transitions
+      // change the mounted view; appearance and population packets must not tear it down.
+      if (previous && !ownerChanged && snapshot.phase === previous.phase && snapshot.room?.Name === previous.room?.Name) {
         this.updateHeader();
         this.updateChatLog();
-        if (snapshot.friends !== previous.friends || snapshot.loverRooms !== previous.loverRooms || snapshot.friendsStatus !== previous.friendsStatus || snapshot.beeps !== previous.beeps) this.updateFriendContent();
-        else if (snapshot.whispers !== previous.whispers) this.updateFriendContent();
+        if (snapshot.characters !== previous.characters || snapshot.room !== previous.room || snapshot.player !== previous.player || snapshot.cuddlePartner !== previous.cuddlePartner) this.updateRoomInfo();
+        if (snapshot.rooms !== previous.rooms) this.refreshRoomResults?.();
+        if (snapshot.friends !== previous.friends || snapshot.loverRooms !== previous.loverRooms || snapshot.friendsStatus !== previous.friendsStatus || snapshot.friendsQueryState !== previous.friendsQueryState || snapshot.beeps !== previous.beeps || snapshot.whispers !== previous.whispers || snapshot.characters !== previous.characters || snapshot.player !== previous.player || snapshot.room !== previous.room) this.updateFriendContent();
         return;
       }
       this.render();
@@ -196,6 +201,7 @@ export class LiteApp {
     this.unread=0; this.roomUnread=0; this.contact=0; this.beepDraft=''; this.chatDraft=''; this.password=''; this.notice='';
     this.tab='rooms'; this.friendFilter='online'; this.friendQuery=''; this.privateFilter='room'; this.privateMode='beep';
     this.privateListOpen=true; this.privateVisible=60; this.privateEndId=null; this.privatePaging=false; this.privateMessagesView.reset();
+    this.privateRequest++;
     this.membersOpen=false; this.historyEndId=null; this.visibleMessages=this.performance.visible; this.roomPage=0; this.roomSearchInitialized=false; this.query='';
     this.composing=false; this.renderPending=false;
     document.querySelectorAll('.profile-dialog, .activity-dialog').forEach(dialog=>dialog.remove());
@@ -245,34 +251,59 @@ export class LiteApp {
 
   private updateHeader(): void {
     const connection = document.querySelector(".connection span:last-child");
-    if (connection) connection.textContent = this.snapshot!.status;
-    const brand = document.querySelector<HTMLElement>(".brand"); if (brand) brand.title = this.snapshot!.status;
+    this.setText(connection, this.snapshot!.status);
+    const brand = document.querySelector<HTMLElement>(".brand"); if (brand && brand.title !== this.snapshot!.status) brand.title = this.snapshot!.status;
     const privateTab = document.querySelector("#nav-private .nav-label");
-    if (privateTab) privateTab.textContent = `${t("private.title")}${this.unread ? ` · ${this.unread}` : ""}`;
+    this.setText(privateTab, `${t("private.title")}${this.unread ? ` · ${this.unread}` : ""}`);
     const chat = document.querySelector("#nav-chat .nav-label");
-    if (chat) chat.textContent = `${t("nav.room")}${this.roomUnread ? ` · ${this.roomUnread}` : ""}`;
+    this.setText(chat, `${t("nav.room")}${this.roomUnread ? ` · ${this.roomUnread}` : ""}`);
+    const player = this.snapshot!.player;
+    const name = document.querySelector('.header-account button');
+    if (name && player) this.setText(name, `${player.Nickname || player.Name} (#${player.MemberNumber})`);
+  }
+
+  private setText(node: Element | null, text: string): void {
+    if (node && node.textContent !== text) node.textContent = text;
   }
 
   private updateChatLog(force = false): void {
     const log = document.getElementById("TextAreaChatLog");
     if (!log) return;
+    if (!force && this.renderedLogs.get(log) === this.snapshot!.messages) return;
+    this.renderedLogs.set(log, this.snapshot!.messages);
     const atBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 70;
     const latest = this.snapshot!.messages.at(-1)?.id || "";
-    if (!force && log.dataset.latest === latest) return;
     const jump = document.getElementById("new-messages");
-    if (!force && this.historyEndId && this.snapshot!.messages.length) { if (jump) jump.hidden = false; return; }
+    if (!force && this.historyEndId && this.snapshot!.messages.length) { this.updateVisibleMessageText(log); if (jump) jump.hidden = false; return; }
     // Freeze the visible slice while reading older messages; no scroll jump or unbounded hidden DOM.
-    if (!force && this.snapshot!.messages.length && !atBottom && log.childElementCount) { if (jump) jump.hidden = false; return; }
+    if (!force && this.snapshot!.messages.length && !atBottom && log.childElementCount) { this.updateVisibleMessageText(log); if (jump) jump.hidden = false; return; }
     const messages = this.visibleHistory();
     const ids = new Set(messages.map(message => message.id));
     for (const node of Array.from(log.children)) if (!ids.has((node as HTMLElement).dataset.messageId || "")) { this.mediaConsent.dispose(node as HTMLElement); node.remove(); }
-    const existing = new Set(Array.from(log.children).map(node => (node as HTMLElement).dataset.messageId));
-    const fragment = document.createDocumentFragment();
-    for (const message of messages) if (!existing.has(message.id)) fragment.append(this.messageNode(message));
-    log.append(fragment);
+    const existing = new Map(Array.from(log.children).map(node => [(node as HTMLElement).dataset.messageId,node]));
+    let cursor = log.firstChild;
+    for (const message of messages) {
+      const node = existing.get(message.id) || this.messageNode(message);
+      if (node !== cursor) log.insertBefore(node, cursor);
+      cursor = node.nextSibling;
+    }
+    this.updateVisibleMessageText(log);
     log.dataset.latest = latest;
     if (atBottom || force) log.scrollTop = log.scrollHeight;
     if (jump) jump.hidden = !this.historyEndId;
+  }
+
+  private updateVisibleMessageText(log: HTMLElement): void {
+    const current = new Map(this.snapshot!.messages.map(message => [message.id, message]));
+    for (const node of Array.from(log.children)) {
+      const prior = this.renderedMessages.get(node);
+      const message = prior && current.get(prior.id);
+      if (!message || message === prior) continue;
+      if (message.text !== prior.text || message.senderName !== prior.senderName || message.targetName !== prior.targetName || message.labelColor !== prior.labelColor || message.type !== prior.type || message.replyId !== prior.replyId || message.nativeId !== prior.nativeId || message.presence !== prior.presence || message.sender !== prior.sender || message.target !== prior.target || +message.time !== +prior.time) {
+        this.mediaConsent.dispose(node as HTMLElement);
+        node.replaceWith(this.messageNode(message));
+      } else this.renderedMessages.set(node, message);
+    }
   }
 
   private visibleHistory(): DisplayMessage[] {
@@ -294,6 +325,7 @@ export class LiteApp {
     const oldRoom = oldLog?.dataset.room;
 
     this.mediaConsent.dispose(app!);
+    this.refreshRoomResults = null;
     app!.replaceChildren(this.buildShell());
     this.updateHeader();
     const nextLog = document.getElementById("TextAreaChatLog");
@@ -324,7 +356,7 @@ export class LiteApp {
     if (state.player) {
       const account = this.el("div", "header-account");
       const name = this.button(`${state.player.Nickname || state.player.Name} (#${state.player.MemberNumber})`, "ghost", "button");
-      name.addEventListener("click", () => this.showMember(state.characters.find(character => character.MemberNumber === state.player!.MemberNumber) || state.player!));
+      name.addEventListener("click", () => { const current = this.snapshot!; this.showMember(current.characters.find(character => character.MemberNumber === current.player!.MemberNumber) || current.player!); });
       const logout = this.button(t("m007"), "ghost", "button");
       logout.addEventListener("click", () => this.confirmAction(t("m008"),()=>this.client.disconnect()));
       account.append(name); header.append(account);
@@ -471,6 +503,12 @@ export class LiteApp {
   }
 
   private updateFriendContent(): void {
+    const whisper = document.querySelector<HTMLButtonElement>('[data-channel="whisper"]');
+    if (whisper) whisper.disabled = !this.snapshot!.characters.some(c => c.MemberNumber === this.contact);
+    for (const control of document.querySelectorAll<HTMLElement>('[data-channel]')) control.setAttribute('aria-pressed', String(control.dataset.channel === this.privateMode));
+    if (!this.replyTarget) document.querySelector('.beep-compose .reply-preview')?.remove();
+    const heading = document.querySelector('.private-conversation .private-heading h2');
+    if (heading && this.contact) this.setText(heading, `${this.contactName(this.contact) || t('private.title')} · #${this.contact}`);
     document.querySelectorAll<HTMLElement>(".room-card[data-room-name]").forEach(card => {
       const room = this.snapshot!.rooms.find(value => value.Name === card.dataset.roomName && value.Space === card.dataset.roomSpace);
       const tags = card.querySelector(".room-tags"); if (!room || !tags) return;
@@ -495,12 +533,17 @@ export class LiteApp {
     this.privateListOpen = false; this.privateVisible = 60; this.privateEndId = null;
     this.beepDraft = this.contactDrafts.get(memberNumber) || "";
     this.privateMode = mode === "whisper" && this.snapshot!.characters.some(c => c.MemberNumber === memberNumber) ? "whisper" : "beep"; this.tab = "private"; this.unread = 0;
+    const owner=historyOwner(this.snapshot!);
+    const request=++this.privateRequest;
+    this.privatePaging=this.history.hasOlderPrivate(memberNumber);
     this.render(); document.getElementById("BeepText")?.focus();
-    void this.history.loadPrivate(memberNumber).catch(()=>this.localNotice(t('history.error')));
+    void this.history.loadPrivate(memberNumber).catch(()=>this.localNotice(t('history.error'))).finally(()=> {
+      if (request===this.privateRequest && this.snapshot && historyOwner(this.snapshot)===owner && this.contact===memberNumber) { this.privatePaging=false; this.updateBeepLog(); }
+    });
   }
 
-  private fillFriendList(list: HTMLElement): void {
-    list.replaceChildren();
+  private fillFriendList(target: HTMLElement): void {
+    const list = this.el('div');
     const state = this.snapshot!;
     const online = new Map(state.friends.map(friend => [friend.MemberNumber, friend]));
     let ids = [...new Set([...online.keys(), ...(state.player?.FriendList || []), ...afcLovers(state.player).map(lover => lover.memberNumber)])];
@@ -554,6 +597,20 @@ export class LiteApp {
     }
     if (!total) list.append(this.el("p", "empty-state", t("m049")));
     if (total > 80) list.append(this.el("p", "muted", t("m050", [total])));
+    this.syncElements(target, Array.from(list.children), node => node.dataset.member || 'empty');
+  }
+
+  /** Keep identical keyed controls mounted, including their focus and listeners. */
+  private syncElements(target: Element, nodes: Element[], key: (node: HTMLElement) => string): void {
+    const existing = new Map(Array.from(target.children).map(node => [key(node as HTMLElement), node]));
+    let cursor = target.firstChild;
+    for (const fresh of nodes) {
+      const old = existing.get(key(fresh as HTMLElement));
+      const node = old?.isEqualNode(fresh) ? old : fresh;
+      if (node !== cursor) target.insertBefore(node, cursor);
+      cursor = node.nextSibling;
+    }
+    while (cursor) { const next = cursor.nextSibling; cursor.remove(); cursor = next; }
   }
 
   private contactName(id: number): string {
@@ -569,13 +626,16 @@ export class LiteApp {
   private pagePrivate(direction: number): void {
     if (this.privatePaging) return;
     const current=this.allPrivateMessages();
-    if (direction<0 && this.privatePageEnd(current)<=this.privateVisible && this.contact && this.history.hasOlderPrivate(this.contact)) {
-      const owner=historyOwner(this.snapshot!), peer=this.contact;
+    const loadOlder = direction<0 && this.privatePageEnd(current)<=this.privateVisible && this.history.hasOlderPrivate(this.contact);
+    const loadNewer = direction>0 && this.privatePageEnd(current)>=current.length && this.history.hasNewerPrivate(this.contact);
+    if (this.contact && (loadOlder || loadNewer)) {
+      const owner=historyOwner(this.snapshot!), peer=this.contact, request=this.privateRequest;
       this.privatePaging=true;
       if (!this.privateEndId) this.privateEndId=current.at(-1)?.id || null;
-      void this.history.loadPrivate(peer,true).then(()=> {
-        if (this.snapshot && owner===historyOwner(this.snapshot) && peer===this.contact) { this.privatePaging=false; this.movePrivatePage(direction); }
-      }).catch(()=>this.localNotice(t('history.error'))).finally(()=>{ if (this.snapshot && owner===historyOwner(this.snapshot) && peer===this.contact) this.privatePaging=false; });
+      void this.history.loadPrivate(peer,loadOlder,loadNewer).then(()=> {
+        if (request===this.privateRequest && this.snapshot && owner===historyOwner(this.snapshot) && peer===this.contact) { this.privatePaging=false; this.movePrivatePage(direction); }
+      }).catch(()=>this.localNotice(t('history.error'))).finally(()=>{ if (request===this.privateRequest && this.snapshot && owner===historyOwner(this.snapshot) && peer===this.contact) { this.privatePaging=false; this.updatePrivatePaging(document.querySelector('.private-history-controls')); } });
+      this.updatePrivatePaging(document.querySelector('.private-history-controls'));
       return;
     }
     this.movePrivatePage(direction);
@@ -590,10 +650,11 @@ export class LiteApp {
     if (!paging) return;
     const rows = this.allPrivateMessages(), end = this.privatePageEnd(rows);
     const more=!!this.contact && this.history.hasOlderPrivate(this.contact);
-    (paging as HTMLElement).hidden = rows.length <= this.privateVisible && !more;
+    (paging as HTMLElement).hidden = rows.length <= this.privateVisible && !more && !this.history.hasNewerPrivate(this.contact);
     const older = paging.querySelector<HTMLButtonElement>('[data-history="older"]'), newer = paging.querySelector<HTMLButtonElement>('[data-history="newer"]');
-    if (older) older.disabled = end <= this.privateVisible && !more;
-    if (newer) newer.disabled = end >= rows.length;
+    if (older) older.disabled = this.privatePaging || (end <= this.privateVisible && !more);
+    if (newer) newer.disabled = this.privatePaging || (end >= rows.length && !this.history.hasNewerPrivate(this.contact));
+    paging.setAttribute('aria-busy',String(this.privatePaging));
   }
 
   private fillBeepLog(log: HTMLElement): void {
@@ -608,7 +669,7 @@ export class LiteApp {
     return rows.slice(Math.max(0, end - this.privateVisible), end);
   }
   private allPrivateMessages(): DisplayMessage[] {
-    return this.privateMessagesView.get(this.snapshot!,this.history.messages,this.contact);
+    return this.privateMessagesView.get(this.snapshot!,this.history.messages,this.contact,this.history.privateWindowEnd(this.contact));
   }
 
   private syncPrivateRows(log: HTMLElement, messages: DisplayMessage[], empty: string): void {
@@ -850,8 +911,8 @@ export class LiteApp {
     sort.addEventListener("change", () => { this.roomSort = sort.value as RoomSort; this.roomPage = 0; this.render(); });
     const rooms = this.el("div", "room-list");
     const pageSize = isMobileLayout() ? 8 : 24;
-    const ordered = sortRooms(state.rooms, this.roomSort, getLocale());
-    const pages = Math.max(1, Math.ceil(ordered.length / pageSize));
+    let ordered = sortRooms(state.rooms, this.roomSort, getLocale());
+    let pages = Math.max(1, Math.ceil(ordered.length / pageSize));
     this.roomPage = Math.min(this.roomPage, pages - 1);
     const pager = this.el("nav", "room-pagination"); pager.setAttribute("aria-label", t("rooms.pagination"));
     const turn = (delta: number) => {
@@ -859,16 +920,23 @@ export class LiteApp {
       if (next !== this.roomPage) { this.roomPage = next; drawPage(); }
     };
     const drawPage = () => {
-      rooms.replaceChildren(); pager.replaceChildren();
-      if (!ordered.length) rooms.append(this.el("div", "empty-state", t("m102")));
-      else ordered.slice(this.roomPage * pageSize, (this.roomPage + 1) * pageSize).forEach(room => rooms.append(this.roomCard(room)));
+      const cards = ordered.length ? ordered.slice(this.roomPage * pageSize, (this.roomPage + 1) * pageSize).map(room => this.roomCard(room)) : [this.el('div','empty-state',t('m102'))];
+      this.syncElements(rooms,cards,node=>JSON.stringify([node.dataset.roomName,node.dataset.roomSpace]));
       const previous = this.button("‹", "ghost", "button"); previous.setAttribute("aria-label", t("rooms.previous")); previous.disabled = this.roomPage === 0;
       const next = this.button("›", "ghost", "button"); next.setAttribute("aria-label", t("rooms.next")); next.disabled = this.roomPage === pages - 1;
       previous.addEventListener("click", () => turn(-1)); next.addEventListener("click", () => turn(1));
       const status = this.el("span", "", `${this.roomPage + 1} / ${pages}`); status.setAttribute("aria-live", "polite");
-      pager.append(previous, status, next);
+      this.syncElements(pager,[previous,status,next],node=>node.getAttribute('aria-label') || 'status');
     };
     drawPage(); bindPageSwipe(rooms, turn); resultHeader.append(pager, sort);
+    this.refreshRoomResults = () => {
+      if (!rooms.isConnected) return;
+      ordered = sortRooms(this.snapshot!.rooms, this.roomSort, getLocale());
+      pages = Math.max(1, Math.ceil(ordered.length / pageSize));
+      this.roomPage = Math.min(this.roomPage, pages - 1);
+      this.setText(resultHeader.querySelector('.result-count'), t('m101', [ordered.length]));
+      drawPage();
+    };
     const create = this.el("form", "room-controls create-controls") as HTMLFormElement;
     const roomName = this.input("NewRoomName", t("m104"), "text", this.newRoomName);
     roomName.maxLength = 20;
@@ -979,15 +1047,57 @@ export class LiteApp {
       Custom: { ImageURL: fields.ImageURL.trim(), MusicURL: fields.MusicURL.trim() }, MapData: map };
   }
 
+  private updateRoomInfo(): void {
+    const state = this.snapshot!, room = state.room;
+    const layout = document.querySelector('.room-view');
+    if (!layout || !room) return;
+    layout.classList.toggle('members-open', this.membersOpen);
+    this.setText(layout.querySelector('.chat-room-top-menu .mobile-members'), this.membersOpen ? t('m160') : t('m161'));
+    this.setText(layout.querySelector('.room-info h1'), room.Name);
+    this.setText(layout.querySelector('.room-info p:not(.eyebrow)'), room.Description || t('m127'));
+    const language = layout.querySelector<HTMLElement>('.room-info .eyebrow');
+    if (language && language.dataset.language !== (room.Language || '')) {
+      language.dataset.language = room.Language || '';
+      language.replaceChildren(icon(roomLanguageIcons[room.Language?.toUpperCase()] || 'translate'), document.createTextNode(room.Language || t('m085')));
+    }
+    this.setText(layout.querySelector('.room-population'), `${state.characters.length}/${room.Limit}`);
+    this.setText(layout.querySelector('.member-title'), t('m158', [state.characters.length]));
+    const list = layout.querySelector('.member-list')!;
+    const existing = new Map(Array.from(list.querySelectorAll<HTMLButtonElement>('.member-row')).map(node => [Number(node.dataset.member), node]));
+    const ids = new Set(state.characters.map(c => c.MemberNumber));
+    for (const [id, node] of existing) if (!ids.has(id)) node.remove();
+    let cursor = list.firstChild;
+    for (const character of [...state.characters].sort((a,b) => Number(b.MemberNumber === state.player?.MemberNumber) - Number(a.MemberNumber === state.player?.MemberNumber))) {
+      let node = existing.get(character.MemberNumber);
+      if (!node) {
+        node = this.button('', 'member-row', 'button'); node.dataset.member = String(character.MemberNumber); node.title = t('m159');
+        node.append(this.el('span','member-avatar'), this.el('span','member-name'), this.el('span','member-number', `#${character.MemberNumber}`));
+        node.addEventListener('click', () => { const current = this.snapshot!.characters.find(c => c.MemberNumber === character.MemberNumber); if (current) this.showMember(current); });
+      }
+      const name = character.Nickname || character.Name || '?';
+      this.setText(node.querySelector('.member-avatar'), name.slice(0,1).toUpperCase());
+      this.setText(node.querySelector('.member-name'), name);
+      const label = node.querySelector<HTMLElement>('.member-name')!;
+      const color = nameColor(character.LabelColor, character.MemberNumber);
+      if (label.style.color !== color) label.style.color = color;
+      const badge = node.querySelector('.member-cuddle');
+      if (character.MemberNumber === state.cuddlePartner) { if (!badge) node.append(this.el('span','member-cuddle',t('cuddle.badge'))); }
+      else badge?.remove();
+      if (node !== cursor) list.insertBefore(node, cursor);
+      cursor = node.nextSibling;
+    }
+  }
+
   private buildRoom(): HTMLElement {
     const state = this.snapshot!;
     const layout = this.el("section", `room-view${this.membersOpen ? " members-open" : ""}`);
     const sidebar = this.el("aside", "member-panel");
     const roomInfo = this.el("div", "room-info");
     const close = this.button(t("m160"), "ghost mobile-members", "button");
-    close.addEventListener("click", () => { this.membersOpen = false; this.render(); });
+    close.addEventListener("click", () => { this.membersOpen = false; this.updateRoomInfo(); });
     roomInfo.append(close, this.el("p", "eyebrow", state.room!.Language || t("m085")), this.el("h1", "", state.room!.Name), this.el("p", "", state.room!.Description || t("m127")));
     roomInfo.querySelector('.eyebrow')?.prepend(icon(roomLanguageIcons[state.room!.Language?.toUpperCase()] || 'translate'));
+    (roomInfo.querySelector('.eyebrow') as HTMLElement).dataset.language = state.room!.Language || '';
     const leave = this.button(t("m157"), "ghost danger", "button");
     leave.addEventListener("click", () => this.client.leave());
     roomInfo.append(leave);
@@ -996,11 +1106,12 @@ export class LiteApp {
     [...state.characters].sort((a, b) => Number(b.MemberNumber === state.player?.MemberNumber) - Number(a.MemberNumber === state.player?.MemberNumber)).forEach((character) => {
       const member = this.el("button", "member-row") as HTMLButtonElement;
       member.type = "button";
+      member.dataset.member = String(character.MemberNumber);
       member.append(this.el("span", "member-avatar", (character.Nickname || character.Name || "?").slice(0, 1).toUpperCase()), this.el("span", "member-name", character.Nickname || character.Name), this.el("span", "member-number", `#${character.MemberNumber}`));
       member.title = t("m159");
       if (character.MemberNumber === state.cuddlePartner) member.append(this.el("span", "member-cuddle", t("cuddle.badge")));
       (member.querySelector(".member-name") as HTMLElement).style.color = nameColor(character.LabelColor, character.MemberNumber);
-      member.addEventListener("click", () => this.showMember(character));
+      member.addEventListener("click", () => { const current = this.snapshot!.characters.find(c => c.MemberNumber === character.MemberNumber); if (current) this.showMember(current); });
       members.append(member);
     });
     sidebar.append(members);
@@ -1012,13 +1123,13 @@ export class LiteApp {
     const roomTitle = this.el("strong", "room-title", state.room!.Name); roomTitle.title = state.room!.Name;
     topMenu.append(roomTitle, this.el("span", "room-population", `${state.characters.length}/${state.room!.Limit}`));
     const toggle = this.button(this.membersOpen ? t("m160") : t("m161"), "ghost mobile-members", "button");
-    toggle.addEventListener("click", () => { this.membersOpen = !this.membersOpen; this.render(); });
+    toggle.addEventListener("click", () => { this.membersOpen = !this.membersOpen; this.updateRoomInfo(); });
     const history = this.button(t("m162"), "ghost", "button");
     history.addEventListener("click", () => {
       const all = this.snapshot!.messages;
       const first = this.visibleHistory()[0];
       const end = Math.max(Math.min(this.visibleMessages, all.length), all.findIndex(message => message.id === first?.id));
-      this.historyEndId = all[end - 1]?.id || null; this.render();
+      this.historyEndId = all[end - 1]?.id || null; this.updateChatLog(true);
       document.getElementById("TextAreaChatLog")!.scrollTop = 0;
     });
     const jump = this.button(t("m163"), "secondary", "button"); jump.id = "new-messages"; jump.hidden = !this.historyEndId;
@@ -1034,6 +1145,7 @@ export class LiteApp {
     const log = this.el("div", "text-area-chat-log"); log.id = "TextAreaChatLog"; log.setAttribute("role", "log"); log.setAttribute("aria-live", "polite");
     log.dataset.room = state.room!.Name;
     log.dataset.latest = state.messages.at(-1)?.id || "";
+    this.renderedLogs.set(log, state.messages);
     this.visibleHistory().forEach((message) => log.append(this.messageNode(message)));
     const reply = this.el("div", "chat-room-reply-indicator"); reply.id = "chat-room-reply-indicator";
     const bot = this.el("form", "chat-room-bot") as HTMLFormElement; bot.id = "chat-room-bot";
@@ -1066,6 +1178,7 @@ export class LiteApp {
 
   private messageNode(message: DisplayMessage): HTMLElement {
     const row = this.el("div", `chat-message type-${message.type.toLowerCase()}`);
+    this.renderedMessages.set(row, message);
     row.dataset.messageId = message.id;
     row.tabIndex = 0;
     if (message.presence) row.classList.add("message-presence");
@@ -1110,23 +1223,28 @@ export class LiteApp {
     if (privateMessage) {
       const peer = message.sender === this.snapshot!.player?.MemberNumber ? message.target! : message.sender!;
       this.openConversation(peer, message.type === "Whisper" ? "whisper" : "beep");
-    } else this.tab = "chat";
+    } else if (this.tab !== 'chat') { this.tab = "chat"; this.render(); }
     this.replyTarget = message;
-    this.render(); document.getElementById(privateMessage ? "BeepText" : "InputChat")?.focus();
+    if (privateMessage) { const form=document.querySelector('.beep-compose'); form?.querySelector('.reply-preview')?.remove(); form?.prepend(this.replyIndicator()); }
+    else document.getElementById('chat-room-reply-indicator')?.replaceChildren(this.replyIndicator());
+    document.getElementById(privateMessage ? "BeepText" : "InputChat")?.focus();
   }
 
   private composeWhisper(id: number): void {
     if (id === this.snapshot!.player?.MemberNumber || !this.snapshot!.characters.some(character => character.MemberNumber === id)) { this.localNotice(t("m032")); return; }
     this.replyTarget = null;
     this.chatDraft = `/W ${id} ${this.chatDraft.replace(/^\/w(?:hisper)?\s+\d+\s*/i, "")}`;
-    this.tab = "chat"; this.render();
+    if (this.tab !== 'chat') { this.tab = "chat"; this.render(); }
+    document.getElementById('chat-room-reply-indicator')?.replaceChildren();
     const input = document.getElementById("InputChat") as HTMLTextAreaElement | null;
+    if (input) input.value=this.chatDraft;
+    this.setText(document.getElementById('InputChatLength'), `${this.chatDraft.length}/1000`);
     input?.focus(); input?.setSelectionRange(input.value.length, input.value.length);
   }
 
   private replyIndicator(): HTMLElement {
     const panel = this.el("div", "reply-preview", t("reply.preview", [this.replyTarget?.senderName, this.replyTarget?.text.slice(0, 120)]));
-    const cancel = this.button(t("safety.cancel"), "ghost", "button"); cancel.addEventListener("click", () => { this.replyTarget = null; this.render(); }); panel.append(cancel); return panel;
+    const cancel = this.button(t("safety.cancel"), "ghost", "button"); cancel.addEventListener("click", () => { this.replyTarget = null; panel.remove(); }); panel.append(cancel); return panel;
   }
 
   private replyContent(text: string): string {
@@ -1148,10 +1266,11 @@ export class LiteApp {
     } else {
       const index = this.snapshot!.messages.findIndex(value => value.id === message.id);
       if (index < 0) { this.localNotice(t("reply.unavailable")); return; }
+      const alreadyChat = this.tab === 'chat';
       this.tab = "chat";
       const end = Math.min(this.snapshot!.messages.length, index + this.visibleMessages);
       this.historyEndId = end === this.snapshot!.messages.length ? null : this.snapshot!.messages[end - 1].id;
-      this.render();
+      if (alreadyChat) this.updateChatLog(true); else this.render();
     }
     const log = document.getElementById(message.type === "Whisper" ? "beep-log" : "TextAreaChatLog");
     const node = Array.from(log?.querySelectorAll<HTMLElement>("[data-message-id]") || []).find(node => node.dataset.messageId === message.id);

@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { stripTypeScriptTypes } from 'node:module';
 import vm from 'node:vm';
 import { Window } from 'happy-dom';
+import { IDBFactory } from 'fake-indexeddb';
 import LZString from 'lz-string';
 import { t, getLocale, setLocale } from './i18n-helper.mjs';
 import { appendChatLinks, MediaConsent } from './links-helper.mjs';
@@ -25,10 +26,14 @@ const roomListSource = stripTypeScriptTypes(readFileSync('src/ui/room-list.ts', 
 const { sortRooms, canJoinRoom } = new Function(roomListSource + ';return {sortRooms,canJoinRoom};')();
 const mobileSource = stripTypeScriptTypes(readFileSync('src/platform/mobile.ts', 'utf8')).replaceAll('export ', '');
 
-function setup(savedAccount, savedPerformance) {
+function setup(savedAccount, savedPerformance, indexedDBFactory) {
   setLocale('zh');
   const window = new Window({ url: 'https://lite.example', settings: { disableCSSFileLoading: true, disableJavaScriptFileLoading: true } });
   const { icon, iconSelect } = uiIcons(window);
+  if (indexedDBFactory) Object.defineProperty(window,'indexedDB',{value:indexedDBFactory});
+  const intervals=[];
+  const setInterval=window.setInterval.bind(window);
+  window.setInterval=(callback,delay,...args)=>{ intervals.push({callback,delay}); return setInterval(callback,delay,...args); };
   const openActivityDialog = new Function('document', 'window', 't', 'definitions', 'canonicalPartGroup', activitySource + ';return openActivityDialog;')(window.document, window, t, definitions, canonicalPartGroup);
   const StabilityControls = new Function('document', 'window', 't', 'URL', stabilitySource + ';return StabilityControls;')(window.document, window, t, window.URL);
   window.document.body.innerHTML = '<div id="app"></div>';
@@ -44,6 +49,7 @@ function setup(savedAccount, savedPerformance) {
     activityOptions() { return [{ group: 'ItemHead', groupLabel: '頭部', name: 'Pet', label: '撫摸', reason: null }]; },
     sendActivity(id, group, name) { calls.push({ activity: name, group, id }); },
     setTextCatalog() {},
+    restoreMessages() {},
     cuddleInfo() { return {token:'test',text:'Both ItemMisc slots'}; },
     respondCuddle(accept) { calls.push({ cuddle: accept }); current = { ...current, cuddleRequest: null }; listener(current); },
     setMessageLimit(value) { calls.push({ historyLimit: value }); if (current.messages.length > value) { current = { ...current, messages: current.messages.slice(-value) }; listener?.(current); } },
@@ -67,8 +73,100 @@ function setup(savedAccount, savedPerformance) {
   const contactCard = new Function('t','el',uiSource('src/ui/contact-card.ts')+';return contactCard;')(t,dom.el);
   const PrivateMessages = new Function(...Object.keys(history),uiSource('src/ui/private-messages.ts')+';return PrivateMessages;')(...Object.values(history));
   vm.runInNewContext(source, { ...history, ...dom, ...modal, buildHistorySettings, contactCard, PrivateMessages, HistorySession:sessionClass(window), contactName, window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, openActivityDialog, icon, iconSelect, nameColor, sortRooms, canJoinRoom, isMobileLayout, bindPageSwipe, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
-  return { window, document: window.document, calls, client:bcClient, state: () => current, emit(change) { if (change.friendsStatus === '查詢完成') change.friendsQueryState = 'ready'; current = { ...current, ...change }; listener(current); } };
+  return { window, document: window.document, calls, intervals, client:bcClient, state: () => current, emit(change) { if (change.friendsStatus === '查詢完成') change.friendsQueryState = 'ready'; current = { ...current, ...change }; listener(current); } };
 }
+
+test('same-room synchronization preserves shell, composer, log, selection and unchanged member nodes', async () => {
+  const f=setup(), character={MemberNumber:55,Name:'Friend',Description:'Original bio'};
+  const message={id:'stable',sender:55,senderName:'Friend',text:'Keep this text',type:'Chat',time:new Date()};
+  f.emit({phase:'in-room',room:{Name:'Here',Limit:10,Language:'EN',Description:'Old description'},characters:[character],messages:[message]});
+  const shell=f.document.querySelector('.app-shell'), input=f.document.getElementById('InputChat'), log=f.document.getElementById('TextAreaChatLog');
+  const row=log.firstChild, member=f.document.querySelector('.member-row');
+  input.value='中文草稿'; input.dispatchEvent(new f.window.Event('input')); input.focus(); input.setSelectionRange(1,3);
+  input.dispatchEvent(new f.window.CompositionEvent('compositionstart',{bubbles:true}));
+  for (let i=0;i<5;i++) f.emit({characters:[{...character,Appearance:[{Group:'ItemArms',Name:`Item${i}`}]}],room:{...f.state().room},player:{...f.state().player},status:`Sync ${i}`,onlinePlayers:i});
+  for (const timer of f.intervals.filter(timer=>timer.delay===60000)) timer.callback();
+  assert.ok(shell); assert.equal(f.document.querySelector('.app-shell'),shell);
+  assert.equal(f.document.getElementById('InputChat'),input); assert.equal(f.document.getElementById('TextAreaChatLog'),log);
+  assert.equal(log.firstChild,row); assert.equal(f.document.querySelector('.member-row'),member);
+  assert.equal(input.value,'中文草稿'); assert.equal(input.selectionStart,1); assert.equal(f.document.activeElement,input);
+  f.emit({characters:[{...character,Nickname:'Updated',Description:'Current bio'},{MemberNumber:66,Name:'New member'}],room:{...f.state().room,Limit:5,Description:'Updated description'}});
+  assert.equal(f.document.querySelector('.member-row'),member); assert.match(member.textContent,/Updated/);
+  assert.equal(f.document.querySelector('.room-population').textContent,'2/5'); assert.match(f.document.querySelector('.room-info').textContent,/Updated description/);
+  member.click(); assert.match(f.document.querySelector('.profile-dialog').textContent,/Updated/);
+  input.dispatchEvent(new f.window.CompositionEvent('compositionend',{bubbles:true}));
+  await new Promise(resolve=>f.window.setTimeout(resolve,5));
+  assert.equal(f.document.getElementById('InputChat'),input);
+  f.emit({characters:[{MemberNumber:66,Name:'New member'}]}); assert.equal(member.isConnected,false); assert.equal(log.firstChild,row);
+  f.emit({room:{Name:'Other',Limit:10}}); assert.notEqual(f.document.getElementById('InputChat'),input);
+  await f.window.happyDOM.close();
+});
+
+test('message corrections and member drawer toggles retain the composer and unrelated rows', async () => {
+  const f=setup(), messages=['one','two'].map(id=>({id,sender:55,senderName:'Friend',text:id,type:'Chat',time:new Date()}));
+  f.emit({phase:'in-room',room:{Name:'Here',Limit:10},messages});
+  const input=f.document.getElementById('InputChat'), log=f.document.getElementById('TextAreaChatLog'), second=log.lastChild;
+  f.emit({messages:[{...messages[0],text:'corrected'},messages[1]]});
+  assert.match(log.textContent,/corrected/); assert.equal(log.lastChild,second); assert.equal(f.document.getElementById('InputChat'),input);
+  f.document.querySelector('.chat-room-top-menu .mobile-members').click();
+  assert.ok(f.document.querySelector('.room-view').classList.contains('members-open')); assert.equal(f.document.getElementById('TextAreaChatLog'),log);
+  f.document.querySelector('.member-panel .mobile-members').click(); assert.equal(f.document.getElementById('InputChat'),input);
+  await f.window.happyDOM.close();
+});
+
+test('overlapping room history pages remain chronological without rebuilding the input', async () => {
+  const f=setup(), messages=Array.from({length:150},(_,i)=>({id:`overlap-${i}`,sender:55,senderName:'Friend',text:`Line ${i}`,type:'Chat',time:new Date()}));
+  f.emit({phase:'in-room',room:{Name:'Here',Limit:10},messages});
+  const input=f.document.getElementById('InputChat'), shared=f.document.querySelector('[data-message-id="overlap-75"]');
+  [...f.document.querySelectorAll('.chat-room-top-menu button')].find(node=>node.textContent===t('m162')).click();
+  assert.deepEqual([...f.document.querySelectorAll('#TextAreaChatLog .chat-message')].map(node=>node.dataset.messageId),messages.slice(0,100).map(message=>message.id));
+  assert.equal(f.document.querySelector('[data-message-id="overlap-75"]'),shared); assert.equal(f.document.getElementById('InputChat'),input);
+  await f.window.happyDOM.close();
+});
+
+test('private UI crosses the cache boundary in both directions while live arrivals stay outside older pages', async context => {
+  const factory=new IDBFactory(), store=new history.HistoryStore(factory), now=Date.now()-1000;
+  const beeps=Array.from({length:725},(_,i)=>({id:`page-${String(i).padStart(4,'0')}`,memberNumber:55,name:'Friend',text:`Line ${i}`,incoming:true,time:new Date(now)}));
+  await store.write(history.historyBatch({player:{MemberNumber:123,Name:'Tester'},room:null,messages:[],whispers:[],beeps}),history.historyPolicy());
+  const f=setup(undefined,undefined,factory);
+  context.after(()=>f.window.happyDOM.close());
+  // Observe completion through the UI rather than sleeping for storage timings.
+  const waitFor=async predicate=>{ for(let i=0;i<2000;i++){ if(predicate())return; await new Promise(resolve=>setTimeout(resolve,5)); } assert.fail(`history UI did not settle: ${f.document.querySelector('.private-history-controls')?.outerHTML}; ${f.document.querySelector('.lite-notice')?.textContent}; first=${f.document.querySelector('#beep-log .chat-message')?.dataset.messageId}; last=${f.document.querySelector('#beep-log .chat-message:last-child')?.dataset.messageId}`); };
+  f.emit({characters:[{MemberNumber:55,Name:'Friend'}],beeps:beeps.slice(-300)});
+  f.document.getElementById('nav-private').click(); f.document.querySelector('[data-member="55"]').click();
+  await waitFor(()=>f.document.querySelector('[data-message-id="page-0724"]') && f.document.querySelector('.private-history-controls').getAttribute('aria-busy')==='false');
+  const input=f.document.getElementById('BeepText');
+  const first=()=>f.document.querySelector('#beep-log .chat-message')?.dataset.messageId;
+  let previous=first();
+  for(let i=0;i<12 && !f.document.querySelector('[data-history="older"]').disabled;i++) {
+    f.document.querySelector('[data-history="older"]').click();
+    await waitFor(()=>f.document.querySelector('.private-history-controls').getAttribute('aria-busy')==='false' && (first()!==previous || f.document.querySelector('[data-history="older"]').disabled)); previous=first();
+  }
+  assert.equal(first(),'page-0000');
+  f.emit({beeps:[...beeps.slice(-299),{...beeps[0],id:'page-new',text:'new live message',time:new Date()}]});
+  assert.equal(first(),'page-0000'); assert.equal(f.document.querySelector('[data-message-id="page-new"]'),null);
+  for(let i=0;i<16 && !f.document.querySelector('[data-history="newer"]').disabled;i++) {
+    f.document.querySelector('[data-history="newer"]').click();
+    await waitFor(()=>f.document.querySelector('.private-history-controls').getAttribute('aria-busy')==='false' && (first()!==previous || f.document.querySelector('[data-history="newer"]').disabled)); previous=first();
+  }
+  assert.ok(f.document.querySelector('[data-message-id="page-new"]')); assert.equal(f.document.getElementById('BeepText'),input);
+  await f.window.happyDOM.close();
+});
+
+test('search refreshes and private presence changes update data without replacing forms', async () => {
+  const f=setup(), search=f.document.getElementById('RoomQuery'); search.value='draft search';
+  f.emit({rooms:[{Name:'Result',MemberCount:1,MemberLimit:10,CanJoin:true,Language:'EN',Space:'X'}]});
+  assert.equal(f.document.getElementById('RoomQuery'),search); assert.equal(search.value,'draft search'); assert.match(f.document.querySelector('.room-list').textContent,/Result/);
+  f.emit({characters:[{MemberNumber:55,Name:'Friend'}]}); f.document.getElementById('nav-private').click();
+  f.document.querySelector('[data-member="55"]').click();
+  const input=f.document.getElementById('BeepText'), card=f.document.querySelector('[data-member="55"]');
+  f.emit({characters:[{MemberNumber:55,Name:'Friend',Appearance:[]}]}); assert.equal(f.document.querySelector('[data-member="55"]'),card);
+  f.document.querySelector('[data-channel="whisper"]').click();
+  f.emit({characters:[]}); assert.equal(f.document.getElementById('BeepText'),input);
+  assert.equal(f.document.querySelector('[data-channel="whisper"]').disabled,true);
+  assert.equal(f.document.querySelector('[data-channel="beep"]').getAttribute('aria-pressed'),'true');
+  await f.window.happyDOM.close();
+});
 
 test('contact cards use cached names with live-room priority, room-only subtitle and message-by-default selection', async () => {
   const f=setup();
