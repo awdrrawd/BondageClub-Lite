@@ -6,7 +6,7 @@ import { nativeActivities, activityReason, activityAvailability, createActivityI
 import { receivedSpeech } from "./speech";
 import { extensionActivities, extensionText } from "../action/extensions";
 import { activityLabel, hasPenis, physicalGroup, textGroup } from "../action/labels";
-import { cuddleNames, cuddleReason, cuddleState } from "../action/cuddle";
+import { cuddleNames, cuddleReason, cuddleState, createCuddleItem } from "../action/cuddle";
 import { validAppearance, copyAppearance, releaseAppearance, type BundledItem } from "../safety/safeword";
 import { io, type Socket } from "socket.io-client";
 import type { CharacterSummary, ChatMessage, ClientSnapshot, DictionaryEntry, DisplayMessage, OnlineFriend, PlayerSummary, RoomCreateOptions, RoomSearchRequest, RoomSearchResult, RoomSync } from "../shared/types";
@@ -72,12 +72,27 @@ export class BcLiteClient {
     if (!token || token !== this.cuddleInfo(memberNumber).token) throw new Error(t("cuddle.changed"));
   }
   private cuddleSelf(): CharacterSummary {
-    return { ...this.state.player!, Appearance: this.safetyCurrent ?? undefined, ActivePose: this.state.characters.find(c => c.MemberNumber === this.state.player?.MemberNumber)?.ActivePose ?? this.state.player?.ActivePose };
+    const character = this.state.characters.find(c => c.MemberNumber === this.state.player?.MemberNumber);
+    return { ...this.state.player!, Appearance: this.safetyCurrent ?? undefined, ActivePose: character?.ActivePose !== undefined ? character.ActivePose : this.state.player?.ActivePose };
   }
   private updateCharacterAppearance(memberNumber: number, appearance: BundledItem[]): void {
     if (memberNumber === this.state.player?.MemberNumber) this.safetyCurrent = copyAppearance(appearance);
     this.patch({ characters: this.state.characters.map(character => character.MemberNumber === memberNumber
       ? { ...character, Appearance: copyAppearance(appearance) } : character) });
+  }
+  /** Confirmed own-slot change: preserve opaque bundles and update the room's authoritative snapshot. */
+  private publishCuddleItem(item?: BundledItem): void {
+    const player = this.state.player;
+    if (!player?.ID || !this.canSend() || !this.state.room || !validAppearance(this.safetyCurrent)) throw new Error(t("native.data"));
+    const appearance = copyAppearance(this.safetyCurrent).filter(entry => entry.Group !== "ItemMisc");
+    if (item) appearance.push(item);
+    const pose = this.cuddleSelf().ActivePose;
+    this.updateCharacterAppearance(player.MemberNumber, appearance);
+    this.patch({player:{...player,Appearance:copyAppearance(appearance)}});
+    this.socket!.emit("ChatRoomCharacterItemUpdate", { Target:player.MemberNumber, Group:"ItemMisc", Color:"Default", Difficulty:0, ...item });
+    // Single-item broadcasts alone do not commit ChatRoomData (BC ChatRoomCharacterUpdate / ECHO cuddle).
+    // Do not use AccountUpdate: this is a room interaction, not an account wardrobe save.
+    this.socket!.emit("ChatRoomCharacterUpdate", { ID:player.ID, Appearance:copyAppearance(appearance), ...(pose !== undefined ? {ActivePose:pose} : {}) });
   }
   private syncCuddle(target?: number): void {
     if (!this.canSend() || !this.state.room) return;
@@ -86,21 +101,16 @@ export class BcLiteClient {
   private wearCuddle(peer: CharacterSummary, name: string, receiving = false): void {
     const reason = cuddleReason(this.cuddleSelf(), peer);
     if (reason || !this.canSend() || !this.state.room) throw new Error(t((reason || "native.data") as Parameters<typeof t>[0]));
-    const item = { Group: "ItemMisc", Name: "贴贴", Color: "Default", Difficulty: 0 };
-    this.safetyCurrent = [...copyAppearance(this.safetyCurrent!).filter(item => item.Group !== "ItemMisc"), item];
+    this.publishCuddleItem(createCuddleItem());
     this.cuddlePair = { peer: peer.MemberNumber, room: this.state.room.Name, state: cuddleState(name, peer.MemberNumber, receiving) };
-    this.socket!.emit("ChatRoomCharacterItemUpdate", { Target: this.state.player!.MemberNumber, ...item });
     this.syncCuddle();
     this.patch({ cuddlePartner: peer.MemberNumber });
-    this.updateCharacterAppearance(this.state.player!.MemberNumber, this.safetyCurrent);
   }
   stopCuddle(): void {
     if (!this.canSend() || !this.state.room) return;
     if (!this.cuddlePair && !this.safetyCurrent?.some(item => item.Group === "ItemMisc" && item.Name === "贴贴")) return;
     if (this.safetyCurrent?.some(item => item.Group === "ItemMisc" && item.Name === "贴贴")) {
-      this.safetyCurrent = this.safetyCurrent.filter(item => !(item.Group === "ItemMisc" && item.Name === "贴贴"));
-      this.socket!.emit("ChatRoomCharacterItemUpdate", { Target: this.state.player!.MemberNumber, Group: "ItemMisc", Color: "Default", Difficulty: 0 });
-      this.updateCharacterAppearance(this.state.player!.MemberNumber, this.safetyCurrent);
+      this.publishCuddleItem();
     }
     this.cuddlePair = null; this.patch({ cuddlePartner: null, characters: [...this.state.characters] }); this.syncCuddle();
   }

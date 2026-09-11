@@ -2,7 +2,7 @@ import { renderAction, dictionaryText } from './action-helper.mjs';
 import { receivedSpeech } from './speech-helper.mjs';
 import { nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, definitions, activityAsset } from './native-helper.mjs';
 import { extensionActivities, extensionText } from './extensions-helper.mjs';
-import { hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState } from './activity-helper.mjs';
+import { hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState, createCuddleItem } from './activity-helper.mjs';
 import { gameCatalog } from './catalog-helper.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -31,7 +31,7 @@ async function setup(environment, relayAvailable = true, account = {}, storage =
   };
   const context = {
     decodeFriendNames, contactName,
-    hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState, receivedSpeech, activityAsset,
+    hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState, createCuddleItem, receivedSpeech, activityAsset,
     localStorage: { getItem(key) { return storage.get(key) ?? null; }, setItem(key, value) { storage.set(key, value); } },
     io: () => socket, nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, extensionActivities, extensionText, renderAction, dictionaryText, t, localizeStatus, validAppearance, copyAppearance, releaseAppearance, afcLovers, embeddedAction,
     exports: {},
@@ -362,7 +362,12 @@ test('ECHO cuddle wears only the own slot and shares native activity plus recipr
   const state = f.sent.find(p => p.payload?.Content === 'Luzi_XCharacterDrawState').payload.Dictionary[0];
   assert.equal(state.prevCharacter, 55); assert.equal(state.leash, 'lead');
   assert.equal(f.state().characters.find(c => c.MemberNumber === 123).Appearance[0].Custom, 'preserve');
-  assert.ok(!f.sent.some(packet => ['AccountUpdate', 'ChatRoomCharacterUpdate'].includes(packet.event)));
+  assert.ok(!f.sent.some(packet => packet.event === 'AccountUpdate'));
+  const appearanceUpdate = f.sent.find(packet => packet.event === 'ChatRoomCharacterUpdate').payload;
+  assert.equal(appearanceUpdate.ID,'socket');
+  assert.equal(appearanceUpdate.Appearance.find(item => item.Group === 'ItemMisc').Name,'贴贴');
+  assert.equal(appearanceUpdate.Appearance[0].Custom,'preserve');
+  assert.equal(f.state().player.Appearance.find(item => item.Group === 'ItemMisc').Name,'贴贴');
   f.handlers.get('ChatRoomSyncMemberLeave')({ SourceMemberNumber: 55 });
   assert.throws(() => f.client.sendActivity(55, option.group, option.name));
 });
@@ -380,6 +385,66 @@ test('native activity sends the BC Activity dictionary, rechecks permissions, an
   f.handlers.get('ChatRoomSyncMemberLeave')({ SourceMemberNumber: 55 });
   assert.throws(() => f.client.sendActivity(55, 'ItemEars', 'Whisper'));
   assert.ok(!f.sent.some(packet => ['AccountUpdate', 'ChatRoomCharacterUpdate'].includes(packet.event)));
+});
+
+for (const activity of ['钻进怀里','抱入怀中']) test(`two Lite clients create, commit and release cuddle without ECHO: ${activity}`, async () => {
+  const base=[{Group:'BodyUpper',Name:'Normal',Custom:'preserve'}, {Group:'ItemCanvas1',Name:'UnknownPlugin',Property:{opaque:['keep']}}];
+  const a=await setup('PROD',true,{MemberNumber:123,ID:'socket-a',Appearance:base});
+  const b=await setup('PROD',true,{MemberNumber:55,ID:'socket-b',Appearance:base});
+  a.client.setTextCatalog(gameCatalog('zh')); b.client.setTextCatalog(gameCatalog('zh'));
+  const clients=[a,b], server=new Map(clients.map(f=>[f.state().player.MemberNumber,{...f.state().player,ActivePose:null,Appearance:structuredClone(base)}]));
+  const sync=()=>clients.forEach(f=>f.handlers.get('ChatRoomSync')({Name:'Room',Character:structuredClone([...server.values()])}));
+  sync();
+  const offsets=new Map(clients.map(f=>[f,f.sent.length]));
+  const pump=()=>{
+    for (let round=0;round<20;round++) {
+      let work=false;
+      for (const source of clients) while (offsets.get(source)<source.sent.length) {
+        work=true;
+        const {event,payload}=source.sent[offsets.get(source)]; offsets.set(source,offsets.get(source)+1);
+        const sender=source.state().player.MemberNumber;
+        if (event==='ChatRoomCharacterItemUpdate') {
+          assert.equal(payload.Target,sender);
+          // BC item notifications are forwarded; they do not persist the room's appearance.
+          clients.filter(f=>f!==source).forEach(f=>f.handlers.get('ChatRoomSyncItem')({Item:structuredClone(payload)}));
+        } else if (event==='ChatRoomCharacterUpdate') {
+          assert.equal(payload.ID,source.state().player.ID);
+          server.set(sender,{...server.get(sender),...structuredClone(payload)});
+          clients.filter(f=>f!==source).forEach(f=>f.handlers.get('ChatRoomSyncCharacter')({Character:structuredClone(server.get(sender))}));
+        } else if (event==='ChatRoomChat') {
+          clients.filter(f=>f!==source && (!payload.Target || payload.Target===f.state().player.MemberNumber)).forEach(f=>f.handlers.get('ChatRoomMessage')({...structuredClone(payload),Sender:sender}));
+        }
+      }
+      if (!work) return;
+    }
+    assert.fail('cuddle synchronization loop');
+  };
+  const name=`cuddle:ChatOther-ItemTorso-${activity}`;
+  const option=a.client.activityOptions(55).find(row=>row.name===name);
+  assert.ok(option);
+  a.client.sendActivity(55,option.group,name,false,a.client.cuddleInfo(55).token); pump();
+  assert.equal(b.state().cuddleRequest.sender,123);
+  assert.equal(server.get(55).Appearance.some(item=>item.Group==='ItemMisc'),false,'no automatic peer wear');
+  b.client.respondCuddle(true,b.client.cuddleInfo(123).token); pump();
+  for (const f of clients) {
+    const self=f.state().player.MemberNumber;
+    assert.equal(f.state().player.Appearance.find(item=>item.Group==='ItemMisc').Name,'贴贴');
+    assert.equal(server.get(self).Appearance.find(item=>item.Group==='ItemMisc').Name,'贴贴');
+    assert.deepEqual(server.get(self).Appearance.slice(0,2),base);
+    assert.equal(server.get(self).ActivePose,null);
+    assert.ok(!f.sent.some(packet=>packet.event==='AccountUpdate'));
+  }
+  sync(); pump(); // Newcomers and subsequent room snapshots must see the committed items.
+  assert.equal(a.state().cuddlePartner,55); assert.equal(b.state().cuddlePartner,123);
+  const observer=await setup('PROD',true,{MemberNumber:99,ID:'observer'});
+  observer.handlers.get('ChatRoomSync')({Name:'Room',Character:structuredClone([...server.values()])});
+  assert.equal(observer.state().characters.filter(c=>c.Appearance.some(item=>item.Name==='贴贴')).length,2);
+  a.client.stopCuddle(); pump(); sync();
+  for (const f of clients) {
+    assert.equal(f.state().cuddlePartner,null);
+    assert.equal(f.state().player.Appearance.some(item=>item.Group==='ItemMisc'),false);
+    assert.deepEqual(server.get(f.state().player.MemberNumber).Appearance,base);
+  }
 });
 
 test('Lite identity uses its own hidden channel without versions or account data', async () => {
