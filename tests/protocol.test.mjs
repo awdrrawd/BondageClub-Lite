@@ -12,6 +12,7 @@ import { stripTypeScriptTypes } from 'node:module';
 import { t, setLocale, localizeStatus } from './i18n-helper.mjs';
 import { afcLovers, embeddedAction } from './community-helper.mjs';
 import { validAppearance, copyAppearance, releaseAppearance } from './safety-helper.mjs';
+import { decodeFriendNames, contactName } from './history-helper.mjs';
 
 async function setup(environment, relayAvailable = true, account = {}, storage = new Map()) {
   setLocale('zh');
@@ -29,6 +30,7 @@ async function setup(environment, relayAvailable = true, account = {}, storage =
     disconnect() { this.connected = false; handlers.get('disconnect')?.('io client disconnect'); return this; },
   };
   const context = {
+    decodeFriendNames, contactName,
     hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState, receivedSpeech, activityAsset,
     localStorage: { getItem(key) { return storage.get(key) ?? null; }, setItem(key, value) { storage.set(key, value); } },
     io: () => socket, nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, extensionActivities, extensionText, renderAction, dictionaryText, t, localizeStatus, validAppearance, copyAppearance, releaseAppearance, afcLovers, embeddedAction,
@@ -56,6 +58,36 @@ async function setup(environment, relayAvailable = true, account = {}, storage =
 }
 
 const request = { Query: '', Space: 'X', Language: '', Game: '', FullRooms: false, ShowLocked: true, SearchDescs: false };
+
+test('AEE and SCA bundles survive login, unrelated updates and safeword release without loading plugin resources', async () => {
+  const appearance=[
+    {Group:'BodyUpper',Name:'Normal'},
+    {Group:'SingleGloveFX',Name:'SingleGlove',Property:{SGSide:'L',SGScope:'both'}},
+    {Group:'ItemCanvas1',Name:'DrawingBoard',Property:{CustomDraw:'opaque compressed drawing',CustomDrawSPS:{url:'https://invalid.example/aee',opaque:true}}},
+    {Group:'ItemCanvas1Mask',Name:'Mask',Property:{OverridePriority:99}},
+    {Group:'ItemHands',Name:'自定义贴图',Property:{Textures:[{TextureURL:'https://invalid.example/sca',PoseSettings:{Kneel:{ScaleX:80}}}]},Craft:{Name:'custom',Unknown:'retain'}},
+    {Group:'ItemArms',Name:'Rope',Property:{Effect:['Block']}},
+  ];
+  const original=JSON.stringify(appearance);
+  const shared={AEE:{Version:'test',FreeDraw:true,ItemFont:'custom'}};
+  const f=await setup('PROD',true,{Appearance:appearance,OnlineSharedSettings:shared,AssetFamily:'Female3DCG',GameplaySettings:{EnableSafeword:true}});
+  assert.equal(JSON.stringify(f.state().player.Appearance),original);
+  assert.notEqual(f.state().player.Appearance,appearance);
+  f.handlers.get('ChatRoomSync')({Name:'Room',Character:[{MemberNumber:123,Name:'Me',Appearance:appearance,OnlineSharedSettings:shared}]});
+  f.handlers.get('ChatRoomSyncItem')({Item:{Target:123,Group:'Cloth',Name:'Dress'}});
+  const own=f.state().characters[0];
+  assert.equal(JSON.stringify(own.Appearance.slice(0,appearance.length)),original);
+  assert.equal(own.OnlineSharedSettings,shared);
+  assert.ok(!f.sent.some(packet=>['AccountUpdate','ChatRoomCharacterUpdate'].includes(packet.event)));
+  f.client.activateSafeword('release');
+  const update=f.sent.find(packet=>packet.event==='AccountUpdate').payload;
+  assert.ok(update.Appearance.some(item=>item.Name==='自定义贴图' && item.Craft.Unknown==='retain'));
+  assert.ok(update.Appearance.some(item=>item.Group==='ItemCanvas1' && item.Property.CustomDraw==='opaque compressed drawing'));
+  assert.ok(!update.Appearance.some(item=>item.Group==='ItemArms'));
+  assert.equal('OnlineSharedSettings' in update,false);
+  assert.equal(JSON.stringify(appearance),original);
+  assert.equal(releaseAppearance([{Group:'ItemHands',Name:'自定义贴图',Property:{Effect:['Block']}}],false).length,0);
+});
 
 test('cuddle previews both slots and pairing IDs; stale consent cannot replace any item', async () => {
   const f=await setup('PROD'); f.client.setTextCatalog(gameCatalog('zh'));
@@ -182,6 +214,27 @@ test('room history defaults to 3000, trims oldest on reduction and keeps the lim
   assert.equal(f.state().messages.length, 600);
 });
 
+test('room messages survive leaving, joining and reconnecting, while account/environment changes clear live data', async () => {
+  const f = await setup('PROD');
+  f.handlers.get('ChatRoomSync')({Name:'First',Character:[]});
+  f.handlers.get('ChatRoomMessage')({Type:'Chat',Sender:55,Content:'keep this message'});
+  f.client.leave(); assert.ok(f.state().messages.some(m=>m.text==='keep this message'));
+  f.client.join('Second'); assert.ok(f.state().messages.some(m=>m.text==='keep this message'));
+  f.handlers.get('ChatRoomSync')({Name:'Second',Character:[]});
+  assert.equal(f.state().messages.find(m=>m.text==='keep this message').roomName,'First');
+  f.handlers.get('disconnect')('transport close');
+  f.handlers.get('ChatRoomSync')({Name:'Second',Character:[]});
+  assert.ok(f.state().messages.some(m=>m.text==='keep this message'));
+  f.handlers.get('LoginResponse')({AccountName:'other',Name:'Other',ID:'other-socket',MemberNumber:999,Environment:'PROD'});
+  assert.equal(f.state().messages.length,0); assert.equal(f.state().beeps.length,0);
+  const record={id:'saved',sender:55,senderName:'Friend',type:'Chat',text:'saved text',time:new Date()};
+  f.client.restoreMessages('PROD:123',[record]); assert.equal(f.state().messages.length,0);
+  f.client.restoreMessages('PROD:999',[record]); assert.equal(f.state().messages.length,1);
+  f.client.restoreMessages('PROD:999',[record]); assert.equal(f.state().messages.length,1);
+  f.handlers.get('LoginResponse')({AccountName:'other',Name:'Other',ID:'dev-socket',MemberNumber:999,Environment:'DEV'});
+  assert.equal(f.state().messages.length,0);
+});
+
 test('membership sync does not duplicate native presence, and departed nickname/color survives', async () => {
   const f = await setup('PROD'); f.client.setTextCatalog(gameCatalog('en'));
   const character = { MemberNumber: 55, Name: 'Account', Nickname: 'Nick', LabelColor: '#FFE800' };
@@ -228,8 +281,7 @@ test('compatibility sends clothed online activity but never overrides explicit p
   assert.equal(f.sent.at(-1).payload.Type, 'Activity');
   actor.Appearance.push({ Group:'ItemMouth', Name:'BallGag', Property:{ Effect:[] } });
   f.handlers.get('ChatRoomSync')({ Name:'Room', Character:[actor, target] });
-  assert.equal(f.client.activityOptions(55, true).find(value => value.name === 'Whisper').reason, 'native.blocked');
-  assert.throws(() => f.client.sendActivity(55, 'ItemEars', 'Whisper', true));
+  assert.equal(f.client.activityOptions(55, true).find(value => value.name === 'Whisper').reason, null);
   actor.Appearance.pop();
   target.ArousalSettings = { ...base.ArousalSettings, Activity: 'd'.repeat(100) };
   f.handlers.get('ChatRoomSync')({ Name: 'Room', Character: [actor, target] });
@@ -283,8 +335,7 @@ test('unknown plugin appearance does not disable equipment checks, while fresh r
   assert.equal(f.sent.at(-1).payload.Type,'Activity');
   actor.Appearance = [...actor.Appearance,{Group:'ItemMouth',Name:'PluginGag',Property:{Effect:['BlockMouth']}}];
   f.handlers.get('ChatRoomSync')({Name:'Room',Character:[actor,target]});
-  assert.equal(option(true).reason,'native.blocked');
-  assert.throws(() => f.client.sendActivity(55,'ItemEars','Whisper',true));
+  assert.equal(option(true).reason,null);
   actor.Appearance = base.Appearance;
   target.ArousalSettings = {...base.ArousalSettings,Activity:'d'.repeat(100)};
   f.handlers.get('ChatRoomSync')({Name:'Room',Character:[actor,target]});
@@ -708,7 +759,7 @@ test('friend updates preserve opaque custom outfit and shared settings; missing 
   f.client.setFriend(99, true);
   f.client.setFriend(77, false);
   assert.equal(JSON.stringify(f.sent.at(-1).payload), JSON.stringify({ FriendList: [88, 99] }));
-  assert.equal(f.state().player.Appearance, appearance);
+  assert.equal(JSON.stringify(f.state().player.Appearance), JSON.stringify(appearance));
   assert.equal(f.state().player.OnlineSharedSettings, settings);
   for (const item of f.sent) assert.equal('Appearance' in item.payload || 'OnlineSharedSettings' in item.payload, false);
   const missing = await setup('PROD');
@@ -762,7 +813,7 @@ test('room and character synchronization never write back unknown ECHO appearanc
   f.client.sendChat('hello');
   f.client.setFriend(55, true);
   f.client.leave();
-  assert.equal(f.state().player.Appearance, appearance);
+  assert.equal(JSON.stringify(f.state().player.Appearance), JSON.stringify(appearance));
   for (const packet of f.sent.filter(packet => packet.event === 'AccountUpdate')) {
     assert.deepEqual(Object.keys(packet.payload), ['FriendList']);
   }

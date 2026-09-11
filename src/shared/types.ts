@@ -15,6 +15,7 @@ export interface PlayerSummary extends CharacterSummary {
   AllowedInteractions?: number;
   AssetFamily?: string;
   FriendList?: number[];
+  FriendNames?: Record<number, string>;
   /** Opaque server bundles: never rebuild with an incomplete asset registry. */
   Appearance?: unknown[];
   OnlineSharedSettings?: Record<string, unknown>;
@@ -118,6 +119,7 @@ export interface ChatMessage {
 }
 
 export interface DisplayMessage {
+  roomName?: string;
   presence?: boolean;
   labelColor?: string;
   replyId?: string;

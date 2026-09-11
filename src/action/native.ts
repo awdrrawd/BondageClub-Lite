@@ -76,19 +76,22 @@ export function activityAsset(actor: CharacterSummary, target: CharacterSummary,
 }
 
 /** Check known item effects; unknown assets never invalidate unrelated activities. */
-export function createActivityInventoryCheck(actor: CharacterSummary, target: CharacterSummary) {
+export function createActivityInventoryCheck(actor: CharacterSummary, target: CharacterSummary, relaxActorRestraints = false) {
   const a = inventoryState(actor), b = inventoryState(target);
   return (group: string, prerequisites: string[] = []): string | null => {
   const zone = (definitions.zones as Record<string, number>)[group];
   const code = zone === undefined ? NaN : (target.ArousalSettings?.Zone?.charCodeAt(zone) ?? NaN) - 100;
   if (Number.isFinite(code) && code >= 0 && code % 10 === 0) return "native.permission";
-  if (actor.MemberNumber !== target.MemberNumber && (a.effects.has("Enclose") || b.effects.has("Enclose"))) return "native.blocked";
+  if (actor.MemberNumber !== target.MemberNumber && ((!relaxActorRestraints && a.effects.has("Enclose")) || b.effects.has("Enclose"))) return "native.blocked";
   const walk = !["Freeze", "Tethered", "Mounted"].some(effect => a.effects.has(effect));
   const hands = !a.effects.has("Block");
   const arms = hands || (!a.groups.has("ItemArms") && !a.blocked("ItemArms"));
   const gagged = [...a.effects].some(effect => /^Gag/.test(effect));
   let unsupported = false;
   for (const pre of prerequisites) {
+    // Lite's text-first actor is not physically immobilized. Keep actual state for
+    // restraint-specific variants (CantUse*, IsGagged), tool needs and target access.
+    if (relaxActorRestraints && ["UseMouth", "UseTongue", "UseHands", "UseArms", "UseFeet", "TargetZoneAccessible"].includes(pre)) continue;
     let allowed: boolean | undefined;
     switch (pre) {
       case "UseMouth": allowed = !a.effects.has("BlockMouth") && !gagged; break;
@@ -124,7 +127,7 @@ export function createActivityInventoryCheck(actor: CharacterSummary, target: Ch
       }
       default:
         // Lite also offers ordinary bare-hand scratching; tool variants still carry ActivityAsset.
-        if (pre === "Needs-Scratch" && a.naked("ItemHands")) allowed = true;
+        if (pre === "Needs-Scratch" && (relaxActorRestraints || a.naked("ItemHands"))) allowed = true;
         else if (pre.startsWith("Needs-")) allowed = a.needs(pre.slice(6));
         else if (pre.startsWith("TargetNeeds-")) allowed = b.needs(pre.slice(12));
         if (allowed === undefined) unsupported = true;

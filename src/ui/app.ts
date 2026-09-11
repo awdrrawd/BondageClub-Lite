@@ -2,11 +2,16 @@ import { t, getLocale, setLocale, type Locale } from "../i18n";
 import "./style.css";
 import { bcClient } from "../network/client";
 import { decodeBiography } from "../profile/biography";
+import { contactName } from "../profile/friend-names";
+import { HistoryStore, exportHistory, localDay, privateRows, type HistoryMessage, type HistoryPolicy } from "../storage/history";
+import { HistorySession } from "../storage/history-session";
 import { appendChatLinks, MediaConsent } from "../media/chat-links";
 import { afcLovers } from "../profile/afc";
 import { StabilityControls } from "../platform/stability";
 import { loadTextCatalog } from "../action/catalog";
 import { openActivityDialog } from "./activity-dialog";
+import { icon, type IconName } from "./icons";
+import { iconSelect } from "./icon-select";
 import { nameColor } from "./name-color";
 import { isMobileLayout, bindPageSwipe } from "../platform/mobile";
 import { canJoinRoom, sortRooms, type RoomSort } from "./room-list";
@@ -16,14 +21,17 @@ const app = document.querySelector<HTMLDivElement>("#app");
 if (!app) throw new Error(t("m001"));
 
 const escapeText = (value: unknown): string => String(value ?? "");
-export type UiClient = Pick<typeof bcClient, "recordLifecycle" | "resumeConnection" | "setMessageLimit" | "subscribe" | "setTextCatalog" | "relocalize" | "disconnect" | "refreshFriends" | "setFriend" | "sendChat" | "sendBeep" | "requestLoverRoom" | "connectionDiagnostics" | "acceptSummon" | "dismissSummon" | "configureSummons" | "search" | "leave" | "join" | "login" | "createRoom" | "clearMessages" | "respondCuddle" | "cuddleInfo" | "activateSafeword" | "activityOptions" | "sendActivity">;
+export type UiClient = Pick<typeof bcClient, "restoreMessages" | "recordLifecycle" | "resumeConnection" | "setMessageLimit" | "subscribe" | "setTextCatalog" | "relocalize" | "disconnect" | "refreshFriends" | "setFriend" | "sendChat" | "sendBeep" | "requestLoverRoom" | "connectionDiagnostics" | "acceptSummon" | "dismissSummon" | "configureSummons" | "search" | "leave" | "join" | "login" | "createRoom" | "clearMessages" | "respondCuddle" | "cuddleInfo" | "activateSafeword" | "activityOptions" | "sendActivity">;
 export class LiteApp {
   private client: UiClient;
+  private history: HistorySession;
+  private historyError = false;
   private mediaConsent = new MediaConsent(document);
   private privateFilter = "room";
   private replyTarget: DisplayMessage | null = null;
   private privateListOpen = true;
   private privateVisible = 60;
+  private privateEndId: string | null = null;
   private summonConfig = { enabled: false, members: "", text: "Come to my room immediately" };
   private stability = new StabilityControls();
   private snapshot: Readonly<ClientSnapshot> | null = null;
@@ -38,7 +46,7 @@ export class LiteApp {
   private newRoomDescription = "";
   private newRoomLimit = 10;
   private roomMode: "search" | "create" = "search";
-  private friendFilter = "all";
+  private friendFilter = "online";
   private createFields = { Background: "MainHall", Admin: "", Whitelist: "", Ban: "", ImageURL: "", MusicURL: "", Game: "", Visibility: "", Access: "All", MapType: "Never", Fog: false, MapJSON: "", BlockCategory: [] as string[] };
   private roomPage = 0;
   private roomSort: RoomSort = "friends";
@@ -64,7 +72,7 @@ export class LiteApp {
   private roomUnread = 0;
   private composing = false;
   private renderPending = false;
-  private settings = { background: false, largeText: false, timestamps: true, locale: "zh" as Locale };
+  private settings = { background: false, largeText: false, timestamps: true, locale: "zh" as Locale, theme: "default" };
 
   constructor(client: UiClient = bcClient) {
     window.matchMedia("(max-width: 760px)").addEventListener("change", () => {
@@ -72,6 +80,13 @@ export class LiteApp {
       if (this.snapshot && this.tab === "rooms") this.render();
     });
     this.client = client;
+    const persist = !document.documentElement.hasAttribute("data-ui-preview") && typeof window.indexedDB !== "undefined";
+    this.historyError = !persist && !document.documentElement.hasAttribute("data-ui-preview");
+    this.history = new HistorySession(persist ? new HistoryStore(window.indexedDB) : null, () => {
+      if (this.snapshot?.player) this.updateFriendContent();
+    }, () => { if (!this.historyError) { this.historyError = true; this.localNotice(t("history.error")); } }, (owner, messages) => this.client.restoreMessages(owner, messages));
+    window.addEventListener("pagehide", () => { void this.history.flush(); });
+    window.setInterval(() => { if (this.snapshot) this.history.observe(this.snapshot); }, 60000);
     // Delegate selection before controls run; reply jumps may then select their destination.
     document.addEventListener("click", event => {
       const target = event.target as HTMLElement | null;
@@ -79,6 +94,8 @@ export class LiteApp {
     }, true);
     document.addEventListener("click", event => {
       const target = event.target as HTMLElement;
+      for (const picker of document.querySelectorAll<HTMLDetailsElement>(".mobile-picker[open]")) if (!picker.contains(target)) picker.open = false;
+      if (!target.closest(".room-query, .room-search")) document.querySelector(".room-controls.search-expanded")?.classList.remove("search-expanded");
       if (this.membersOpen && !target.closest(".member-panel, .mobile-members, .profile-dialog")) {
         this.membersOpen = false;
         document.querySelector(".room-view")?.classList.remove("members-open");
@@ -105,7 +122,7 @@ export class LiteApp {
     });
     try {
       const saved = JSON.parse(localStorage.getItem("bc-lite-display-v1") || "{}");
-      this.settings = { background: saved.background === true, largeText: saved.largeText === true, timestamps: saved.timestamps !== false, locale: saved.locale === "en" ? "en" : "zh" };
+      this.settings = { background: saved.background === true, largeText: saved.largeText === true, timestamps: saved.timestamps !== false, locale: saved.locale === "en" ? "en" : "zh", theme: ["default", "midnight", "forest"].includes(saved.theme) ? saved.theme : "default" };
     } catch { /* Storage can be unavailable in private browsing. */ }
     try {
       const savedAccount = localStorage.getItem("bc-lite-account-v1");
@@ -122,6 +139,8 @@ export class LiteApp {
     this.client.subscribe((snapshot) => {
       const previous = this.snapshot;
       this.snapshot = snapshot;
+      this.history.observe(snapshot);
+      if (this.privateMode === "whisper" && !snapshot.characters.some(c => c.MemberNumber === this.contact)) { this.privateMode = "beep"; this.replyTarget = null; }
       if (previous && (snapshot.characters !== previous.characters || snapshot.player !== previous.player || snapshot.room !== previous.room)) {
         document.querySelector('.activity-dialog')?.dispatchEvent(new window.Event('activity-refresh'));
       }
@@ -153,7 +172,7 @@ export class LiteApp {
         this.updateHeader();
         this.updateChatLog();
         if (snapshot.friends !== previous.friends || snapshot.loverRooms !== previous.loverRooms || snapshot.friendsStatus !== previous.friendsStatus || snapshot.beeps !== previous.beeps) this.updateFriendContent();
-        else if (snapshot.whispers !== previous.whispers) this.updateBeepLog();
+        else if (snapshot.whispers !== previous.whispers) this.updateFriendContent();
         return;
       }
       this.render();
@@ -161,6 +180,7 @@ export class LiteApp {
   }
 
   private applySettings(): void {
+    document.documentElement.dataset.theme = this.settings.theme;
     document.documentElement.lang = getLocale() === "zh" ? "zh-Hant" : "en";
     document.querySelector('meta[name="description"]')?.setAttribute("content", t("site.description"));
     document.body.classList.toggle("scenic", this.settings.background);
@@ -184,7 +204,8 @@ export class LiteApp {
       this.client.relocalize(); this.render();
       if (this.snapshot?.player) this.refreshCatalog();
     });
-    return this.field(t("locale.label"), select);
+    const control = iconSelect(select, {zh: "zh", en: "en"}, "translate", true);
+    control.classList.add("locale-picker"); return control;
   }
 
   private saveAccountPreference(): void {
@@ -204,9 +225,9 @@ export class LiteApp {
     const connection = document.querySelector(".connection span:last-child");
     if (connection) connection.textContent = this.snapshot!.status;
     const brand = document.querySelector<HTMLElement>(".brand"); if (brand) brand.title = this.snapshot!.status;
-    const privateTab = document.getElementById("nav-private");
+    const privateTab = document.querySelector("#nav-private .nav-label");
     if (privateTab) privateTab.textContent = `${t("private.title")}${this.unread ? ` · ${this.unread}` : ""}`;
-    const chat = document.getElementById("nav-chat");
+    const chat = document.querySelector("#nav-chat .nav-label");
     if (chat) chat.textContent = `${t("nav.room")}${this.roomUnread ? ` · ${this.roomUnread}` : ""}`;
   }
 
@@ -320,6 +341,8 @@ export class LiteApp {
     nav.setAttribute("aria-label", t("m009"));
     for (const [key, label] of [["rooms", t("nav.search")], ["chat", t("nav.room")], ["private", t("private.title")], ["friends", t("m012")], ["settings", t("m013")]] as const) {
       const button = this.button(label, this.tab === key ? "active" : "ghost", "button");
+      const icons: Record<string, IconName> = { rooms: "search", chat: "room", private: "chats", friends: "users", settings: "gear" };
+      button.replaceChildren(icon(icons[key]), this.el("span", "nav-label", label));
       button.id = `nav-${key}`;
       button.setAttribute("aria-current", this.tab === key ? "page" : "false");
       button.disabled = key === "chat" && !this.snapshot!.room;
@@ -338,15 +361,19 @@ export class LiteApp {
 
   private buildFriends(privatePage = false): HTMLElement {
     const section = this.el("section", privatePage ? "friends-view private-page" : "friends-view");
-    if (!privatePage) section.append(this.el("p", "eyebrow", t("m015")));
+    if (!privatePage) section.append(this.el("p", "eyebrow", t("friends.list")));
     section.append(this.el("h1", "", privatePage ? t("private.title") : t("m016")));
     if (!privatePage) section.append(this.el("p", "muted", t("m017")));
-    const toolbar = this.el("div", "toolbar");
-    const refresh = this.button(t("m018"), "secondary", "button");
+    const toolbar = this.el("form", "toolbar contact-toolbar");
+    const refresh = this.button("", "ghost friend-refresh", "button");
+    refresh.append(icon("refresh")); refresh.title = t("m018"); refresh.setAttribute("aria-label", t("m018"));
+    refresh.disabled = this.snapshot!.friendsQueryState === "loading";
     refresh.addEventListener("click", () => this.run(() => this.client.refreshFriends()));
     const query = this.input("FriendQuery", t("m019"), "search", this.friendQuery);
     query.addEventListener("input", () => { this.friendQuery = query.value; this.updateFriendContent(); });
-    toolbar.append(query, refresh);
+    const search = this.button("", "ghost", "submit"); search.append(icon("search")); search.title = t("m098"); search.setAttribute("aria-label", t("m098"));
+    toolbar.addEventListener("submit", event => { event.preventDefault(); this.friendQuery = query.value; this.updateFriendContent(); });
+    toolbar.append(query, search, refresh);
     const filters = this.el("div", "toolbar friend-filters");
     for (const [value, label] of (privatePage ? [["room", t("m010")], ["friends", t("m012")], ["recent", t("private.recent")]] : [["all", t("m020")], ["online", t("m021")], ["offline", t("m022")], ["unknown", t("m023")]])) {
       const button = this.button(label, (privatePage ? this.privateFilter : this.friendFilter) === value ? "secondary" : "ghost", "button");
@@ -354,7 +381,7 @@ export class LiteApp {
       button.addEventListener("click", () => { if (privatePage) this.privateFilter = value; else this.friendFilter = value; this.render(); });
       filters.append(button);
     }
-    const status = this.el("p", privatePage ? "private-status" : "muted"); status.id = "friends-status";
+    const status = this.el("p", "muted"); status.id = "friends-status";
     const list = this.el("div", "contact-list"); list.id = "contact-list";
     if (!privatePage) {
       section.append(toolbar, filters, status, list);
@@ -371,6 +398,7 @@ export class LiteApp {
     for (const [mode, label] of [["whisper", t("m029")], ["beep", t("m028")]]) {
       const button = this.button(label, "secondary", "button");
       button.dataset.channel = mode;
+      button.disabled = mode === "whisper" && !this.snapshot!.characters.some(c => c.MemberNumber === this.contact);
       button.setAttribute("aria-pressed", String(this.privateMode === mode));
       button.addEventListener("click", () => {
         if (this.privateMode === mode) return;
@@ -396,22 +424,27 @@ export class LiteApp {
     });
     const inbox = this.el("div", "beep-log"); inbox.id = "beep-log"; inbox.setAttribute("role", "log");
     const contacts = this.el("aside", "private-contacts");
-    contacts.append(this.el("h2", "private-heading", t("private.contacts")), toolbar, filters, status, list);
+    contacts.append(this.el("h2", "private-heading", t("private.contacts")), toolbar, filters, list);
     const conversation = this.el("section", "private-conversation");
     const back = this.button(t("private.back"), "ghost private-back", "button");
     back.addEventListener("click", () => { this.privateListOpen = true; this.render(); });
-    const peer = this.snapshot!.characters.find(c => c.MemberNumber === this.contact);
-    const peerName = peer?.Nickname || peer?.Name || this.snapshot!.friends.find(c => c.MemberNumber === this.contact)?.MemberName;
+    const peerName = this.contactName(this.contact);
     const heading = this.el("div", "private-heading");
     add.disabled = !this.contact;
     heading.append(back, this.el("h2", "", this.contact ? `${peerName || t("private.title")} · #${this.contact}` : t("m035")), add);
-    conversation.append(heading, inbox, form);
+    const paging = this.el("nav", "toolbar private-history-controls"); paging.setAttribute("aria-label", t("history.title"));
+    const older = this.button(t("history.older"), "ghost", "button"); older.dataset.history = "older";
+    const newer = this.button(t("history.newer"), "ghost", "button"); newer.dataset.history = "newer";
+    older.addEventListener("click", () => this.pagePrivate(-1)); newer.addEventListener("click", () => this.pagePrivate(1));
+    paging.append(older, newer);
+    conversation.append(heading, paging, inbox, form);
     const split = this.el("div", `private-split ${this.privateListOpen ? "show-contacts" : "show-conversation"}`);
     split.append(contacts, conversation); section.append(split);
     // Populate detached containers; later updates only touch list and log, never the composer.
     this.fillFriendList(list);
     status.textContent = this.snapshot!.friendsStatus;
     this.fillBeepLog(inbox);
+    this.updatePrivatePaging(paging);
     return section;
   }
 
@@ -427,6 +460,8 @@ export class LiteApp {
     if (list) this.fillFriendList(list);
     const status = document.getElementById("friends-status");
     if (status) status.textContent = this.snapshot!.friendsStatus;
+    const refresh = document.querySelector<HTMLButtonElement>(".friend-refresh");
+    if (refresh) { refresh.disabled = this.snapshot!.friendsQueryState === "loading"; refresh.setAttribute("aria-busy", String(refresh.disabled)); refresh.title = `${t("m018")} · ${this.snapshot!.friendsStatus}`; }
     this.updateBeepLog();
   }
 
@@ -435,9 +470,9 @@ export class LiteApp {
     this.replyTarget = null;
     this.contactDrafts.set(this.contact, this.beepDraft);
     this.contact = memberNumber;
-    this.privateListOpen = false; this.privateVisible = 60;
+    this.privateListOpen = false; this.privateVisible = 60; this.privateEndId = null;
     this.beepDraft = this.contactDrafts.get(memberNumber) || "";
-    this.privateMode = mode; this.tab = "private"; this.unread = 0;
+    this.privateMode = mode === "whisper" && this.snapshot!.characters.some(c => c.MemberNumber === memberNumber) ? "whisper" : "beep"; this.tab = "private"; this.unread = 0;
     this.render(); document.getElementById("BeepText")?.focus();
   }
 
@@ -447,10 +482,10 @@ export class LiteApp {
     const online = new Map(state.friends.map(friend => [friend.MemberNumber, friend]));
     let ids = [...new Set([...online.keys(), ...(state.player?.FriendList || []), ...afcLovers(state.player).map(lover => lover.memberNumber)])];
     if (this.tab === "private" && this.privateFilter === "room") ids = state.characters.map(character => character.MemberNumber);
-    if (this.tab === "private" && this.privateFilter === "recent") ids = [...new Set([...state.beeps.map(message => message.memberNumber), ...(state.whispers || state.messages).filter(message => message.type === "Whisper").map(message => message.sender === state.player?.MemberNumber ? message.target! : message.sender!)])];
+    if (this.tab === "private" && this.privateFilter === "recent") ids = [...new Set([...this.history.contacts.map(contact => contact.peer), ...state.beeps.map(message => message.memberNumber), ...(state.whispers || state.messages).filter(message => message.type === "Whisper").map(message => message.sender === state.player?.MemberNumber ? message.target! : message.sender!)])];
     ids = ids.filter(id => id > 0 && id !== state.player?.MemberNumber);
     if (this.tab === "private" && this.privateFilter === "recent") {
-      const recent = new Map<number, number>();
+      const recent = new Map<number, number>(this.history.contacts.map(contact => [contact.peer, contact.timestamp]));
       state.beeps.forEach(message => recent.set(message.memberNumber, Math.max(recent.get(message.memberNumber) || 0, +message.time)));
       (state.whispers || state.messages).filter(message => message.type === "Whisper").forEach(message => {
         const id = message.sender === state.player?.MemberNumber ? message.target! : message.sender!;
@@ -464,18 +499,28 @@ export class LiteApp {
       const fresh = state.friendsQueryState === "ready";
       const presence = inRoom || (friend && fresh) ? "online" : fresh && state.player?.FriendList?.includes(id) ? "offline" : "unknown";
       if (this.tab !== "private" && this.friendFilter !== "all" && this.friendFilter !== presence) continue;
-      const name = friend?.MemberName || state.characters.find(character => character.MemberNumber === id)?.Name || afcLovers(state.player).find(lover => lover.memberNumber === id)?.name || [...state.beeps].reverse().find(message => message.memberNumber === id)?.name || t("m037");
+      if (this.tab === "private" && this.privateFilter === "friends" && presence !== "online") continue;
+      const name = this.contactName(id);
       if (!`${name} ${id}`.toLowerCase().includes(this.friendQuery.trim().toLowerCase())) continue;
       total++;
       if (total > 80) continue;
       const row = this.el("article", "contact-card");
+      row.dataset.member = String(id);
+      row.tabIndex = 0; row.setAttribute("role", "button"); row.setAttribute("aria-label", `${name} #${id} · ${t("m028")}`);
+      row.classList.toggle("contact-offline", presence !== "online");
+      const activate = () => this.openConversation(id);
+      row.addEventListener("click", event => { if (!(event.target as HTMLElement).closest("button")) activate(); });
+      row.addEventListener("keydown", event => { if (event.target === row && ["Enter", " "].includes(event.key)) { event.preventDefault(); activate(); } });
       if (this.tab === "private" && this.contact === id) row.classList.add("selected-contact");
       const info = this.el("div");
-      const relation = friend ? ({ Friend: t("relation.friend"), Lover: t("relation.lover"), Owner: t("relation.owner"), Submissive: t("relation.submissive") }[friend.Type] || friend.Type) : "";
-      const statusClass = this.tab === "private" ? "private-status" : "muted";
-      info.append(this.el("strong", "", `${name} #${id}`), this.el("p", statusClass, friend && fresh ? t("m038", [friend.ChatRoomName || t("m039"), friend.Private ? t("m040") : "", relation]) : inRoom ? t("m041") : presence === "offline" ? t("m042") : t("m043")));
-      const chat = this.button(t("m177"), "secondary", "button");
-      chat.addEventListener("click", () => this.openConversation(id));
+      const relationship = friend?.Type || (state.player?.Ownership?.MemberNumber === id ? "Owner" : state.player?.Lovership?.some(lover => lover.MemberNumber === id) ? "Lover" : state.player?.FriendList?.includes(id) ? "Friend" : "");
+      const relation = ({ Friend: t("relation.friend"), Lover: t("relation.lover"), Owner: t("relation.owner"), Submissive: t("relation.submissive") }[relationship] || relationship);
+      const title = this.el("div", "contact-title");
+      title.append(this.el("strong", "", name), this.el("span", "contact-id", `#${id}`), this.el("span", "contact-relation", relation));
+      info.append(title);
+      const sharedRoom = inRoom ? state.room?.Name : fresh ? friend?.ChatRoomName || state.loverRooms?.[id]?.name : undefined;
+      const roomLabel = inRoom ? t("contact.sameRoom") : fresh && friend?.Private ? t("contact.privateRoom") : sharedRoom;
+      if (roomLabel) info.append(this.el("p", "contact-room", roomLabel));
       row.append(info);
       if (afcLovers(state.player).some(lover => lover.memberNumber === id)) {
         info.append(this.el("span", "tag afc-tag", t("afc.title")));
@@ -483,19 +528,12 @@ export class LiteApp {
         queryRoom.disabled = !state.player?.FriendList?.includes(id) || !["ready", "in-room"].includes(state.phase);
         queryRoom.addEventListener("click", () => this.run(() => this.client.requestLoverRoom(id))); row.append(queryRoom);
       }
-      const sharedRoom = friend?.ChatRoomName || state.loverRooms?.[id]?.name;
-      if (sharedRoom) info.append(this.el("small", statusClass, sharedRoom));
       if (sharedRoom) {
         const join = this.button(t("m044"), "ghost", "button");
         join.disabled = !["ready", "in-room"].includes(state.phase);
         join.title = sharedRoom;
         join.addEventListener("click", () => this.joinRoom(sharedRoom));
         row.append(join);
-      }
-      row.append(chat);
-      if (inRoom) {
-        const whisper = this.button(t("m046"), "secondary", "button");
-        whisper.addEventListener("click", () => this.openConversation(id, "whisper")); row.append(whisper);
       }
       if (this.tab !== "private" && state.player?.FriendList?.includes(id)) {
         const remove = this.button(t("m047"), "ghost danger", "button");
@@ -505,10 +543,33 @@ export class LiteApp {
       list.append(row);
     }
     if (!total) list.append(this.el("p", "empty-state", t("m049")));
-    if (total > 80) list.append(this.el("p", this.tab === "private" ? "private-status" : "muted", t("m050", [total])));
+    if (total > 80) list.append(this.el("p", "muted", t("m050", [total])));
   }
 
-  private updateBeepLog(): void { const log = document.getElementById("beep-log"); if (log) this.fillBeepLog(log); }
+  private contactName(id: number): string {
+    return contactName(this.snapshot!, id, [...this.snapshot!.beeps].reverse().find(message => message.memberNumber === id)?.name || this.history.contacts.find(contact => contact.peer === id)?.name || afcLovers(this.snapshot!.player).find(lover => lover.memberNumber === id)?.name);
+  }
+
+  private updateBeepLog(): void { const log = document.getElementById("beep-log"); if (log) this.fillBeepLog(log); this.updatePrivatePaging(document.querySelector(".private-history-controls")); }
+
+  private privatePageEnd(rows: DisplayMessage[]): number {
+    const index = this.privateEndId ? rows.findIndex(row => row.id === this.privateEndId) : -1;
+    return index >= 0 ? index + 1 : rows.length;
+  }
+  private pagePrivate(direction: number): void {
+    const rows = this.allPrivateMessages();
+    const end = Math.min(rows.length, Math.max(Math.min(this.privateVisible, rows.length), this.privatePageEnd(rows) + direction * this.privateVisible));
+    this.privateEndId = end === rows.length ? null : rows[end - 1]?.id || null;
+    this.updateBeepLog();
+  }
+  private updatePrivatePaging(paging: Element | null): void {
+    if (!paging) return;
+    const rows = this.allPrivateMessages(), end = this.privatePageEnd(rows);
+    (paging as HTMLElement).hidden = rows.length <= this.privateVisible;
+    const older = paging.querySelector<HTMLButtonElement>('[data-history="older"]'), newer = paging.querySelector<HTMLButtonElement>('[data-history="newer"]');
+    if (older) older.disabled = end <= this.privateVisible;
+    if (newer) newer.disabled = end >= rows.length;
+  }
 
   private fillBeepLog(log: HTMLElement): void {
     const scrollTop = log.scrollTop;
@@ -518,18 +579,14 @@ export class LiteApp {
   }
 
   private privateMessages(): DisplayMessage[] {
+    const rows = this.allPrivateMessages(), end = this.privatePageEnd(rows);
+    return rows.slice(Math.max(0, end - this.privateVisible), end);
+  }
+  private allPrivateMessages(): DisplayMessage[] {
     const state = this.snapshot!;
-    const self = state.player!;
-    const rows: DisplayMessage[] = [];
-    rows.push(...(state.whispers || state.messages).filter(message => message.type === "Whisper" && (message.sender === this.contact || (message.sender === self.MemberNumber && message.target === this.contact))));
-    const messages = state.beeps.filter(message => !this.contact || message.memberNumber === this.contact);
-    for (const message of messages) {
-      rows.push({ id: message.id, sender: message.incoming ? message.memberNumber : self.MemberNumber,
-        senderName: message.incoming ? message.name : self.Nickname || self.Name,
-        target: message.incoming ? self.MemberNumber : message.memberNumber, targetName: message.incoming ? self.Name : message.name,
-        text: message.text, type: "Beep", time: message.time });
-    }
-    return rows.sort((a, b) => a.time.getTime() - b.time.getTime()).slice(-this.privateVisible);
+    const rows = new Map([...this.history.messages.map(row => row.message), ...privateRows(state)].map(message => [message.id, message]));
+    return [...rows.values()].filter(message => !this.contact || message.sender === this.contact || (message.sender === state.player!.MemberNumber && message.target === this.contact))
+      .sort((a, b) => +a.time - +b.time);
   }
 
   private syncPrivateRows(log: HTMLElement, messages: DisplayMessage[], empty: string): void {
@@ -546,13 +603,18 @@ export class LiteApp {
       if (node !== cursor) log.insertBefore(node, cursor);
       cursor = node.nextSibling;
     }
-    if (!messages.length) log.append(this.el("p", "private-status", empty));
+    if (!messages.length) log.append(this.el("p", "empty-state", empty));
   }
 
   private buildSettings(): HTMLElement {
     const section = this.el("section", "settings-view");
     section.append(this.el("p", "eyebrow", t("m055")), this.el("h1", "", t("m056")));
     const panel = this.el("div", "settings-card");
+    panel.append(this.el("h2", "", t("settings.appearance")));
+    const theme = this.select(t("settings.theme"), (["default", "midnight", "forest"] as const).map(value => [value, t(`theme.${value}`)]), this.settings.theme);
+    theme.id = "ThemeSelect";
+    theme.addEventListener("change", () => { this.settings.theme = theme.value; this.applySettings(); try { localStorage.setItem("bc-lite-display-v1", JSON.stringify(this.settings)); } catch { this.localNotice(t("m060")); } });
+    panel.append(this.field(t("settings.theme"), theme));
     for (const [key, label] of [["background", t("m057")], ["largeText", t("m058")], ["timestamps", t("m059")]] as const) {
       panel.append(this.checkbox(label, this.settings[key], value => {
         this.settings[key] = value; this.applySettings();
@@ -560,7 +622,6 @@ export class LiteApp {
       }));
     }
     panel.append(this.el("p", "muted", t("m061")));
-    section.append(this.buildPerformanceSettings());
     const privacy = this.el("div", "settings-card");
     privacy.append(this.el("h2", "", t("m062")), this.accountPrivacyNote());
     const forget = this.button(t("m063"), "ghost", "button");
@@ -571,8 +632,67 @@ export class LiteApp {
     compatibility.append(this.el("p", "muted", t("m069")));
     const disconnect = this.button(t("m070"), "ghost danger", "button");
     disconnect.addEventListener("click", () => { if (window.confirm(t("m071"))) this.client.disconnect(); });
-    section.append(panel, this.buildSummonSettings(), this.mediaConsent.buildSettings(), this.stability.build(() => this.client.connectionDiagnostics(), () => this.client.resumeConnection()), privacy, compatibility, disconnect);
+    const jumps = this.el("nav", "settings-jumps"); jumps.setAttribute("aria-label", t("settings.jump"));
+    const groups: Array<[string, string, HTMLElement[]]> = [
+      ["appearance", t("settings.appearance"), [panel]],
+      ["function", t("settings.function"), [this.buildSummonSettings(), compatibility]],
+      ["performance", t("settings.performance"), [this.buildPerformanceSettings(), this.stability.build(() => this.client.connectionDiagnostics(), () => this.client.resumeConnection())]],
+      ["storage", t("settings.storage"), [this.buildHistorySettings()]],
+      ["privacy", t("settings.privacy"), [privacy, this.mediaConsent.buildSettings()]],
+    ];
+    section.append(jumps);
+    for (const [id, label, panels] of groups) {
+      const anchor = this.el("a", "button ghost", label) as HTMLAnchorElement; anchor.href = `#settings-${id}`; jumps.append(anchor);
+      const group = this.el("section", "settings-group"); group.id = `settings-${id}`; group.append(this.el("h2", "", label), ...panels); section.append(group);
+    }
+    section.append(disconnect);
     return section;
+  }
+
+  private buildHistorySettings(): HTMLElement {
+    const panel = this.el("section", "settings-card history-settings");
+    panel.append(this.el("h2", "", t("history.title")), this.el("p", "", t("history.privacy")), this.el("p", "muted", t("history.cleanup")));
+    for (const [key, choices] of [["recentDays", [0,7,14,30]], ["roomDays", [0,1,3,7]], ["privateDays", [0,1,3,7]]] as const) {
+      const select = this.select(t(`history.${key}`), choices.map(days => [String(days), days ? t("history.days", [days]) : t("history.off")]), String(this.history.policy[key]));
+      select.id = `History-${key}`;
+      select.addEventListener("change", () => {
+        const value = Number(select.value), policy: HistoryPolicy = {...this.history.policy, [key]: value};
+        if (value < this.history.policy[key] && !window.confirm(t("history.shorten"))) { select.value = String(this.history.policy[key]); return; }
+        select.disabled = true;
+        void this.history.configure(policy).then(() => refresh()).catch(() => { this.localNotice(t("history.error")); }).finally(() => { select.disabled = false; });
+      }); panel.append(this.field(t(`history.${key}`), select));
+    }
+    const status = this.el("p", "muted", this.historyError ? t("history.error") : t("history.loading")); status.setAttribute("role", "status");
+    const dates = this.select(t("history.date"), [], ""); dates.id = "HistoryDate";
+    let records: HistoryMessage[] = [], includePrivate = false;
+    const download = this.button(t("history.export"), "secondary", "button"); download.disabled = true;
+    const updateDates = () => {
+      const selected = dates.value;
+      dates.replaceChildren();
+      for (const date of [...new Set(records.filter(row => includePrivate || row.kind === 'room').map(row => localDay(row.timestamp)))].sort().reverse()) {
+        const option = document.createElement("option"); option.value = date; option.textContent = date; dates.append(option);
+      }
+      if ([...dates.options].some(option => option.value === selected)) dates.value = selected;
+      download.disabled = !dates.options.length;
+      status.textContent = this.historyError ? t("history.error") : records.length ? t("history.count", [records.length]) : t("history.empty");
+    };
+    const refresh = async () => { try { const data = await this.history.read(); if (panel.isConnected) { records = data.messages; updateDates(); } } catch { status.textContent = t("history.error"); } };
+    download.addEventListener("click", () => {
+      // Re-read on click so expired records or a changed retention policy cannot leak into export.
+      const day = dates.value, owner = this.snapshot?.player?.MemberNumber;
+      void this.history.read().then(data => {
+        if (!panel.isConnected || this.snapshot?.player?.MemberNumber !== owner) return;
+        const labels: Record<string,string> = {Chat:t("history.chat"),Emote:t("history.emote"),Action:t("history.action"),Activity:t("history.action"),Whisper:t("m029"),Beep:t("m028"),Local:t("history.system"),ServerMessage:t("history.system")};
+        const content = exportHistory(data.messages, day, includePrivate, type => labels[type] || type);
+        const url = URL.createObjectURL(new Blob(["\uFEFF", content], {type:"text/plain;charset=utf-8"}));
+        const a = document.createElement("a"); a.href = url; a.download = `BC-Lite-${owner}-${day}.txt`; document.body.append(a); a.click(); a.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }).catch(() => { status.textContent = t("history.error"); });
+    });
+    const clear = this.button(t("history.clear"), "ghost danger", "button");
+    clear.addEventListener("click", () => { if (window.confirm(t("history.clearConfirm"))) { clear.disabled = true; void this.history.clear().then(refresh).catch(() => { status.textContent = t("history.error"); }).finally(() => { clear.disabled = false; }); } });
+    panel.append(status, this.field(t("history.date"), dates), this.checkbox(t("history.includePrivate"), false, value => { includePrivate = value; updateDates(); }), download, clear);
+    void refresh(); return panel;
   }
 
   private run(action: () => void): void { try { action(); } catch (error) { this.localNotice(error instanceof Error ? error.message : t("m072")); } }
@@ -705,12 +825,17 @@ export class LiteApp {
 
     const form = this.el("form", "room-controls") as HTMLFormElement;
     const query = this.input("RoomQuery", t("m088"), "search", this.query);
+    query.setAttribute("aria-label", t("m094"));
+    query.addEventListener("focus", () => { form.classList.add("search-expanded"); if (isMobileLayout()) { filters.open = false; for (const picker of form.querySelectorAll<HTMLDetailsElement>(".mobile-picker")) picker.open = false; } });
+    form.addEventListener("focusout", event => { const next = event.relatedTarget as HTMLElement | null; if (!next?.closest?.(".room-query, .room-search")) form.classList.remove("search-expanded"); });
     query.addEventListener("input", () => { this.query = query.value; });
     const language = this.select(t("m089"), [["", t("m020")], ["EN", "EN"], ["CN", "CN"], ["DE", "DE"], ["FR", "FR"], ["ES", "ES"], ["RU", "RU"], ["UA", "UA"]], this.language);
     language.addEventListener("change", () => { this.language = language.value as RoomSearchRequest["Language"]; this.searchRooms(); });
     const space = this.select(t("m090"), [["X", t("m091")], ["", t("m092")], ["M", t("m093")]], this.space);
     space.addEventListener("change", () => { this.space = space.value as RoomSearchRequest["Space"]; this.searchRooms(true); });
-    form.append(this.field(t("m094"), query), this.field(t("m089"), language), this.field(t("m090"), space));
+    const queryField = this.field(t("m094"), query); queryField.classList.add("room-query");
+    const languageField = this.el("div", "field room-language"); languageField.append(this.el("span", "field-label", t("m089")), iconSelect(language, {}, "translate", true));
+    const spaceField = this.el("div", "field room-space"); spaceField.append(this.el("span", "field-label", t("m090")), iconSelect(space, {X:"mixed", M:"male", "":"female"}, "mixed"));
     const options = this.el("div", "search-options");
     options.append(
       this.checkbox(t("m095"), this.showFull, (value) => { this.showFull = value; }),
@@ -718,20 +843,23 @@ export class LiteApp {
       this.checkbox(t("m097"), this.searchDescriptions, (value) => { this.searchDescriptions = value; }),
     );
     const search = this.button(t("m098"), "primary", "submit");
+    search.classList.add("room-search"); search.setAttribute("aria-label", t("m098"));
+    search.replaceChildren(icon("search"), this.el("span", "control-text", t("m098")));
     const filters = this.el("details", "room-filters") as HTMLDetailsElement;
     filters.open = !isMobileLayout();
-    filters.append(this.el("summary", "", t("rooms.filters")), options);
-    form.append(filters, search);
+    const filterToggle = this.el("summary"); filterToggle.setAttribute("aria-label", t("rooms.filters"));
+    filterToggle.append(icon("faders"), this.el("span", "control-text", t("rooms.filters")));
+    filters.append(filterToggle, options);
+    form.append(queryField, search, spaceField, languageField, filters);
     form.addEventListener("submit", (event) => {
       event.preventDefault();
       this.searchRooms();
     });
 
     const resultHeader = this.el("div", "result-header");
-    resultHeader.append(this.el("h2", "", t("m100")), this.el("span", "result-count", t("m101", [state.rooms.length])));
+    resultHeader.append(this.el("span", "result-count", t("m101", [state.rooms.length])));
     const sort = this.select(t("rooms.sort"), [["friends", t("rooms.sortFriends")], ["name", t("rooms.sortName")], ["count", t("rooms.sortCount")]], this.roomSort);
     sort.addEventListener("change", () => { this.roomSort = sort.value as RoomSort; this.roomPage = 0; this.render(); });
-    resultHeader.append(sort);
     const rooms = this.el("div", "room-list");
     const pageSize = isMobileLayout() ? 8 : 24;
     const ordered = sortRooms(state.rooms, this.roomSort, getLocale());
@@ -752,7 +880,7 @@ export class LiteApp {
       const status = this.el("span", "", `${this.roomPage + 1} / ${pages}`); status.setAttribute("aria-live", "polite");
       pager.append(previous, status, next);
     };
-    drawPage(); bindPageSwipe(rooms, turn); resultHeader.append(pager);
+    drawPage(); bindPageSwipe(rooms, turn); resultHeader.append(pager, sort);
     const create = this.el("form", "room-controls create-controls") as HTMLFormElement;
     const roomName = this.input("NewRoomName", t("m104"), "text", this.newRoomName);
     roomName.maxLength = 20;
@@ -906,7 +1034,7 @@ export class LiteApp {
     jump.addEventListener("click", () => { this.historyEndId = null; this.updateChatLog(true); });
     topMenu.append(toggle, history, jump);
     const clear = this.button(t("chat.clear"), "ghost clear-messages", "button");
-    clear.addEventListener("click", () => { if (window.confirm(t("chat.clearConfirm"))) { this.replyTarget = null; this.historyEndId = null; this.client.clearMessages(); document.getElementById("chat-room-reply-indicator")?.replaceChildren(); this.updateChatLog(true); } });
+    clear.addEventListener("click", () => { if (window.confirm(t("chat.clearConfirm"))) { this.replyTarget = null; this.historyEndId = null; void this.history.clearRoom().catch(() => this.localNotice(t("history.error"))); this.client.clearMessages(); document.getElementById("chat-room-reply-indicator")?.replaceChildren(); this.updateChatLog(true); } });
     topMenu.append(clear);
     const mobileLeave = this.button(t("m164"), "ghost", "button");
     mobileLeave.addEventListener("click", () => this.client.leave());
@@ -951,7 +1079,7 @@ export class LiteApp {
     row.tabIndex = 0;
     if (message.presence) row.classList.add("message-presence");
     if (message.replyId) {
-      const original = [...this.snapshot!.messages, ...(this.snapshot!.whispers || [])].find(item => item.nativeId === message.replyId && (item.type !== "Whisper" || (message.type === "Whisper" && new Set([item.sender, item.target]).size === 2 && [message.sender, message.target].every(id => id === item.sender || id === item.target))));
+      const original = [...this.snapshot!.messages, ...(this.snapshot!.whispers || []), ...(message.type === "Whisper" ? this.history.messages.map(row => row.message) : [])].find(item => item.nativeId === message.replyId && (item.type !== "Whisper" || (message.type === "Whisper" && new Set([item.sender, item.target]).size === 2 && [message.sender, message.target].every(id => id === item.sender || id === item.target))));
       const preview = this.button(original ? t("reply.preview", [original.senderName, original.text.slice(0, 160)]) : t("reply.unavailable"), "ghost reply-preview reply-jump", "button");
       preview.disabled = !original;
       if (original) preview.addEventListener("click", () => this.jumpToMessage(original));
@@ -959,7 +1087,7 @@ export class LiteApp {
     }
     const content = this.el("span", "message-content");
     const meta = this.el("span", "message-meta");
-    const name = message.senderName.replace(/\s+#\d+$/, "");
+    const name = ((message.type === "Beep" || message.type === "Whisper") && message.sender && message.sender !== this.snapshot!.player?.MemberNumber ? contactName(this.snapshot!, message.sender, message.senderName) : message.senderName).replace(/\s+#\d+$/, "");
     if (message.sender && !message.presence) {
       const author = this.button(name, "message-author", "button");
       const character = this.snapshot!.characters.find(c => c.MemberNumber === message.sender) || (this.snapshot!.player?.MemberNumber === message.sender ? this.snapshot!.player : undefined);
@@ -1011,7 +1139,7 @@ export class LiteApp {
   }
 
   private replyContent(text: string): string {
-    if (!this.replyTarget || (this.replyTarget.nativeId && this.replyTarget.type !== "Beep")) return text;
+    if (!this.replyTarget || (this.replyTarget.nativeId && this.replyTarget.type !== "Beep" && !(this.tab === "private" && this.privateMode === "beep"))) return text;
     const quote = `> ${this.replyTarget.senderName}: ${this.replyTarget.text.slice(0, 160)}\n`;
     // Keep explicitly selected channels outside the quote, especially /W.
     const prefix = this.tab === "chat" ? text.match(/^(\/w(?:hisper)?\s+\d+\s+|\/me\s+|\.a\s+|\*)/i)?.[0] || "" : "";
@@ -1022,7 +1150,10 @@ export class LiteApp {
     if (message.type === "Whisper") {
       const peer = message.sender === this.snapshot!.player?.MemberNumber ? message.target! : message.sender!;
       if (this.tab !== "private" || this.contact !== peer || this.privateMode !== "whisper") this.openConversation(peer, "whisper");
-      this.privateVisible = 300; this.updateBeepLog();
+      const rows = this.allPrivateMessages(), index = rows.findIndex(row => row.id === message.id);
+      if (index < 0) { this.localNotice(t("reply.unavailable")); return; }
+      const end = Math.min(rows.length, index + this.privateVisible);
+      this.privateEndId = end === rows.length ? null : rows[end - 1].id; this.updateBeepLog();
     } else {
       const index = this.snapshot!.messages.findIndex(value => value.id === message.id);
       if (index < 0) { this.localNotice(t("reply.unavailable")); return; }
@@ -1167,7 +1298,7 @@ export class LiteApp {
 
   private field(label: string, control: HTMLElement): HTMLElement { const field = this.el("label", "field"); field.append(this.el("span", "field-label", label), control); return field; }
   private input(id: string, placeholder: string, type: string, value: string): HTMLInputElement { const input = document.createElement("input"); input.id = id; input.name = id; input.type = type; input.placeholder = placeholder; input.value = value; input.required = type !== "search"; return input; }
-  private select(label: string, options: string[][], value: string): HTMLSelectElement { const select = document.createElement("select"); select.setAttribute("aria-label", label); for (const [key, text] of options) { const option = document.createElement("option"); option.value = key; option.textContent = text; option.selected = key === value; select.append(option); } return select; }
+  private select(label: string, options: string[][], value: string): HTMLSelectElement { const select = document.createElement("select"); select.setAttribute("aria-label", label); for (const [key, text] of options) { const option = document.createElement("option"); option.value = key; option.textContent = text; select.append(option); } if (options.some(([key]) => key === value)) select.value = value; return select; }
   private checkbox(label: string, checked: boolean, change: (value: boolean) => void): HTMLElement { const wrap = this.el("label", "checkbox"); const input = document.createElement("input"); input.type = "checkbox"; input.checked = checked; input.addEventListener("change", () => change(input.checked)); wrap.append(input, this.el("span", "", label)); return wrap; }
   private button(text: string, className: string, type: "button" | "submit"): HTMLButtonElement { const button = this.el("button", `button ${className}`, text) as HTMLButtonElement; button.type = type; return button; }
   private localNotice(message: string): void { this.notice = message; window.alert(message); }

@@ -1,7 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { activityReason, activityAvailability, activityInventoryReason, definitions } from './native-helper.mjs';
+import { activityReason, activityAvailability, activityInventoryReason, createActivityInventoryCheck, definitions } from './native-helper.mjs';
 const character = id => ({ MemberNumber: id, Name: 'Test', AssetFamily: 'Female3DCG', Appearance: [{ Group: 'BodyUpper', Name: definitions.bodies.BodyUpper[0] }], ArousalSettings: { Active: 'Manual', Activity: 'z'.repeat(100), Zone: 'f'.repeat(30) } });
+
+test('Lite actor restraint policy retains actual tool, target and refusal checks', () => {
+  const a=character(1),b=character(2);
+  a.Appearance.push({Group:'ItemArms',Name:'Custom',Property:{Effect:['Block','MergedFingers','Freeze','BlockMouth','Enclose']}});
+  const check=createActivityInventoryCheck(a,b,true);
+  assert.equal(check('ItemHead',['UseHands','UseArms','UseFeet','UseMouth','UseTongue']),null);
+  assert.equal(check('ItemHead',['CantUseArms']),null);
+  assert.equal(check('ItemHead',['Needs-BrushItem']),'native.blocked');
+  assert.equal(check('ItemHead',['Luzi_HasWings']),'native.blocked');
+  b.Appearance.push({Group:'ItemHood',Name:'Custom',Property:{Block:['ItemHead']}});
+  assert.equal(createActivityInventoryCheck(a,b,true)('ItemHead',['ZoneAccessible']),'native.blocked');
+});
 
 test('barehand scratch and care differ from comb use; wings require the correct wearer', () => {
   const a=character(1), b=character(2);

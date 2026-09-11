@@ -36,6 +36,7 @@ export function createPreviewClient() {
     },
     sendBeep(memberNumber, text) { patch({ beeps:[...state.beeps, { id:`preview-beep-${++sequence}`, memberNumber, name:people.find(p => p.MemberNumber === memberNumber)?.Name || "Preview", text, incoming:false, time:new Date() }] }); },
     clearMessages() { patch({ messages:[] }); },
+    restoreMessages() {},
     refreshFriends() { patch({ friendsStatus:"離線好友資料已更新" }); },
     setFriend(member, add) { if (state.player) patch({ player:{ ...state.player, FriendList:add ? [...new Set([...(state.player.FriendList || []),member])] : state.player.FriendList?.filter(id => id !== member) } }); },
     requestLoverRoom() {}, setMessageLimit(limit) { patch({ messages:state.messages.slice(-limit) }); }, setTextCatalog() {}, relocalize() {},

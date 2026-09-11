@@ -10,6 +10,8 @@ import { appendChatLinks, MediaConsent } from './links-helper.mjs';
 import { afcLovers } from './community-helper.mjs';
 import { definitions } from './native-helper.mjs';
 import { canonicalPartGroup } from './activity-helper.mjs';
+import { uiIcons } from './icons-helper.mjs';
+import { history, sessionClass, contactName } from './history-helper.mjs';
 const activitySource = stripTypeScriptTypes(readFileSync('src/ui/activity-dialog.ts', 'utf8')).replace(/^import .*;\r?\n/gm, '').replaceAll('export ', '');
 const nameColor = new Function(stripTypeScriptTypes(readFileSync('src/ui/name-color.ts', 'utf8')).replaceAll('export ', '') + ';return nameColor;')();
 const stabilitySource = stripTypeScriptTypes(readFileSync(new URL('../src/platform/stability.ts', import.meta.url), 'utf8')).replace('import { t } from "../i18n";', '').replace('export ', '');
@@ -25,6 +27,7 @@ const mobileSource = stripTypeScriptTypes(readFileSync('src/platform/mobile.ts',
 function setup(savedAccount, savedPerformance) {
   setLocale('zh');
   const window = new Window({ url: 'https://lite.example', settings: { disableCSSFileLoading: true, disableJavaScriptFileLoading: true } });
+  const { icon, iconSelect } = uiIcons(window);
   const openActivityDialog = new Function('document', 'window', 't', 'definitions', 'canonicalPartGroup', activitySource + ';return openActivityDialog;')(window.document, window, t, definitions, canonicalPartGroup);
   const StabilityControls = new Function('document', 'window', 't', 'URL', stabilitySource + ';return StabilityControls;')(window.document, window, t, window.URL);
   window.document.body.innerHTML = '<div id="app"></div>';
@@ -55,9 +58,86 @@ function setup(savedAccount, savedPerformance) {
     setFriend() {}, clearBeeps() {}, leave() {}, disconnect() {}, search(request) { calls.push({ search:request }); }, join() {}, createRoom() {},
   };
   const {isMobileLayout, bindPageSwipe} = new Function('window', mobileSource + ';return {isMobileLayout,bindPageSwipe};')(window);
-  vm.runInNewContext(source, { window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, openActivityDialog, nameColor, sortRooms, canJoinRoom, isMobileLayout, bindPageSwipe, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
+  vm.runInNewContext(source, { ...history, HistorySession:sessionClass(window), contactName, window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, openActivityDialog, icon, iconSelect, nameColor, sortRooms, canJoinRoom, isMobileLayout, bindPageSwipe, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
   return { window, document: window.document, calls, client:bcClient, state: () => current, emit(change) { if (change.friendsStatus === '查詢完成') change.friendsQueryState = 'ready'; current = { ...current, ...change }; listener(current); } };
 }
+
+test('contact cards use cached names with live-room priority, room-only subtitle and message-by-default selection', async () => {
+  const f=setup();
+  f.emit({player:{...f.state().player,FriendList:[55,66,77],FriendNames:{55:'Cached name',66:'Old name',77:'Offline name'}},
+    room:{Name:'Here'},characters:[{MemberNumber:66,Name:'Room name',Nickname:'Live nickname'}],friendsStatus:'查詢完成',
+    friends:[{MemberNumber:55,MemberName:'Server name',Type:'Lover',Private:true}],
+    beeps:[{id:'offline',memberNumber:77,name:'Old offline name',text:'Saved conversation',incoming:true,time:new Date()}]});
+  f.document.getElementById('nav-friends').click();
+  assert.match(f.document.querySelector('.eyebrow').textContent,/好友清單/);
+  assert.equal(f.document.querySelectorAll('.contact-card').length,2);
+  assert.equal(f.document.querySelector('.contact-toolbar input').type,'search');
+  assert.equal(f.document.querySelectorAll('.contact-toolbar button svg').length,2);
+  const card=f.document.querySelector('[data-member="55"]');
+  assert.match(card.textContent,/Cached name/); assert.equal(card.querySelector('.contact-room').textContent,'私人');
+  assert.equal(card.querySelector('.contact-id').nextElementSibling.className,'contact-relation');
+  assert.equal(f.document.querySelector('[data-member="66"] .contact-room').textContent,'同一房間');
+  assert.match(f.document.querySelector('[data-member="66"]').textContent,/Live nickname/);
+  card.click();
+  assert.equal(f.document.querySelector('[data-channel="beep"]').getAttribute('aria-pressed'),'true');
+  assert.equal(f.document.querySelector('[data-channel="whisper"]').disabled,true);
+  assert.equal(f.document.querySelector('.private-status'),null);
+  const filter=label=>[...f.document.querySelectorAll('.friend-filters button')].find(b=>b.textContent===label).click();
+  filter(t('m012')); assert.equal(f.document.querySelector('[data-member="77"]'),null);
+  filter(t('private.recent')); const offline=f.document.querySelector('[data-member="77"]');
+  assert.ok(offline.classList.contains('contact-offline')); assert.equal(offline.querySelector('button'),null);
+  offline.click(); assert.ok(f.document.querySelector('[data-member="77"]').classList.contains('selected-contact'));
+  f.document.querySelector('.friend-refresh').click(); assert.equal(f.calls.at(-1),'friends');
+  await f.window.happyDOM.close();
+});
+
+test('settings have working category anchors, independent retention choices and theme/flag controls', async () => {
+  const f=setup(); f.document.getElementById('nav-settings').click();
+  for (const a of f.document.querySelectorAll('.settings-jumps a')) assert.ok(f.document.querySelector(a.hash));
+  assert.equal(f.document.getElementById('History-recentDays').value,'30');
+  assert.equal(f.document.getElementById('History-roomDays').value,'7');
+  assert.equal(f.document.getElementById('History-privateDays').value,'7');
+  assert.equal(f.document.querySelector('.history-settings input[type=checkbox]').checked,false);
+  const theme=f.document.getElementById('ThemeSelect'); theme.value='midnight'; theme.dispatchEvent(new f.window.Event('change'));
+  assert.equal(f.document.documentElement.dataset.theme,'midnight');
+  assert.equal(JSON.parse(f.window.localStorage.getItem('bc-lite-display-v1')).theme,'midnight');
+  const locale=f.document.querySelector('.locale-picker'); assert.ok(locale.querySelector('summary svg'));
+  locale.querySelector('[data-value="en"]').click(); assert.equal(f.document.documentElement.lang,'en');
+  await f.window.happyDOM.close();
+});
+
+test('private history pages stay bounded and freeze while reading older messages', async () => {
+  const f=setup(), now=Date.now();
+  const beeps=Array.from({length:155},(_,i)=>({id:`history-${i}`,memberNumber:55,name:'Friend',text:`Line ${i}`,incoming:true,time:new Date(now-100000+i)}));
+  f.emit({beeps}); f.document.getElementById('nav-private').click();
+  assert.equal(f.document.querySelectorAll('#beep-log .chat-message').length,60);
+  assert.ok(f.document.querySelector('[data-message-id="history-154"]'));
+  f.document.querySelector('[data-history="older"]').click();
+  const first=f.document.querySelector('#beep-log .chat-message').dataset.messageId;
+  f.emit({beeps:[...beeps,{...beeps[0],id:'newest',text:'newest',time:new Date()}]});
+  assert.equal(f.document.querySelector('#beep-log .chat-message').dataset.messageId,first);
+  assert.equal(f.document.querySelectorAll('#beep-log .chat-message').length,60);
+  f.document.querySelector('[data-history="newer"]').click(); f.document.querySelector('[data-history="newer"]').click();
+  assert.ok(f.document.querySelector('[data-message-id="newest"]'));
+  await f.window.happyDOM.close();
+});
+
+test('mobile search controls use labelled SVG choices, expand query and retain navigation/result order', async () => {
+  const f=setup();
+  const form=f.document.querySelector('.room-controls:not(.create-controls)');
+  assert.deepEqual([...form.children].map(node=>node.classList[1] || node.classList[0]),['room-query','primary','room-space','room-language','room-filters']);
+  assert.equal(f.document.querySelectorAll('.app-nav button > svg').length,5);
+  assert.deepEqual([...f.document.querySelector('.result-header').children].map(node=>node.tagName),['SPAN','NAV','SELECT']);
+  const query=f.document.getElementById('RoomQuery'); query.focus();
+  assert.equal(form.classList.contains('search-expanded'),true);
+  f.document.querySelector('.view-heading h1').click(); assert.equal(form.classList.contains('search-expanded'),false);
+  const picker=form.querySelector('.room-space .mobile-picker'); picker.open=true;
+  const male=picker.querySelector('button[data-value="M"]'); assert.ok(male.querySelector('svg')); assert.match(male.textContent,/男性/);
+  male.click(); assert.equal(picker.open,false); assert.equal(f.calls.at(-1).search.Space,'M');
+  assert.match(picker.querySelector('summary').getAttribute('aria-label'),/男性/);
+  picker.open=true; f.document.querySelector('.view-heading').click(); assert.equal(picker.open,false);
+  await f.window.happyDOM.close();
+});
 
 test('body families light together, merge actions and show warnings only in tooltips', async () => {
   const f=setup();
@@ -193,7 +273,7 @@ test('private composer and navigation follow the compact layout, mixed channels 
   assert.deepEqual([...f.document.querySelectorAll('.app-nav button')].map(b => b.id), ['nav-rooms','nav-chat','nav-private','nav-friends','nav-settings']);
   assert.equal(f.document.getElementById('nav-rooms').textContent, '搜尋');
   f.document.getElementById('nav-private').click();
-  [...f.document.querySelectorAll('#contact-list button')].find(b => b.textContent === t('m177')).click();
+  f.document.querySelector('#contact-list .contact-card').click();
   const input = f.document.getElementById('BeepText');
   assert.equal(input.previousElementSibling.className, 'private-channel');
   const channels = [...input.previousElementSibling.querySelectorAll('button')];
@@ -371,6 +451,7 @@ test('AFC room queries live in friends and matching room badges update without r
   const f = setup();
   f.emit({ player: { ...f.state().player, OnlineSharedSettings: { AFC: { lovers: [{ memberNumber: 55, name: 'Lover' }] } } } });
   f.document.getElementById('nav-friends').click();
+  [...f.document.querySelectorAll('.friend-filters button')].find(button => button.textContent === t('m020')).click();
   f.document.querySelector('.afc-query').click(); assert.deepEqual(f.calls.at(-1), { lover: 55 });
   f.document.getElementById('nav-rooms').click();
   f.emit({ rooms: [{ Name: 'Shared', Space: 'X', MemberCount: 1, MemberLimit: 10, CanJoin: true, Friends: [] }] });
@@ -635,7 +716,7 @@ test('display preferences persist alone and background starts disabled', async (
   const checkbox = f.document.querySelector('.settings-card input[type=checkbox]');
   checkbox.click();
   assert.equal(f.document.body.classList.contains('scenic'), true);
-  assert.deepEqual(JSON.parse(f.window.localStorage.getItem('bc-lite-display-v1')), { background: true, largeText: false, timestamps: true, locale: 'zh' });
+  assert.deepEqual(JSON.parse(f.window.localStorage.getItem('bc-lite-display-v1')), { background: true, largeText: false, timestamps: true, locale: 'zh', theme: 'default' });
   assert.equal(f.window.localStorage.length, 1);
   await f.window.happyDOM.close();
 });
@@ -676,7 +757,7 @@ test('a remembered name prefills login without password and can be erased in set
 
 test('room heading switches a single form, header owns identity and logout', async () => {
   const f = setup();
-  assert.match(f.document.querySelector('.app-header').textContent, /Tester.*123.*安全詞.*登出/);
+  assert.match(f.document.querySelector('.app-header').textContent, /Tester.*123.*安全詞.*登出/s);
   assert.equal(f.document.querySelectorAll('.form-notice, .search-form').length, 0);
   assert.ok(f.document.getElementById('RoomQuery'));
   assert.equal(f.document.getElementById('NewRoomName'), null);
@@ -701,12 +782,13 @@ test('room search navigation remains usable in-room without consuming chat draft
   await f.window.happyDOM.close();
 });
 
-test('friend tabs use room presence and successful query, with join before BEEP', async () => {
+test('friend tabs default online, use room presence and successful query, with clickable cards', async () => {
   const f = setup();
   f.emit({ player: { ...f.state().player, FriendList: [55, 66, 77] }, characters: [{ MemberNumber: 66, Name: 'Same room' }], friendsStatus: '查詢完成', friends: [{ MemberNumber: 55, MemberName: 'Remote', Type: 'Friend', ChatRoomName: 'Elsewhere' }] });
   f.document.getElementById('nav-friends').click();
   const card = f.document.querySelector('.contact-card');
-  assert.deepEqual([...card.querySelectorAll('button')].slice(0, 2).map(button => button.textContent), ['前往房間', '私訊']);
+  assert.equal(card.getAttribute('role'), 'button');
+  assert.deepEqual([...card.querySelectorAll('button')].map(button => button.textContent), ['前往房間', '移除']);
   const clickFilter = name => [...f.document.querySelectorAll('.friend-filters button')].find(button => button.textContent === name).click();
   clickFilter('在線'); assert.equal(f.document.querySelectorAll('.contact-card').length, 2);
   clickFilter('不在線'); assert.equal(f.document.querySelectorAll('.contact-card').length, 1);
@@ -738,7 +820,7 @@ test('friend whisper opens private conversation and preserves drafts per recipie
   const f = setup();
   f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, player: { ...f.state().player, FriendList: [55,66] }, characters: [{ Name: 'First', MemberNumber: 55 }, { Name: 'Second', MemberNumber: 66 }] });
   f.document.getElementById('nav-friends').click();
-  const selectWhisper = index => f.document.querySelectorAll('.contact-card')[index].querySelectorAll('button')[1].click();
+  const selectWhisper = index => { f.document.querySelectorAll('.contact-card')[index].click(); f.document.querySelector('[data-channel="whisper"]').click(); };
   selectWhisper(0);
   let input = f.document.getElementById('BeepText'); input.value = 'First draft'; input.dispatchEvent(new f.window.Event('input'));
   selectWhisper(1);

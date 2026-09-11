@@ -1,5 +1,6 @@
 import { t, localizeStatus } from "../i18n";
 import { afcLovers } from "../profile/afc";
+import { decodeFriendNames, contactName } from "../profile/friend-names";
 import { renderAction, dictionaryText } from "../action/render";
 import { nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, activityAsset } from "../action/native";
 import { receivedSpeech } from "./speech";
@@ -112,6 +113,14 @@ export class BcLiteClient {
     this.patch({ cuddleRequest: null });
   }
   clearMessages(): void { this.patch({ messages: [] }); }
+
+  restoreMessages(owner: string, messages: DisplayMessage[]): void {
+    const player = this.state.player;
+    if (!player || owner !== `${player.Environment || 'unknown'}:${player.MemberNumber}`) return;
+    const merged = new Map([...messages, ...this.state.messages].map(message => [message.id, message]));
+    const next = [...merged.values()].sort((a,b) => +a.time - +b.time).slice(-this.messageLimit);
+    if (next.length !== this.state.messages.length || next.some((row,i) => row.id !== this.state.messages[i]?.id)) this.patch({messages: next});
+  }
   private textCatalog: Record<string, string> = {};
   private safetyBaseline: { appearance: BundledItem[]; pose: string[] | null } | null = null;
   private safetyCurrent: BundledItem[] | null = null;
@@ -317,7 +326,7 @@ export class BcLiteClient {
     if (Date.now() - this.lastBeepAt < 1500) throw new Error(t("m197"));
     this.lastBeepAt = Date.now();
     this.socket!.emit("AccountBeep", { MemberNumber: memberNumber, BeepType: "", Message: message, IsSecret: true });
-    this.addBeep(memberNumber, this.state.friends.find(friend => friend.MemberNumber === memberNumber)?.MemberName || `#${memberNumber}`, message, false);
+    this.addBeep(memberNumber, contactName(this.state, memberNumber), message, false);
   }
 
   clearBeeps(): void { this.patch({ beeps: [] }); }
@@ -334,7 +343,7 @@ export class BcLiteClient {
   join(roomName: string): void {
     if (!this.canSend() || !roomName.trim() || this.state.phase !== "ready") return;
     this.startRoomTimer();
-    this.patch({ phase: "joining", status: t("m198", [roomName]), messages: [] });
+    this.patch({ phase: "joining", status: t("m198", [roomName]) });
     this.socket!.emit("ChatRoomJoin", { Name: roomName });
   }
 
@@ -364,7 +373,7 @@ export class BcLiteClient {
     this.returnRoom = null;
     this.rememberLastRoom(null);
     if (this.socket?.connected && this.state.room) this.socket.emit("ChatRoomLeave", "");
-    this.patch({ phase: "ready", room: null, characters: [], messages: [], status: t("m207") });
+    this.patch({ phase: "ready", room: null, characters: [], status: t("m207") });
   }
 
   /** Explicit UI-confirmed exception to the normal no-appearance-write policy. */
@@ -410,7 +419,7 @@ export class BcLiteClient {
     const actor = { ...this.state.player!, ...this.state.characters.find(c => c.MemberNumber === this.state.player?.MemberNumber) };
     const target = this.state.characters.find(c => c.MemberNumber === memberNumber);
     if (!target || !actor.MemberNumber || !this.state.room) return [];
-    const checkInventory = createActivityInventoryCheck(actor, target);
+    const checkInventory = createActivityInventoryCheck(actor, target, true);
     const native = nativeActivities.flatMap(activity => {
       // A tool belongs to an activity, not to each of its target zones.
       const item = activityAsset(actor, target, activity.name);
@@ -539,8 +548,11 @@ export class BcLiteClient {
       this.clearFriendsTimer();
       if (!Array.isArray(data.Result)) { this.patch({ friendsQueryState: "error", friendsStatus: t("m214") }); return; }
       const friends = data.Result.filter(friend => friend && Number.isSafeInteger(friend.MemberNumber) && typeof friend.MemberName === "string");
+      const player = this.state.player;
+      const missingNames = friends.filter(friend => !player?.FriendNames?.[friend.MemberNumber]);
+      const namedPlayer = player && missingNames.length ? {...player, FriendNames: {...player.FriendNames, ...Object.fromEntries(missingNames.map(friend => [friend.MemberNumber, friend.MemberName.slice(0,100)]))}} : player;
       const loverRooms = Object.fromEntries(Object.entries(this.state.loverRooms || {}).filter(([id]) => friends.some(friend => friend.MemberNumber === Number(id))));
-      this.patch({ friends, loverRooms, friendsQueryState: "ready", friendsStatus: t("m215", [friends.length, new Date().toLocaleTimeString()]) });
+      this.patch({ player: namedPlayer, friends, loverRooms, friendsQueryState: "ready", friendsStatus: t("m215", [friends.length, new Date().toLocaleTimeString()]) });
     });
     this.socket.on("AccountBeep", (data: { MemberNumber?: number; MemberName?: string; BeepType?: string; Message?: unknown; ChatRoomName?: string; ChatRoomSpace?: string }) => {
       if (data && !data.BeepType && this.summonRule.enabled && this.summonRule.members.includes(data.MemberNumber!) && typeof data.Message === "string" && (data.Message.trim().toLowerCase() === "summon" || data.Message.toLowerCase().startsWith(this.summonRule.text.toLowerCase())) && typeof data.ChatRoomName === "string" && data.ChatRoomName.trim() && data.ChatRoomName.length <= 100 && ["X", "M", ""].includes(data.ChatRoomSpace ?? "invalid")) {
@@ -596,7 +608,7 @@ export class BcLiteClient {
       const self = characters.find(character => character.MemberNumber === this.state.player?.MemberNumber);
       if (this.cuddlePair && (this.cuddlePair.room !== room.Name || !characters.some(c => c.MemberNumber === this.cuddlePair?.peer) || !validAppearance(self?.Appearance) || !self.Appearance.some(i => i.Group === "ItemMisc" && i.Name === "贴贴"))) this.cuddlePair = null;
       this.safetyCurrent = validAppearance(self?.Appearance) ? copyAppearance(self.Appearance) : null;
-      this.patch({ phase: "in-room", room, characters, cuddlePartner: this.cuddlePair?.peer ?? null, messages: sameRoom ? this.state.messages : [], status: t("m223", [room.Name]) });
+      this.patch({ phase: "in-room", room, characters, cuddlePartner: this.cuddlePair?.peer ?? null, status: t("m223", [room.Name]) });
       if (!sameRoom) this.localMessage(t("m223", [room.Name]));
       if (!sameRoom) this.announceLite();
       if (this.cuddlePair) this.syncCuddle();
@@ -707,11 +719,16 @@ export class BcLiteClient {
       ActivePose: Array.isArray(value.ActivePose) && value.ActivePose.every(pose => typeof pose === "string") ? [...value.ActivePose] : null,
       Environment: typeof value.Environment === "string" ? value.Environment : undefined,
       FriendList: Array.isArray(value.FriendList) && value.FriendList.every(Number.isSafeInteger) ? value.FriendList : undefined,
-      Appearance: Array.isArray(value.Appearance) ? value.Appearance : undefined,
+      FriendNames: decodeFriendNames(value.FriendNames),
+      // Preserve complete AEE/SCA/ECHO bundles, including unknown Property/Craft
+      // fields. Loading an asset registry here would silently strip plugin items.
+      Appearance: validAppearance(value.Appearance) ? copyAppearance(value.Appearance) : Array.isArray(value.Appearance) ? value.Appearance : undefined,
       OnlineSharedSettings: value.OnlineSharedSettings && typeof value.OnlineSharedSettings === "object" ? value.OnlineSharedSettings : undefined };
     this.safetyBaseline = validAppearance(player.Appearance) ? { appearance: copyAppearance(player.Appearance), pose: player.ActivePose ? [...player.ActivePose] : null } : null;
     this.safetyCurrent = null;
-    this.patch({ player, phase: "waiting-server", status: t("m236") });
+    const previous = this.state.player;
+    const changedAccount = previous && (previous.MemberNumber !== player.MemberNumber || previous.Environment !== player.Environment);
+    this.patch({ ...(changedAccount ? initialSnapshot() : {}), player, phase: "waiting-server", status: t("m236") });
     if (this.serverReady) this.finishLogin();
   }
 
@@ -782,6 +799,7 @@ export class BcLiteClient {
   }
 
   private appendMessage(message: DisplayMessage): void {
+    message = { ...message, roomName: this.state.room?.Name };
     this.patch({ messages: [...this.state.messages, message].slice(-this.messageLimit), ...(message.type === "Whisper" ? { whispers: [...(this.state.whispers || []), message].slice(-300) } : {}) });
   }
 

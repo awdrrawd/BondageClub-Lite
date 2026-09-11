@@ -1,3 +1,4 @@
+import { isDecorativePluginItem } from './plugin-appearance';
 /** Native Category=Item groups from BC Assets/Female3DCG/Female3DCG.js.
  * Never infer categories from prefixes: unknown plugin groups remain untouched.
  */
@@ -9,6 +10,9 @@ export function validAppearance(value: unknown): value is BundledItem[] {
 export function copyAppearance(items: BundledItem[]): BundledItem[] { return JSON.parse(JSON.stringify(items)); }
 export function releaseAppearance(items: BundledItem[], owned: boolean): BundledItem[] {
   return copyAppearance(items).filter(item => {
+    // SCA can occupy native Item* slots without being a restraint. AEE drawing
+    // payloads and companion layers also stay opaque, including compressed data.
+    if (isDecorativePluginItem(item)) return true;
     if (item.Group === "ItemNeck" && item.Name === "SlaveCollar" && owned) {
       // CharacterReleaseTotal keeps an owned collar, removing its gameplay variant.
       if (Array.isArray(item.Property?.Effect) && item.Property.Effect.length) item.Property = { TypeRecord: { noarch: 0 } };
