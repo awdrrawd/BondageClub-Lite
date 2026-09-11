@@ -1,5 +1,20 @@
 # Relay v1 部署與驗收
 
+## 本機開發
+
+使用 Node.js 22.13+；Cloudflare 建置設定 NODE_VERSION=22。
+
+```sh
+npm ci
+npm run build
+npm test
+npm run dev:ui
+```
+
+- `dev:ui` 使用虛構資料，不登入 BC、不開歷史 IndexedDB；可檢查版面、輸入與模擬斷線。外部媒體由預覽 CSP 阻擋，顯示偏好仍留在本機；預覽入口不納入正式建置。
+- `npm run dev` 只有 Vite 前端，沒有 Pages Worker。完整本機中繼測試需先建置，再執行 `npm run dev:relay`。
+- build／dev 前置步驟會編譯本庫翻譯來源；服務運行中修改翻譯後，另跑 `npm run catalog:compile`。擷取上游文字見[翻譯貢獻指南](../src/translations/README.md)。
+
 ## 部署結構
 
 沿用現有 Cloudflare Pages，使用進階模式的 `dist/_worker.js`。不必建立另一個 Worker 網址、修改 DNS 或提供 API token。`_routes.json` 只把 `/socket.io/*` 和 `/api/relay-status` 交給 Worker，其餘頁面和素材由 Pages 直接提供。
