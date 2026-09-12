@@ -567,3 +567,28 @@ html[data-ui-preview] .app-nav { bottom:var(--preview-height); }
 .delivery-pending { color: var(--accent); }
 .delivery-confirmed { color: var(--muted); }
 .delivery-unconfirmed { color: #ff8b8b; }
+
+/* Shared scrollbar colors for page, panels, dialogs and form controls. */
+* { scrollbar-color: #a78bda #211b2c; scrollbar-width: thin; }
+*::-webkit-scrollbar { width: 9px; height: 9px; }
+*::-webkit-scrollbar-track { background: #211b2c; }
+*::-webkit-scrollbar-thumb { background: #a78bda; border: 2px solid #211b2c; border-radius: 8px; }
+*::-webkit-scrollbar-thumb:hover { background: #c4a8f0; }
+*::-webkit-scrollbar-corner { background: #211b2c; }
+.history-search-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.history-search-heading h2 { margin: 0; }
+.history-search-heading > button { flex-shrink: 0; }
+
+/* The entry page shares available height instead of adding a viewport-sized form. */
+.login-shell { grid-template-rows: auto 1fr auto; }
+.login-shell .app-content { display: grid; align-items: center; padding: 1rem .75rem; }
+.login-shell .login-layout { min-height: 0; grid-template-columns: minmax(0, 440px); gap: .7rem; }
+.login-shell .login-card { padding: 1.25rem; }
+.login-shell .login-card h2 { margin-bottom: 1rem; }
+.login-shell .app-footer { display: flex; flex-wrap: wrap; padding-block: .65rem; gap: .4rem 1rem; }
+@media (max-height: 650px) {
+  .login-shell .intro-panel { display: none; }
+  .login-shell .app-header { height: 48px; }
+  .login-shell .app-content { padding-block: .5rem; }
+  .login-shell .login-card { padding: 1rem; }
+}

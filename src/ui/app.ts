@@ -390,6 +390,7 @@ export class LiteApp {
     document.body.classList.toggle("chat-active", this.tab === "chat" && state.phase === "in-room" && !!state.room);
     document.body.classList.toggle("private-active", this.tab === "private" && !!state.player);
     const shell = this.el("main", "app-shell");
+    shell.classList.toggle("login-shell", !state.player);
     const header = this.el("header", "app-header");
     const brand = this.el("div", "brand");
     brand.append(this.el("span", "brand-mark", "BC"), this.el("div", "", "Lite"));
@@ -433,7 +434,9 @@ export class LiteApp {
     header.append(summon);
     this.fillSummon(summon);
     const banner=this.el('p','notice');banner.id='connection-banner';banner.setAttribute('role','status');
-    shell.append(header, banner, content);
+    shell.append(header);
+    if (state.player) shell.append(banner);
+    shell.append(content);
     if (state.player) shell.append(this.buildNavigation());
     shell.append(this.buildFooter());
     return shell;
@@ -1114,11 +1117,7 @@ export class LiteApp {
     this.setText(layout.querySelector('.chat-room-top-menu .mobile-members'), this.membersOpen ? t('m160') : t('m161'));
     this.setText(layout.querySelector('.room-info h1'), room.Name);
     this.setText(layout.querySelector('.room-info p:not(.eyebrow)'), room.Description || t('m127'));
-    const language = layout.querySelector<HTMLElement>('.room-info .eyebrow');
-    if (language && language.dataset.language !== (room.Language || '')) {
-      language.dataset.language = room.Language || '';
-      language.replaceChildren(icon(roomLanguageIcons[room.Language?.toUpperCase()] || 'translate'), document.createTextNode(room.Language || t('m085')));
-    }
+
     this.setText(layout.querySelector('.room-population'), `${state.characters.length}/${room.Limit}`);
     this.setText(layout.querySelector('.member-title'), t('m158', [state.characters.length]));
     const list = layout.querySelector('.member-list')!;
@@ -1154,9 +1153,7 @@ export class LiteApp {
     const roomInfo = this.el("div", "room-info");
     const close = this.button(t("m160"), "ghost mobile-members", "button");
     close.addEventListener("click", () => { this.membersOpen = false; this.updateRoomInfo(); });
-    roomInfo.append(close, this.el("p", "eyebrow", state.room!.Language || t("m085")), this.el("h1", "", state.room!.Name), this.el("p", "", state.room!.Description || t("m127")));
-    roomInfo.querySelector('.eyebrow')?.prepend(icon(roomLanguageIcons[state.room!.Language?.toUpperCase()] || 'translate'));
-    (roomInfo.querySelector('.eyebrow') as HTMLElement).dataset.language = state.room!.Language || '';
+    roomInfo.append(close, this.el("h1", "", state.room!.Name), this.el("p", "", state.room!.Description || t("m127")));
     const leave = this.button(t("m157"), "ghost danger", "button");
     leave.classList.add('leave-room');
     leave.addEventListener("click", () => this.client.leave());

@@ -61,7 +61,8 @@ export function openHistorySearch(history: HistorySession, owner: ()=>string, in
   };
   form.addEventListener('submit',event=>{event.preventDefault();void search();});
   more.addEventListener('click',()=>{void search(true);});
-  dialog.append(close,el('h2','',t('searchHistory.title')),el('p','muted',t('searchHistory.help')),form,status,results,more,context);
+  const heading=el('div','history-search-heading'); heading.append(el('h2','',t('searchHistory.title')),close);
+  dialog.append(heading,el('p','muted',t('searchHistory.help')),form,status,results,more,context);
   document.body.append(dialog); dialog.showModal(); keyword.focus();
   if(initial?.hit)show(initial.hit);
 }

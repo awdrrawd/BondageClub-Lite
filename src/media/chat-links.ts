@@ -75,7 +75,7 @@ export class MediaConsent {
       if (media.tagName === "IFRAME") {
         const frame = media as HTMLIFrameElement;
         frame.title = target.label; frame.sandbox.add("allow-scripts", "allow-same-origin", "allow-presentation");
-        frame.allow = "fullscreen; encrypted-media"; frame.allowFullscreen = true;
+        frame.allow = "fullscreen; encrypted-media";
         frame.referrerPolicy = "strict-origin-when-cross-origin";
       } else {
         const player = media as HTMLMediaElement; player.controls = true; player.preload = "none";
