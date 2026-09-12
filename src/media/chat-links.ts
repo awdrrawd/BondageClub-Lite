@@ -149,7 +149,14 @@ export function appendChatLinks(node: HTMLElement, text: string, consent?: Media
     node.append(document.createTextNode(text.slice(cursor, match.index)));
     const anchor = document.createElement("a");
     anchor.href = url.href;
-    anchor.textContent = value;
+    let label = value;
+    if (['bilibili.com', 'www.bilibili.com', 'm.bilibili.com'].includes(url.hostname) && /^\/(video|bangumi\/play)\//.test(url.pathname)) {
+      const display = new URL(url.href);
+      // Keep episode/time selection visible; tracking parameters stay only in the href.
+      for (const key of [...display.searchParams.keys()]) if (!['p', 't', 'start_progress'].includes(key)) display.searchParams.delete(key);
+      label = explicit ? display.href : display.href.slice('https://'.length);
+    }
+    anchor.textContent = label.length > 90 ? `${label.slice(0, 70)}…${label.slice(-12)}` : label;
     anchor.title = url.href;
     anchor.target = "_blank";
     anchor.rel = "noopener noreferrer nofollow";

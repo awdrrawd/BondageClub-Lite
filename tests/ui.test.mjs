@@ -1193,3 +1193,22 @@ test('native reply sends only the draft and ID; missing IDs never add a text quo
  assert.deepEqual(f.replies.at(-1),{text:'https://www.bilibili.com/video/BV1xx411c7mD',replyId:'bc-native-id'});
  assert.equal(f.document.querySelector('#chat-room-reply-indicator .reply-preview'),null);
 });
+
+
+test('delivery notices show only pending or unconfirmed messages without rebuilding chat',async()=>{
+ const f=setup();
+ f.emit({phase:'in-room',room:{Name:'Room'},messages:[]});
+ const input=f.document.getElementById('InputChat'),log=f.document.getElementById('TextAreaChatLog');
+ const item={id:'outgoing',text:'https://www.bilibili.com/video/BV1Hy4k64Erk',status:'pending'};
+ f.emit({deliveries:[item]});
+ assert.equal(f.document.getElementById('delivery-status').hidden,false);
+ assert.ok(f.document.querySelector('.delivery-pending'));
+ f.emit({deliveries:[{...item,status:'unconfirmed'}]});
+ assert.ok(f.document.querySelector('.delivery-unconfirmed'));
+ f.emit({deliveries:[{...item,status:'confirmed'}]});
+ assert.equal(f.document.getElementById('delivery-status').hidden,true);
+ assert.equal(f.document.getElementById('delivery-status').textContent,'');
+ assert.equal(f.document.getElementById('InputChat'),input);
+ assert.equal(f.document.getElementById('TextAreaChatLog'),log);
+ await f.window.happyDOM.close();
+});

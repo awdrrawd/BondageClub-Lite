@@ -817,7 +817,10 @@ export class LiteApp {
   private updateDeliveryStatus(): void { const node = document.getElementById("delivery-status"); if (node) this.fillDeliveryStatus(node); }
   private fillDeliveryStatus(node: HTMLElement): void {
     node.replaceChildren();
-    for (const item of this.snapshot?.deliveries || []) node.append(this.el("div", `delivery-${item.status}`, `${t(`delivery.${item.status}`)} · ${item.text.slice(0, 80)}`));
+    for (const item of this.snapshot?.deliveries || []) {
+      if (item.status === "confirmed") continue;
+      node.append(this.el("div", `delivery-${item.status}`, `${t(`delivery.${item.status}`)} · ${item.text.slice(0, 80)}`));
+    }
     node.hidden = !node.childElementCount;
   }
 

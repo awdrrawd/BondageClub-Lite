@@ -10,7 +10,7 @@ test('ACV recognizes bare media URLs while preserving text and waiting for a cli
     const node = window.document.createElement('div'); window.document.body.append(node);
     const original = 'bilibili.com/video/BV149bG6dE5r/?spm_id_from=333.1007.tianma.3-2-6.click';
     appendChatLinks(node, original, new MediaConsent(window.document));
-    assert.equal(node.querySelector('a').textContent, original);
+    assert.equal(node.querySelector('a').textContent, 'bilibili.com/video/BV149bG6dE5r/');
     assert.equal(node.querySelector('a').href, `https://${original}`);
     assert.equal(node.querySelector('iframe'), null);
     assert.equal(node.querySelectorAll('button').length, 1);
@@ -180,5 +180,22 @@ test('ACV switch stops players, preserves normal links and persists without chan
   assert.equal(window.localStorage.getItem('bc-lite-acv-v1'),'false');
   const fresh=new MediaConsent(window.document);assert.equal(fresh.buildSettings().querySelector('#ACVEnabled').checked,false);
   toggle.click();assert.ok(node.querySelector('button'));assert.equal(node.querySelector('iframe'),null);
+ } finally {await window.happyDOM.close();}
+});
+
+
+test('long links use short labels without changing targets or meaningful Bilibili selection', async () => {
+ const window=new Window();
+ try {
+  const node=window.document.createElement('div');
+  const url='https://www.bilibili.com/video/BV149bG6dE5r/?spm_id_from=tracking&vd_source=tracking&p=2&t=30';
+  appendChatLinks(node,url);
+  const anchor=node.querySelector('a');
+  assert.equal(anchor.textContent,'https://www.bilibili.com/video/BV149bG6dE5r/?p=2&t=30');
+  assert.equal(anchor.href,url);assert.equal(anchor.title,url);
+  const long='https://example.org/path?value='+'a'.repeat(150);
+  const other=window.document.createElement('div');appendChatLinks(other,long);
+  assert.ok(other.querySelector('a').textContent.length<=90);
+  assert.equal(other.querySelector('a').href,long);
  } finally {await window.happyDOM.close();}
 });

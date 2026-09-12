@@ -566,7 +566,8 @@ export class BcLiteClient {
     this.lastChatAt = Date.now();
     const id = String(message.Dictionary.find(entry => entry.Tag === "MsgId")?.MsgId || crypto.randomUUID());
     if (!message.Dictionary.some(entry => entry.Tag === "MsgId")) message.Dictionary.push({ Tag: "MsgId", MsgId: id });
-    if (this.deliveryTimers.size >= 20) { const oldest = this.deliveryTimers.keys().next().value!; window.clearTimeout(this.deliveryTimers.get(oldest)); this.deliveryTimers.delete(oldest); }
+    const dropped = (this.state.deliveries || []).slice(0, -19);
+    for (const item of dropped) { window.clearTimeout(this.deliveryTimers.get(item.id)); this.deliveryTimers.delete(item.id); }
     this.patch({ deliveries: [...(this.state.deliveries || []).slice(-19), { id, text, status: "pending" }] });
     this.deliveryTimers.set(id, window.setTimeout(() => this.settleDelivery(id, "unconfirmed"), 15000));
     this.socket!.emit("ChatRoomChat", message);
