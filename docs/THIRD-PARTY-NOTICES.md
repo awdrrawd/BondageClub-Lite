@@ -1,5 +1,7 @@
 # 第三方參考與素材
 
+[文件導覽](README.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture.html)
+
 - `src/assets/lce-lounge.jpg`：依使用者要求取自本機 BC-LCE 的 `assets/BG-98.jpg`，未修改。BC-LCE 倉庫採 AGPL-3.0；隨附 `LCE-AGPL-3.0.txt`，素材不納入 Lite 自有程式的 MIT 授權聲明。圖片原作者／獨立授權未能由本機檔案確認；公開再散布前請確認你有素材使用權，否則移除此圖與對應背景選項。未複製 LCE JavaScript。
 - 好友／BEEP：依 BC 原生訊息格式獨立實作；以本機 BC-FCM（MIT）的 `chat-sender.js` 為互通格式參考。未引入 FCM 的資料庫、UI 或附件解碼器；接收一般文字，忽略插件控制／附件封包。
 - ECHO 相容性調查：https://github.com/SugarChain-Studio/echo-clothing-ext 的 `src/main.js`。未嵌入、執行或宣稱載入 ECHO；不支援其自訂資產操作及繪圖。
@@ -9,7 +11,7 @@
 ## 本機 SVG 圖示
 
 - Phosphor Icons Core 的 regular SVG 保存在 `src/ui/icons/`，不用遠端圖示服務或整套字型。來源记录日期為 2026-09-11；MIT 與 Copyright (c) 2023 Phosphor Icons 保留於 [完整授權](licenses/phosphor-icons-MIT.txt)，並透過 `public/licenses/phosphor-icons-MIT.txt` 隨部署分發。
-- flag-icons 的國旗 SVG 隨站打包，搭配語言文字標籤；MIT 授權保存於 `public/licenses/flag-icons-MIT.txt`。實际使用項目以 `src/ui/icons/` 與 `icons.ts` 為準，不固定抄寫圖示數量。
+- flag-icons 僅打包實際使用的國旗，搭配語言文字標籤。來源 SVG 保存在 src/ui/icons/，以 Vite ?no-inline 輸出帶內容雜湊的本站 assets 檔案；不使用 CDN、不引入整套 CSS，也不把國旗文字放入主 JS。每次顯示使用 SVG image 引用共用 URL，避免重複建立旗徽節點與 ID 衝突；MIT 授權保存於 `public/licenses/flag-icons-MIT.txt`。實际使用項目以 `src/ui/icons/` 與 `icons.ts` 為準，不固定抄寫圖示數量。
 
 ## BC 文字資料與 BIO
 

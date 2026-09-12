@@ -261,17 +261,17 @@ test('private history pages stay bounded and freeze while reading older messages
 
 test('room language flags and desktop region labels share the SVG picker, Chinese uses Hong Kong', async () => {
   const f=setup();
-  assert.match(f.document.querySelector('.locale-picker summary image').getAttribute('href'),/flag-icons-hk/);
+  assert.match(f.document.querySelector('.locale-picker summary image').getAttribute('href'),/flag-hk\.svg/);
   const language=f.document.querySelector('.room-language');
   for (const [code,flag] of [['CN','hk'],['EN','gb'],['DE','de'],['FR','fr'],['ES','es'],['RU','ru'],['UA','ua']]) {
-    assert.match(language.querySelector(`[data-value="${code}"] image`).getAttribute('href'),new RegExp(`flag-icons-${flag}`));
+    assert.match(language.querySelector(`[data-value="${code}"] image`).getAttribute('href'),new RegExp(`flag-${flag}\\.svg`));
   }
   assert.ok(f.document.querySelector('.room-space summary .picker-value').textContent);
   language.querySelector('[data-value="CN"]').click();
   assert.equal(f.calls.at(-1).search.Language,'CN');
-  assert.match(language.querySelector('summary image').getAttribute('href'),/flag-icons-hk/);
+  assert.match(language.querySelector('summary image').getAttribute('href'),/flag-hk\.svg/);
   f.emit({rooms:[{Name:'Chinese room',Language:'CN',Space:'X',MemberCount:1,MemberLimit:10,CanJoin:true}]});
-  assert.match(f.document.querySelector('.room-language-tag image').getAttribute('href'),/flag-icons-hk/);
+  assert.match(f.document.querySelector('.room-language-tag image').getAttribute('href'),/flag-hk\.svg/);
   await f.window.happyDOM.close();
 });
 

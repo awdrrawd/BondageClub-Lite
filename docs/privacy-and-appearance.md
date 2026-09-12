@@ -1,6 +1,6 @@
 # 帳號、資料流向與外觀保護
 
-[文件導覽](README.md) · [本機紀錄](local-history-and-contacts.md)
+[文件導覽](README.md) · [本機紀錄](local-history-and-contacts.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture.html)
 
 ## 資料保存位置
 
@@ -41,11 +41,17 @@ AEE 的 SingleGloveFX／ItemCanvas／Mask／Vis 伴隨層、Property.CustomDraw 
 
 ## 媒體與自報識別
 
+媒體網域管理以框列出永久許可及本次許可；永久列表不重複標示「總是許可」，兩類均可撤銷。撤銷按鈕使用 #ff8b8b，文字與色彩共同辨識操作。
+
 HTTP(S) 連結不解析玩家 HTML。HTTPS 圖片／影音直連，以及部分 YouTube、Vimeo、Spotify 網址可按來源許可嵌入。許可依**實際播放器 origin**，不是僅看原始連結；影音須另外點擊開啟，不自動播放，同時僅保留一個播放器。允許的是特定服務 iframe，不是任意網頁。
 
 媒體直接連來源，來源可收到 IP、使用 Cookie 或載入次級資源；網站設定 no-referrer，不代表匿名代理。重新導向由瀏覽器處理。撤銷許可釋放媒體，不能撤回已送出的請求。詳細格式與測試見[媒體與安全詞](links-safeword-tests.md)。
 
 Lite 以 Hidden/BCLiteHello 自報 client: Lite，沒有版本、帳密或插件清單；支援的觀看端能識別 Lite。window.BCLite 只提供靜態名稱，不暴露連線操作。這是自報標記，不是身分驗證。原生活動接收端可能產生活動效果；Lite 自身不執行完整 BC 效果引擎。
+
+## 訊息音效
+
+BEEP 與悄悄話通知音效各自開關，預設關閉，偏好以 bc-lite-sounds-v1 存 localStorage。音效由 Web Audio 本機產生，不下載聲音、不請求桌面通知權限。啟用時播放短音預覽；瀏覽器需使用者手勢解鎖，背景／鎖屏播放仍受瀏覽器限制。未讀計數只在分頁記憶體，不上傳已讀狀態。
 
 ## 驗收
 
@@ -55,9 +61,3 @@ Lite 以 Hidden/BCLiteHello 自報 client: Lite，沒有版本、帳密或插件
 4. ECHO／AEE／SCA 觀看端比對登入 Lite、聊天、加好友、一般單件同步前後；未知裝飾欄位不應丟失。
 5. 以可恢復的測試外觀分別驗證安全詞與貼貼；普通操作不送外觀更新，確認例外才送；重新登入完整版核對結果。
 6. 未許可媒體前 Network 無來源請求；許可、撤銷、登出及訊息移出 DOM 時核對播放器生命週期。
-
-## 訊息音效
-
-BEEP 與悄悄話通知音效各自開關，預設關閉，偏好以 bc-lite-sounds-v1 存 localStorage。音效由 Web Audio 本機產生，不下載聲音、不請求桌面通知權限。啟用時播放短音預覽；瀏覽器需使用者手勢解鎖，背景／鎖屏播放仍受瀏覽器限制。未讀計數只在分頁記憶體，不上傳已讀狀態。
-
-媒體網域管理以框列出永久許可及本次許可；永久列表不重複標示「總是許可」，兩類均可撤銷。撤銷按鈕使用 #ff8b8b，文字與色彩共同辨識操作。

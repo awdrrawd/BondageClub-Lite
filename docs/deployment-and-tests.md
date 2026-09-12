@@ -1,4 +1,6 @@
-# Relay v1 部署與驗收
+# 開發、部署與驗收
+
+[文件導覽](README.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture.html)
 
 ## 本機開發
 
@@ -96,19 +98,9 @@ JSON 另有 upstream 與 note。這只證明中繼程式存在，不能證明 PR
 
 不要貼完整 LoginResponse、AccountLogin 或未清理的 HAR，裡面可能包含帳密、個人資料或聊天內容。中繼程式刻意不記錄這些內容。
 
-## 本機檢查
+## 驗收記錄
 
-每次要部署的版本都應重新執行建置及測試。自動測試不登入帳號；握手 smoke test 也不代表 PROD 登入或長連線已驗收。真人測試請記錄部署 commit、裝置、時間、實際結果與未通過項目，不能沿用舊文件的「已通過」敘述。
-
-`npm run dev` 只用於前端排版，沒有 Pages 中繼，登入檢查會失敗。要測完整流程：
-
-```sh
-npm run build
-npm test
-npm run dev:relay
-```
-
-開啟 http://127.0.0.1:8788 。另一個終端可執行 `node scripts/smoke-relay.mjs`，只測中繼與 BC Socket.IO 握手，不傳 AccountLogin。
+自動測試不登入 BC；握手測試也不代表 PROD 登入或長連線已驗收。真人測試請記錄部署 commit、裝置、時間、結果及未通過項目。完整本機流程見本頁「本機開發」，握手測試可執行 `node scripts/smoke-relay.mjs`，不傳送 AccountLogin。
 
 ## 使用者腳本的 CSP 樣式警告
 

@@ -1,8 +1,8 @@
 # 客戶端架構
 
-[文件導覽](README.md) · [HTML 摘要](architecture.html) · [翻譯貢獻](../src/translations/README.md)
+[文件導覽](README.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture.html) · [翻譯貢獻](../src/translations/README.md)
 
-本頁是模組責任與資料流的維護基準；HTML 提供可獨立部署的摘要。最後對照原始碼：2026-09-11。
+本頁是模組責任與資料流的維護基準；HTML 提供可獨立部署的摘要。
 
 ## 系統邊界
 
@@ -35,8 +35,8 @@ Cloudflare Pages 靜態資源 → 瀏覽器 LiteApp
 | src/ui/history-search.ts | 本機歷史搜尋，每頁 50 筆；同房間／同對話上下文，帳戶與請求序號隔離 |
 | src/platform/message-sounds.ts | BEEP／悄悄話獨立開關；Web Audio 本機短音，使用者手勢解鎖與 700ms 合併 |
 | src/ui/activity-dialog.ts、history-settings.ts | 活動選單與送出前條件刷新；保存設定與按日匯出 |
-| src/ui/dom.ts、contact-card.ts、icons.ts、icon-select.ts、style.css | 安全 DOM 元件、卡片、本機 SVG、選單及響應式版面 |
-| src/storage/history.ts | 白名單資料、IndexedDB v2、雙向索引分頁、到期清理及 TXT／HTML／Excel 匯出 |
+| src/ui/dom.ts、contact-card.ts、icons.ts、icon-select.ts、style.css | 安全 DOM 元件、卡片、本機 SVG、選單及響應式版面；國旗採本站雜湊 SVG URL，其他圖示保留內嵌 SVG |
+| src/storage/history.ts | 白名單資料、IndexedDB v2、雙向索引分頁、到期清理及 TXT 匯出 |
 | src/storage/history-export.ts | 獨立 HTML 閱讀頁與固定 OOXML／ZIP 結構的 XLSX 產生器；所有儲存格明確為文字 |
 | src/storage/history-session.ts | 增量收集、批次寫入、失敗重試、有上限的私訊快取、跨帳戶／請求競態隔離 |
 | src/action/ | catalog／merge 文字表；render／embedded 句子處理；native／extensions／labels 活動條件與標籤；cuddle 貼貼 |
@@ -96,6 +96,8 @@ IndexedDB `bc-lite-history` v2 的 messages／contacts 按環境及玩家 ID 分
 
 ## 文字與活動管線
 
+介面與動作目錄支援 zh／en／ru。俄文 UI 隨前端載入，BC 俄文差異表按語言選擇載入；插件缺漏回退英文。build-text-catalog.mjs 從 RU 資源取文，拒絕遺失角色／物品替換標記的譯文。
+
 1. client 過濾控制訊息；Chat／Whisper 可附加發送者分享的 Original，普通聊天不套用動作翻譯。
 2. action/embedded 處理可讀插件替代文字；action/render 以文字表和 Dictionary 代入玩家、物品、部位。
 3. UI 使用 textContent／安全連結 API；BIO 按需解壓，玩家原文及 CraftName 不自動翻譯。
@@ -143,5 +145,3 @@ UI 預覽禁止外部媒體，且不包含在正式建置。happy-dom、fake-ind
 搜尋由 HistorySession 等待寫入後交給 HistoryStore 的 ownerKindTime 索引游標，結果每頁最多 50 筆，以時間與唯一鍵排序；不把整個資料庫載入 UI。上下文前 10／後 10 筆限制於同房間或同私訊對象。搜尋與上下文只顯示文字，不載入媒體、不改變房間與草稿。
 
 暫時斷線由 UI 保留 recoveryRoom 作閱讀用途；真實連線快照仍決定發送權限。同帳戶回到同名房間保留 DOM，登出、帳戶變更或換房重新建立對應畫面。草稿不自動重送。BEEP／悄悄話音效偏好存 bc-lite-sounds-v1，預設皆關閉；不請求桌面通知權限。
-
-介面與動作目錄支援 zh／en／ru。俄文 UI 隨前端載入，BC 俄文差異表按語言選擇載入；插件缺漏回退英文。build-text-catalog.mjs 從 RU 資源取文，拒絕遺失角色／物品替換標記的譯文。

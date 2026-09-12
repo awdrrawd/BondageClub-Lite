@@ -1,5 +1,7 @@
 # 第三方動作文字來源
 
+[文件導覽](README.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture.html)
+
 `scripts/build-plugin-catalog.mjs` 只解析本機來源的字面值，不執行插件。來源整理於 `src/translations/action/{xiaosu,lscg,echo}/`（英文基底＋中文差異），再由編譯器合併成按需載入產物；人工修正放 `src/translations/overrides/`；未收錄動作可使用封包提供的可讀替代文字。
 
 這些來源的文字保留原授權，不因放入 Lite 而改為 Lite 自身程式碼的授權。不同來源的條目分別受其原授權約束；再散布與商業使用前須核對各授權，尤其 ECHO 的非商業／相同方式分享條款及 LSCG 的 GPL 條款。

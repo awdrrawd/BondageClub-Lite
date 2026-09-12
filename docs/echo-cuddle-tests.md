@@ -1,6 +1,6 @@
 # ECHO 貼貼與配對驗收
 
-[文件導覽](README.md) · [活動條件](chat-native-identity-tests.md) · [外觀保存界線](privacy-and-appearance.md)
+[文件導覽](README.md) · [活動條件](chat-native-identity-tests.md) · [外觀保存界線](privacy-and-appearance.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture.html)
 
 ## 實作範圍
 
@@ -24,7 +24,7 @@ Hidden/Luzi_XCharacterDrawState 分享位置狀態，不在 Lite 載入 ECHO 或
 
 ## 翻譯與介面
 
-1. 中英文各檢查原生、小酥、LSCG、ECHO 的選單標籤及動作句子。未提供翻譯仍保留來源文字，不應顯示 MISSING TEXT；動態插件自訂句子不保證全部涵蓋。
+1. 中、英、俄文各檢查原生、小酥、LSCG、ECHO 的選單標籤及動作句子。未提供翻譯仍保留來源文字，不應顯示 MISSING TEXT；動態插件自訂句子不保證全部涵蓋。
 2. 目標沒有 Pussy/Penis 時不出現 ItemPenis／ItemGlans 專用動作；有時合併到外陰／陰部對應熱區，不另加人物格子。
 3. 導航順序為搜尋、房間、私聊、好友、設定。進出訊息文字置中，時間及 ID 靠右。
 4. 私聊選同一人，交替發送私訊與悄悄話：同一時間線、對方靠左自己靠右，有通道標籤。通道選單在輸入左側、送出在右側，加好友在標題最右；沒有編號輸入框、移除按鈕或 muted 樣式。

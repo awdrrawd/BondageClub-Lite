@@ -1,10 +1,10 @@
 # URL 與安全詞驗收
 
-[文件導覽](README.md) · [保存與資料流向](privacy-and-appearance.md)
+[文件導覽](README.md) · [保存與資料流向](privacy-and-appearance.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture.html)
 
 ## 共用 Lite 確認與通知
 
-`src/platform/dialogs.ts` 提供網頁內確認／提示，沿用 Lite 外觀與中英翻譯，不使用瀏覽器 alert、confirm 或 prompt。換房、登出、移除好友、清除聊天室／已存歷史、縮短保存期限、降低訊息上限皆須按確認才執行；取消或 Escape 不執行。換房確認開啟期間若帳號／所在房間改變，舊確認失效。媒體來源許可保存失敗與一般操作錯誤也使用 Lite 提示窗。
+`src/platform/dialogs.ts` 提供網頁內確認／提示，沿用 Lite 外觀與中、英、俄文翻譯，不使用瀏覽器 alert、confirm 或 prompt。換房、登出、移除好友、清除聊天室／已存歷史、縮短保存期限、降低訊息上限皆須按確認才執行；取消或 Escape 不執行。換房確認開啟期間若帳號／所在房間改變，舊確認失效。媒體來源許可保存失敗與一般操作錯誤也使用 Lite 提示窗。
 
 驗收：換房先取消一次再確認，取消時不得離房；清除紀錄與降低上限先取消，確認資料不變。瀏覽器自己的檔案選取器、下載提示及權限提示不由網站取代。
 

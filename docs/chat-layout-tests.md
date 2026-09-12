@@ -1,6 +1,6 @@
 # 房間、好友、聊天與 DOM 驗收
 
-[文件導覽](README.md) · [本機歷史](local-history-and-contacts.md) · [活動與社群協定](chat-native-identity-tests.md)
+[文件導覽](README.md) · [本機歷史](local-history-and-contacts.md) · [活動與社群協定](chat-native-identity-tests.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture.html)
 
 ## 介面與訊息
 
@@ -43,8 +43,12 @@
 3. 回覆有原生 MsgId 時送 ReplyId，否則文字引用；BEEP 用文字引用。公開回覆不能洩漏私聊內容，切換通道、取消及送出後清除選取；不可引用不屬於當前通道的私訊。
 4. 聊天輸入 ActionUse、Talk、null 或動作鍵名，保持原文；Type=Status／Hidden 不作普通訊息或未讀。Dictionary.Original 僅顯示發送者分享的原文，相同文字不重複，沒有原文不還原。
 5. 用 BC／小酥／LSCG／ECHO 活動核對玩家、物品、部位與舊／新字典格式。玩家 CraftName 保留原文；未知鍵名與缺翻譯可保留英文／原文，不偽造含義。
-6. 中英文切換涵蓋登入、搜尋、建房、好友、設定、個人資料與提示；語言在頂欄選擇並保存。文字表晚到時更新仍在記憶體的動作，不能把普通聊天重譯；BIO 的 HTML／腳本僅作文字。
+6. 中、英、俄文切換涵蓋登入、搜尋、建房、好友、設定、個人資料與提示；語言在頂欄選擇並保存。文字表晚到時更新仍在記憶體的動作，不能把普通聊天重譯；BIO 的 HTML／腳本僅作文字。
 7. Network 核對登入後英文基底＋所選語言差異，沒有遠端翻譯／人物圖片。不要沿用舊文件的固定 bundle 大小；編譯及翻譯維護見[貢獻指南](../src/translations/README.md)。
+
+## 外觀與語言選單
+
+設定提供外觀／功能／效能／保存／隱私分類跳轉，主題為經典紫、午夜藍、森林綠，僅本機偏好。flag-icons 的 HK／GB／RU SVG 分別搭配中文／English／Русский 文字標籤；房間語言另含 DE／FR／ES／RU／UA。桌面與手機共用 SVG 選單，保留語言名稱。國旗以本站獨立 SVG 檔隨站打包，不請求 CDN；MIT 授權位於 `public/licenses/flag-icons-MIT.txt`。刷新圖示來自 Phosphor，沿用其 MIT 授權。
 
 ## 版面與 DOM 手動測試
 

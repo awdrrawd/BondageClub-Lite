@@ -1,6 +1,6 @@
 # 文件導覽
 
-[返回首頁](../README.md) · [English index](README.en.md)
+[返回首頁](../README.md) · [English index](README.en.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture.html)
 
 功能細節、架構、部署與驗收集中在這裡。歷史變更請查 Git。
 
@@ -8,19 +8,19 @@
 
 | 用途 | 文件 |
 | --- | --- |
-| 系統、模組、狀態與更新邊界 | [架構說明](architecture.md)、[獨立 HTML 導覽](architecture.html) |
+| 系統、模組、狀態與更新邊界 | [架構說明](architecture.md)、[架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture.html) |
 | 安裝、部署、中繼排錯與正式驗收 | [部署與驗收](deployment-and-tests.md) |
 | 手機介面、前景探測、重連與登入回房 | [手機與連線](mobile-connection-tests.md) |
 | 搜尋、建房、好友、聊天、回覆、翻譯及 DOM 更新 | [房間與聊天驗收](chat-layout-tests.md) |
-| 本機歷史、快取、期限、匯出與帳戶隔離 | [本機紀錄](local-history-and-contacts.md) |
-| 帳號、資料流向、媒體與外觀的保存界線 | [隱私與外觀](privacy-and-appearance.md) |
+| 本機歷史、搜尋、未讀、期限及 TXT／HTML／Excel 匯出 | [本機紀錄](local-history-and-contacts.md) |
+| 帳號、資料流向、媒體許可、通知音效與外觀保護 | [隱私與外觀](privacy-and-appearance.md) |
 | 原生活動、擴展文字、AFC、召喚與 Lite 識別 | [活動與社群協定](chat-native-identity-tests.md) |
 | ECHO 貼貼的確認、配對、寫入與雙人測試 | [貼貼驗收](echo-cuddle-tests.md) |
 | URL／影音許可、安全詞與確認對話框 | [媒體與安全詞](links-safeword-tests.md) |
 | 翻譯來源、覆寫與建置方法 | [翻譯貢獻指南](../src/translations/README.md) |
 | 素材、圖示、BC 與插件文字來源 | [第三方素材](THIRD-PARTY-NOTICES.md)、[第三方文字](third-party-dialogues.md)、[授權文字](licenses/) |
 
-HTML 架構導覽會建置到 `dist/docs/architecture.html`；其他 Markdown 是倉庫文件，不假設已隨網站部署。
+「架構導覽（HTML）」連結指向 GitHub 的 HTML 原始檔；下載後可用瀏覽器開啟。部署時會建置到 `dist/docs/architecture.html`；其他 Markdown 是倉庫文件，不假設已隨網站部署。
 
 ## 維護規則
 
