@@ -1,6 +1,6 @@
 # Documentation
 
-[Project overview](../README.en.md) · [繁體中文](README.md) · [Architecture overview (HTML)](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture.html)
+[Project overview](../README.en.md) · [繁體中文](README.md) · [Architecture overview (HTML)](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture/index.html)
 
 Detailed behavior, architecture, deployment and verification guides live here. The linked guides are currently in Chinese. See Git history for past changes.
 

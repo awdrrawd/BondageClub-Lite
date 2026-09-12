@@ -1,6 +1,6 @@
 # 文件導覽
 
-[返回首頁](../README.md) · [English index](README.en.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture.html)
+[返回首頁](../README.md) · [English index](README.en.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture/index.html)
 
 功能細節、架構、部署與驗收集中在這裡。歷史變更請查 Git。
 
