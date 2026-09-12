@@ -1169,6 +1169,21 @@ test('leash indicator updates without rebuilding the active chat',async()=>{
  f.emit({leashHolder:null});assert.equal(f.document.getElementById('summon-notice').hidden,true);
 });
 
+test('incoming media links render for both self echoes and other players',async()=>{
+ const f=setup();
+ const url='https://www.bilibili.com/video/BV149bG6dE5r';
+ f.emit({phase:'in-room',room:{Name:'Room'},messages:[]});
+ const incoming=messages(2).map((message,index)=>({...message,sender:index===0?123:55,text:url}));
+ f.emit({messages:incoming.slice(0,1)});
+ f.emit({messages:incoming});
+ for(const row of f.document.querySelectorAll('#TextAreaChatLog [data-message-id]')){
+  assert.equal(row.querySelector('a.chat-link')?.textContent,url);
+  assert.ok(row.querySelector('.chat-media-slot'));
+ }
+ assert.equal(f.document.querySelectorAll('#TextAreaChatLog .chat-media-slot').length,2);
+ await f.window.happyDOM.close();
+});
+
 test('native reply sends only the draft and ID; missing IDs never add a text quote',async()=>{
  const f=setup();f.emit({phase:'in-room',room:{Name:'Room'},messages:[{...messages(1)[0],text:'Original quote',nativeId:'bc-native-id'},{...messages(1)[0],id:'legacy',nativeId:undefined}]});
  assert.equal(f.document.querySelector('[data-message-id=legacy] .message-reply'),null);

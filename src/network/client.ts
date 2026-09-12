@@ -559,6 +559,8 @@ export class BcLiteClient {
     if (!message.Content.trim()) return;
     if (message.Content.length > 1000) throw new Error(t("m209"));
     message.Dictionary = [...(message.Dictionary || []), { Tag: "SourceCharacter", MemberNumber: this.state.player?.MemberNumber }];
+    // Match official ServerSend: native chat IDs enable replies and message-content hooks.
+    if (["Chat", "Whisper", "Emote"].includes(message.Type)) message.Dictionary.push({ Tag: "MsgId", MsgId: crypto.randomUUID() });
     if (replyId && replyId.length <= 256 && ["Chat", "Whisper", "Emote"].includes(message.Type)) message.Dictionary.push({ Tag: "ReplyId", ReplyId: replyId });
     this.lastChatAt = Date.now();
     this.socket!.emit("ChatRoomChat", message);

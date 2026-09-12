@@ -1156,8 +1156,12 @@ test('plain media URLs remain unchanged on the wire when sent as a native reply'
  const f=await setup('PROD');f.handlers.get('ChatRoomSync')({Name:'Room',Character:[]});
  const url='https://bilibili.com/video/BV149bG6dE5r/?spm_id_from=333.1007.tianma.3-2-6.click';f.client.sendChat(url,'original-msg-id');
  const packet=f.sent.at(-1).payload;assert.equal(packet.Content,url);
+ assert.equal(f.state().messages.some(message=>message.text===url),false,'public chat waits for the server echo');
+ const messageId=packet.Dictionary.find(entry=>entry.Tag==='MsgId')?.MsgId;
+ assert.equal(typeof messageId,'string');assert.ok(messageId.length>0);
  assert.equal(packet.Dictionary.find(entry=>entry.Tag==='ReplyId').ReplyId,'original-msg-id');
  assert.equal(packet.Type,'Chat');
  f.handlers.get('ChatRoomMessage')({...packet,Sender:55});
  assert.equal(f.state().messages.at(-1).text,url);
+ assert.equal(f.state().messages.at(-1).nativeId,messageId);
 });
