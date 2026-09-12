@@ -11,6 +11,8 @@
 
 文件檢查涵蓋本機 Markdown 連結、圖片及參照目的地是否存在；不連網檢查外部網址，也不驗證標題錨點。Actions 僅要求 contents: read；不需要 BC 帳密、Cloudflare Token 或自動合併權限。
 
+若所有測試顯示通過卻沒有最後總結，可能是測試程序尚有存活資源。npm test 對每個測試程序設定 60 秒診斷期限；逾時會輸出 TEST WORKER TIMEOUT、測試檔、Node／平台及資源建立堆疊，並以失敗退出。GitHub 與 Cloudflare 都適用；這是診斷與等待上限，不代表已修復資源洩漏。
+
 ## GitHub 手動設定
 
 1. 提交並推送這次變更。到倉庫 **Actions → CI** 確認 Verify 成功。手動工作流程與 Dependabot 設定需存在於預設分支；目前工作流程的 push 分支為 Mater，若變更主要分支請同步調整。

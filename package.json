@@ -17,7 +17,7 @@
     "dev:relay": "wrangler pages dev dist --ip 127.0.0.1 --port 8788 --compatibility-date 2026-09-01",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test": "node --test tests/*.test.mjs",
+    "test": "node --import ./scripts/test-watchdog.mjs --test tests/*.test.mjs",
     "check:docs": "node scripts/check-doc-links.mjs",
     "check:site": "node scripts/check-site.mjs",
     "ci": "npm run check:docs && npm run build && npm test"
