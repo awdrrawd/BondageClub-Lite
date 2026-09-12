@@ -40,3 +40,13 @@ CI validates local Markdown links on every PR and push to Mater. Code, tests, wo
 Push these files, confirm the Verify check, then optionally require it in a branch ruleset. Enable Dependabot alerts/security updates in repository settings. In Cloudflare Pages, set the build command to **npm run ci**, output to **dist**, Node to **22**, and apply the documented build watch paths manually. Limit preview branches and optionally protect previews with Access. After deployment, run **Actions → Site health → Run workflow**. No credentials are needed; this checks public pages and relay metadata, not BC login.
 
 平台文件：[GitHub 工作流程觸發](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow)、[Dependabot 版本更新](https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/configure-version-updates)、[Cloudflare 建置路徑](https://developers.cloudflare.com/pages/configuration/build-watch-paths/)、[預覽部署與 Access](https://developers.cloudflare.com/pages/configuration/preview-deployments/)。
+
+## BC 原生文字每月更新
+
+BC text data update 工作流程每月 5、10、15、20、25、30 日臺灣時間 11:23（沒有 30 日的月份略過該次） 檢查，也可在 Actions 手動 Run workflow。排程時間可能受 GitHub 排隊影響。來源是 awdrrawd/Bondage-College-Mirror 的 bondageclub 分支；每次先取得 commit，再下載該 commit 的 CSV／翻譯 TXT。
+
+只產生 src/translations/bc 的訊息、動作敘述、道具與部位名稱更新。沒有差異不建立 PR；已有 codex/bc-data- 開頭的待審 PR 則暫停新提案。PR 記錄來源 commit，通過建置及測試後才建立，不自動合併。人工 overrides、通訊、native-data 的活動／道具限制、插件程式皆保持人工維護。
+
+推送工作流程至預設分支後，到 Settings → Actions → General → Workflow permissions，允許 GitHub Actions 建立 Pull requests。此工作流程單獨要求 contents／pull-requests 寫入權限，其他 CI 保持唯讀；不需要額外 Token。Bot PR 的 CI 可能要求點選 Approve workflows to run，核對檢查通過才合併。若政策禁止建立 PR，工作流程會失敗，不會直接修改 Mater。
+
+English: Text-only synchronization on days 5, 10, 15, 20, 25 and 30 of each month opens a reviewed PR from a pinned mirror commit. No auto-merge, protocol changes, native item/activity rules, plugin code or manual overrides. Enable Actions PR creation and approve the bot PR's checks when prompted.

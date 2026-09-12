@@ -8,6 +8,7 @@
 
 | 用途 | 文件 |
 | --- | --- |
+| 插件與機器人事件、操作入口及限制 | [插件 API](plugin-api.md) |
 | 系統、模組、狀態與更新邊界 | [架構說明](architecture.md)、[架構導覽（HTML）](https://bondageclub-lite.pages.dev/docs/architecture/) |
 | CI、套件更新、健康檢查與後台設定 | [自動化與操作步驟](automation.md) |
 | 哪些倉庫變更觸發 Cloudflare 部署 | [建置觸發規則](cloudflare-builds.md) |

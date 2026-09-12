@@ -34,6 +34,16 @@ export class BcLiteClient {
   private socket: Socket | null = null;
   private credentials: Credentials | null = null;
   private listeners = new Set<Listener>();
+  private messageListeners = new Set<(message: DisplayMessage) => void>();
+  subscribeMessages(listener: (message: DisplayMessage) => void): () => void {
+    this.messageListeners.add(listener);
+    return () => { this.messageListeners.delete(listener); };
+  }
+  private publishMessage(message: DisplayMessage): void {
+    for (const listener of this.messageListeners) {
+      try { listener(message); } catch { /* Extensions cannot interrupt the client. */ }
+    }
+  }
   private state = initialSnapshot();
   private messageLimit = MAX_MESSAGES;
   setMessageLimit(limit: number): void {
@@ -347,7 +357,12 @@ export class BcLiteClient {
   }
 
   private addBeep(memberNumber: number, name: string, text: string, incoming: boolean): void {
-    this.patch({ beeps: [...this.state.beeps, { id: crypto.randomUUID(), memberNumber, name, text, incoming, time: new Date() }].slice(-300) });
+    const beep = { id: crypto.randomUUID(), memberNumber, name, text, incoming, time: new Date() };
+    this.patch({ beeps: [...this.state.beeps, beep].slice(-300) });
+    this.publishMessage({ id: beep.id, type: "Beep", text, time: beep.time,
+      sender: incoming ? memberNumber : this.state.player?.MemberNumber ?? null,
+      senderName: incoming ? name : displayName(this.state.player ?? undefined),
+      target: incoming ? this.state.player?.MemberNumber : memberNumber });
   }
 
   join(roomName: string): void {
@@ -434,11 +449,11 @@ export class BcLiteClient {
     this.sendChat(`.a ${t(keys[action], [this.state.player?.Nickname || this.state.player?.Name, target.Nickname || target.Name])}`);
   }
 
-  activityOptions(memberNumber: number, compatibility = false) {
+  activityOptions(memberNumber: number, compatibility = false, strictActor = false) {
     const actor = { ...this.state.player!, ...this.state.characters.find(c => c.MemberNumber === this.state.player?.MemberNumber) };
     const target = this.state.characters.find(c => c.MemberNumber === memberNumber);
     if (!target || !actor.MemberNumber || !this.state.room) return [];
-    const checkInventory = createActivityInventoryCheck(actor, target, true);
+    const checkInventory = createActivityInventoryCheck(actor, target, !strictActor);
     const native = nativeActivities.flatMap(activity => {
       // A tool belongs to an activity, not to each of its target zones.
       const item = activityAsset(actor, target, activity.name);
@@ -822,6 +837,7 @@ export class BcLiteClient {
   private appendMessage(message: DisplayMessage): void {
     message = { ...message, roomName: this.state.room?.Name };
     this.patch({ messages: [...this.state.messages, message].slice(-this.messageLimit), ...(message.type === "Whisper" ? { whispers: [...(this.state.whispers || []), message].slice(-300) } : {}) });
+    this.publishMessage(message);
   }
 
   private upsertCharacter(character: CharacterSummary): CharacterSummary[] {

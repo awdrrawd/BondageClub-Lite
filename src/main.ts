@@ -1,4 +1,6 @@
 // Browser entry point. UI owns DOM; network/client owns the authenticated session.
 import "./ui/app";
-// Identification only; no session state, account data or version is exposed.
-Object.defineProperty(window, "BCLite", { value: Object.freeze({ client: "Lite" }), configurable: true });
+import { bcClient } from "./network/client";
+import { createExtensionAPI } from "./extensions/api";
+Object.defineProperty(window, "BCLite", { value: createExtensionAPI(bcClient), configurable: false });
+window.dispatchEvent(new Event("bclite:ready"));

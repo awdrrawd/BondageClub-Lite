@@ -28,6 +28,7 @@ export interface PlayerSummary extends CharacterSummary {
 }
 
 export interface CharacterSummary {
+  AllowedInteractions?: number;
   LabelColor?: string;
   AssetFamily?: string;
   ArousalSettings?: { Active?: string; Zone?: string; Activity?: string };

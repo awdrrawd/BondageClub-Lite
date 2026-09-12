@@ -145,3 +145,7 @@ UI 預覽禁止外部媒體，且不包含在正式建置。happy-dom、fake-ind
 搜尋由 HistorySession 等待寫入後交給 HistoryStore 的 ownerKindTime 索引游標，結果每頁最多 50 筆，以時間與唯一鍵排序；不把整個資料庫載入 UI。上下文前 10／後 10 筆限制於同房間或同私訊對象。搜尋與上下文只顯示文字，不載入媒體、不改變房間與草稿。
 
 暫時斷線由 UI 保留 recoveryRoom 作閱讀用途；真實連線快照仍決定發送權限。同帳戶回到同名房間保留 DOM，登出、帳戶變更或換房重新建立對應畫面。草稿不自動重送。BEEP／悄悄話音效偏好存 bc-lite-sounds-v1，預設皆關閉；不請求桌面通知權限。
+
+## 插件 API
+
+src/extensions/api.ts 建立 BCLite v1，同步事件由 client.subscribeMessages 提供，與畫面／歷史快照訂閱分離。插件只能透過現有 client 方法送出，原生活動使用嚴格條件及保守權限檢查。沒有暴露帳密、Socket、外觀寫入及房主／地圖功能。完整介面見[插件 API](plugin-api.md)。

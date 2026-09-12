@@ -1019,3 +1019,16 @@ test('activity keys resolve through bundled translations, names and late catalog
   f.handlers.get('ChatRoomMessage')({ Type: 'Activity', Sender: 55, Content: 'UnknownPluginAction' });
   assert.equal(f.state().messages.at(-1).text, 'UnknownPluginAction');
 });
+
+
+test('live message subscriptions do not replay history and isolate a throwing listener', async()=>{
+ const f=await setup('PROD'), messages=[];
+ f.client.subscribeMessages(()=>{throw Error('plugin failed');});
+ const off=f.client.subscribeMessages(m=>messages.push(m));
+ assert.equal(messages.length,0);
+ f.handlers.get('ChatRoomMessage')({Sender:55,Type:'Chat',Content:'hello'});
+ assert.equal(messages.length,1);assert.equal(messages[0].text,'hello');
+ f.client.relocalize();assert.equal(messages.length,1);
+ off();f.handlers.get('ChatRoomMessage')({Sender:55,Type:'Chat',Content:'again'});
+ assert.equal(messages.length,1);
+});

@@ -6,6 +6,7 @@ Detailed behavior, architecture, deployment and verification guides live here. T
 
 | Topic | Guide |
 | --- | --- |
+| Plugin/bot events, operations and limitations | [Plugin API](plugin-api.md) |
 | Architecture and module responsibilities | [Architecture](architecture.md), [Architecture overview (HTML)](https://bondageclub-lite.pages.dev/docs/architecture/) |
 | CI, dependency updates, health checks and dashboard setup | [Automation (Chinese + English summary)](automation.md) |
 | Cloudflare build triggers | [Build watch paths (Chinese)](cloudflare-builds.md) |
