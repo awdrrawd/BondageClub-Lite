@@ -188,7 +188,7 @@ export class LiteApp {
       if (snapshot.player && !this.catalogLoading) {
         this.refreshCatalog();
       }
-      if (snapshot.summon !== previous?.summon) this.updateSummon();
+      if (snapshot.summon !== previous?.summon || snapshot.leashHolder !== previous?.leashHolder) this.updateSummon();
       if (!["ready", "joining", "in-room"].includes(snapshot.phase)) document.querySelectorAll(".profile-dialog:not(.lite-notice)").forEach(dialog => dialog.remove());
       if (snapshot.room && snapshot.room.Name !== oldViewRoom) { this.tab = "chat"; this.visibleMessages = this.performance.visible; this.historyEndId = null; }
       if (!this.viewRoom() && previous?.room && this.tab === "chat") this.tab = "rooms";
@@ -815,7 +815,8 @@ export class LiteApp {
 
   private updateSummon(): void { const node = document.getElementById("summon-notice"); if (node) this.fillSummon(node); }
   private fillSummon(node: HTMLElement): void {
-    node.replaceChildren(); const summon = this.snapshot?.summon; node.hidden = !summon;
+    node.replaceChildren(); const summon = this.snapshot?.summon; node.hidden = !summon && !this.snapshot?.leashHolder;
+    if (this.snapshot?.leashHolder) node.append(this.el('span', '', t('follow.held',[this.snapshot.leashHolder])));
     if (!summon) return;
     node.append(this.el("span", "", t("summon.received", [summon.sender, `${summon.room} (${summon.space || "Mixed"})`])));
     const accept = this.button(t("summon.accept"), "secondary", "button"); accept.addEventListener("click", () => this.run(() => this.client.acceptSummon()));

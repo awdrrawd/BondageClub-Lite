@@ -27,7 +27,19 @@ native-data.json 由本機 BC 定義靜態擷取活動、部位與物品條件�
 
 AFC 擴展戀人讀取公開共享關係。只向自己的 AFC 戀人且在好友名單內的人查詢房間，並只接受相應回覆。房間卡片比對搜尋 Friends 或 AFC 房名＋區域；不掃描其他玩家，不回傳自己的房間、不改 AFC 設定。查不到不等於沒有關係或已離線。
 
-BCX 相容召喚接收普通 BEEP，依本次登入允許名單、關鍵字、有效房名／區域判斷。收到後顯示接受確認，未接受不離房；60 秒到期、關閉規則或登出後失效。不實作 BCX 私有強制規則、倒數或跨房自動跟隨。
+BCX 相容召喚接收普通 BEEP，依本次登入允許名單、關鍵字、有效房名／區域判斷。收到後顯示接受確認，未接受不離房；60 秒到期、關閉規則或登出後失效。接受時再次檢查允許名單、黑名單／GhostList 與有效期，查詢目的房間並確認可加入後才離房。不實作 BCX 私有強制規則或倒數；這是 Lite 本次登入的本機允許名單，不能以對方自稱有 BCX 權限代替。
+
+## 接收牽引與跟隨
+
+在完整版 BC 啟用允許玩家牽引，並佩戴有 Leash 效果的已知道具。Lite 收到同房角色的 Hidden HoldLeash 後，檢查該角色對自己的互動權限、黑名單／GhostList、房間禁止、固定效果與頸部鎖具；符合才記錄牽引者。未知道具／鎖具或所需資料不足時拒絕，不移除、不修改外觀。
+
+只接受目前牽引者的 Leash BEEP。先查詢指定區域的目的房間，確認可加入且未滿；結果返回時再驗證牽引資格，才離房並加入。持有人離房後僅保留 30 秒驗證窗口。放開、移除牽繩、斷線、手動離房或加入失敗會解除本機牽引；手動搜尋會取消待執行的換房。地圖房間暫不跟隨。若查詢後房間才變滿／上鎖，仍可能加入失敗。
+
+支援 HoldLeash／StopHoldLeash／PingHoldLeash，必要時回傳 RemoveLeash；不把控制封包顯示成聊天。此入口是**接收牽引**，未新增抓取別人牽繩的按鈕，也未載入 BCX 規則引擎。
+
+實機待驗收：完整版牽住 Lite → 換房 → 再換房；放開、拆牽繩、主人／戀人鎖、滿房／鎖房、牽引者與自己斷線。確認錯誤通知不會讓 Lite 離開原房，且外觀封包沒有寫入。自動測試不能代替正式伺服器雙帳號驗收。
+
+English: Lite receives authorized official leash controls and follows only its recorded holder after a room lookup and renewed permission checks. Missing asset/lock data and unsupported map rooms fail closed. BCX-style summon BEEPs require a local opt-in allowlist and manual acceptance; blocked senders are rejected. This does not load BCX enforcement rules or add outgoing leash grabbing. Live two-account testing remains required.
 
 ## Lite 識別
 

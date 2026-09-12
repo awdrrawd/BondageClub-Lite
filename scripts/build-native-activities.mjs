@@ -10,7 +10,7 @@ function literal(node) {
   if (node.type === 'ObjectExpression') return Object.fromEntries(node.properties.filter(p => p.type === 'ObjectProperty' && !p.computed).map(p => [p.key.name || p.key.value, literal(p.value)]));
 }
 const ast = parse(source, { sourceType: 'script' });
-const activities = [], zones = {}, bodies = {}, geometry = {}, items = {};
+const activities = [], zones = {}, bodies = {}, geometry = {}, items = {}, locks = {};
 function walk(node) {
   if (!node || typeof node !== 'object') return;
   if (node.type === 'VariableDeclarator' && node.id.name === 'ActivityFemale3DCG') {
@@ -26,6 +26,7 @@ function walk(node) {
       for (const node of props.Asset.elements) {
         const asset = node?.type === 'StringLiteral' ? { Name: node.value } : literal(node);
         if (!asset?.Name) continue;
+        if (asset.IsLock === true) locks[asset.Name] = { owner: asset.OwnerOnly === true, lover: asset.LoverOnly === true, family: asset.FamilyOnly === true };
         const rule = {};
         for (const key of ['Effect', 'Block', 'AllowActivityOn', 'AllowActivity', 'Expose']) {
           const ownNode = node?.properties?.find(property => property.type === 'ObjectProperty' && (property.key.name || property.key.value) === key)?.value;
@@ -45,5 +46,5 @@ function walk(node) {
 }
 walk(ast);
 const bodyGroups = ['BodyUpper', 'BodyLower', 'Height', 'Eyes', 'Eyes2', 'Eyebrows', 'Mouth', 'Blush', 'Fluids', 'Emoticon', 'HairFront', 'HairBack'];
-writeJson('src/action/native-data.json', { activities, zones, geometry, bodies: Object.fromEntries(Object.entries(bodies).filter(([group]) => bodyGroups.includes(group))), items });
+writeJson('src/action/native-data.json', { activities, zones, geometry, bodies: Object.fromEntries(Object.entries(bodies).filter(([group]) => bodyGroups.includes(group))), items, locks });
 console.log(`${activities.length} native activities, ${Object.keys(zones).length} zones`);

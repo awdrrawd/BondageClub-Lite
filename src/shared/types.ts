@@ -28,6 +28,7 @@ export interface PlayerSummary extends CharacterSummary {
 }
 
 export interface CharacterSummary {
+  GhostList?: number[];
   BlackList?: number[];
   WhiteList?: number[];
   Reputation?: Array<{ Type: string; Value: number }>;
@@ -60,6 +61,7 @@ export interface RoomSearchRequest {
 }
 
 export interface RoomSearchResult {
+  BlockCategory?: string[];
   Game?: string;
   Name: string;
   Language: string;
@@ -145,6 +147,7 @@ export interface ClientSnapshot {
   cuddlePartner?: number | null;
   whispers?: DisplayMessage[];
   summon?: { sender: number; room: string; space: string; expires: number } | null;
+  leashHolder?: number | null;
   loverRooms?: Record<number, { name: string; space: string }>;
   friendsQueryState: "idle" | "loading" | "ready" | "error";
   friends: OnlineFriend[];

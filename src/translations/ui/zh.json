@@ -354,7 +354,7 @@
   "interaction.smileText": "{0}對{1}微笑。",
   "interaction.hugText": "{0}擁抱了{1}。",
   "summon.title": "BCX 相容召喚",
-  "summon.help": "此處為 Lite 自己的允許規則，不代表已載入 BCX 的私有規則引擎。啟用後只有列出的帳號、符合文字且附房名的普通 私訊，才會產生召喚提示；需你确认後前往，不回覆 BCX 控制封包。",
+  "summon.help": "使用 Lite 本次登入的允許名單，支援 BCX 招喚文字。只有符合文字且附房名的普通 BEEP 才會提示；接受後重查名單、黑名單與房間可用性，再前往。不載入 BCX 私有強制規則。",
   "summon.enabled": "啟用召喚接收",
   "summon.members": "允許的玩家 ID（逗號分隔）",
   "summon.text": "召喚文字（也接受 summon）",
@@ -455,5 +455,7 @@
   "history.column.text": "訊息",
   "locale.ru": "Русский",
   "footer.repository": "GitHub 倉庫",
-  "media.permanent": "永久許可"
+  "media.permanent": "永久許可",
+  "follow.held": "正由 #{0} 牽引；有效換房通知會在檢查房間後跟隨。",
+  "follow.unavailable": "無法跟隨：目的房間不可用或權限已變更。"
 }

@@ -455,5 +455,7 @@
   "history.column.text": "Message",
   "locale.ru": "Русский",
   "footer.repository": "GitHub repository",
-  "media.permanent": "Permanent permissions"
+  "media.permanent": "Permanent permissions",
+  "follow.held": "Leashed by #{0}; valid room changes are checked before following.",
+  "follow.unavailable": "Cannot follow: destination unavailable or permission changed."
 }

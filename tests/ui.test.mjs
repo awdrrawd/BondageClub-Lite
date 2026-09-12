@@ -1152,3 +1152,13 @@ test('UI disposal closes its IndexedDB connection after pending writes',async()=
   request.onblocked=()=>reject(new Error('Disposed UI retained its database connection'));
  });
 });
+
+test('leash indicator updates without rebuilding the active chat',async()=>{
+ const f=setup();f.emit({phase:'in-room',room:{Name:'Room'},characters:[],messages:[]});
+ f.document.querySelector('#nav-chat').click();
+ const log=f.document.getElementById('TextAreaChatLog');
+ f.emit({leashHolder:55});
+ assert.match(f.document.getElementById('summon-notice').textContent,/#55/);
+ assert.equal(f.document.getElementById('TextAreaChatLog'),log);
+ f.emit({leashHolder:null});assert.equal(f.document.getElementById('summon-notice').hidden,true);
+});

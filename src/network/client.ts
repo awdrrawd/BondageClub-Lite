@@ -1,3 +1,5 @@
+import { canFollowLeash } from "../action/leash";
+import { LeashSession } from "./leash-session";
 import { interactionPermission } from "../action/interaction-permission";
 import { RoomSearch } from "./room-search";
 import { t, localizeStatus } from "../i18n";
@@ -47,9 +49,24 @@ export class BcLiteClient {
     }
   }
   private state = initialSnapshot();
+  private travel: { room: string; space: string; valid: () => boolean; kind: 'leash' | 'summon' } | null = null;
+  private leash = new LeashSession({
+    eligible: holder => canFollowLeash(this.state, holder),
+    hidden: (target, content) => { if (this.canSend()) this.socket!.emit('ChatRoomChat', {Type:'Hidden', Content:content, Target:target}); },
+    changed: leashHolder => this.patch({leashHolder}),
+  });
+  private moveTo(room: string, space: string, valid: () => boolean, kind: 'leash' | 'summon'): void {
+    if (!this.canSend() || !['ready','in-room'].includes(this.state.phase) || !valid()) return;
+    if (this.state.room?.Name === room || this.travel?.room === room && this.travel.space === space) return;
+    this.travel = { room, space, valid, kind };
+    this.searches.search({Query:room, Language:'', Space:space as RoomSearchRequest['Space'], Game:'', FullRooms:true, ShowLocked:true, SearchDescs:false});
+  }
+  private cancelTravel(): void { this.travel = null; }
+
   private searches = new RoomSearch({
     canSend: () => this.canSend(),
     status: code => {
+      if (code === "timeout") { if (this.travel?.kind === "leash") this.leash.clear(); this.cancelTravel(); }
       if (code === "blocked") throw new Error(t("m184"));
       this.patch(code === "queued" ? { rooms: [] } : code === "loading" ? { rooms: [], status: t("m186") } : { status: t("m187") });
     },
@@ -156,17 +173,20 @@ export class BcLiteClient {
   private summonRule = { enabled: false, members: [] as number[], text: "Come to my room immediately" };
   configureSummons(enabled: boolean, members: number[], text: string): void {
     if (members.length > 100 || members.some(id => !Number.isSafeInteger(id) || id <= 0) || !text.trim() || text.length > 200) throw new Error(t("summon.invalid"));
+    this.cancelTravel();
     this.summonRule = { enabled, members: [...new Set(members)], text: text.trim() };
     this.patch({ summon: null });
   }
-  dismissSummon(): void { this.patch({ summon: null }); }
+  private summonAllowed(member: number): boolean {
+    const self = {...this.state.player, ...this.state.characters.find(c => c.MemberNumber === this.state.player?.MemberNumber)};
+    return Number.isSafeInteger(member) && member > 0 && member !== self.MemberNumber && this.summonRule.enabled && this.summonRule.members.includes(member) && ![self.BlackList,self.GhostList].some(list => list !== undefined && (!Array.isArray(list) || list.includes(member)));
+  }
+  dismissSummon(): void { this.cancelTravel(); this.patch({ summon: null }); }
   acceptSummon(): void {
     const summon = this.state.summon;
-    if (!summon || !this.summonRule.enabled || !this.summonRule.members.includes(summon.sender) || summon.expires < Date.now() || !this.canSend() || !["ready", "in-room"].includes(this.state.phase)) throw new Error(t("summon.expired"));
+    if (!summon || !this.summonRule.enabled || !this.summonAllowed(summon.sender) || summon.expires < Date.now() || !this.canSend() || !["ready", "in-room"].includes(this.state.phase)) throw new Error(t("summon.expired"));
     this.patch({ summon: null });
-    if (this.state.room?.Name === summon.room) return;
-    if (this.state.room) this.leave();
-    this.join(summon.room);
+    this.moveTo(summon.room, summon.space, () => this.summonAllowed(summon.sender) && summon.expires >= Date.now(), "summon");
   }
   private recoveryTimer: number | null = null;
   private lastResumeCheck = 0;
@@ -275,6 +295,7 @@ export class BcLiteClient {
   }
 
   disconnect(): void {
+    this.cancelTravel(); this.leash.clear();
     this.searches.reset(true);
     this.cuddlePair = null; this.cuddlePeers.clear();
     this.departed.clear();
@@ -301,7 +322,7 @@ export class BcLiteClient {
     this.patch(initialSnapshot());
   }
 
-  search(request: RoomSearchRequest): void { this.searches.search(request); }
+  search(request: RoomSearchRequest): void { this.cancelTravel(); this.searches.search(request); }
 
   refreshFriends(): void {
     if (!this.canSend()) throw new Error(t("m188"));
@@ -379,7 +400,9 @@ export class BcLiteClient {
     });
   }
 
-  leave(): void {
+  leave(): void { this.leaveRoom(); }
+  private leaveRoom(preserveLeash = false): void {
+    this.cancelTravel(); if (!preserveLeash) this.leash.clear();
     this.stopCuddle(); this.patch({ cuddleRequest: null });
     this.returnRoom = null;
     this.rememberLastRoom(null);
@@ -577,7 +600,14 @@ export class BcLiteClient {
       this.patch({ player: namedPlayer, friends, loverRooms, friendsQueryState: "ready", friendsStatus: t("m215", [friends.length, new Date().toLocaleTimeString()]) });
     });
     this.socket.on("AccountBeep", (data: { MemberNumber?: number; MemberName?: string; BeepType?: string; Message?: unknown; ChatRoomName?: string; ChatRoomSpace?: string }) => {
-      if (data && !data.BeepType && this.summonRule.enabled && this.summonRule.members.includes(data.MemberNumber!) && typeof data.Message === "string" && (data.Message.trim().toLowerCase() === "summon" || data.Message.toLowerCase().startsWith(this.summonRule.text.toLowerCase())) && typeof data.ChatRoomName === "string" && data.ChatRoomName.trim() && data.ChatRoomName.length <= 100 && ["X", "M", ""].includes(data.ChatRoomSpace ?? "invalid")) {
+      if (data?.BeepType === 'Leash') {
+        const holder = this.leash.current(this.state.characters);
+        if (holder && holder.MemberNumber === data.MemberNumber && typeof data.ChatRoomName === 'string' && data.ChatRoomName.trim() && data.ChatRoomName.length <= 100 && ['X','M',''].includes(data.ChatRoomSpace ?? 'invalid')) {
+          this.moveTo(data.ChatRoomName, data.ChatRoomSpace!, () => this.leash.current(this.state.characters)?.MemberNumber === data.MemberNumber, 'leash');
+        }
+        return;
+      }
+      if (data && !data.BeepType && this.summonRule.enabled && this.summonAllowed(data.MemberNumber!) && typeof data.Message === "string" && (data.Message.trim().toLowerCase() === "summon" || data.Message.toLowerCase().startsWith(this.summonRule.text.toLowerCase())) && typeof data.ChatRoomName === "string" && data.ChatRoomName.trim() && data.ChatRoomName.length <= 100 && ["X", "M", ""].includes(data.ChatRoomSpace ?? "invalid")) {
         this.patch({ summon: { sender: data.MemberNumber!, room: data.ChatRoomName, space: data.ChatRoomSpace!, expires: Date.now() + 60000 } });
       }
       if (data?.BeepType === "afcBeep") {
@@ -601,18 +631,30 @@ export class BcLiteClient {
     this.socket.on("ChatRoomSearchResult", (rooms: RoomSearchResult[]) => {
       const queued = this.searches.complete();
       if (queued === false) return;
-      if (queued) { this.search(queued); return; }
-      if (!Array.isArray(rooms)) { this.patch({ status: t("m217") }); return; }
+      if (queued) { this.searches.search(queued); return; }
+      if (!Array.isArray(rooms)) { this.cancelTravel(); this.patch({ status: t("m217") }); return; }
+      if (this.travel) {
+        const travel = this.travel; this.travel = null;
+        const destination = rooms.find(room => room && room.Name === travel.room && room.Space === travel.space);
+        const blocksLeash = travel.kind === 'leash' && destination?.BlockCategory?.includes('Leashing');
+        if (!travel.valid() || blocksLeash || destination?.CanJoin !== true || !Number.isSafeInteger(destination.MemberCount) || !Number.isSafeInteger(destination.MemberLimit) || destination.MemberCount < 0 || destination.MemberCount >= destination.MemberLimit || destination.MapType && destination.MapType !== 'Never') {
+          if (travel.kind === 'leash') this.leash.clear();
+          this.localMessage(t('follow.unavailable')); return;
+        }
+        if (this.state.room) this.leaveRoom(travel.kind === 'leash');
+        this.join(destination.Name); return;
+      }
       const safeRooms = rooms;
       this.patch({ rooms: safeRooms, status: t("m218", [safeRooms.length]) });
     });
     this.socket.on("ChatRoomSearchResponse", (result: unknown) => {
       if (result === "RoomKicked") {
+        this.cancelTravel(); this.leash.clear();
         this.returnRoom = null; this.rememberLastRoom(null); this.clearRoomTimer();
         this.patch({ phase: "ready", room: null, characters: [], status: t("m220", [String(result)]) }); return;
       }
       if (this.state.phase !== "joining") { this.patch({ status: t("m219", [String(result)]) }); return; }
-      if (result !== "JoinedRoom") { this.rememberLastRoom(null); this.clearRoomTimer(); this.patch({ phase: "ready", room: null, characters: [], status: t("m220", [String(result)]) }); }
+      if (result !== "JoinedRoom") { this.cancelTravel(); this.leash.clear(); this.rememberLastRoom(null); this.clearRoomTimer(); this.patch({ phase: "ready", room: null, characters: [], status: t("m220", [String(result)]) }); }
     });
     this.socket.on("ChatRoomCreateResponse", (result: unknown) => {
       if (result === "ChatRoomCreated") this.patch({ status: t("m221") });
@@ -642,6 +684,7 @@ export class BcLiteClient {
     });
     this.socket.on("ChatRoomSyncMemberLeave", (data: { SourceMemberNumber?: number }) => {
       if (data?.SourceMemberNumber) this.cuddlePeers.delete(data.SourceMemberNumber);
+      if (data?.SourceMemberNumber) this.leash.departed(data.SourceMemberNumber);
       const character = this.findCharacter(data?.SourceMemberNumber);
       if (this.cuddlePair?.peer === data?.SourceMemberNumber) this.stopCuddle();
       if (character) { this.departed.set(character.MemberNumber, character); if (this.departed.size > 100) this.departed.delete(this.departed.keys().next().value!); }
@@ -693,6 +736,7 @@ export class BcLiteClient {
     });
     this.socket.on("disconnect", (reason) => {
       this.searches.reset();
+      this.cancelTravel(); this.leash.clear();
       this.patch({ summon: null });
       this.clearRecovery();
       this.recordConnection(["ping timeout", "transport close", "transport error", "io server disconnect", "io client disconnect"].includes(reason) ? reason : "disconnected");
@@ -730,6 +774,7 @@ export class BcLiteClient {
     }
     this.loginAccepted = true;
     const player: PlayerSummary = { AccountName: value.AccountName, ID: value.ID, MemberNumber: value.MemberNumber!, Name: value.Name, Nickname: value.Nickname,
+      BlackList: value.BlackList, WhiteList: value.WhiteList, GhostList: value.GhostList, Reputation: value.Reputation,
       Description: value.Description, Owner: value.Owner, Ownership: value.Ownership, Lovership: value.Lovership,
       AssetFamily: value.AssetFamily, LabelColor: value.LabelColor,
       LastChatRoom: value.LastChatRoom && typeof value.LastChatRoom === "object" ? { Name: this.validRoomName(value.LastChatRoom.Name) || undefined } : null,
@@ -762,6 +807,13 @@ export class BcLiteClient {
   }
 
   private handleMessage(message: ChatMessage): void {
+    if (message?.Type === 'Hidden' && ['HoldLeash','StopHoldLeash','PingHoldLeash','RemoveLeash'].includes(message.Content)) {
+      const sender = this.state.characters.find(c => c.MemberNumber === message.Sender);
+      if (sender && this.canSend() && this.state.phase === 'in-room' && (!message.Target || message.Target === this.state.player?.MemberNumber)) this.leash.message(sender, message.Content);
+      return;
+    }
+    if (message?.Type === 'Action' && typeof message.Content === 'string' && message.Content.startsWith('ServerDisconnect') && message.Sender === this.state.leashHolder) { this.cancelTravel(); this.leash.clear(); }
+
     if (message?.Type === "Hidden" && message.Content === "Luzi_XCharacterDrawState" && this.state.characters.some(character => character.MemberNumber === message.Sender)) {
       const state = message.Dictionary?.[0] as { prevCharacter?: number; nextCharacter?: number; associatedAsset?: { group?: string; asset?: string } } | undefined;
       const peer = state?.prevCharacter ?? state?.nextCharacter;
@@ -841,12 +893,14 @@ export class BcLiteClient {
     this.clearRoomTimer();
     this.roomTimer = window.setTimeout(() => {
       this.clearRoomTimer();
+      this.cancelTravel(); this.leash.clear();
       this.patch({ phase: "ready", status: t("m241") });
     }, 12_000);
   }
   private clearSearchTimer(): void { this.searches.clearTimer(); }
   private patch(change: Partial<ClientSnapshot>): void {
     this.state = { ...this.state, ...change };
+    if (this.state.leashHolder && this.state.phase === 'in-room' && (change.characters || change.player || change.room)) this.leash.current(this.state.characters);
     for (const listener of this.listeners) listener(this.state);
   }
 }

@@ -33,6 +33,8 @@ async function setup(environment, relayAvailable = true, account = {}, storage =
   const RoomSearch = new Function("window", loadTypeScript("src/network/room-search.ts")+";return RoomSearch;")({setTimeout(fn){timers.set(++timerId,fn);return timerId;},clearTimeout(id){timers.delete(id);}});
   const context = {
     RoomSearch, interactionPermission,
+    canFollowLeash: new Function('definitions','interactionPermission',loadTypeScript('src/action/leash.ts')+';return canFollowLeash;')(definitions,interactionPermission),
+    LeashSession: new Function(loadTypeScript('src/network/leash-session.ts')+';return LeashSession;')(),
     decodeFriendNames, contactName,
     hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState, createCuddleItem, receivedSpeech, activityAsset,
     localStorage: { getItem(key) { return storage.get(key) ?? null; }, setItem(key, value) { storage.set(key, value); } },
@@ -563,7 +565,9 @@ test('BCX-compatible summons require opt-in, allowed sender, ordinary beep, matc
   }
   receive(beep); assert.equal(f.state().summon.sender, 55);
   assert.equal(f.sent.some(p => p.event === 'ChatRoomJoin'), false);
-  f.client.acceptSummon(); assert.equal(f.sent.at(-1).payload.Name, 'Target');
+  f.client.acceptSummon(); assert.equal(f.sent.at(-1).event,'ChatRoomSearch');
+  f.handlers.get('ChatRoomSearchResult')([{Name:'Target',Space:'X',CanJoin:true,MemberCount:1,MemberLimit:10}]);
+  assert.equal(f.sent.at(-1).payload.Name, 'Target');
   assert.equal(f.state().summon, null);
   receive(beep); f.client.configureSummons(false, [], 'Come here');
   assert.throws(() => f.client.acceptSummon());
@@ -1054,4 +1058,95 @@ test('relationship activity permission is revoked immediately by character sync'
  assert.equal(f.client.activityOptions(55,true).find(o=>o.name==='Whisper').reason,null);
  f.handlers.get('ChatRoomSyncCharacter')({Character:{...target,WhiteList:[]}});
  for(const mode of [false,true]) assert.throws(()=>f.client.sendActivity(55,'ItemEars','Whisper',mode));
+});
+
+const leashedSelf = () => ({MemberNumber:123,Name:'Self',AssetFamily:'Female3DCG',AllowedInteractions:0,BlackList:[],GhostList:[],OnlineSharedSettings:{AllowPlayerLeashing:true},Appearance:[{Group:'ItemNeckRestraints',Name:'CollarLeash'}]});
+async function leashFixture(self = leashedSelf()) {
+ const f=await setup('PROD',true,self);
+ f.handlers.get('ChatRoomSync')({Name:'Start',Space:'X',Character:[self,{MemberNumber:55,Name:'Holder'}]});
+ return f;
+}
+const hold = f => f.handlers.get('ChatRoomMessage')({Type:'Hidden',Content:'HoldLeash',Sender:55,Target:123});
+const pull = (f,extra={}) => f.handlers.get('AccountBeep')({BeepType:'Leash',MemberNumber:55,ChatRoomName:'Destination',ChatRoomSpace:'X',...extra});
+const destination = {Name:'Destination',Space:'X',CanJoin:true,MemberCount:1,MemberLimit:10};
+
+test('leash holder follows through a validated room search and never rewrites appearance',async()=>{
+ const f=await leashFixture(); hold(f); assert.equal(f.state().leashHolder,55);
+ f.handlers.get('ChatRoomSyncMemberLeave')({SourceMemberNumber:55});
+ pull(f); assert.equal(f.sent.at(-1).event,'ChatRoomSearch');
+ assert.equal(f.sent.some(p=>p.event==='ChatRoomLeave'),false);
+ f.handlers.get('ChatRoomSearchResult')([destination]);
+ assert.equal(f.sent.at(-1).payload.Name,'Destination'); assert.equal(f.state().leashHolder,55);
+ f.handlers.get('ChatRoomSync')({Name:'Destination',Space:'X',Character:[leashedSelf(),{MemberNumber:55,Name:'Holder'}]});
+ const count=f.sent.length;
+ f.handlers.get('ChatRoomMessage')({Type:'Hidden',Content:'PingHoldLeash',Sender:55});
+ assert.equal(f.sent.length,count);
+ assert.ok(!f.sent.some(p=>['AccountUpdate','ChatRoomCharacterUpdate','ChatRoomCharacterItemUpdate'].includes(p.event)));
+});
+
+test('random leash beeps, wrong sender and stopped leashes cannot move the player',async()=>{
+ const f=await leashFixture(); pull(f); assert.equal(f.sent.some(p=>p.event==='ChatRoomSearch'),false);
+ hold(f); pull(f,{MemberNumber:66}); assert.equal(f.sent.some(p=>p.event==='ChatRoomSearch'),false);
+ f.handlers.get('ChatRoomMessage')({Type:'Hidden',Content:'StopHoldLeash',Sender:55});
+ pull(f); assert.equal(f.state().leashHolder,null); assert.equal(f.sent.some(p=>p.event==='ChatRoomSearch'),false);
+});
+
+test('leash rejects missing gear, tethering, permissions and restricted or unknown locks',async()=>{
+ for(const change of [
+  {Appearance:[]}, {OnlineSharedSettings:{AllowPlayerLeashing:false}}, {AllowedInteractions:5},
+  {Appearance:[{Group:'ItemNeckRestraints',Name:'CollarLeash'},{Group:'ItemArms',Name:'Rope',Property:{Effect:['Tethered']}}]},
+  ...['OwnerPadlock','LoversPadlock','FamilyPadlock','UnknownLock'].map(LockedBy=>({Appearance:[{Group:'ItemNeckRestraints',Name:'CollarLeash',Property:{LockedBy}}]}))
+ ]) {
+  const f=await leashFixture({...leashedSelf(),...change}); hold(f);
+  assert.equal(f.state().leashHolder ?? null,null); assert.equal(f.sent.at(-1).payload.Content,'RemoveLeash');
+ }
+ const f=await leashFixture({...leashedSelf(),Ownership:{MemberNumber:55},Appearance:[{Group:'ItemNeckRestraints',Name:'CollarLeash',Property:{LockedBy:'OwnerPadlock'}}]});
+ hold(f); assert.equal(f.state().leashHolder,55);
+});
+
+test('pending leash travel rechecks item updates and preserves the room when full',async()=>{
+ const f=await leashFixture();hold(f);pull(f);
+ f.handlers.get('ChatRoomSyncItem')({Item:{Target:123,Group:'ItemNeckRestraints'}});
+ f.handlers.get('ChatRoomSearchResult')([destination]);
+ assert.equal(f.state().room.Name,'Start');assert.equal(f.state().leashHolder,null);
+ const g=await leashFixture();hold(g);pull(g);g.handlers.get('ChatRoomSearchResult')([{...destination,MemberCount:10}]);
+ assert.equal(g.state().room.Name,'Start');assert.equal(g.sent.some(p=>p.event==='ChatRoomLeave'),false);
+});
+
+test('summon permission is rechecked after search and blacklist beats the local allowlist',async()=>{
+ const f=await setup('PROD',true,{BlackList:[55]});f.client.configureSummons(true,[55],'Come here');
+ const beep={MemberNumber:55,Message:'summon',ChatRoomName:'Destination',ChatRoomSpace:'X'};
+ f.handlers.get('AccountBeep')(beep);assert.equal(f.state().summon,null);
+ const g=await setup('PROD');g.client.configureSummons(true,[55],'Come here');
+ g.handlers.get('AccountBeep')(beep);g.client.acceptSummon();g.client.configureSummons(false,[],'Come here');
+ g.handlers.get('ChatRoomSearchResult')([destination]);assert.equal(g.sent.some(p=>p.event==='ChatRoomJoin'),false);
+});
+
+test('leash permission never borrows the follower reputation for an unknown holder',async()=>{
+ const f=await leashFixture({...leashedSelf(),AllowedInteractions:2,Reputation:[]});hold(f);
+ assert.equal(f.state().leashHolder ?? null,null);
+ f.handlers.get('ChatRoomSyncCharacter')({Character:{MemberNumber:55,Name:'Holder',Reputation:[]}});hold(f);
+ assert.equal(f.state().leashHolder,55);
+});
+
+test('disconnect and manual searches cancel a pending follow without late navigation',async()=>{
+ for(const cancel of [f=>f.handlers.get('disconnect')('transport close'),f=>f.client.search(request),f=>f.client.leave()]) {
+  const f=await leashFixture();hold(f);pull(f);cancel(f);
+  f.handlers.get('ChatRoomSearchResult')([destination]);
+  assert.equal(f.sent.some(p=>p.event==='ChatRoomJoin'),false);
+ }
+});
+
+test('room leashing restrictions and ghosted holders prevent acquisition',async()=>{
+ for(const change of [{BlockCategory:['Leashing']},{MapType:'Always'}]) {
+  const f=await leashFixture();f.handlers.get('ChatRoomSync')({Name:'Start',Space:'X',...change,Character:[leashedSelf(),{MemberNumber:55,Name:'Holder'}]});
+  hold(f);assert.equal(f.state().leashHolder ?? null,null);
+ }
+ const f=await leashFixture({...leashedSelf(),GhostList:[55]});hold(f);assert.equal(f.state().leashHolder ?? null,null);
+});
+
+test('a destination that prohibits leashing cannot cause the follower to leave',async()=>{
+ const f=await leashFixture();hold(f);pull(f);
+ f.handlers.get('ChatRoomSearchResult')([{...destination,BlockCategory:['Leashing']}]);
+ assert.equal(f.state().room.Name,'Start');assert.equal(f.sent.some(p=>p.event==='ChatRoomLeave'),false);
 });

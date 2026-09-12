@@ -455,5 +455,7 @@
   "history.column.targetId": "Номер получателя",
   "history.column.targetName": "Имя получателя",
   "history.column.text": "Сообщение",
-  "media.permanent": "Постоянные разрешения"
+  "media.permanent": "Постоянные разрешения",
+  "follow.held": "Поводок держит #{0}; переход выполняется после проверки комнаты.",
+  "follow.unavailable": "Переход невозможен: комната недоступна или права изменились."
 }

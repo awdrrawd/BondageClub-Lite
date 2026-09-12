@@ -114,7 +114,7 @@ IndexedDB `bc-lite-history` v2 的 messages／contacts 按環境及玩家 ID 分
 | 送出 | AccountLogin | 登入 |
 | 收到 | LoginQueue、LoginResponse、ServerInfo | 登入與就緒 |
 | 送出／收到 | AccountQuery／AccountQueryResult | OnlineFriends |
-| 送出／收到 | AccountBeep | 普通文字、AFC 查詢回覆、經允許的召喚 |
+| 送出／收到 | AccountBeep | 普通文字、AFC 查詢回覆、經允許的召喚及 Leash 跟隨 |
 | 送出 | ChatRoomSearch、ChatRoomJoin、ChatRoomCreate、ChatRoomLeave | 房間操作 |
 | 收到 | ChatRoomSearchResult、ChatRoomSearchResponse、ChatRoomCreateResponse、ChatRoomSync* | 房間結果、角色／物品同步 |
 | 送出／收到 | ChatRoomChat／ChatRoomMessage | Chat、Whisper、Emote、Action、Activity、受控 Hidden |
@@ -169,3 +169,7 @@ src/extensions/api.ts 建立 BCLite v1，同步事件由 client.subscribeMessage
 這次調整模組責任與清理入口，已補齊線上互動關係規則；未新增物品操作。貼貼協定協調、帳戶與房間畫面仍由 client／LiteApp 統籌；沒有為了縮短檔案而把同一狀態任意分散到多個 Socket 或視圖控制器。
 
 English: Settings composition, unread accounting, room-search retries and UI resource cleanup now have dedicated modules. UI and plugins share online permission levels 0–5, including ownership, lovers, lists and dominance, with missing-data rejection. Tests remove module declarations structurally while preserving source strings. The client remains the sole socket owner; disposal of a UI does not disconnect it. NPC and inventory operations remain outside this refactor.
+
+## 牽引與招喚
+
+`action/leash.ts` 只讀檢查牽引裝備、效果、鎖具與共用關係權限；`network/leash-session.ts` 保存已驗證牽引者，處理放開、ping 及短暫離房窗口。client 使用既有 RoomSearch 查詢目標，返回後再驗證權限及容量，才送出離房／加入。控制封包不進訊息事件或歷史，不寫外觀。BCX 相容招喚使用獨立的本機允許名單與人工接受。設定、限制與雙人驗收見[活動與社群協定](chat-native-identity-tests.md)。

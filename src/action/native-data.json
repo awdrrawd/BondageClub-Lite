@@ -12198,5 +12198,97 @@
     },
     "ItemBoots/SingleBalletBoot": {},
     "ItemScript/Script": {}
+  },
+  "locks": {
+    "MetalPadlock": {
+      "owner": false,
+      "lover": false,
+      "family": false
+    },
+    "IntricatePadlock": {
+      "owner": false,
+      "lover": false,
+      "family": false
+    },
+    "HighSecurityPadlock": {
+      "owner": false,
+      "lover": false,
+      "family": false
+    },
+    "TimerPadlock": {
+      "owner": false,
+      "lover": false,
+      "family": false
+    },
+    "CombinationPadlock": {
+      "owner": false,
+      "lover": false,
+      "family": false
+    },
+    "PasswordPadlock": {
+      "owner": false,
+      "lover": false,
+      "family": false
+    },
+    "TimerPasswordPadlock": {
+      "owner": false,
+      "lover": false,
+      "family": false
+    },
+    "OwnerPadlock": {
+      "owner": true,
+      "lover": false,
+      "family": false
+    },
+    "OwnerTimerPadlock": {
+      "owner": true,
+      "lover": false,
+      "family": false
+    },
+    "LoversPadlock": {
+      "owner": false,
+      "lover": true,
+      "family": false
+    },
+    "LoversTimerPadlock": {
+      "owner": false,
+      "lover": true,
+      "family": false
+    },
+    "FamilyPadlock": {
+      "owner": false,
+      "lover": false,
+      "family": true
+    },
+    "MistressPadlock": {
+      "owner": false,
+      "lover": false,
+      "family": false
+    },
+    "MistressTimerPadlock": {
+      "owner": false,
+      "lover": false,
+      "family": false
+    },
+    "PandoraPadlock": {
+      "owner": false,
+      "lover": false,
+      "family": false
+    },
+    "ExclusivePadlock": {
+      "owner": false,
+      "lover": false,
+      "family": false
+    },
+    "SafewordPadlock": {
+      "owner": false,
+      "lover": false,
+      "family": false
+    },
+    "PortalLinkPadlock": {
+      "owner": false,
+      "lover": false,
+      "family": false
+    }
   }
 }
