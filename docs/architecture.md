@@ -157,12 +157,14 @@ src/extensions/api.ts 建立 BCLite v1，同步事件由 client.subscribeMessage
 
 已清除無引用的 defaultHistoryPolicy、測試專用 activityInventoryReason 包裝及已完成的 UI 遷移工具。build-extension-rules.mjs 仍有人工更新用途，動態載入的翻譯、插件相容分支與 BCLite 公開入口保留。
 
-仍值得逐步拆分：
+本輪整理：
 
-- ui/app.ts 同時負責頁面建構、草稿／未讀／歷史視窗、帳戶重設與全域事件。優先抽出設定／資料頁，再分離聊天閱讀狀態；保留 DOM 身分測試，避免重新引入定時重建。
-- network/client.ts 是唯一 Socket 擁有者，這個邊界應保留；貼貼、搜尋重試及好友查詢可抽成受 client 調用的狀態模組，不讓各模組自行建立 Socket。
-- LiteApp 仍以整頁單一實例為生命週期，尚無統一 dispose。未來支援熱重載或多實例前，需統一取消訂閱、timer 與全域事件；目前測試已有失敗時清理保護。
-- 測試仍大量用移除 import 加 VM 注入來執行 TypeScript，耦合來源文字結構。後續應建立共用測試載入方式；本輪未將測試框架整套替換。
-- 插件 API 的限制權限是保守子集，與 UI 相容模式不同；不要把它當完整官方權限引擎。擴展操作前應先建立共享權限模組。
+- `ui/settings-view.ts` 負責設定頁組裝，透過窄介面接收設定與操作；`ui/unread-state.ts` 集中訊息去重、各對象未讀數與已讀標記，UI 只提供目前是否正在閱讀。
+- `network/room-search.ts` 管理搜尋排隊、逾時及重連重試。`network/client.ts` 仍是唯一 Socket 擁有者，搜尋模組只透過注入的操作發送請求。
+- `platform/lifetime.ts` 統一取消 UI 訂閱、全域事件與計時器。`LiteApp.dispose()` 清理媒體、音效、常亮、對話框並等待歷史批次寫入；不等同登出，不主動切斷共用 client。`BCLite.dispose()` 可另行撤銷所有插件及橋接訂閱。
+- `tests/load-typescript.mjs` 用語法樹移除模組宣告，保留字串內容；測試仍明確注入依賴，Vite 專用的 chunks 也以宣告名稱替換，不再全面取代 export 字串。
+- `action/interaction-permission.ts` 提供 UI 與插件共用的保守互動權限。優先讀 AllowedInteractions，缺值時接受舊欄位 ItemPermission；自己或 Everyone 可繼續驗證活動，其餘受限關係與缺資料拒絕。相容模式不繞過此檢查。貼貼維持獨立的雙方確認與只改自身欄位流程。
 
-以上是維護項目，不是已完成的分拆；本輪沒有改寫通訊或外觀操作。
+這次調整模組責任與清理入口，沒有實作完整官方關係／物品引擎。貼貼協定協調、帳戶與房間畫面仍由 client／LiteApp 統籌；沒有為了縮短檔案而把同一狀態任意分散到多個 Socket 或視圖控制器。
+
+English: Settings composition, unread accounting, room-search retries and UI resource cleanup now have dedicated modules. UI and plugins share conservative interaction permissions. Tests remove module declarations structurally while preserving source strings. The client remains the sole socket owner; disposal of a UI does not disconnect it. Full official relationship and inventory rules are outside this refactor.

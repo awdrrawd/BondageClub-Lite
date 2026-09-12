@@ -3,6 +3,14 @@ import type { ClientSnapshot } from '../shared/types';
 
 /** Keeps disk I/O out of the socket and renderer, and rejects stale account loads. */
 export class HistorySession {
+  private disposed = false;
+  async dispose(): Promise<void> {
+    if (this.disposed) return;
+    this.disposed = true; this.generation++; this.privateLoad++; this.roomGeneration++; this.archiveGeneration++;
+    this.changed = () => {}; this.loaded = () => {};
+    await this.flush();
+    window.clearTimeout(this.timer); this.timer = undefined;
+  }
   policy: HistoryPolicy = historyPolicy();
   messages: HistoryMessage[] = [];
   contacts: RecentContact[] = [];
@@ -46,6 +54,7 @@ export class HistorySession {
     return this.queue;
   }
   observe(state: Readonly<ClientSnapshot>): void {
+    if (this.disposed) return;
     const owner = historyOwner(state);
     const previous=this.observed; this.observed={...state};
     if (owner !== this.owner) {
@@ -151,7 +160,7 @@ export class HistorySession {
           messages:[...new Map([...batch.messages.filter(row=>this.unsaved.get(row.key)===revisions.get(row.key)),...this.pending.messages].map(row=>[row.key,row])).values()],
           contacts:[...new Map([...batch.contacts,...this.pending.contacts].map(row=>[row.key,row])).values()],
         };
-        if (++this.retries <= 3 && this.timer === undefined) this.timer = window.setTimeout(()=>{ void this.flush(); }, 1000 * 2 ** (this.retries - 1));
+        if (!this.disposed && ++this.retries <= 3 && this.timer === undefined) this.timer = window.setTimeout(()=>{ void this.flush(); }, 1000 * 2 ** (this.retries - 1));
         throw error;
       }
     });

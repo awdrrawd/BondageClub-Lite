@@ -1,10 +1,10 @@
+import { loadTypeScript } from './load-typescript.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {stripTypeScriptTypes} from 'node:module';
 import {Window} from 'happy-dom';
 import {history} from './history-helper.mjs';
-const code=stripTypeScriptTypes(readFileSync('src/storage/history-export.ts','utf8')).replace(/^import .*;\r?\n/gm,'').replaceAll('export ','');
+const code=loadTypeScript('src/storage/history-export.ts');
 const {exportHistoryHTML,exportHistoryXLSX}=new Function('localDay',code+';return {exportHistoryHTML,exportHistoryXLSX};')(history.localDay);
 const labels={title:'BC Lite',private:'Private',columns:['Time','Room','Channel','ID','Name','Target ID','Target','Text'],type:t=>t};
 const now=Date.now(),day=history.localDay(now);

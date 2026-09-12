@@ -1,8 +1,7 @@
+import { loadTypeScript } from './load-typescript.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
-import {stripTypeScriptTypes} from 'node:module';
-const source=stripTypeScriptTypes(readFileSync('src/platform/message-sounds.ts','utf8')).replace('export ','');
+const source=loadTypeScript('src/platform/message-sounds.ts');
 test('sounds are opt-in, independently persisted, gesture-unlocked and burst-limited',async()=>{
   const saved=new Map(), tones=[];
   const localStorage={getItem:k=>saved.get(k),setItem:(k,v)=>saved.set(k,v)};

@@ -6,6 +6,8 @@ Lite 提供 window.BCLite（apiVersion: 1），入口建立後發出 bclite:read
 
 TypeScript 契約位於 src/extensions/types.ts：PluginOptions、PluginMessage、MessageKind。這些型別與執行期 API 分離，不增加網路依賴。
 
+整個橋接可呼叫 `window.BCLite.dispose()` 取消快照訂閱並撤銷全部插件，之後不能再註冊。一般插件停用請使用自身的 `dispose()`。
+
 ## 註冊與訊息
 
 registerPlugin(id, { allowSend: false, privateMessages: false }) 回傳插件實例。同一 id 不能重複註冊；dispose() 移除監聽並停用該實例。發送與私訊訂閱各自明確啟用。getState() 僅提供 phase、self、room、members，不提供帳密、Socket、完整快照或外觀。
@@ -34,7 +36,9 @@ onMessage(callback) 回傳取消訂閱函式。只通知新加入的訊息，不
 - activityOptions(memberNumber)：取得原生 BC 活動與不可用原因。
 - sendActivity(memberNumber, group, name)：每次重新檢查權限及嚴格活動條件，不啟用寬鬆相容模式。
 
-每個插件的發送入口至少相隔 1500 毫秒，另受客戶端原有共同限制。失敗會 throw；送出不等於對端接受。活動權限目前只接受自己或明確 Everyone（AllowedInteractions=0）的對象；受限關係權限或缺資料會拒絕，尚未完整重現官方 owner／lover／白名單／支配聲望判斷。
+每個插件的發送入口至少相隔 1500 毫秒，另受客戶端原有共同限制。失敗會 throw；送出不等於對端接受。活動權限目前只接受自己或明確 Everyone（AllowedInteractions=0；缺值時讀取舊欄位 ItemPermission）的對象；受限關係權限或缺資料會拒絕，尚未完整重現官方 owner／lover／白名單／支配聲望判斷。
+
+UI 與插件共用 `action/interaction-permission.ts`；UI 相容模式也不會略過權限檢查，貼貼則沿用獨立的雙方確認流程。
 
 capabilities 明確標出目前不支援的 inventory、roomAdmin、musicControl、map。綁人、解綁、換裝必須先補齊物品與權限驗證；播歌可先發連結，不能強制其他人播放；地圖及房主操作需各自接入協定與房主權限。沒有提供任意 emit、整份 Appearance 覆寫或權限繞過入口。
 

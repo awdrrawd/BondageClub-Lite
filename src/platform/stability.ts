@@ -10,11 +10,9 @@ export class StabilityControls {
   private status = "";
   private statusNode: HTMLElement | null = null;
 
-  constructor() {
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible" && this.awake) void this.acquire();
-    });
-  }
+  private onVisibility = () => { if (document.visibilityState === "visible" && this.awake) void this.acquire(); };
+  constructor() { document.addEventListener("visibilitychange", this.onVisibility); }
+  dispose(): void { document.removeEventListener("visibilitychange", this.onVisibility); this.stop(); this.statusNode = null; }
   private show(text: string): void { this.status = text; if (this.statusNode) this.statusNode.textContent = text; }
   private async acquire(): Promise<void> {
     if (!this.awake || this.lock || this.acquiring || document.visibilityState !== "visible") return;

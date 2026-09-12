@@ -1,9 +1,9 @@
+import { interactionPermission } from "./permissions-helper.mjs";
+import { loadTypeScript } from './load-typescript.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { stripTypeScriptTypes } from 'node:module';
-const source = stripTypeScriptTypes(readFileSync('src/extensions/api.ts','utf8')).replace(/^import .*;\r?\n/gm,'').replaceAll('export ', '');
-const {createExtensionAPI, classifyMessage} = new Function(source+';return {createExtensionAPI,classifyMessage};')();
+const source = loadTypeScript('src/extensions/api.ts');
+const {createExtensionAPI, classifyMessage} = new Function('interactionPermission',source+';return {createExtensionAPI,classifyMessage};')(interactionPermission);
 function setup() {
  const callbacks=new Set(), calls=[];
  const state={phase:'in-room',player:{MemberNumber:1,AccountName:'private'},room:{Name:'Room'},characters:[{MemberNumber:2,Name:'Peer',AllowedInteractions:0}]};
@@ -37,4 +37,11 @@ test('plugin sends opt in, rate limit, and reject unknown/restricted target perm
 test('message classification distinguishes all supported channels and presence',()=>{
  for(const [type,kind] of Object.entries({Chat:'chat',Whisper:'whisper',Emote:'emote',Action:'action',Activity:'activity',ServerMessage:'server',Local:'local',Beep:'beep',Other:'unknown'}))assert.equal(classifyMessage({type}),kind);
  assert.equal(classifyMessage({type:'Action',presence:true}),'presence');
+});
+
+test('disposing the extension bridge revokes plugins and future registration',()=>{
+ const f=setup(),p=f.api.registerPlugin('lifecycle'); let count=0;
+ p.onMessage(()=>count++); f.api.dispose(); f.api.dispose(); f.emit({});
+ assert.equal(count,0); assert.throws(()=>p.getState(),/disposed/);
+ assert.throws(()=>f.api.registerPlugin('next'),/disposed/);
 });

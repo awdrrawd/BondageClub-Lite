@@ -1,3 +1,5 @@
+import { loadTypeScript } from './load-typescript.mjs';
+import { interactionPermission } from "./permissions-helper.mjs";
 import { renderAction, dictionaryText } from './action-helper.mjs';
 import { receivedSpeech } from './speech-helper.mjs';
 import { nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, definitions, activityAsset } from './native-helper.mjs';
@@ -8,7 +10,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
-import { stripTypeScriptTypes } from 'node:module';
 import { t, setLocale, localizeStatus } from './i18n-helper.mjs';
 import { afcLovers, embeddedAction } from './community-helper.mjs';
 import { validAppearance, copyAppearance, releaseAppearance } from './safety-helper.mjs';
@@ -29,7 +30,9 @@ async function setup(environment, relayAvailable = true, account = {}, storage =
     connect() { this.connected = true; handlers.get('connect')?.(); return this; },
     disconnect() { this.connected = false; handlers.get('disconnect')?.('io client disconnect'); return this; },
   };
+  const RoomSearch = new Function("window", loadTypeScript("src/network/room-search.ts")+";return RoomSearch;")({setTimeout(fn){timers.set(++timerId,fn);return timerId;},clearTimeout(id){timers.delete(id);}});
   const context = {
+    RoomSearch, interactionPermission,
     decodeFriendNames, contactName,
     hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState, createCuddleItem, receivedSpeech, activityAsset,
     localStorage: { getItem(key) { return storage.get(key) ?? null; }, setItem(key, value) { storage.set(key, value); } },
@@ -42,10 +45,7 @@ async function setup(environment, relayAvailable = true, account = {}, storage =
     AbortSignal,
     fetch: async () => ({ ok: relayAvailable, json: async () => relayAvailable ? ({ service: 'bc-lite-relay', version: 1 }) : ({}) }),
   };
-  const source = readFileSync(new URL('../src/network/client.ts', import.meta.url), 'utf8');
-  const javascript = stripTypeScriptTypes(source)
-    .replace(/^import .*;\r?\n/gm, '')
-    .replaceAll('export ', '');
+  const javascript = loadTypeScript('src/network/client.ts');
   vm.runInNewContext(`${javascript}\nexports.BcLiteClient = BcLiteClient;`, context);
   const client = new context.exports.BcLiteClient();
   let state;
@@ -117,7 +117,7 @@ test('cuddle previews both slots and pairing IDs; stale consent cannot replace a
 });
 
 test('comb activity publishes the actual worn tool and rechecks it after item removal', async () => {
-  const base={Appearance:[{Group:'BodyUpper',Name:'Normal'},{Group:'ItemHandheld',Name:'Hairbrush'}],ArousalSettings:{Active:'Manual',Zone:'f'.repeat(30),Activity:'z'.repeat(100)}};
+  const base={AllowedInteractions:0,Appearance:[{Group:'BodyUpper',Name:'Normal'},{Group:'ItemHandheld',Name:'Hairbrush'}],ArousalSettings:{Active:'Manual',Zone:'f'.repeat(30),Activity:'z'.repeat(100)}};
   const f=await setup('PROD',true,base); f.client.setTextCatalog(gameCatalog('zh'));
   f.handlers.get('ChatRoomSync')({Name:'Room',Character:[{...base,MemberNumber:123,Name:'Me'},{...base,MemberNumber:55,Name:'Peer'}]});
   f.client.sendActivity(55,'ItemHead','BrushItem');
@@ -270,7 +270,7 @@ test('incoming LCE ungarbled speech reaches chat and private history without sen
 
 test('compatibility sends clothed online activity but never overrides explicit preferences or room restrictions', async () => {
   const clothing = Object.keys(definitions.items).find(key => key.startsWith('Cloth/') && Object.keys(definitions.items[key]).length === 0).split('/');
-  const base = { Name: 'Test', Appearance: [{ Group: clothing[0], Name: clothing[1] }], ArousalSettings: { Active: 'Automatic', Activity: 'z'.repeat(100), Zone: 'f'.repeat(30) } };
+  const base = {AllowedInteractions:0, Name: 'Test', Appearance: [{ Group: clothing[0], Name: clothing[1] }], ArousalSettings: { Active: 'Automatic', Activity: 'z'.repeat(100), Zone: 'f'.repeat(30) } };
   const f = await setup('PROD', true, base);
   const actor = { ...base, MemberNumber: 123 }, target = { ...base, MemberNumber: 55 };
   f.handlers.get('ChatRoomSync')({ Name: 'Room', Character: [actor, target] });
@@ -293,7 +293,7 @@ test('compatibility sends clothed online activity but never overrides explicit p
 });
 
 test('paw activities require the correct wearer in both modes while ordinary automatic-mode activities remain usable', async () => {
-  const base={Name:'Test',Appearance:[{Group:'BodyUpper',Name:'Normal'}],ArousalSettings:{Active:'Automatic',Activity:'z'.repeat(100),Zone:'f'.repeat(30)}};
+  const base={AllowedInteractions:0,Name:'Test',Appearance:[{Group:'BodyUpper',Name:'Normal'}],ArousalSettings:{Active:'Automatic',Activity:'z'.repeat(100),Zone:'f'.repeat(30)}};
   const f=await setup('PROD',true,base);
   f.client.setTextCatalog(gameCatalog('zh'));
   const actor={...base,MemberNumber:123},target={...base,MemberNumber:55};
@@ -323,7 +323,7 @@ test('paw activities require the correct wearer in both modes while ordinary aut
 });
 
 test('unknown plugin appearance does not disable equipment checks, while fresh restrictions still block sending', async () => {
-  const base = {Name:'Test',Appearance:[{Group:'BodyUpper',Name:'Normal'},{Group:'Cloth',Name:'PluginDress'}],ArousalSettings:{Active:'Manual',Activity:'z'.repeat(100),Zone:'f'.repeat(30)}};
+  const base = {AllowedInteractions:0,Name:'Test',Appearance:[{Group:'BodyUpper',Name:'Normal'},{Group:'Cloth',Name:'PluginDress'}],ArousalSettings:{Active:'Manual',Activity:'z'.repeat(100),Zone:'f'.repeat(30)}};
   const f = await setup('PROD',true,base);
   const actor = {...base,MemberNumber:123}, target = {...base,MemberNumber:55};
   f.handlers.get('ChatRoomSync')({Name:'Room',Character:[actor,target]});
@@ -373,7 +373,7 @@ test('ECHO cuddle wears only the own slot and shares native activity plus recipr
 });
 
 test('native activity sends the BC Activity dictionary, rechecks permissions, and never writes appearance', async () => {
-  const base = { Name: 'Test', AssetFamily: 'Female3DCG', Appearance: [{ Group: 'BodyUpper', Name: definitions.bodies.BodyUpper[0] }], ArousalSettings: { Active: 'Manual', Activity: 'z'.repeat(100), Zone: 'f'.repeat(30) } };
+  const base = {AllowedInteractions:0, Name: 'Test', AssetFamily: 'Female3DCG', Appearance: [{ Group: 'BodyUpper', Name: definitions.bodies.BodyUpper[0] }], ArousalSettings: { Active: 'Manual', Activity: 'z'.repeat(100), Zone: 'f'.repeat(30) } };
   const f = await setup('PROD', true, base);
   f.handlers.get('ChatRoomSync')({ Name: 'Room', Character: [{ ...base, MemberNumber: 123 }, { ...base, MemberNumber: 55 }] });
   f.client.sendActivity(55, 'ItemEars', 'Whisper');
@@ -1031,4 +1031,17 @@ test('live message subscriptions do not replay history and isolate a throwing li
  f.client.relocalize();assert.equal(messages.length,1);
  off();f.handlers.get('ChatRoomMessage')({Sender:55,Type:'Chat',Content:'again'});
  assert.equal(messages.length,1);
+});
+
+test('UI compatibility cannot bypass shared unknown or restricted interaction permissions',async()=>{
+ const base={Name:'Test',Appearance:[{Group:'BodyUpper',Name:'Normal'}],ArousalSettings:{Active:'Manual',Activity:'z'.repeat(100),Zone:'f'.repeat(30)}};
+ const f=await setup('PROD',true,base);
+ for (const permission of [undefined,3]) {
+  f.handlers.get('ChatRoomSync')({Name:'Room',Character:[{...base,MemberNumber:123},{...base,MemberNumber:55,AllowedInteractions:permission}]});
+  for (const mode of [false,true]) {
+   assert.equal(f.client.activityOptions(55,mode).find(o=>o.name==='Whisper').reason,permission===undefined?'native.data':'native.permission');
+   assert.throws(()=>f.client.sendActivity(55,'ItemEars','Whisper',mode));
+  }
+ }
+ assert.ok(!f.sent.some(packet=>packet.event==='ChatRoomChat'&&packet.payload.Type==='Activity'));
 });

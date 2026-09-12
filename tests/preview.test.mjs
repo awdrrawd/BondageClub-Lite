@@ -1,11 +1,11 @@
+import { loadTypeScript } from './load-typescript.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
-import { stripTypeScriptTypes } from 'node:module';
 import vm from 'node:vm';
 
 test('offline preview client supports UI flows without network or browser storage', async () => {
-  const code = stripTypeScriptTypes(readFileSync('src/preview/client.ts','utf8')).replace(/^import .*;\r?\n/gm,'').replaceAll('export ','');
+  const code = loadTypeScript('src/preview/client.ts');
   const preview = vm.runInNewContext(code + ';createPreviewClient();', { Date, Set });
   let snapshot;
   preview.client.subscribe(value => { snapshot=value; });

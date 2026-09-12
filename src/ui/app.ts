@@ -1,5 +1,8 @@
+import { UnreadState } from "./unread-state";
+import { buildSettingsView } from "./settings-view";
 import { t, getLocale, setLocale, type Locale } from "../i18n";
 import "./style.css";
+import { Lifetime } from "../platform/lifetime";
 import type { UiClient } from "./client-contract";
 import { decodeBiography } from "../profile/biography";
 import { contactName } from "../profile/friend-names";
@@ -27,8 +30,10 @@ import type { CharacterSummary, ClientSnapshot, DisplayMessage, RoomCreateOption
 const roomLanguageIcons: Record<string, IconName> = { CN:'zh', EN:'en', DE:'de', FR:'fr', ES:'es', RU:'ru', UA:'ua' };
 export class LiteApp {
   private client: UiClient;
+  private lifetime = new Lifetime();
   private root: HTMLElement;
   private history: HistorySession;
+  private historyStore: HistoryStore | null;
   private historyError = false;
   private restoringHistory = false;
   private mediaConsent = new MediaConsent(document);
@@ -77,12 +82,9 @@ export class LiteApp {
   private visibleMessages = 100;
   private historyEndId: string | null = null;
   private performance = { history: 3000, visible: 100 };
-  private unread = 0;
-  private unreadPeers = new Map<number,{count:number;first:DisplayMessage}>();
-  private incomingSeen = new Set<string>();
+  private unread = new UnreadState();
   private sounds = new MessageSounds();
   private recoveryRoom: RoomSync | null = null;
-  private roomUnread = 0;
   private composing = false;
   private renderPending = false;
   private refreshRoomResults: (() => void) | null = null;
@@ -93,29 +95,30 @@ export class LiteApp {
   constructor(client: UiClient, root = document.querySelector<HTMLElement>("#app")) {
     if (!root) throw new Error(t("m001"));
     this.root = root;
-    document.addEventListener('pointerdown',()=>{void this.sounds.unlock().catch(()=>{});});
-    document.addEventListener('keydown',()=>{void this.sounds.unlock().catch(()=>{});});
-    window.matchMedia("(max-width: 760px)").addEventListener("change", () => {
+    this.lifetime.listen(document, 'pointerdown',()=>{void this.sounds.unlock().catch(()=>{});});
+    this.lifetime.listen(document, 'keydown',()=>{void this.sounds.unlock().catch(()=>{});});
+    this.lifetime.listen(window.matchMedia("(max-width: 760px)"), "change", () => {
       this.roomPage = 0;
       if (this.snapshot && this.tab === "rooms") this.render();
     });
     this.client = client;
     const persist = !document.documentElement.hasAttribute("data-ui-preview") && typeof window.indexedDB !== "undefined";
     this.historyError = !persist && !document.documentElement.hasAttribute("data-ui-preview");
-    this.history = new HistorySession(persist ? new HistoryStore(window.indexedDB) : null, () => {
+    this.historyStore = persist ? new HistoryStore(window.indexedDB) : null;
+    this.history = new HistorySession(this.historyStore, () => {
       if (this.snapshot?.player) this.updateFriendContent();
     }, () => { if (!this.historyError) { this.historyError = true; this.localNotice(t("history.error")); } }, (owner, messages) => {
       this.restoringHistory=true;
       try { this.client.restoreMessages(owner,messages); } finally { this.restoringHistory=false; }
     });
-    window.addEventListener("pagehide", () => { void this.history.flush(); });
-    window.setInterval(() => { if (this.snapshot) this.history.observe(this.snapshot); }, 60000);
+    this.lifetime.listen(window, "pagehide", () => { void this.history.flush(); });
+    this.lifetime.interval(() => { if (this.snapshot) this.history.observe(this.snapshot); }, 60000);
     // Delegate selection before controls run; reply jumps may then select their destination.
-    document.addEventListener("click", event => {
+    this.lifetime.listen(document, "click", event => {
       const target = event.target as HTMLElement | null;
       this.selectMessage(target?.closest<HTMLElement>(".chat-message") ?? null);
     }, true);
-    document.addEventListener("click", event => {
+    this.lifetime.listen(document, "click", event => {
       const target = event.target as HTMLElement;
       for (const picker of document.querySelectorAll<HTMLDetailsElement>(".mobile-picker[open]")) if (!picker.contains(target)) picker.open = false;
       if (!target.closest(".room-query, .room-search")) document.querySelector(".room-controls.search-expanded")?.classList.remove("search-expanded");
@@ -130,18 +133,18 @@ export class LiteApp {
       this.client.recordLifecycle(event);
       if (document.visibilityState === "visible" && window.navigator.onLine !== false) this.client.resumeConnection();
     };
-    document.addEventListener("visibilitychange", () => {
+    this.lifetime.listen(document, "visibilitychange", () => {
       if (document.visibilityState === "visible") resume("visible");
       else this.client.recordLifecycle("hidden");
     });
-    window.addEventListener("pageshow", () => resume("pageshow"));
-    window.addEventListener("online", () => resume("online"));
-    window.addEventListener("offline", () => this.client.recordLifecycle("offline"));
-    this.root.addEventListener("compositionstart", () => { this.composing = true; });
-    this.root.addEventListener("compositionend", () => {
+    this.lifetime.listen(window, "pageshow", () => resume("pageshow"));
+    this.lifetime.listen(window, "online", () => resume("online"));
+    this.lifetime.listen(window, "offline", () => this.client.recordLifecycle("offline"));
+    this.lifetime.listen(this.root, "compositionstart", () => { this.composing = true; });
+    this.lifetime.listen(this.root, "compositionend", () => {
       this.composing = false;
       // The final input event follows compositionend. Read its draft before replacing controls.
-      window.setTimeout(() => { if (this.renderPending) { this.renderPending = false; this.render(); } }, 0);
+      this.lifetime.timeout(() => { if (this.renderPending) { this.renderPending = false; this.render(); } }, 0);
     });
     try {
       const saved = JSON.parse(localStorage.getItem("bc-lite-display-v1") || "{}");
@@ -159,7 +162,8 @@ export class LiteApp {
     this.visibleMessages = this.performance.visible;
     this.client.setMessageLimit(this.performance.history);
     this.applySettings();
-    this.client.subscribe((snapshot) => {
+    this.lifetime.add(this.client.subscribe((snapshot) => {
+      if (this.lifetime.disposed) return;
       const previous = this.snapshot;
       const oldViewRoom = this.viewRoom()?.Name;
       this.snapshot = snapshot;
@@ -175,7 +179,7 @@ export class LiteApp {
       if (snapshot.phase === "ready" && !this.roomSearchInitialized) {
         this.roomSearchInitialized = true;
         const owner = historyOwner(snapshot);
-        window.setTimeout(() => {
+        this.lifetime.timeout(() => {
           if (owner && this.snapshot && historyOwner(this.snapshot) === owner && ["ready", "joining", "in-room"].includes(this.snapshot.phase)) this.searchRooms(true);
         }, 0);
       }
@@ -189,7 +193,7 @@ export class LiteApp {
       if (snapshot.room && snapshot.room.Name !== oldViewRoom) { this.tab = "chat"; this.visibleMessages = this.performance.visible; this.historyEndId = null; }
       if (!this.viewRoom() && previous?.room && this.tab === "chat") this.tab = "rooms";
       this.observeIncoming(!previous || ownerChanged || this.restoringHistory);
-      if (previous && !ownerChanged && !this.restoringHistory && snapshot.messages !== previous.messages && snapshot.messages.length && this.tab !== "chat" && snapshot.messages.at(-1)?.id !== previous.messages.at(-1)?.id) this.roomUnread++;
+      if (previous && !ownerChanged && !this.restoringHistory && snapshot.messages !== previous.messages && snapshot.messages.length && this.tab !== "chat" && snapshot.messages.at(-1)?.id !== previous.messages.at(-1)?.id) this.unread.room++;
       // Preserve the mounted authenticated view across synchronization and reconnection.
       if (previous && !ownerChanged && !!snapshot.player===!!previous.player && (snapshot.player || snapshot.phase===previous.phase) && this.viewRoom()?.Name === oldViewRoom) {
         this.updateHeader();
@@ -200,14 +204,24 @@ export class LiteApp {
         return;
       }
       this.render();
-    });
+    }));
+  }
+
+  async dispose(): Promise<void> {
+    if (this.lifetime.disposed) return;
+    this.lifetime.dispose(); this.catalogRequest++; this.privateRequest++;
+    this.mediaConsent.dispose(this.root); this.stability.dispose(); this.sounds.stop();
+    document.querySelectorAll<HTMLDialogElement>(".profile-dialog, .activity-dialog").forEach(node => { node.close(); node.remove(); });
+    this.root.replaceChildren();
+    await this.history.dispose();
+    await this.historyStore?.close();
   }
 
   private resetAccountView(): void {
     this.contactDrafts.clear(); this.mediaConsent.resetSession(); this.replyTarget=null;
     this.summonConfig={enabled:false,members:'',text:'Come to my room immediately'};
-    this.unread=0; this.roomUnread=0; this.contact=0; this.beepDraft=''; this.chatDraft=''; this.password=''; this.notice='';
-    this.unreadPeers.clear(); this.incomingSeen.clear(); this.recoveryRoom=null;
+    this.unread.reset(); this.contact=0; this.beepDraft=''; this.chatDraft=''; this.password=''; this.notice='';
+    this.recoveryRoom=null;
     this.tab='rooms'; this.friendFilter='online'; this.friendQuery=''; this.privateFilter='room'; this.privateMode='beep';
     this.privateListOpen=true; this.privateVisible=60; this.privateEndId=null; this.privatePaging=false; this.privateMessagesView.reset();
     this.privateRequest++;
@@ -264,9 +278,9 @@ export class LiteApp {
     this.setText(connection, this.snapshot!.status);
     const brand = document.querySelector<HTMLElement>(".brand"); if (brand && brand.title !== this.snapshot!.status) brand.title = this.snapshot!.status;
     const privateTab = document.querySelector("#nav-private .nav-label");
-    this.setText(privateTab, `${t("private.title")}${this.unread ? ` · ${this.unread}` : ""}`);
+    this.setText(privateTab, `${t("private.title")}${this.unread.total ? ` · ${this.unread.total}` : ""}`);
     const chat = document.querySelector("#nav-chat .nav-label");
-    this.setText(chat, `${t("nav.room")}${this.roomUnread ? ` · ${this.roomUnread}` : ""}`);
+    this.setText(chat, `${t("nav.room")}${this.unread.room ? ` · ${this.unread.room}` : ""}`);
     const player = this.snapshot!.player;
     const name = document.querySelector('.header-account button');
     if (name && player) this.setText(name, `${player.Nickname || player.Name} (#${player.MemberNumber})`);
@@ -277,18 +291,10 @@ export class LiteApp {
     const state=this.snapshot!;
     if(!state.player)return;
     const messages:DisplayMessage[]=[...(state.whispers || state.messages.filter(m=>m.type==='Whisper')), ...state.beeps.map(m=>({id:m.id,type:'Beep' as const,sender:m.incoming?m.memberNumber:state.player!.MemberNumber,target:m.incoming?state.player!.MemberNumber:m.memberNumber,senderName:m.name,text:m.text,time:m.time}))];
-    for(const message of messages) {
-      const key=`${message.type}:${message.id}`;
-      if(this.incomingSeen.has(key))continue;
-      this.incomingSeen.add(key);
-      if(baseline || !message.sender || message.sender===state.player.MemberNumber)continue;
-      const log=document.getElementById('beep-log');
-      const reading=this.tab==='private' && this.contact===message.sender && !this.privateEndId && !this.privateListOpen && document.visibilityState==='visible' && !!log && log.scrollHeight-log.scrollTop-log.clientHeight<60 && !this.unreadPeers.has(message.sender);
-      if(!reading) { const item=this.unreadPeers.get(message.sender);this.unreadPeers.set(message.sender,{count:(item?.count || 0)+1,first:item?.first || message}); }
-      void this.sounds.play(message.type==='Beep'?'beep':'whisper').catch(()=>{});
-    }
-    if(this.incomingSeen.size>3000)this.incomingSeen=new Set(messages.map(m=>`${m.type}:${m.id}`));
-    this.unread=[...this.unreadPeers.values()].reduce((n,item)=>n+item.count,0);
+    const log=document.getElementById('beep-log');
+    const incoming=this.unread.observe(messages,state.player.MemberNumber,baseline,sender =>
+      this.tab==='private' && this.contact===sender && !this.privateEndId && !this.privateListOpen && document.visibilityState==='visible' && !!log && log.scrollHeight-log.scrollTop-log.clientHeight<60);
+    for (const message of incoming) void this.sounds.play(message.type==='Beep'?'beep':'whisper').catch(()=>{});
   }
   private updateConnectionControls(): void {
     const state=this.snapshot!;
@@ -354,6 +360,7 @@ export class LiteApp {
   }
 
   private render(): void {
+    if (this.lifetime.disposed) return;
     if (!this.snapshot) return;
     if (this.composing) { this.renderPending = true; return; }
     const active = document.activeElement as HTMLInputElement | HTMLTextAreaElement | null;
@@ -444,7 +451,7 @@ export class LiteApp {
       button.addEventListener("click", () => {
         if (this.tab !== key) this.replyTarget = null;
         this.tab = key;
-        if (key === "chat") this.roomUnread = 0;
+        if (key === "chat") this.unread.room = 0;
         this.render();
         if ((key === "friends" || key === "private") && this.snapshot!.friendsQueryState === "idle") this.run(() => this.client.refreshFriends());
       });
@@ -570,7 +577,7 @@ export class LiteApp {
     this.updateConnectionControls();
   }
   private fillPrivateUnread(node:HTMLElement): void {
-    const item=this.unreadPeers.get(this.contact);
+    const item=this.unread.get(this.contact);
     if(node.dataset.count===String(item?.count || 0) && node.dataset.peer===String(this.contact))return;
     node.dataset.count=String(item?.count || 0);node.dataset.peer=String(this.contact);node.replaceChildren();
     if(!item)return;
@@ -580,7 +587,7 @@ export class LiteApp {
       if(index>=0){this.privateEndId=rows[Math.min(rows.length-1,index+this.privateVisible-1)].id;this.updateBeepLog();Array.from(document.querySelectorAll<HTMLElement>('#beep-log [data-message-id]')).find(node=>node.dataset.messageId===item.first.id)?.scrollIntoView?.({block:'start'});}
       else { const owner=historyOwner(this.snapshot!); openHistorySearch(this.history,()=>historyOwner(this.snapshot!),{member:String(this.contact),hit:{key:`${owner}:private:${item.first.id}`,owner,kind:'private',room:'',timestamp:+item.first.time,message:item.first}}); }
     });
-    const read=this.button(t('unread.mark'),'ghost','button');read.addEventListener('click',()=>{this.unreadPeers.delete(this.contact);this.unread=[...this.unreadPeers.values()].reduce((n,v)=>n+v.count,0);this.updateFriendContent();this.updateHeader();});
+    const read=this.button(t('unread.mark'),'ghost','button');read.addEventListener('click',()=>{this.unread.markRead(this.contact);this.updateFriendContent();this.updateHeader();});
     node.append(first,read);
   }
 
@@ -634,7 +641,7 @@ export class LiteApp {
       const sharedRoom = inRoom ? state.room?.Name : fresh ? friend?.ChatRoomName || state.loverRooms?.[id]?.name : undefined;
       const roomLabel = inRoom ? t("contact.sameRoom") : fresh && friend?.Private ? t("contact.privateRoom") : sharedRoom;
       const {row,info}=contactCard({id,name,online:presence==='online',selected:this.tab==='private' && this.contact===id,relation,room:roomLabel,activate:()=>this.openConversation(id)});
-      const unread=this.unreadPeers.get(id);if(unread)info.append(this.el('span','tag unread-count',t('unread.count',[unread.count])));
+      const unread=this.unread.get(id);if(unread)info.append(this.el('span','tag unread-count',t('unread.count',[unread.count])));
       if (afcLovers(state.player).some(lover => lover.memberNumber === id)) {
         info.append(this.el("span", "tag afc-tag", t("afc.title")));
         const queryRoom = this.button(t("afc.query"), "ghost afc-query", "button");
@@ -759,46 +766,17 @@ export class LiteApp {
   }
 
   private buildSettings(): HTMLElement {
-    const section = this.el("section", "settings-view");
-    section.append(this.el("p", "eyebrow", t("m055")), this.el("h1", "", t("m056")));
-    const panel = this.el("div", "settings-card");
-    panel.append(this.el("h2", "", t("settings.appearance")));
-    const theme = this.select(t("settings.theme"), (["default", "midnight", "forest"] as const).map(value => [value, t(`theme.${value}`)]), this.settings.theme);
-    theme.id = "ThemeSelect";
-    theme.addEventListener("change", () => { this.settings.theme = theme.value; this.applySettings(); try { localStorage.setItem("bc-lite-display-v1", JSON.stringify(this.settings)); } catch { this.localNotice(t("m060")); } });
-    panel.append(this.field(t("settings.theme"), theme));
-    for (const [key, label] of [["background", t("m057")], ["largeText", t("m058")], ["timestamps", t("m059")]] as const) {
-      panel.append(this.checkbox(label, this.settings[key], value => {
-        this.settings[key] = value; this.applySettings();
-        try { localStorage.setItem("bc-lite-display-v1", JSON.stringify(this.settings)); } catch { this.localNotice(t("m060")); }
-      }));
-    }
-    panel.append(this.el("p", "muted", t("m061")));
-    const privacy = this.el("div", "settings-card");
-    privacy.append(this.el("h2", "", t("m062")), this.accountPrivacyNote());
-    const forget = this.button(t("m063"), "ghost", "button");
-    forget.addEventListener("click", () => { this.rememberAccount = false; this.saveAccountPreference(); });
-    privacy.append(forget, this.el("p", "muted", t("m064")), this.el("p", "muted", t("privacy.lastRoom")));
-    const compatibility = this.el("div", "settings-card");
-    compatibility.append(this.el("h2", "", t("m065")), this.el("p", "", t("m066", [this.snapshot!.player?.Appearance?.length ?? t("m067")])), this.el("p", "muted", t("m068")));
-    compatibility.append(this.el("p", "muted", t("m069")));
-    const disconnect = this.button(t("m070"), "ghost danger", "button");
-    disconnect.addEventListener("click", () => this.confirmAction(t("m071"),()=>this.client.disconnect()));
-    const jumps = this.el("nav", "settings-jumps"); jumps.setAttribute("aria-label", t("settings.jump"));
-    const groups: Array<[string, string, HTMLElement[]]> = [
-      ["appearance", t("settings.appearance"), [panel]],
-      ["function", t("settings.function"), [this.buildSoundSettings(), this.buildSummonSettings(), compatibility]],
-      ["performance", t("settings.performance"), [this.buildPerformanceSettings(), this.stability.build(() => this.client.connectionDiagnostics(), () => this.client.resumeConnection())]],
-      ["storage", t("settings.storage"), [this.buildHistorySettings()]],
-      ["privacy", t("settings.privacy"), [privacy, this.mediaConsent.buildSettings()]],
-    ];
-    section.append(jumps);
-    for (const [id, label, panels] of groups) {
-      const anchor = this.el("a", "button ghost", label) as HTMLAnchorElement; anchor.href = `#settings-${id}`; jumps.append(anchor);
-      const group = this.el("section", "settings-group"); group.id = `settings-${id}`; group.append(this.el("h2", "", label), ...panels); section.append(group);
-    }
-    section.append(disconnect);
-    return section;
+    return buildSettingsView({
+      settings: this.settings, appearanceCount: this.snapshot!.player?.Appearance?.length ?? t('m067'),
+      applySettings: () => this.applySettings(), notice: message => this.localNotice(message),
+      accountPrivacyNote: () => this.accountPrivacyNote(),
+      forgetAccount: () => { this.rememberAccount = false; this.saveAccountPreference(); },
+      disconnect: () => this.client.disconnect(), confirmAction: (message, action) => this.confirmAction(message, action),
+      buildSoundSettings: () => this.buildSoundSettings(), buildSummonSettings: () => this.buildSummonSettings(),
+      buildPerformanceSettings: () => this.buildPerformanceSettings(), buildHistorySettings: () => this.buildHistorySettings(),
+      stabilityPanel: () => this.stability.build(() => this.client.connectionDiagnostics(), () => this.client.resumeConnection()),
+      mediaPanel: () => this.mediaConsent.buildSettings(),
+    });
   }
 
   private buildHistorySettings(): HTMLElement {
@@ -1503,8 +1481,9 @@ export class LiteApp {
   private button = button;
   private el = el;
   private confirmAction(message: string, accept:()=>void): void {
+    if (this.lifetime.disposed) return;
     const owner=this.snapshot ? historyOwner(this.snapshot) : '', room=this.snapshot?.room?.Name;
-    showConfirm(message,accept,{valid:()=>!!this.snapshot && historyOwner(this.snapshot)===owner && this.snapshot.room?.Name===room});
+    showConfirm(message,accept,{valid:()=>!this.lifetime.disposed && !!this.snapshot && historyOwner(this.snapshot)===owner && this.snapshot.room?.Name===room});
   }
-  private localNotice(message: string): void { this.notice = message; showNotice(message); }
+  private localNotice(message: string): void { if (this.lifetime.disposed) return; this.notice = message; showNotice(message); }
 }

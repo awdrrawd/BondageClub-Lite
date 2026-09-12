@@ -1,3 +1,4 @@
+import { interactionPermission } from "../action/interaction-permission";
 import type { ExtensionClient, MessageKind, PluginMessage, PluginOptions } from "./types";
 import type { ClientSnapshot, DisplayMessage } from "../shared/types";
 
@@ -8,29 +9,29 @@ export function classifyMessage(message: DisplayMessage): MessageKind {
   return messageKinds[message.type] ?? "unknown";
 }
 
-// Conservative subset of ServerChatRoomGetAllowItem. Restricted relationship
-// rules require more authoritative data than Lite currently retains.
-export function interactionPermission(state: Readonly<ClientSnapshot> | undefined, targetId: number) {
-  if (!state?.player || state.phase !== "in-room" || !state.room) return "not-in-room";
-  const target = state.characters.find(c => c.MemberNumber === targetId);
-  if (!target) return "target-missing";
-  if (targetId === state.player.MemberNumber || target.AllowedInteractions === 0) return null;
-  return target.AllowedInteractions === undefined ? "permission-unknown" : "restricted-permission";
-}
-
 export function createExtensionAPI(client: ExtensionClient) {
   let state: Readonly<ClientSnapshot>;
-  client.subscribe(value => { state = value; });
+  const unsubscribe = client.subscribe(value => { state = value; });
   const plugins = new Set<string>();
+  const disposers = new Set<() => void>();
+  let closed = false;
   return Object.freeze({
     client: "Lite", apiVersion: 1,
     capabilities: Object.freeze({ messages: true, chat: true, beep: true, nativeActivities: true, inventory: false, roomAdmin: false, musicControl: false, map: false, modSdkCompatible: false }),
     registerPlugin(id: string, options: PluginOptions = {}) {
+      if (closed) throw new Error("Extension API disposed");
       if (!/^[a-z0-9][a-z0-9._-]{0,63}$/i.test(id) || plugins.has(id)) throw new Error("Invalid or duplicate plugin id");
       plugins.add(id);
       const allowSend = options.allowSend === true, privateMessages = options.privateMessages === true;
       const subscriptions = new Set<() => void>();
       let disposed = false, lastSend = 0;
+      const dispose = () => {
+        if (disposed) return;
+        disposed = true;
+        for (const off of subscriptions) off();
+        plugins.delete(id); disposers.delete(dispose);
+      };
+      disposers.add(dispose);
       const alive = () => { if (disposed) throw new Error("Plugin disposed"); };
       const sending = () => {
         alive();
@@ -75,8 +76,14 @@ export function createExtensionAPI(client: ExtensionClient) {
           if (!option || option.reason) throw new Error(option?.reason || "Unsupported activity");
           client.sendActivity(target, group, name, false);
         },
-        dispose() { if (disposed) return; disposed = true; for (const off of subscriptions) off(); plugins.delete(id); }
+        dispose
       });
+    },
+    dispose() {
+      if (closed) return;
+      closed = true;
+      for (const dispose of disposers) dispose();
+      unsubscribe();
     }
   });
 }

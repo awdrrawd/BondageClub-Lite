@@ -1,7 +1,7 @@
+import { loadTypeScript } from './load-typescript.mjs';
 import test, { afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { stripTypeScriptTypes } from 'node:module';
 import vm from 'node:vm';
 import { Window } from 'happy-dom';
 import { IDBFactory } from 'fake-indexeddb';
@@ -14,17 +14,17 @@ import { canonicalPartGroup } from './activity-helper.mjs';
 import { uiIcons } from './icons-helper.mjs';
 import { history, sessionClass, contactName } from './history-helper.mjs';
 import { dialogs } from './dialogs-helper.mjs';
-const activitySource = stripTypeScriptTypes(readFileSync('src/ui/activity-dialog.ts', 'utf8')).replace(/^import .*;\r?\n/gm, '').replaceAll('export ', '');
-const nameColor = new Function(stripTypeScriptTypes(readFileSync('src/ui/name-color.ts', 'utf8')).replaceAll('export ', '') + ';return nameColor;')();
-const stabilitySource = stripTypeScriptTypes(readFileSync(new URL('../src/platform/stability.ts', import.meta.url), 'utf8')).replace('import { t } from "../i18n";', '').replace('export ', '');
+const activitySource = loadTypeScript('src/ui/activity-dialog.ts');
+const nameColor = new Function(loadTypeScript('src/ui/name-color.ts') + ';return nameColor;')();
+const stabilitySource = loadTypeScript(new URL('../src/platform/stability.ts', import.meta.url));
 
-const bioCode = stripTypeScriptTypes(readFileSync(new URL('../src/profile/biography.ts', import.meta.url), 'utf8')).replace('import LZString from "lz-string";', '').replace('import { t } from "../i18n";', '').replace('export ', '');
+const bioCode = loadTypeScript(new URL('../src/profile/biography.ts', import.meta.url));
 const decodeBiography = new Function('LZString', 't', bioCode + '; return decodeBiography;')(LZString, t);
 
-const source = stripTypeScriptTypes(readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8')).replace(/^import .*;\r?\n/gm, '').replaceAll('export ', '');
-const roomListSource = stripTypeScriptTypes(readFileSync('src/ui/room-list.ts', 'utf8')).replace(/^import .*;\r?\n/gm, '').replaceAll('export ', '');
+const source = loadTypeScript(new URL('../src/ui/app.ts', import.meta.url));
+const roomListSource = loadTypeScript('src/ui/room-list.ts');
 const { sortRooms, canJoinRoom } = new Function(roomListSource + ';return {sortRooms,canJoinRoom};')();
-const mobileSource = stripTypeScriptTypes(readFileSync('src/platform/mobile.ts', 'utf8')).replaceAll('export ', '');
+const mobileSource = loadTypeScript('src/platform/mobile.ts');
 
 const fixtureCleanup = new Set();
 afterEach(async () => {
@@ -40,11 +40,14 @@ function setup(savedAccount, savedPerformance, indexedDBFactory) {
   const intervalHandles = new Set();
   // Register before initializing LiteApp so assertion/setup failures cannot
   // leave its periodic history observer running in a test worker.
+  let instance;
   fixtureCleanup.add(async () => {
+    await instance?.dispose();
     for (const handle of intervalHandles) window.clearInterval(handle);
     intervalHandles.clear();
     if (!window.closed) await window.happyDOM.close();
   });
+  const Lifetime = new Function("window",loadTypeScript("src/platform/lifetime.ts")+";return Lifetime;")(window);
   const { icon, iconSelect } = uiIcons(window);
   if (indexedDBFactory) Object.defineProperty(window,'indexedDB',{value:indexedDBFactory});
   const intervals=[];
@@ -64,7 +67,7 @@ function setup(savedAccount, savedPerformance, indexedDBFactory) {
   let listener;
   const calls = [];
   const bcClient = {
-    subscribe(callback) { listener = callback; listener(current); },
+    subscribe(callback) { listener = callback; listener(current); return () => { listener = () => {}; }; },
     refreshFriends() { calls.push('friends'); },
     sendChat(text) { calls.push(text); },
     activityOptions() { return [{ group: 'ItemHead', groupLabel: '頭部', name: 'Pet', label: '撫摸', reason: null }]; },
@@ -86,8 +89,9 @@ function setup(savedAccount, savedPerformance, indexedDBFactory) {
     setFriend() {}, clearBeeps() {}, leave() {}, disconnect() {}, search(request) { calls.push({ search:request }); }, join() {}, createRoom() {},
   };
   const {isMobileLayout, bindPageSwipe} = new Function('window', mobileSource + ';return {isMobileLayout,bindPageSwipe};')(window);
-  const uiSource = path => stripTypeScriptTypes(readFileSync(path,'utf8')).replace(/^import .*;\r?\n/gm,'').replaceAll('export ','');
+  const uiSource = path => loadTypeScript(path);
   const dom = new Function('document',uiSource('src/ui/dom.ts')+';return {el,select,field,button,checkbox,input};')(window.document);
+  const buildSettingsView = new Function("t", "localStorage", ...Object.keys(dom), loadTypeScript("src/ui/settings-view.ts")+";return buildSettingsView;")(t,window.localStorage,...Object.values(dom));
   const modal=dialogs(window.document);
   const deps = {...history,...dom,...modal,t,window,document:window.document};
   Object.assign(deps,new Function('localDay',uiSource('src/storage/history-export.ts')+';return {exportHistoryHTML,exportHistoryXLSX};')(history.localDay));
@@ -95,9 +99,10 @@ function setup(savedAccount, savedPerformance, indexedDBFactory) {
   const MessageSounds = new Function('window','localStorage',uiSource('src/platform/message-sounds.ts')+';return MessageSounds;')(window,window.localStorage);
   const openHistorySearch = new Function(...Object.keys(deps),uiSource('src/ui/history-search.ts')+';return openHistorySearch;')(...Object.values(deps));
   const contactCard = new Function('t','el',uiSource('src/ui/contact-card.ts')+';return contactCard;')(t,dom.el);
+  const UnreadState = new Function(uiSource('src/ui/unread-state.ts')+';return UnreadState;')();
   const PrivateMessages = new Function(...Object.keys(history),uiSource('src/ui/private-messages.ts')+';return PrivateMessages;')(...Object.values(history));
-  vm.runInNewContext(source + "\nnew LiteApp(bcClient);", { ...history, ...dom, ...modal, MessageSounds, openHistorySearch, buildHistorySettings, contactCard, PrivateMessages, HistorySession:sessionClass(window), contactName, window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, openActivityDialog, icon, iconSelect, nameColor, sortRooms, canJoinRoom, isMobileLayout, bindPageSwipe, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
-  return { window, document: window.document, calls, intervals, client:bcClient, state: () => current, emit(change) { if (change.friendsStatus === '查詢完成') change.friendsQueryState = 'ready'; current = { ...current, ...change }; listener(current); } };
+  instance = vm.runInNewContext(source + "\nnew LiteApp(bcClient);", { UnreadState, Lifetime, buildSettingsView, ...history, ...dom, ...modal, MessageSounds, openHistorySearch, buildHistorySettings, contactCard, PrivateMessages, HistorySession:sessionClass(window), contactName, window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, openActivityDialog, icon, iconSelect, nameColor, sortRooms, canJoinRoom, isMobileLayout, bindPageSwipe, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
+  return { instance, window, document: window.document, calls, intervals, client:bcClient, state: () => current, emit(change) { if (change.friendsStatus === '查詢完成') change.friendsQueryState = 'ready'; current = { ...current, ...change }; listener(current); } };
 }
 
 test('same-room synchronization preserves shell, composer, log, selection and unchanged member nodes', async () => {
@@ -1125,4 +1130,25 @@ test('Russian selection preserves player text and draft and exposes repository f
  assert.equal(f.document.querySelector('.app-footer a').href,'https://github.com/awdrrawd/BondageClub-Lite/tree/Mater');
  f.document.getElementById('nav-private').click();assert.equal(f.document.querySelector('.private-page > h1'),null);
  f.document.getElementById('nav-friends').click();assert.equal(f.document.querySelector('.friends-view > h1'),null);
+});
+
+test('disposing the UI releases subscriptions and global lifecycle handlers',async()=>{
+ const f=setup();
+ await f.instance.dispose(); await f.instance.dispose();
+ const count=f.calls.length;
+ f.window.dispatchEvent(new f.window.Event('online'));
+ f.window.dispatchEvent(new f.window.Event('pageshow'));
+ f.emit({status:'after disposal'});
+ assert.equal(f.calls.length,count);
+ assert.equal(f.document.getElementById('app').childElementCount,0);
+});
+
+test('UI disposal closes its IndexedDB connection after pending writes',async()=>{
+ const factory=new IDBFactory(),f=setup(undefined,undefined,factory);
+ await f.instance.dispose();
+ await new Promise((resolve,reject)=>{
+  const request=factory.deleteDatabase('bc-lite-history');
+  request.onsuccess=resolve; request.onerror=()=>reject(request.error);
+  request.onblocked=()=>reject(new Error('Disposed UI retained its database connection'));
+ });
 });

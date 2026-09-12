@@ -1,8 +1,7 @@
-import { readFileSync } from 'node:fs';
-import { stripTypeScriptTypes } from 'node:module';
+import { loadTypeScript } from './load-typescript.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-const nameColor = new Function(stripTypeScriptTypes(readFileSync('src/ui/name-color.ts', 'utf8')).replaceAll('export ', '') + ';return nameColor;')();
+const nameColor = new Function(loadTypeScript('src/ui/name-color.ts') + ';return nameColor;')();
 test('shared label colors preserve bright colors, lift dark colors and reject CSS injection', () => {
   assert.equal(nameColor('#FFE800', 1), '#ffe800');
   assert.notEqual(nameColor('#000000', 1), '#000000');

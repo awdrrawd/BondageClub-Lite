@@ -95,6 +95,11 @@ export class HistoryStore {
   private db: Promise<IDBDatabase> | null = null;
   private factory: IDBFactory;
   constructor(factory: IDBFactory = indexedDB) { this.factory = factory; }
+  async close(): Promise<void> {
+    const pending = this.db; this.db = null;
+    // Opening failures are already reported by the operation that requested it.
+    if (pending) await pending.then(db => db.close(), () => {});
+  }
   private open(): Promise<IDBDatabase> {
     if (!this.db) this.db = new Promise<IDBDatabase>((resolve, reject) => {
       let blocked = false;

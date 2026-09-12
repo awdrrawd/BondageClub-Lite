@@ -1,3 +1,5 @@
+import { interactionPermission } from "../action/interaction-permission";
+import { RoomSearch } from "./room-search";
 import { t, localizeStatus } from "../i18n";
 import { afcLovers } from "../profile/afc";
 import { decodeFriendNames, contactName } from "../profile/friend-names";
@@ -45,6 +47,15 @@ export class BcLiteClient {
     }
   }
   private state = initialSnapshot();
+  private searches = new RoomSearch({
+    canSend: () => this.canSend(),
+    status: code => {
+      if (code === "blocked") throw new Error(t("m184"));
+      this.patch(code === "queued" ? { rooms: [] } : code === "loading" ? { rooms: [], status: t("m186") } : { status: t("m187") });
+    },
+    send: request => { this.socket!.emit("ChatRoomSearch", request); },
+    reconnect: () => { this.socket!.disconnect().connect(); },
+  });
   private messageLimit = MAX_MESSAGES;
   setMessageLimit(limit: number): void {
     if (![600, 1500, 3000].includes(limit)) throw new RangeError("Invalid history limit");
@@ -54,10 +65,6 @@ export class BcLiteClient {
   private loginAccepted = false;
   private manualDisconnect = false;
   private serverReady = false;
-  private searchTimer: number | null = null;
-  private queuedSearch: RoomSearchRequest | null = null;
-  private searchPending = false;
-  private recoverySearch: RoomSearchRequest | null = null;
   private roomTimer: number | null = null;
   private friendsTimer: number | null = null;
   private lastBeepAt = 0;
@@ -199,7 +206,7 @@ export class BcLiteClient {
     const room = this.returnRoom || (remembered === undefined ? this.validRoomName(this.state.player?.LastChatRoom?.Name) : remembered);
     this.returnRoom = null;
     if (room) { this.recordConnection("rejoin-attempt"); this.join(room); }
-    const search = this.recoverySearch; this.recoverySearch = null;
+    const search = this.searches.recovery; this.searches.recovery = null;
     if (search) this.search(search);
   }
 
@@ -268,7 +275,7 @@ export class BcLiteClient {
   }
 
   disconnect(): void {
-    this.recoverySearch = null; this.queuedSearch = null; this.searchPending = false;
+    this.searches.recovery = null; this.searches.queued = null; this.searches.pending = false;
     this.cuddlePair = null; this.cuddlePeers.clear();
     this.departed.clear();
     this.summonRule = { enabled: false, members: [], text: "Come to my room immediately" };
@@ -294,28 +301,7 @@ export class BcLiteClient {
     this.patch(initialSnapshot());
   }
 
-  search(request: RoomSearchRequest): void {
-    if (!this.canSend()) throw new Error(t("m184"));
-    if (this.searchPending) {
-      if (this.searchTimer === null) { this.recoverSearch(request); return; }
-      this.queuedSearch = { ...request }; this.patch({ rooms: [] }); return;
-    }
-    this.searchPending = true;
-    this.patch({ rooms: [], status: t("m186") });
-    this.clearSearchTimer();
-    this.searchTimer = window.setTimeout(() => {
-      this.clearSearchTimer();
-      this.patch({ status: t("m187") });
-      if (this.queuedSearch) this.recoverSearch(this.queuedSearch);
-    }, SEARCH_TIMEOUT_MS);
-    this.socket!.emit("ChatRoomSearch", { ...request, Query: request.Query.toUpperCase().trim() });
-  }
-
-  private recoverSearch(request: RoomSearchRequest): void {
-    // BC search replies have no correlation ID. Retrying an expired request needs a fresh transport.
-    this.recoverySearch = { ...request };
-    this.socket!.disconnect().connect();
-  }
+  search(request: RoomSearchRequest): void { this.searches.search(request); }
 
   refreshFriends(): void {
     if (!this.canSend()) throw new Error(t("m188"));
@@ -454,12 +440,14 @@ export class BcLiteClient {
     const target = this.state.characters.find(c => c.MemberNumber === memberNumber);
     if (!target || !actor.MemberNumber || !this.state.room) return [];
     const checkInventory = createActivityInventoryCheck(actor, target, !strictActor);
+    const permission = interactionPermission(this.state, memberNumber);
+    const permissionReason = permission === "permission-unknown" ? "native.data" : permission ? "native.permission" : null;
     const native = nativeActivities.flatMap(activity => {
       // A tool belongs to an activity, not to each of its target zones.
       const item = activityAsset(actor, target, activity.name);
       const suffix = item ? ` · ${this.textCatalog[`Asset.${item.GroupName}.${item.AssetName}`] || item.AssetName}` : "";
       return (memberNumber === actor.MemberNumber ? activity.self : activity.target).map(group => {
-        const availability = activityAvailability(!this.canSend() ? "native.data" : activityReason(actor, target, group, activity.name, this.state.room!, checkInventory), compatibility);
+        const availability = activityAvailability(!this.canSend() ? "native.data" : permissionReason || activityReason(actor, target, group, activity.name, this.state.room!, checkInventory), compatibility);
         return {
           group, name: activity.name, groupLabel: this.textCatalog[`DialogGroupName${textGroup(group, target)}`] || this.textCatalog[`Group.${group}`] || group,
           label: activityLabel(activity.name, group, target, memberNumber === actor.MemberNumber, this.textCatalog) + suffix,
@@ -472,7 +460,7 @@ export class BcLiteClient {
     const extensions = extensionActivities.filter(entry => entry.self === (actor.MemberNumber === memberNumber) && Object.hasOwn(this.textCatalog, entry.key) && (!["ItemPenis", "ItemGlans"].includes(entry.group) || hasPenis(target))).map(entry => ({
       group: physicalGroup(entry.group), name: `${entry.source === "echo" && cuddleNames.includes(entry.name) ? "cuddle" : "text"}:${entry.key}`, groupLabel: this.textCatalog[`DialogGroupName${textGroup(physicalGroup(entry.group), target)}`] || this.textCatalog[`Group.${physicalGroup(entry.group)}`] || entry.group,
       label: entry.name === "钻进怀里" ? t("interaction.cuddleIn") : entry.name === "抱入怀中" ? t("interaction.cuddleHold") : activityLabel(entry.name, physicalGroup(entry.group), target, entry.self, this.textCatalog),
-      reason: !this.canSend() ? "native.data" : this.state.room!.BlockCategory?.includes("Arousal") || target.ArousalSettings?.Active === "Inactive" ? "native.permission" : this.state.room!.MapType && this.state.room!.MapType !== "Never" ? "native.room" : checkInventory(physicalGroup(entry.group), entry.prerequisites ?? ["ZoneAccessible"]),
+      reason: !this.canSend() ? "native.data" : permissionReason || (this.state.room!.BlockCategory?.includes("Arousal") || target.ArousalSettings?.Active === "Inactive" ? "native.permission" : this.state.room!.MapType && this.state.room!.MapType !== "Never" ? "native.room" : checkInventory(physicalGroup(entry.group), entry.prerequisites ?? ["ZoneAccessible"])),
       warning: entry.source === "echo" && cuddleNames.includes(entry.name) ? "cuddle.help" : "interaction.textOnly", source: entry.source,
     }));
     for (const option of extensions) {
@@ -564,7 +552,7 @@ export class BcLiteClient {
       if (this.canSend() && this.recoveryTimer !== null) { this.clearRecovery(); this.recordConnection("probe-response"); }
     });
     this.socket.on("connect", () => {
-      this.searchPending = false; this.queuedSearch = null; this.clearSearchTimer();
+      this.searches.pending = false; this.searches.queued = null; this.clearSearchTimer();
       this.clearRecovery();
       this.recordConnection("connected");
       if (!this.credentials) return;
@@ -611,10 +599,10 @@ export class BcLiteClient {
       if (this.loginAccepted && this.state.phase === "waiting-server") this.finishLogin();
     });
     this.socket.on("ChatRoomSearchResult", (rooms: RoomSearchResult[]) => {
-      if (!this.searchPending) return;
-      this.searchPending = false;
+      if (!this.searches.pending) return;
+      this.searches.pending = false;
       this.clearSearchTimer();
-      const queued = this.queuedSearch; this.queuedSearch = null;
+      const queued = this.searches.queued; this.searches.queued = null;
       if (queued) { this.search(queued); return; }
       if (!Array.isArray(rooms)) { this.patch({ status: t("m217") }); return; }
       const safeRooms = rooms;
@@ -706,7 +694,7 @@ export class BcLiteClient {
       this.socket?.disconnect();
     });
     this.socket.on("disconnect", (reason) => {
-      this.searchPending = false; this.queuedSearch = null;
+      this.searches.pending = false; this.searches.queued = null;
       this.patch({ summon: null });
       this.clearRecovery();
       this.recordConnection(["ping timeout", "transport close", "transport error", "io server disconnect", "io client disconnect"].includes(reason) ? reason : "disconnected");
@@ -858,7 +846,7 @@ export class BcLiteClient {
       this.patch({ phase: "ready", status: t("m241") });
     }, 12_000);
   }
-  private clearSearchTimer(): void { if (this.searchTimer !== null) window.clearTimeout(this.searchTimer); this.searchTimer = null; }
+  private clearSearchTimer(): void { this.searches.clearTimer(); }
   private patch(change: Partial<ClientSnapshot>): void {
     this.state = { ...this.state, ...change };
     for (const listener of this.listeners) listener(this.state);
