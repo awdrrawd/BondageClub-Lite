@@ -180,7 +180,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); box-sha
   .view-heading { align-items: center; }
 }
 
-/* Social layout: static panels, no canvas, video, backdrop blur or continuous animation. */
+/* Social layout: no canvas, backdrop blur or continuous decorative animation. */
 body.scenic {
   background: linear-gradient(#100d13b8, #100d13ed), url("../assets/lce-lounge.jpg") center top / cover no-repeat, var(--bg);
 }
@@ -591,4 +591,51 @@ html[data-ui-preview] .app-nav { bottom:var(--preview-height); }
   .login-shell .app-header { height: 48px; }
   .login-shell .app-content { padding-block: .5rem; }
   .login-shell .login-card { padding: 1rem; }
+}
+
+.contact-layout-buttons { display:flex; gap:.3rem; margin-left:auto; }
+.contact-layout-buttons [aria-pressed="true"] { color:var(--accent); border-color:var(--accent); }
+.contact-list { align-content:start; touch-action:pan-y pinch-zoom; }
+.contact-list[data-layout="grid"], .contact-list[data-layout="auto"] { grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr)); }
+.contact-list[data-layout="rows"] { grid-template-columns:minmax(0,1fr); }
+.friends-view, .settings-view, .private-contacts, .private-conversation { touch-action:pan-y pinch-zoom; }
+.private-split { grid-template-columns:230px minmax(0,1fr); height:calc(100dvh - 210px - var(--preview-height,0px)); min-height:360px; }
+.private-split .private-contacts { display:flex; flex-direction:column; min-height:0; overflow:hidden; }
+.private-split .private-contacts > :not(.contact-list) { flex-shrink:0; }
+.private-split .contact-list { flex:1; min-height:0; max-height:none; overflow:auto; }
+.private-split .private-conversation { display:flex; flex-direction:column; min-height:0; }
+.private-split .private-conversation .beep-log { flex:1; height:auto; min-height:0; overflow:auto; }
+.private-split .beep-compose, .private-split .private-heading { flex-shrink:0; }
+@media(max-width:760px) {
+ .contact-list[data-layout="auto"] { grid-template-columns:minmax(0,1fr); }
+ .private-active .private-split { height:100%; min-height:0; }
+ .private-active .private-split .private-contacts { height:100%; }
+ .private-split.show-conversation .private-contacts, .private-split.show-contacts .private-conversation { display:none; }
+}
+
+/* Short, compositor-friendly motion; transcript updates do not animate. */
+@keyframes lite-page-enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes lite-panel-enter {
+  from { opacity: 0; transform: scale(.98) translateY(4px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes lite-backdrop-enter { from { opacity: 0; } to { opacity: 1; } }
+.page-enter { animation: lite-page-enter 180ms ease-out; }
+dialog[open] { animation: lite-panel-enter 170ms ease-out; }
+dialog[open]::backdrop { animation: lite-backdrop-enter 150ms ease-out; }
+.button { transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, box-shadow 140ms ease, transform 90ms ease; }
+@media (hover:hover) and (pointer:fine) {
+  .button:not(:disabled):hover { border-color: var(--accent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent); }
+}
+.button:not(:disabled):active { transform: scale(.97); }
+.button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+@media (max-width:760px) {
+  .members-open .member-panel { animation: lite-panel-enter 170ms ease-out; transform-origin: left center; }
+}
+@media (prefers-reduced-motion:reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  .button:not(:disabled):active { transform: none; }
 }

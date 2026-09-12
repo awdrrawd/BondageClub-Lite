@@ -360,6 +360,7 @@ export class LiteApp {
     return all.slice(Math.max(0, end - this.visibleMessages), end);
   }
 
+  private renderedPageKey: string | null = null;
   private render(): void {
     if (this.lifetime.disposed) return;
     if (!this.snapshot) return;
@@ -375,6 +376,9 @@ export class LiteApp {
     this.mediaConsent.dispose(this.root);
     this.refreshRoomResults = null;
     this.root.replaceChildren(this.buildShell());
+    const pageKey = this.snapshot.player ? this.tab : "login";
+    if (this.renderedPageKey !== pageKey) this.root.querySelector('.app-content')?.classList.add('page-enter');
+    this.renderedPageKey = pageKey;
     this.updateHeader();
     const nextLog = document.getElementById("TextAreaChatLog");
     if (nextLog) nextLog.scrollTop = oldRoom === this.snapshot.room?.Name && oldScroll !== undefined ? oldScroll : nextLog.scrollHeight;
@@ -464,6 +468,7 @@ export class LiteApp {
     return nav;
   }
 
+  private contactLayout: "grid" | "rows" | null = null;
   private buildFriends(privatePage = false): HTMLElement {
     const section = this.el("section", privatePage ? "friends-view private-page" : "friends-view");
     if (!privatePage) section.append(this.el("p", "eyebrow", t("friends.list")));
@@ -488,6 +493,19 @@ export class LiteApp {
     }
     const status = this.el("p", "muted"); status.id = "friends-status";
     const list = this.el("div", "contact-list"); list.id = "contact-list";
+    const layoutButtons = this.el("div", "contact-layout-buttons");
+    const applyLayout = () => {
+      list.dataset.layout = this.contactLayout || "auto";
+      const mode = this.contactLayout || (window.matchMedia('(max-width: 760px)').matches ? "rows" : "grid");
+      for (const button of layoutButtons.querySelectorAll('button')) button.setAttribute('aria-pressed', String(button.dataset.layout === mode));
+    };
+    for (const mode of ["grid", "rows"] as const) {
+      const toggle = this.button("", "ghost", "button"); toggle.dataset.layout = mode;
+      toggle.title = t(`contacts.${mode}`); toggle.setAttribute('aria-label', toggle.title); toggle.append(icon(mode));
+      toggle.addEventListener('click', () => { this.contactLayout = mode; applyLayout(); }); layoutButtons.append(toggle);
+    }
+    filters.append(layoutButtons); applyLayout();
+
     if (!privatePage) {
       section.append(toolbar, filters, status, list);
       this.fillFriendList(list); status.textContent = this.snapshot!.friendsStatus;

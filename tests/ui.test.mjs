@@ -1212,3 +1212,19 @@ test('delivery notices show only pending or unconfirmed messages without rebuild
  assert.equal(f.document.getElementById('TextAreaChatLog'),log);
  await f.window.happyDOM.close();
 });
+
+
+test('contact layout toggles preserve the mounted list and use responsive defaults',async()=>{
+ const f=setup();f.document.getElementById('nav-friends').click();
+ const list=f.document.getElementById('contact-list');
+ assert.equal(list.dataset.layout,'auto');
+ const buttons=f.document.querySelector('.contact-layout-buttons');
+ assert.equal(buttons.querySelectorAll('svg').length,2);
+ buttons.querySelector('[data-layout="rows"]').click();
+ assert.equal(list.dataset.layout,'rows');
+ assert.equal(buttons.querySelector('[data-layout="rows"]').getAttribute('aria-pressed'),'true');
+ buttons.querySelector('[data-layout="grid"]').click();
+ assert.equal(list.dataset.layout,'grid');
+ assert.equal(f.document.getElementById('contact-list'),list);
+ await f.window.happyDOM.close();
+});

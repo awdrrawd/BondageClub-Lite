@@ -463,5 +463,7 @@
   "media.supported": "Supported websites (expand)",
   "delivery.pending": "Sending — awaiting server echo",
   "delivery.confirmed": "Server echo confirmed",
-  "delivery.unconfirmed": "Unconfirmed (delayed or disconnected). Check chat before resending."
+  "delivery.unconfirmed": "Unconfirmed (delayed or disconnected). Check chat before resending.",
+  "contacts.grid": "Grid layout",
+  "contacts.rows": "List layout"
 }
