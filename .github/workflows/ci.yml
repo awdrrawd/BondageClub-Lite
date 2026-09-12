@@ -22,11 +22,19 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22'
+          cache: npm
+          cache-dependency-path: package-lock.json
       - name: Classify changes
         id: changes
         run: node scripts/ci-changes.mjs
       - run: npm run check:docs
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
         if: steps.changes.outputs.full == 'true'
-      - run: npm run build && npm test
+      - name: Build
+        run: npm run build
+        if: steps.changes.outputs.full == 'true'
+      - name: Test
+        run: npm test
+        timeout-minutes: 3
         if: steps.changes.outputs.full == 'true'
