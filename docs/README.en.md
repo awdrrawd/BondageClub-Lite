@@ -7,6 +7,7 @@ Detailed behavior, architecture, deployment and verification guides live here. T
 | Topic | Guide |
 | --- | --- |
 | Architecture and module responsibilities | [Architecture](architecture.md), [Architecture overview (HTML)](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture/index.html) |
+| CI, dependency updates, health checks and dashboard setup | [Automation (Chinese + English summary)](automation.md) |
 | Cloudflare build triggers | [Build watch paths (Chinese)](cloudflare-builds.md) |
 | Local development, deployment and relay troubleshooting | [Deployment and verification](deployment-and-tests.md) |
 | Mobile layout and reconnection | [Mobile and connection behavior](mobile-connection-tests.md) |

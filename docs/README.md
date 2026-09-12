@@ -9,6 +9,7 @@
 | 用途 | 文件 |
 | --- | --- |
 | 系統、模組、狀態與更新邊界 | [架構說明](architecture.md)、[架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture/index.html) |
+| CI、套件更新、健康檢查與後台設定 | [自動化與操作步驟](automation.md) |
 | 哪些倉庫變更觸發 Cloudflare 部署 | [建置觸發規則](cloudflare-builds.md) |
 | 安裝、部署、中繼排錯與正式驗收 | [部署與驗收](deployment-and-tests.md) |
 | 手機介面、前景探測、重連與登入回房 | [手機與連線](mobile-connection-tests.md) |

@@ -28,13 +28,15 @@ npm run dev:ui
 ## 你要做的部署設定
 
 1. 將要部署的版本提交至你的 Git 倉庫。包含 `public/_worker.js`、`public/_routes.json`、src、package.json 和 lockfile；不用提交 dist/node_modules。
-2. Cloudflare Pages 選擇實際要發布的 Production branch；Build command `npm run build`，Output directory `dist`，Root directory 指向本專案根目錄；Node 版本使用 `NODE_VERSION=22`。不要把歷史部署的分支名稱當成固定要求。
+2. Cloudflare Pages 選擇實際要發布的 Production branch；Build command `npm run ci`，Output directory `dist`，Root directory 指向本專案根目錄；Node 版本使用 `NODE_VERSION=22`。不要把歷史部署的分支名稱當成固定要求。
 3. 不用建立獨立 Workers 專案。Pages 會識別輸出根目錄中的 `_worker.js`，部署為 Pages Functions 進階模式。這一版已經有雲端運算部分；舊文件的「純靜態、不需要 Functions」不再適用。
 4. 若曾設定 `SKIP_DEPENDENCY_INSTALL` 或只安裝 production dependencies，取消該自訂設定，以便建置 Vite/TypeScript。
 5. 不需要設定 `BC_ORIGIN`，程式有預設值。若你曾自行設定，先移除錯誤值，或將 Production 及 Preview 的該值設為 `https://bondageprojects.elementfx.com`（無 www、版本路徑或尾斜線）。它不是 BC 帳密。變更後重新部署。
 6. 等新部署成功，關掉舊 Lite 分頁，再開正式網址。清除舊頁面快取或強制重新整理，頁尾應顯示 `Relay v1`。
 
 相關平台文件：[Pages 進階模式](https://developers.cloudflare.com/pages/functions/advanced-mode/)、[WebSocket](https://developers.cloudflare.com/workers/runtime-apis/websockets/)。部署配額與服務限制請依實際平台設定核對；本文件不保證無限用量或永不斷線。
+
+GitHub 驗證、Dependabot 與後台操作見[自動化設定](automation.md)。
 
 ## 建置觸發範圍
 
