@@ -8,7 +8,8 @@
 
 | 用途 | 文件 |
 | --- | --- |
-| 系統、模組、狀態與更新邊界 | [架構說明](architecture.md)、[架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture.html) |
+| 系統、模組、狀態與更新邊界 | [架構說明](architecture.md)、[架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture/index.html) |
+| 哪些倉庫變更觸發 Cloudflare 部署 | [建置觸發規則](cloudflare-builds.md) |
 | 安裝、部署、中繼排錯與正式驗收 | [部署與驗收](deployment-and-tests.md) |
 | 手機介面、前景探測、重連與登入回房 | [手機與連線](mobile-connection-tests.md) |
 | 搜尋、建房、好友、聊天、回覆、翻譯及 DOM 更新 | [房間與聊天驗收](chat-layout-tests.md) |
@@ -20,7 +21,7 @@
 | 翻譯來源、覆寫與建置方法 | [翻譯貢獻指南](../src/translations/README.md) |
 | 素材、圖示、BC 與插件文字來源 | [第三方素材](THIRD-PARTY-NOTICES.md)、[第三方文字](third-party-dialogues.md)、[授權文字](licenses/) |
 
-「架構導覽（HTML）」連結指向 GitHub 的 HTML 原始檔；下載後可用瀏覽器開啟。部署時會建置到 `dist/docs/architecture.html`；其他 Markdown 是倉庫文件，不假設已隨網站部署。
+「架構導覽（HTML）」連結指向 GitHub 的 HTML 原始檔；下載後可用瀏覽器開啟。部署時會建置到 `dist/docs/architecture/index.html`；其他 Markdown 是倉庫文件，不假設已隨網站部署。
 
 ## 維護規則
 

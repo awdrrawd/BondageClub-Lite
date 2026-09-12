@@ -43,3 +43,20 @@ test('used flags ship as local hashed SVG assets rather than embedded JS strings
  }
  assert.ok(!files.some(file=>/^flag-tw-/.test(file)),'unused flags are not shipped');
 });
+
+
+test('architecture directory entry builds with a local stylesheet and redirects its old URL',async()=>{
+ const html=await readFile(new URL('dist/docs/architecture/index.html',root),'utf8');
+ const stylesheet=html.match(/href="([^"]+\.css)"/)[1];
+ const css=await readFile(new URL('dist/'+stylesheet.replace(/^\//,''),root),'utf8');assert.ok(css.length>0);
+ assert.match(await readFile(new URL('dist/_redirects',root),'utf8'),/\/docs\/architecture\.html \/docs\/architecture\/ 301/);
+});
+
+test('Pages watch policy skips prose and tests while retaining deployable source and architecture changes',async()=>{
+ const policy=JSON.parse(await readFile(new URL('.cloudflare/build-watch-paths.json',root),'utf8'));
+ const match=(pattern,file)=>new RegExp('^'+pattern.split('*').map(part=>part.replace(/[.*+?^$\{\}()|[\]\\]/g,'\\$&')).join('.*')+'$').test(file);
+ const watched=file=>!policy.path_excludes.some(p=>match(p,file))&&policy.path_includes.some(p=>match(p,file));
+ for(const file of ['README.md','docs/architecture.md','docs/licenses/license.txt','docs/deployment-and-tests.md','tests/build.test.mjs','src/translations/README.md','src/preview/client.ts','ui-preview.html'])assert.equal(watched(file),false,file);
+ for(const file of ['src/main.ts','src/translations/ui/ru.json','public/_worker.js','public/licenses/license.txt','scripts/compile-action-catalogs.mjs','docs/architecture/index.html','docs/architecture/architecture.css','package-lock.json','vite.config.ts','index.html','.cloudflare/build-watch-paths.json'])assert.equal(watched(file),true,file);
+ assert.equal(['docs/README.md','src/main.ts'].some(watched),true);
+});

@@ -1,6 +1,6 @@
 # 房間、好友、聊天與 DOM 驗收
 
-[文件導覽](README.md) · [本機歷史](local-history-and-contacts.md) · [活動與社群協定](chat-native-identity-tests.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture.html)
+[文件導覽](README.md) · [本機歷史](local-history-and-contacts.md) · [活動與社群協定](chat-native-identity-tests.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture/index.html)
 
 ## 介面與訊息
 

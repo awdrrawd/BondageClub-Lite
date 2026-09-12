@@ -1,6 +1,6 @@
 # 手機介面、連線恢復與登入回房
 
-[文件導覽](README.md) · [部署與驗收](deployment-and-tests.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture.html)
+[文件導覽](README.md) · [部署與驗收](deployment-and-tests.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture/index.html)
 
 ## 手機介面
 

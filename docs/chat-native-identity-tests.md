@@ -1,6 +1,6 @@
 # 活動、社群協定與 Lite 識別
 
-[文件導覽](README.md) · [第三方動作文字](third-party-dialogues.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture.html)
+[文件導覽](README.md) · [第三方動作文字](third-party-dialogues.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture/index.html)
 
 ## 原生活動與擴展文字
 

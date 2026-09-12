@@ -1,6 +1,6 @@
 # 帳號、資料流向與外觀保護
 
-[文件導覽](README.md) · [本機紀錄](local-history-and-contacts.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture.html)
+[文件導覽](README.md) · [本機紀錄](local-history-and-contacts.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture/index.html)
 
 ## 資料保存位置
 

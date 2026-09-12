@@ -1,6 +1,6 @@
 # 第三方參考與素材
 
-[文件導覽](README.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture.html)
+[文件導覽](README.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture/index.html)
 
 - `src/assets/lce-lounge.jpg`：依使用者要求取自本機 BC-LCE 的 `assets/BG-98.jpg`，未修改。BC-LCE 倉庫採 AGPL-3.0；隨附 `LCE-AGPL-3.0.txt`，素材不納入 Lite 自有程式的 MIT 授權聲明。圖片原作者／獨立授權未能由本機檔案確認；公開再散布前請確認你有素材使用權，否則移除此圖與對應背景選項。未複製 LCE JavaScript。
 - 好友／BEEP：依 BC 原生訊息格式獨立實作；以本機 BC-FCM（MIT）的 `chat-sender.js` 為互通格式參考。未引入 FCM 的資料庫、UI 或附件解碼器；接收一般文字，忽略插件控制／附件封包。

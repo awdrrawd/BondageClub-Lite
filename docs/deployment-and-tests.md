@@ -1,6 +1,6 @@
 # 開發、部署與驗收
 
-[文件導覽](README.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture.html)
+[文件導覽](README.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture/index.html)
 
 ## 本機開發
 
@@ -35,6 +35,10 @@ npm run dev:ui
 6. 等新部署成功，關掉舊 Lite 分頁，再開正式網址。清除舊頁面快取或強制重新整理，頁尾應顯示 `Relay v1`。
 
 相關平台文件：[Pages 進階模式](https://developers.cloudflare.com/pages/functions/advanced-mode/)、[WebSocket](https://developers.cloudflare.com/workers/runtime-apis/websockets/)。部署配額與服務限制請依實際平台設定核對；本文件不保證無限用量或永不斷線。
+
+## 建置觸發範圍
+
+純 MD／一般 docs／測試變更可略過自動建置；部署用的架構 HTML／CSS 保留觸發。需在 Cloudflare 後台設定，完整規則見[建置觸發範圍](cloudflare-builds.md)。
 
 ## 測試順序與通過標準
 
