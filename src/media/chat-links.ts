@@ -130,14 +130,16 @@ export class MediaConsent {
 export function appendChatLinks(node: HTMLElement, text: string, consent?: MediaConsent): void {
   const document = node.ownerDocument;
   let cursor = 0;
-  // Explicit schemes only. Keep surrounding chat punctuation outside the anchor.
-  for (const match of text.matchAll(/https?:\/\/[^\s<>"'`\u0000-\u001f\u007f]+/giu)) {
+  // Bare media URLs are common in ACV messages. Keep their displayed text intact.
+  for (const match of text.matchAll(/https?:\/\/[^\s<>"'`\u0000-\u001f\u007f]+|(?<![\w@./:-])(?:[a-z\d](?:[a-z\d-]*[a-z\d])?\.)+[a-z]{2,}\/[^\s<>"'`\u0000-\u001f\u007f]*/giu)) {
     let value = match[0].replace(/[.,!?:;，。！？；：、）】」』》*]+$/u, "");
     for (const [open, close] of [["(", ")"], ["[", "]"], ["{", "}"]]) {
       while (value.endsWith(close) && value.split(close).length > value.split(open).length) value = value.slice(0, -1);
     }
     let url: URL;
-    try { url = new URL(value); } catch { continue; }
+    const explicit = /^https?:\/\//i.test(value);
+    try { url = new URL(explicit ? value : `https://${value}`); } catch { continue; }
+    if (!explicit && !resolveMedia(url, document.location.hostname)) continue;
     if (!["http:", "https:"].includes(url.protocol) || !url.hostname || url.username || url.password) continue;
     node.append(document.createTextNode(text.slice(cursor, match.index)));
     const anchor = document.createElement("a");

@@ -1154,8 +1154,10 @@ test('a destination that prohibits leashing cannot cause the follower to leave',
 
 test('plain media URLs remain unchanged on the wire when sent as a native reply',async()=>{
  const f=await setup('PROD');f.handlers.get('ChatRoomSync')({Name:'Room',Character:[]});
- const url='https://www.bilibili.com/video/BV1xx411c7mD';f.client.sendChat(url,'original-msg-id');
+ const url='https://bilibili.com/video/BV149bG6dE5r/?spm_id_from=333.1007.tianma.3-2-6.click';f.client.sendChat(url,'original-msg-id');
  const packet=f.sent.at(-1).payload;assert.equal(packet.Content,url);
  assert.equal(packet.Dictionary.find(entry=>entry.Tag==='ReplyId').ReplyId,'original-msg-id');
  assert.equal(packet.Type,'Chat');
+ f.handlers.get('ChatRoomMessage')({...packet,Sender:55});
+ assert.equal(f.state().messages.at(-1).text,url);
 });

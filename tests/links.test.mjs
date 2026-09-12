@@ -4,6 +4,26 @@ import assert from 'node:assert/strict';
 import { Window } from 'happy-dom';
 import { appendChatLinks, MediaConsent, resolveMedia } from './links-helper.mjs';
 
+test('ACV recognizes bare media URLs while preserving text and requiring consent', async () => {
+  const window = new Window({ url: 'https://lite.example', settings: { disableIframePageLoading: true } });
+  try {
+    const node = window.document.createElement('div'); window.document.body.append(node);
+    const original = 'bilibili.com/video/BV149bG6dE5r/?spm_id_from=333.1007.tianma.3-2-6.click';
+    appendChatLinks(node, original, new MediaConsent(window.document));
+    assert.equal(node.querySelector('a').textContent, original);
+    assert.equal(node.querySelector('a').href, `https://${original}`);
+    assert.equal(node.querySelector('iframe'), null);
+    node.querySelector('button').click();
+    node.querySelector('button').click();
+    assert.equal(node.querySelector('iframe').src, 'https://player.bilibili.com/player.html?bvid=BV149bG6dE5r&autoplay=0&isOutside=true');
+    const plain = window.document.createElement('div');
+    const text = 'user@bilibili.com/video/BV149bG6dE5r bilibili.com.evil.test/video/BV149bG6dE5r ftp://bilibili.com/video/BV149bG6dE5r';
+    appendChatLinks(plain, text, new MediaConsent(window.document));
+    assert.equal(plain.textContent, text);
+    assert.equal(plain.querySelector('a'), null);
+  } finally { await window.happyDOM.close(); }
+});
+
 test('media permission storage failure uses a Lite notice and does not load the media',async()=>{
   const window=new Window(); window.alert=()=>assert.fail('browser alert');
   Object.defineProperty(window,'localStorage',{value:{getItem:()=>null,setItem:()=>{throw Error('quota');}}});
