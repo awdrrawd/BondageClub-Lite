@@ -1,4 +1,4 @@
-import test from 'node:test';
+import test, { afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { stripTypeScriptTypes } from 'node:module';
@@ -26,14 +26,35 @@ const roomListSource = stripTypeScriptTypes(readFileSync('src/ui/room-list.ts', 
 const { sortRooms, canJoinRoom } = new Function(roomListSource + ';return {sortRooms,canJoinRoom};')();
 const mobileSource = stripTypeScriptTypes(readFileSync('src/platform/mobile.ts', 'utf8')).replaceAll('export ', '');
 
+const fixtureCleanup = new Set();
+afterEach(async () => {
+  const cleanup = [...fixtureCleanup];
+  fixtureCleanup.clear();
+  const results = await Promise.allSettled(cleanup.map(dispose => dispose()));
+  for (const result of results) if (result.status === 'rejected') throw result.reason;
+});
+
 function setup(savedAccount, savedPerformance, indexedDBFactory) {
   setLocale('zh');
   const window = new Window({ url: 'https://lite.example', settings: { disableCSSFileLoading: true, disableJavaScriptFileLoading: true } });
+  const intervalHandles = new Set();
+  // Register before initializing LiteApp so assertion/setup failures cannot
+  // leave its periodic history observer running in a test worker.
+  fixtureCleanup.add(async () => {
+    for (const handle of intervalHandles) window.clearInterval(handle);
+    intervalHandles.clear();
+    if (!window.closed) await window.happyDOM.close();
+  });
   const { icon, iconSelect } = uiIcons(window);
   if (indexedDBFactory) Object.defineProperty(window,'indexedDB',{value:indexedDBFactory});
   const intervals=[];
   const setInterval=window.setInterval.bind(window);
-  window.setInterval=(callback,delay,...args)=>{ intervals.push({callback,delay}); return setInterval(callback,delay,...args); };
+  window.setInterval=(callback,delay,...args)=>{
+    intervals.push({callback,delay});
+    const handle = setInterval(callback,delay,...args);
+    intervalHandles.add(handle);
+    return handle;
+  };
   const openActivityDialog = new Function('document', 'window', 't', 'definitions', 'canonicalPartGroup', activitySource + ';return openActivityDialog;')(window.document, window, t, definitions, canonicalPartGroup);
   const StabilityControls = new Function('document', 'window', 't', 'URL', stabilitySource + ';return StabilityControls;')(window.document, window, t, window.URL);
   window.document.body.innerHTML = '<div id="app"></div>';
