@@ -43,7 +43,7 @@ AEE 的 SingleGloveFX／ItemCanvas／Mask／Vis 伴隨層、Property.CustomDraw 
 
 媒體網域管理以框列出永久許可及本次許可；永久列表不重複標示「總是許可」，兩類均可撤銷。撤銷按鈕使用 #ff8b8b，文字與色彩共同辨識操作。
 
-HTTP(S) 連結不解析玩家 HTML。HTTPS 圖片／影音直連，以及[ACV 相容平台](links-safeword-tests.md)的網址可按來源許可嵌入。許可依**實際播放器 origin**，不是僅看原始連結；影音須另外點擊開啟，不自動播放，同時僅保留一個播放器。允許的是特定服務 iframe，不是任意網頁。
+HTTP(S) 連結不解析玩家 HTML。HTTPS 圖片／影音直連，以及[ACV 相容平台](links-safeword-tests.md)的網址可嵌入。ACV 限定平台免詢問許可，點擊觀看按鈕才載入；停用 ACV 時保留超連結。一般圖片／影音直連許可依**實際播放器 origin**，不是僅看原始連結；影音須另外點擊開啟，不自動播放，同時僅保留一個播放器。允許的是特定服務 iframe，不是任意網頁。
 
 媒體直接連來源，來源可收到 IP、使用 Cookie 或載入次級資源；網站設定 no-referrer，不代表匿名代理。重新導向由瀏覽器處理。撤銷許可釋放媒體，不能撤回已送出的請求。詳細格式與測試見[媒體與安全詞](links-safeword-tests.md)。
 

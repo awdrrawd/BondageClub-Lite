@@ -13,13 +13,13 @@
 - `src/media/providers.ts` 分類 URL，`chat-links.ts` 管理實際播放器來源許可。支援 HTTPS 圖片／影片／音訊直連及下述 ACV 相容平台；服務播放器使用限定格式的 iframe，不嵌入任意網頁，也不載入 ACV 插件或執行定時 DOM 掃描。
 - 測試一般聊天、密語、/me、動作及 BEEP 內的 `https://example.org/`、多個連結、帶參數連結及括號／中文句號。可點擊、另開分頁、原文保持不變。
 - `javascript:`、`data:`、含帳密 URL、HTML 標籤不得成為可執行內容。測試 JPG／PNG／GIF／WebP／AVIF、MP4／WebM、MP3／OGG 等直連（含查詢參數）：未許可前没有媒體請求；圖片許可後可載入，影音須再點擊開啟，不自動播放；失效媒體保留原始連結。普通網頁、HTTP 媒體、SVG、非支援服務格式或無法辨識的網址只保留連結，分類細節以 providers.ts 為準。
-- 許可以實際播放器 origin 判斷：YouTube 轉到 youtube-nocookie.com、Vimeo 轉到 player.vimeo.com。核對「本次／總是許可」、設定頁撤銷、登出／刷新；來源跳轉仍由瀏覽器處理，來源可能使用 Cookie 或載入其他資源，no-referrer 不等於匿名。
+- 限定平台（例如 YouTube、Vimeo）直接提供播放按鈕；一般媒體直連仍以實際播放器 origin 判斷許可。核對「本次／總是許可」、設定頁撤銷、登出／刷新；來源跳轉仍由瀏覽器處理，來源可能使用 Cookie 或載入其他資源，no-referrer 不等於匿名。
 - 同時只保留一個影音播放器，開第二個應釋放第一個；關閉、撤銷許可或訊息移出 DOM 時釋放。一般同房同步不重建未變訊息列，不應重新載入既有播放器。預覽入口阻擋外部媒體，實際播放要在正式入口另測。
 - 手機長網址應可折行，不撑寬聊天室；收到連結訊息時草稿與中文輸入不能被重建。
 
 ## ACV 相容顯示
 
-設定 → 媒體網域管理中可切換「ACV 影片／音樂網址轉換」，偏好存於 `bc-lite-acv-v1`，預設開啟。只改顯示：訊息、複製連結與匯出保留原網址；許可實際播放器網域後，仍需點擊播放。關閉立即停止影音／iframe，保留普通連結；圖片與既有網域許可不受影響。
+設定 → 媒體網域管理中可切換「ACV 影片／音樂網址轉換」，偏好存於 `bc-lite-acv-v1`，預設開啟。只改顯示：訊息、複製連結與匯出保留原網址；支援平台不再詢問網域許可，直接提供觀看／聆聽按鈕，點擊才載入播放器；一般圖片與影音直連仍需許可。設定頁可展開支援網站清單。關閉立即停止影音／iframe，保留普通連結；圖片與既有網域許可不受影響。
 
 支援 YouTube（含 Shorts／Live）、Bilibili 影片／番劇、抖音、Vimeo、Niconico、Facebook 影片、Twitch、Streamable、Dailymotion、Pornhub、Instagram、Spotify、SoundCloud、Apple Music、網易雲與影音直連。GitHub blob／raw 的媒體來源在播放器內轉為 raw.githubusercontent.com，原連結不變。Twitch 使用本站 hostname 作 parent。
 
@@ -27,7 +27,7 @@
 
 驗收：從 Lite 發送正常網址，在完整版 BC 應仍為正常連結；開關前後原文字及 href 不變。未許可時無 iframe／影音 src，關閉與撤銷許可後播放器消失，重新開啟只出現播放按鈕。CSP 僅列出支援播放器網域，頁面不執行外部插件腳本。
 
-English: ACV-style players are a local display option. Outgoing text, copied links and exports retain the original URLs. Origin consent and a playback click are required. Turning ACV off stops players while keeping links and image permissions. X/Twitter stays a link; third-party playback availability is not guaranteed.
+English: ACV-style players are a local display option. Outgoing text, copied links and exports retain the original URLs. Supported platforms require only a playback click; direct media files still require origin consent. Turning ACV off stops players while keeping links and image permissions. X/Twitter stays a link; third-party playback availability is not guaranteed.
 
 ## 安全詞：請先以可恢復的外觀測試
 

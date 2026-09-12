@@ -459,5 +459,6 @@
   "follow.held": "Leashed by #{0}; valid room changes are checked before following.",
   "follow.unavailable": "Cannot follow: destination unavailable or permission changed.",
   "media.acv": "ACV video/music link conversion",
-  "media.acvHelp": "Players are local display only; sent and copied links stay unchanged. Allow the player origin, then click to play. Disabling stops players; image permissions remain separate."
+  "media.acvHelp": "When enabled, supported website links offer a watch/listen button without a permission prompt. When disabled, they remain hyperlinks. Players load only on click; outgoing URLs stay unchanged. Direct image and media files still use origin permissions.",
+  "media.supported": "Supported websites (expand)"
 }

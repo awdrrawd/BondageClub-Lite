@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { Window } from 'happy-dom';
 import { appendChatLinks, MediaConsent, resolveMedia } from './links-helper.mjs';
 
-test('ACV recognizes bare media URLs while preserving text and requiring consent', async () => {
+test('ACV recognizes bare media URLs while preserving text and waiting for a click', async () => {
   const window = new Window({ url: 'https://lite.example', settings: { disableIframePageLoading: true } });
   try {
     const node = window.document.createElement('div'); window.document.body.append(node);
@@ -13,7 +13,7 @@ test('ACV recognizes bare media URLs while preserving text and requiring consent
     assert.equal(node.querySelector('a').textContent, original);
     assert.equal(node.querySelector('a').href, `https://${original}`);
     assert.equal(node.querySelector('iframe'), null);
-    node.querySelector('button').click();
+    assert.equal(node.querySelectorAll('button').length, 1);
     node.querySelector('button').click();
     assert.equal(node.querySelector('iframe').src, 'https://player.bilibili.com/player.html?bvid=BV149bG6dE5r&autoplay=0&isOutside=true');
     const plain = window.document.createElement('div');
@@ -35,16 +35,14 @@ test('media permission storage failure uses a Lite notice and does not load the 
   await window.happyDOM.close();
 });
 
-test('provider matching rejects spoofed hosts and embeds need destination consent plus a click', async () => {
+test('provider matching rejects spoofed hosts and supported embeds need only a playback click', async () => {
   assert.equal(resolveMedia(new URL('https://youtube.com.evil.test/watch?v=abcdefghijk')),null);
   assert.equal(resolveMedia(new URL('https://youtube.com/watch?v=bad')),null);
   assert.equal(resolveMedia(new URL('https://youtu.be/abcdefghijk')).src,'https://www.youtube-nocookie.com/embed/abcdefghijk?autoplay=0&rel=0');
   const window = new Window({ settings:{ disableIframePageLoading:true } });
   const node=window.document.createElement('div'); window.document.body.append(node);
   appendChatLinks(node,'https://youtu.be/abcdefghijk',new MediaConsent(window.document));
-  assert.match(node.textContent,/youtube-nocookie.com/);
-  assert.equal(node.querySelector('iframe'),null);
-  node.querySelector('button').click();
+  assert.match(node.textContent,/YouTube/);
   assert.equal(node.querySelector('iframe'),null);
   node.querySelector('button').click();
   assert.ok(node.querySelector('iframe').src.startsWith('https://www.youtube-nocookie.com/embed/'));
@@ -176,7 +174,7 @@ test('ACV switch stops players, preserves normal links and persists without chan
   const consent=new MediaConsent(window.document),node=window.document.createElement('div');window.document.body.append(node);
   const original='https://www.bilibili.com/video/BV1xx411c7mD';appendChatLinks(node,original,consent);
   assert.equal(node.querySelector('a').href,original);assert.equal(node.querySelector('iframe'),null);
-  node.querySelector('button').click();const stale=node.querySelector('button');stale.click();assert.ok(node.querySelector('iframe'));
+  const stale=node.querySelector('button');stale.click();assert.ok(node.querySelector('iframe'));
   window.document.body.append(consent.buildSettings());const toggle=window.document.getElementById('ACVEnabled');toggle.click();
   assert.equal(node.querySelector('iframe'),null);assert.equal(node.querySelector('a').textContent,original);stale.click();assert.equal(node.querySelector('iframe'),null);
   assert.equal(window.localStorage.getItem('bc-lite-acv-v1'),'false');

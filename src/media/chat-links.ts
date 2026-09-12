@@ -35,6 +35,7 @@ export class MediaConsent {
     const origin = new URL(target.src).origin;
     slot.removeAttribute("data-playing");
     slot.replaceChildren();
+    if (target.kind === "frame") { this.playerButton(slot, target); return; }
     if (this.session.has(origin) || this.remembered.has(origin)) {
       if (target.kind !== "image") { this.playerButton(slot, target); return; }
       const media = this.document.createElement("img"); media.className = "chat-media";
@@ -63,9 +64,9 @@ export class MediaConsent {
     for (const frame of slot.querySelectorAll("iframe")) frame.removeAttribute("src");
   }
   private playerButton(slot: HTMLElement, target: MediaTarget): void {
-    const button = this.document.createElement("button"); button.className = "button ghost"; button.type = "button"; button.textContent = t("media.open", [target.label]);
+    const button = this.document.createElement("button"); button.className = "button media-play-button"; button.type = "button"; button.textContent = `▶ ${t("media.open", [target.label])}`;
     button.addEventListener("click", () => {
-      if (!slot.isConnected || !this.acv || ![this.session,this.remembered].some(origins => origins.has(new URL(target.src).origin))) return;
+      if (!slot.isConnected || !this.acv || (target.kind !== "frame" && ![this.session,this.remembered].some(origins => origins.has(new URL(target.src).origin)))) return;
       // One active inline player, independent of provider. Close the old one before allocating another.
       for (const previous of this.document.querySelectorAll<HTMLElement>(".chat-media-slot[data-playing]")) { previous.removeAttribute("data-playing"); this.render(previous); }
       slot.replaceChildren(); slot.dataset.playing = "true";
@@ -98,6 +99,10 @@ export class MediaConsent {
     });
     toggle.append(input, this.document.createTextNode(t('media.acv'))); panel.append(toggle);
     const acvNote = this.document.createElement('p'); acvNote.className = 'muted'; acvNote.textContent = t('media.acvHelp'); panel.append(acvNote);
+    const supported = this.document.createElement('details'); supported.className = 'acv-supported';
+    const summary = this.document.createElement('summary'); summary.textContent = t('media.supported'); supported.append(summary);
+    const sites = this.document.createElement('p'); sites.textContent = 'YouTube · Bilibili · Douyin · Vimeo · Niconico · Facebook · Twitch · Streamable · Dailymotion · Pornhub · Instagram · Spotify · SoundCloud · Apple Music · NetEase Music';
+    supported.append(sites); panel.append(supported);
     const title = this.document.createElement("h2"); title.textContent = t("media.manage"); panel.append(title);
     const note = this.document.createElement("p"); note.textContent = t("media.help"); panel.append(note);
     const list = this.document.createElement("div"); list.className="media-origin-groups"; panel.append(list);

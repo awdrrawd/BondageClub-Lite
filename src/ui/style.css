@@ -224,6 +224,19 @@ body.scenic {
 .settings-view { max-width: 800px; margin: auto; }
 .settings-card { padding: 1.25rem; border: 1px solid var(--line); border-radius: 12px; margin: 1rem 0; background: var(--panel); line-height: 1.7; }
 .settings-card .checkbox { margin: 1rem 0; font-size: .95rem; min-height: 32px; }
+.settings-card label { border-radius: .6rem; transition: background-color .15s; }
+.settings-card label:hover, .settings-card label:focus-within { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.settings-card .checkbox { padding: .6rem; cursor: pointer; }
+.settings-card input[type="checkbox"] { appearance: none; position: relative; flex: 0 0 auto; width: 2.5rem; height: 1.4rem; border: 1px solid var(--muted); border-radius: 1rem; background: transparent; cursor: pointer; }
+.settings-card input[type="checkbox"]::before { content: ""; position: absolute; width: 1rem; height: 1rem; top: .13rem; left: .15rem; border-radius: 50%; background: var(--muted); transition: transform .15s; }
+.settings-card input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
+.settings-card input[type="checkbox"]:checked::before { background: #211a30; transform: translateX(1rem); }
+.settings-card input[type="checkbox"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.settings-card input[type="checkbox"]:disabled { opacity: .45; cursor: default; }
+.acv-supported { padding: .7rem; border: 1px solid var(--muted); border-radius: .6rem; }
+.acv-supported summary { cursor: pointer; color: var(--accent); }
+.chat-media-slot .media-play-button { color: var(--accent); border: 2px solid var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); font-weight: 600; margin: .4rem 0; }
+.chat-media-slot .media-play-button:hover { background: color-mix(in srgb, var(--accent) 25%, transparent); }
 .settings-card h2 { font-size: 1.15rem; }
 .settings-jumps { position:sticky; top:0; z-index:3; display:flex; gap:.35rem; overflow-x:auto; padding:.5rem 0; background:var(--bg); }
 .settings-jumps a { white-space:nowrap; text-decoration:none; }
