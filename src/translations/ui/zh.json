@@ -457,5 +457,7 @@
   "footer.repository": "GitHub 倉庫",
   "media.permanent": "永久許可",
   "follow.held": "正由 #{0} 牽引；有效換房通知會在檢查房間後跟隨。",
-  "follow.unavailable": "無法跟隨：目的房間不可用或權限已變更。"
+  "follow.unavailable": "無法跟隨：目的房間不可用或權限已變更。",
+  "media.acv": "ACV 影片／音樂網址轉換",
+  "media.acvHelp": "只在本機提供播放器，送出與複製仍是原網址。需許可播放器網域並點擊播放；關閉會停止播放器，圖片許可獨立保留。"
 }

@@ -502,7 +502,7 @@ test('BC input prefixes and native reply IDs survive the wire', async () => {
     f.client.sendChat(input, 'native-reply');
     const packet = f.sent.at(-1).payload;
     assert.equal(packet.Type, type); assert.equal(packet.Content, content);
-    assert.equal(packet.Dictionary.find(entry => entry.Tag === 'ReplyId').ReplyId, 'native-reply');
+    assert.equal(packet.Dictionary.find(entry => entry.Tag === 'ReplyId')?.ReplyId, type === 'Action' ? undefined : 'native-reply');
   }
 });
 
@@ -1149,4 +1149,13 @@ test('a destination that prohibits leashing cannot cause the follower to leave',
  const f=await leashFixture();hold(f);pull(f);
  f.handlers.get('ChatRoomSearchResult')([{...destination,BlockCategory:['Leashing']}]);
  assert.equal(f.state().room.Name,'Start');assert.equal(f.sent.some(p=>p.event==='ChatRoomLeave'),false);
+});
+
+
+test('plain media URLs remain unchanged on the wire when sent as a native reply',async()=>{
+ const f=await setup('PROD');f.handlers.get('ChatRoomSync')({Name:'Room',Character:[]});
+ const url='https://www.bilibili.com/video/BV1xx411c7mD';f.client.sendChat(url,'original-msg-id');
+ const packet=f.sent.at(-1).payload;assert.equal(packet.Content,url);
+ assert.equal(packet.Dictionary.find(entry=>entry.Tag==='ReplyId').ReplyId,'original-msg-id');
+ assert.equal(packet.Type,'Chat');
 });

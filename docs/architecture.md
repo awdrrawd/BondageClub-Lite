@@ -173,3 +173,7 @@ English: Settings composition, unread accounting, room-search retries and UI res
 ## 牽引與招喚
 
 `action/leash.ts` 只讀檢查牽引裝備、效果、鎖具與共用關係權限；`network/leash-session.ts` 保存已驗證牽引者，處理放開、ping 及短暫離房窗口。client 使用既有 RoomSearch 查詢目標，返回後再驗證權限及容量，才送出離房／加入。控制封包不進訊息事件或歷史，不寫外觀。BCX 相容招喚使用獨立的本機允許名單與人工接受。設定、限制與雙人驗收見[活動與社群協定](chat-native-identity-tests.md)。
+
+## 原生回覆與 ACV 顯示
+
+回覆正文只含使用者輸入，UI 僅對有原生 MsgId 的聊天／悄悄話／Emote 提供回覆；client 以官方 ReplyId 字典送出，無 ID 時不產生文字引用。`media/providers.ts` 以精確 host 與路徑建立播放器網址；`MediaConsent` 管理 ACV 開關、來源許可及停止播放。原始訊息不經轉換，沒有 DOM 掃描計時器。支援範圍見[網址與安全詞](links-safeword-tests.md)。

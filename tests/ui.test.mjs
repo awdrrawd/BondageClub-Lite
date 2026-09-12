@@ -65,11 +65,11 @@ function setup(savedAccount, savedPerformance, indexedDBFactory) {
   if (savedPerformance) window.localStorage.setItem('bc-lite-performance-v1', savedPerformance);
   let current = { phase: 'ready', status: 'Ready', player: { Name: 'Tester', MemberNumber: 123, FriendList: [55], Appearance: [] }, room: null, rooms: [], characters: [], messages: [], friends: [], friendsQueryState: 'idle', friendsStatus: '尚未查詢', beeps: [] };
   let listener;
-  const calls = [];
+  const calls = [], replies = [];
   const bcClient = {
     subscribe(callback) { listener = callback; listener(current); return () => { listener = () => {}; }; },
     refreshFriends() { calls.push('friends'); },
-    sendChat(text) { calls.push(text); },
+    sendChat(text, replyId) { calls.push(text); replies.push({text,replyId}); },
     activityOptions() { return [{ group: 'ItemHead', groupLabel: '頭部', name: 'Pet', label: '撫摸', reason: null }]; },
     sendActivity(id, group, name) { calls.push({ activity: name, group, id }); },
     setTextCatalog() {},
@@ -102,7 +102,7 @@ function setup(savedAccount, savedPerformance, indexedDBFactory) {
   const UnreadState = new Function(uiSource('src/ui/unread-state.ts')+';return UnreadState;')();
   const PrivateMessages = new Function(...Object.keys(history),uiSource('src/ui/private-messages.ts')+';return PrivateMessages;')(...Object.values(history));
   instance = vm.runInNewContext(source + "\nnew LiteApp(bcClient);", { UnreadState, Lifetime, buildSettingsView, ...history, ...dom, ...modal, MessageSounds, openHistorySearch, buildHistorySettings, contactCard, PrivateMessages, HistorySession:sessionClass(window), contactName, window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, openActivityDialog, icon, iconSelect, nameColor, sortRooms, canJoinRoom, isMobileLayout, bindPageSwipe, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
-  return { instance, window, document: window.document, calls, intervals, client:bcClient, state: () => current, emit(change) { if (change.friendsStatus === '查詢完成') change.friendsQueryState = 'ready'; current = { ...current, ...change }; listener(current); } };
+  return { instance, window, document: window.document, calls, replies, intervals, client:bcClient, state: () => current, emit(change) { if (change.friendsStatus === '查詢完成') change.friendsQueryState = 'ready'; current = { ...current, ...change }; listener(current); } };
 }
 
 test('same-room synchronization preserves shell, composer, log, selection and unchanged member nodes', async () => {
@@ -382,7 +382,7 @@ test('merged all-actions menus prefer a usable sibling even when a blocked sibli
 });
 
 function messages(count) {
-  return Array.from({ length: count }, (_, index) => ({ id: `id-${index}`, sender: 55, senderName: 'Friend', text: `message ${index}`, time: new Date(), type: 'Chat' }));
+  return Array.from({ length: count }, (_, index) => ({ id: `id-${index}`, nativeId: `native-${index}`, sender: 55, senderName: 'Friend', text: `message ${index}`, time: new Date(), type: 'Chat' }));
 }
 
 test('room sorting puts unavailable rooms last without mutating server results', () => {
@@ -586,12 +586,12 @@ test('message selection clears when clicking outside and moves between rows', as
   await f.window.happyDOM.close();
 });
 
-test('only chat, emote, whisper and beep expose reply controls', async () => {
+test('only chat, emote and whisper with native IDs expose reply controls', async () => {
   const f = setup();
   const types = ['Chat', 'Emote', 'Whisper', 'Beep', 'Action', 'Activity', 'Local', 'Hidden', 'Unknown'];
   f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, messages: types.map(type => ({ ...messages(1)[0], id: type, type })) });
   for (const type of types) {
-    assert.equal(Boolean(f.document.querySelector(`[data-message-id="${type}"] .message-reply`)), ['Chat', 'Emote', 'Whisper', 'Beep'].includes(type), type);
+    assert.equal(Boolean(f.document.querySelector(`[data-message-id="${type}"] .message-reply`)), ['Chat', 'Emote', 'Whisper'].includes(type), type);
   }
   f.document.querySelector('[data-message-id="Emote"] .message-reply').click();
   assert.match(f.document.getElementById('chat-room-reply-indicator').textContent, /message 0/);
@@ -897,17 +897,23 @@ test('incoming chat preserves textarea identity, draft, focus, and a bounded log
 
 test('reading history freezes visible rows and offers explicit jump to latest', async () => {
   const f = setup();
-  f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, messages: messages(100) });
+  // A leading-zero timestamp after "message 10" used to falsely match /message 100/.
+  const rows = messages(101).map(message => ({ ...message, time: new Date(2026, 0, 1, 1, 16) }));
+  f.emit({ phase: 'in-room', room: { Name: 'Test', Limit: 10 }, messages: rows.slice(0, 100) });
   const log = f.document.getElementById('TextAreaChatLog');
+  const originalRows = Array.from(log.children);
   Object.defineProperty(log, 'scrollHeight', { value: 1000, configurable: true });
   Object.defineProperty(log, 'clientHeight', { value: 200, configurable: true });
   log.scrollTop = 100;
-  f.emit({ messages: messages(101) });
-  assert.doesNotMatch(log.textContent, /message 100/);
+  f.emit({ messages: rows });
+  assert.equal(log.querySelector('[data-message-id="id-100"]'), null);
+  assert.equal(log.children.length, originalRows.length);
+  originalRows.forEach((row, index) => assert.equal(log.children[index], row));
   assert.equal(log.scrollTop, 100);
   assert.equal(f.document.getElementById('new-messages').hidden, false);
   f.document.getElementById('new-messages').click();
-  assert.match(log.textContent, /message 100/);
+  assert.equal(log.querySelector('[data-message-id="id-100"] .message-text')?.textContent, 'message 100');
+  assert.equal(log.querySelector('[data-message-id="id-0"]'), null);
   assert.equal(log.children.length, 100);
   await f.window.happyDOM.close();
 });
@@ -1161,4 +1167,14 @@ test('leash indicator updates without rebuilding the active chat',async()=>{
  assert.match(f.document.getElementById('summon-notice').textContent,/#55/);
  assert.equal(f.document.getElementById('TextAreaChatLog'),log);
  f.emit({leashHolder:null});assert.equal(f.document.getElementById('summon-notice').hidden,true);
+});
+
+test('native reply sends only the draft and ID; missing IDs never add a text quote',async()=>{
+ const f=setup();f.emit({phase:'in-room',room:{Name:'Room'},messages:[{...messages(1)[0],text:'Original quote',nativeId:'bc-native-id'},{...messages(1)[0],id:'legacy',nativeId:undefined}]});
+ assert.equal(f.document.querySelector('[data-message-id=legacy] .message-reply'),null);
+ f.document.querySelector('[data-message-id=id-0] .message-reply').click();
+ const input=f.document.getElementById('InputChat');input.value='https://www.bilibili.com/video/BV1xx411c7mD';input.dispatchEvent(new f.window.Event('input'));
+ input.closest('form').dispatchEvent(new f.window.Event('submit',{bubbles:true,cancelable:true}));
+ assert.deepEqual(f.replies.at(-1),{text:'https://www.bilibili.com/video/BV1xx411c7mD',replyId:'bc-native-id'});
+ assert.equal(f.document.querySelector('#chat-room-reply-indicator .reply-preview'),null);
 });

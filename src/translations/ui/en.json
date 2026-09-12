@@ -457,5 +457,7 @@
   "footer.repository": "GitHub repository",
   "media.permanent": "Permanent permissions",
   "follow.held": "Leashed by #{0}; valid room changes are checked before following.",
-  "follow.unavailable": "Cannot follow: destination unavailable or permission changed."
+  "follow.unavailable": "Cannot follow: destination unavailable or permission changed.",
+  "media.acv": "ACV video/music link conversion",
+  "media.acvHelp": "Players are local display only; sent and copied links stay unchanged. Allow the player origin, then click to play. Disabling stops players; image permissions remain separate."
 }

@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Window } from 'happy-dom';
@@ -101,7 +102,7 @@ test('unsafe schemes and markup stay text; images require origin permission', as
 
 test('direct videos use inline controls without autoplay; webpages and insecure media stay links', async () => {
   const window = new Window();
-  const node = window.document.createElement('span');
+  const node = window.document.createElement('span'); window.document.body.append(node);
   appendChatLinks(node, 'https://example.org/a.mp4?download=1 http://example.org/a.jpg https://example.org/page https://example.org/a.svg', new MediaConsent(window.document));
   assert.equal(node.querySelector('video'), null);
   node.querySelector('button').click();
@@ -128,4 +129,38 @@ test('media settings separate permanent and session grants without repeated alwa
  assert.ok(!panel.querySelector('.media-origin-groups').textContent.includes('總是許可'));assert.equal(panel.querySelectorAll('.media-origin-revoke').length,2);
  panel.querySelector('.media-origin-revoke').click();assert.deepEqual(JSON.parse(window.localStorage.getItem('bc-lite-media-origins-v1')),[]);
  assert.equal(panel.querySelectorAll('.media-origin-row').length,1);
+});
+
+test('ACV converts supported URLs locally and rejects hostname lookalikes',()=>{
+ const cases=[
+  ['https://www.bilibili.com/video/BV1xx411c7mD','https://player.bilibili.com/player.html?bvid=BV1xx411c7mD&autoplay=0&isOutside=true'],
+  ['https://www.bilibili.com/bangumi/play/ep123','https://player.bilibili.com/player.html?ep_id=123&autoplay=0&isOutside=true'],
+  ['https://www.douyin.com/video/123','https://open.douyin.com/player/video?vid=123&autoplay=0'],
+  ['https://streamable.com/abc','https://streamable.com/e/abc'],
+  ['https://www.dailymotion.com/video/x123','https://www.dailymotion.com/embed/video/x123'],
+  ['https://www.nicovideo.jp/watch/sm123','https://embed.nicovideo.jp/watch/sm123'],
+  ['https://www.instagram.com/reel/abc/','https://www.instagram.com/p/abc/embed/'],
+  ['https://music.163.com/#/song?id=123','https://music.163.com/outchain/player?type=2&id=123&auto=0&height=66'],
+  ['https://music.apple.com/us/album/example/123?i=456','https://embed.music.apple.com/us/album/example/123?i=456'],
+  ['https://github.com/owner/repo/blob/main/video.mp4','https://raw.githubusercontent.com/owner/repo/main/video.mp4'],
+  ['https://www.pornhub.com/view_video.php?viewkey=ph123','https://www.pornhub.com/embed/ph123'],
+ ];
+ for(const [raw,src] of cases){if(resolveMedia(new URL(raw))?.kind==='frame') assert.ok(readFileSync('public/_headers','utf8').split('frame-src ')[1].split(';')[0].split(' ').includes(new URL(src).origin));const url=new URL(raw);assert.equal(resolveMedia(url).src,src);assert.equal(url.href,raw);if(!/mp4$/.test(raw)){url.hostname+='.'+'evil.test';assert.equal(resolveMedia(url),null);}}
+ assert.equal(resolveMedia(new URL('https://www.twitch.tv/videos/123'),'lite.example').src,'https://player.twitch.tv/?video=123&parent=lite.example&autoplay=false');
+ assert.equal(resolveMedia(new URL('https://www.twitch.tv/channel')),null);
+});
+
+test('ACV switch stops players, preserves normal links and persists without changing grants',async()=>{
+ const window=new Window({url:'https://lite.example',settings:{disableIframePageLoading:true}});
+ try {
+  const consent=new MediaConsent(window.document),node=window.document.createElement('div');window.document.body.append(node);
+  const original='https://www.bilibili.com/video/BV1xx411c7mD';appendChatLinks(node,original,consent);
+  assert.equal(node.querySelector('a').href,original);assert.equal(node.querySelector('iframe'),null);
+  node.querySelector('button').click();const stale=node.querySelector('button');stale.click();assert.ok(node.querySelector('iframe'));
+  window.document.body.append(consent.buildSettings());const toggle=window.document.getElementById('ACVEnabled');toggle.click();
+  assert.equal(node.querySelector('iframe'),null);assert.equal(node.querySelector('a').textContent,original);stale.click();assert.equal(node.querySelector('iframe'),null);
+  assert.equal(window.localStorage.getItem('bc-lite-acv-v1'),'false');
+  const fresh=new MediaConsent(window.document);assert.equal(fresh.buildSettings().querySelector('#ACVEnabled').checked,false);
+  toggle.click();assert.ok(node.querySelector('button'));assert.equal(node.querySelector('iframe'),null);
+ } finally {await window.happyDOM.close();}
 });

@@ -519,8 +519,8 @@ export class LiteApp {
         if (this.privateMode === "whisper") {
           if (!this.beepDraft.trim()) return;
           if (!this.snapshot!.characters.some(character => character.MemberNumber === this.contact)) throw new Error(t("m032"));
-          this.client.sendChat(`/w ${this.contact} ${this.replyContent(this.beepDraft)}`, this.replyTarget?.nativeId);
-        } else this.client.sendBeep(this.contact, this.replyContent(this.beepDraft));
+          this.client.sendChat(`/w ${this.contact} ${this.beepDraft}`, this.replyTarget?.nativeId);
+        } else this.client.sendBeep(this.contact, this.beepDraft);
         this.beepDraft = ""; this.replyTarget = null; form.querySelector(".reply-preview")?.remove(); this.contactDrafts.delete(this.contact); text.value = "";
       });
     });
@@ -1211,7 +1211,7 @@ export class LiteApp {
       event.preventDefault();
       if (!this.chatDraft.trim()) return;
       if(this.snapshot!.phase!=='in-room' || !this.snapshot!.room){this.localNotice(t('connection.retained'));return;}
-      try { this.client.sendChat(this.replyContent(this.chatDraft), this.replyTarget?.nativeId); this.replyTarget = null; reply.replaceChildren(); this.chatDraft = ""; input.value = ""; length.textContent = "0/1000"; }
+      try { this.client.sendChat(this.chatDraft, this.replyTarget?.nativeId); this.replyTarget = null; reply.replaceChildren(); this.chatDraft = ""; input.value = ""; length.textContent = "0/1000"; }
       catch (error) { this.localNotice(error instanceof Error ? error.message : t("m167")); }
     });
     if (this.replyTarget) reply.append(this.replyIndicator());
@@ -1266,7 +1266,7 @@ export class LiteApp {
   }
 
   private canReply(message: DisplayMessage): boolean {
-    return !message.presence && ["Chat", "Emote", "Whisper", "Beep"].includes(message.type);
+    return !message.presence && !!message.nativeId && message.nativeId.length <= 256 && ["Chat", "Emote", "Whisper"].includes(message.type);
   }
 
   private selectReply(message: DisplayMessage): void {
@@ -1297,14 +1297,6 @@ export class LiteApp {
   private replyIndicator(): HTMLElement {
     const panel = this.el("div", "reply-preview", t("reply.preview", [this.replyTarget?.senderName, this.replyTarget?.text.slice(0, 120)]));
     const cancel = this.button(t("safety.cancel"), "ghost", "button"); cancel.addEventListener("click", () => { this.replyTarget = null; panel.remove(); }); panel.append(cancel); return panel;
-  }
-
-  private replyContent(text: string): string {
-    if (!this.replyTarget || (this.replyTarget.nativeId && this.replyTarget.type !== "Beep" && !(this.tab === "private" && this.privateMode === "beep"))) return text;
-    const quote = `> ${this.replyTarget.senderName}: ${this.replyTarget.text.slice(0, 160)}\n`;
-    // Keep explicitly selected channels outside the quote, especially /W.
-    const prefix = this.tab === "chat" ? text.match(/^(\/w(?:hisper)?\s+\d+\s+|\/me\s+|\.a\s+|\*)/i)?.[0] || "" : "";
-    return prefix + quote + text.slice(prefix.length);
   }
 
   private jumpToMessage(message: DisplayMessage): void {

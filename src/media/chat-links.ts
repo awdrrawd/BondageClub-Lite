@@ -3,12 +3,14 @@ import { showNotice } from "../platform/dialogs";
 import { resolveMedia, type MediaTarget } from "./providers";
 
 export class MediaConsent {
+  private acv = true;
   private session = new Set<string>();
   private remembered = new Set<string>();
   private readonly key = "bc-lite-media-origins-v1";
   private document: Document;
   constructor(document: Document) {
     this.document = document;
+    try { this.acv = document.defaultView!.localStorage.getItem('bc-lite-acv-v1') !== 'false'; } catch { /* Optional display preference. */ }
     try {
       const values = JSON.parse(document.defaultView!.localStorage.getItem(this.key) || "[]");
       if (Array.isArray(values)) for (const value of values.slice(0, 200)) {
@@ -27,10 +29,10 @@ export class MediaConsent {
   }
   private render(slot: HTMLElement): void {
     const url = new URL(slot.dataset.url!);
-    const target = resolveMedia(url);
-    if (!target) { slot.replaceChildren(); return; }
-    const origin = new URL(target.src).origin;
+    const target = resolveMedia(url, this.document.location.hostname);
     this.release(slot);
+    if (!target || (!this.acv && target.kind !== "image")) { slot.removeAttribute("data-playing"); slot.replaceChildren(); return; }
+    const origin = new URL(target.src).origin;
     slot.removeAttribute("data-playing");
     slot.replaceChildren();
     if (this.session.has(origin) || this.remembered.has(origin)) {
@@ -39,7 +41,7 @@ export class MediaConsent {
       media.setAttribute("aria-label", url.href);
       media.alt = ""; media.loading = "lazy"; media.decoding = "async"; media.referrerPolicy = "no-referrer";
       media.addEventListener("error", () => media.remove(), { once: true });
-      media.src = url.href; slot.append(media); return;
+      media.src = target.src; slot.append(media); return;
     }
     slot.append(this.document.createTextNode(t("media.prompt", [origin])));
     for (const permanent of [false, true]) {
@@ -63,6 +65,7 @@ export class MediaConsent {
   private playerButton(slot: HTMLElement, target: MediaTarget): void {
     const button = this.document.createElement("button"); button.className = "button ghost"; button.type = "button"; button.textContent = t("media.open", [target.label]);
     button.addEventListener("click", () => {
+      if (!slot.isConnected || !this.acv || ![this.session,this.remembered].some(origins => origins.has(new URL(target.src).origin))) return;
       // One active inline player, independent of provider. Close the old one before allocating another.
       for (const previous of this.document.querySelectorAll<HTMLElement>(".chat-media-slot[data-playing]")) { previous.removeAttribute("data-playing"); this.render(previous); }
       slot.replaceChildren(); slot.dataset.playing = "true";
@@ -86,6 +89,15 @@ export class MediaConsent {
   }
   buildSettings(): HTMLElement {
     const panel = this.document.createElement("section"); panel.className = "settings-card";
+    const toggle = this.document.createElement('label'); toggle.className = 'checkbox';
+    const input = this.document.createElement('input'); input.type = 'checkbox'; input.id = 'ACVEnabled'; input.checked = this.acv;
+    input.addEventListener('change', () => {
+      try { this.document.defaultView!.localStorage.setItem('bc-lite-acv-v1',String(input.checked)); }
+      catch { input.checked = this.acv; showNotice(t('media.storageError'),this.document); return; }
+      this.acv = input.checked; this.refresh();
+    });
+    toggle.append(input, this.document.createTextNode(t('media.acv'))); panel.append(toggle);
+    const acvNote = this.document.createElement('p'); acvNote.className = 'muted'; acvNote.textContent = t('media.acvHelp'); panel.append(acvNote);
     const title = this.document.createElement("h2"); title.textContent = t("media.manage"); panel.append(title);
     const note = this.document.createElement("p"); note.textContent = t("media.help"); panel.append(note);
     const list = this.document.createElement("div"); list.className="media-origin-groups"; panel.append(list);
@@ -138,7 +150,7 @@ export function appendChatLinks(node: HTMLElement, text: string, consent?: Media
     anchor.className = "chat-link";
     node.append(anchor);
     if (url.protocol === "https:") {
-      if (resolveMedia(url) && consent) node.append(consent.slot(url));
+      if (resolveMedia(url, document.location.hostname) && consent) node.append(consent.slot(url));
     }
     cursor = match.index + value.length;
   }
