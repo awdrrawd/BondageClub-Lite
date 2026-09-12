@@ -96,6 +96,8 @@ export class LiteApp {
     if (!root) throw new Error(t("m001"));
     this.root = root;
     this.lifetime.listen(document, 'pointerdown',()=>{void this.sounds.unlock().catch(()=>{});});
+    this.lifetime.listen(document, 'scroll', () => this.updateSettingsLocation(), { capture: true, passive: true });
+    this.lifetime.listen(window, 'resize', () => this.updateSettingsLocation());
     this.lifetime.listen(document, 'keydown',()=>{void this.sounds.unlock().catch(()=>{});});
     this.lifetime.listen(window.matchMedia("(max-width: 760px)"), "change", () => {
       this.roomPage = 0;
@@ -471,16 +473,17 @@ export class LiteApp {
   private contactLayout: "grid" | "rows" | null = null;
   private buildFriends(privatePage = false): HTMLElement {
     const section = this.el("section", privatePage ? "friends-view private-page" : "friends-view");
-    if (!privatePage) section.append(this.el("p", "eyebrow", t("friends.list")));
+
     section.setAttribute("aria-label", privatePage ? t("private.title") : t("m016"));
-    if (!privatePage) section.append(this.el("p", "muted", t("m017")));
+
     const toolbar = this.el("form", "toolbar contact-toolbar");
     const refresh = this.button("", "ghost friend-refresh", "button");
     refresh.append(icon("refresh")); refresh.title = t("m018"); refresh.setAttribute("aria-label", t("m018"));
     refresh.disabled = this.snapshot!.friendsQueryState === "loading";
     refresh.addEventListener("click", () => this.run(() => this.client.refreshFriends()));
     const query = this.input("FriendQuery", t("m019"), "search", this.friendQuery);
-    query.addEventListener("input", () => { this.friendQuery = query.value; this.updateFriendContent(); });
+    query.addEventListener("input", () => { this.friendQuery = query.value; if (privatePage) refresh.hidden = !!query.value.trim(); this.updateFriendContent(); });
+    if (privatePage) refresh.hidden = !!query.value.trim();
     const search = this.button("", "ghost", "submit"); search.append(icon("search")); search.title = t("m098"); search.setAttribute("aria-label", t("m098"));
     toolbar.addEventListener("submit", event => { event.preventDefault(); this.friendQuery = query.value; this.updateFriendContent(); });
     toolbar.append(query, search, refresh);
@@ -493,18 +496,19 @@ export class LiteApp {
     }
     const status = this.el("p", "muted"); status.id = "friends-status";
     const list = this.el("div", "contact-list"); list.id = "contact-list";
-    const layoutButtons = this.el("div", "contact-layout-buttons");
-    const applyLayout = () => {
-      list.dataset.layout = this.contactLayout || "auto";
-      const mode = this.contactLayout || (window.matchMedia('(max-width: 760px)').matches ? "rows" : "grid");
-      for (const button of layoutButtons.querySelectorAll('button')) button.setAttribute('aria-pressed', String(button.dataset.layout === mode));
-    };
-    for (const mode of ["grid", "rows"] as const) {
-      const toggle = this.button("", "ghost", "button"); toggle.dataset.layout = mode;
-      toggle.title = t(`contacts.${mode}`); toggle.setAttribute('aria-label', toggle.title); toggle.append(icon(mode));
-      toggle.addEventListener('click', () => { this.contactLayout = mode; applyLayout(); }); layoutButtons.append(toggle);
+    list.dataset.layout = privatePage ? "rows" : this.contactLayout || "auto";
+    if (!privatePage) {
+      const layoutButtons = this.el("div", "contact-layout-buttons");
+      const toggle = this.button("", "ghost", "button");
+      const update = () => {
+        const mode = this.contactLayout || (window.matchMedia('(max-width: 760px)').matches ? "rows" : "grid");
+        const next = mode === "grid" ? "rows" : "grid";
+        toggle.dataset.layout = mode; toggle.title = t(`contacts.${next}`); toggle.setAttribute('aria-label', toggle.title);
+        toggle.replaceChildren(icon(mode)); list.dataset.layout = this.contactLayout || "auto";
+      };
+      toggle.addEventListener('click', () => { this.contactLayout = toggle.dataset.layout === "grid" ? "rows" : "grid"; update(); });
+      layoutButtons.append(toggle); filters.append(layoutButtons); update();
     }
-    filters.append(layoutButtons); applyLayout();
 
     if (!privatePage) {
       section.append(toolbar, filters, status, list);
@@ -835,6 +839,20 @@ export class LiteApp {
     panel.append(this.field(t("performance.history"), history), this.field(t("performance.visible"), visible)); return panel;
   }
 
+  private updateSettingsLocation(): void {
+    const nav = this.root.querySelector<HTMLElement>('.settings-jumps');
+    if (!nav) return;
+    const groups = Array.from(this.root.querySelectorAll<HTMLElement>('.settings-group'));
+    const edge = nav.getBoundingClientRect().bottom + 16;
+    let current = groups[0];
+    for (const group of groups) if (group.getBoundingClientRect().top <= edge) current = group;
+    if (!current) return;
+    for (const link of nav.querySelectorAll('a')) {
+      if (link.getAttribute('href') === `#${current.id}`) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    }
+  }
+
   private updateDeliveryStatus(): void { const node = document.getElementById("delivery-status"); if (node) this.fillDeliveryStatus(node); }
   private fillDeliveryStatus(node: HTMLElement): void {
     node.replaceChildren();
@@ -975,7 +993,7 @@ export class LiteApp {
     search.classList.add("room-search"); search.setAttribute("aria-label", t("m098"));
     search.replaceChildren(icon("search"), this.el("span", "control-text", t("m098")));
     const filters = this.el("details", "room-filters") as HTMLDetailsElement;
-    filters.open = !isMobileLayout();
+    filters.open = false;
     const filterToggle = this.el("summary"); filterToggle.setAttribute("aria-label", t("rooms.filters"));
     filterToggle.append(icon("faders"), this.el("span", "control-text", t("rooms.filters")));
     filters.append(filterToggle, options);
@@ -986,7 +1004,7 @@ export class LiteApp {
     });
 
     const resultHeader = this.el("div", "result-header");
-    resultHeader.append(this.el("span", "result-count", t("m101", [state.rooms.length])));
+
     const sort = this.select(t("rooms.sort"), [["friends", t("rooms.sortFriends")], ["name", t("rooms.sortName")], ["count", t("rooms.sortCount")]], this.roomSort);
     sort.addEventListener("change", () => { this.roomSort = sort.value as RoomSort; this.roomPage = 0; this.render(); });
     const rooms = this.el("div", "room-list");

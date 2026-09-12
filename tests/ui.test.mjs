@@ -204,7 +204,7 @@ test('contact cards use cached names with live-room priority, room-only subtitle
     friends:[{MemberNumber:55,MemberName:'Server name',Type:'Lover',Private:true}],
     beeps:[{id:'offline',memberNumber:77,name:'Old offline name',text:'Saved conversation',incoming:true,time:new Date()}]});
   f.document.getElementById('nav-friends').click();
-  assert.match(f.document.querySelector('.eyebrow').textContent,/好友清單/);
+  assert.equal(f.document.querySelector('.friends-view > .eyebrow'),null);
   assert.equal(f.document.querySelectorAll('.contact-card').length,2);
   assert.equal(f.document.querySelector('.contact-toolbar input').type,'search');
   assert.equal(f.document.querySelectorAll('.contact-toolbar button svg').length,2);
@@ -306,7 +306,7 @@ test('mobile search controls use labelled SVG choices, expand query and retain n
   const form=f.document.querySelector('.room-controls:not(.create-controls)');
   assert.deepEqual([...form.children].map(node=>node.classList[1] || node.classList[0]),['room-query','primary','room-space','room-language','room-filters']);
   assert.equal(f.document.querySelectorAll('.app-nav button > svg').length,5);
-  assert.deepEqual([...f.document.querySelector('.result-header').children].map(node=>node.tagName),['SPAN','NAV','SELECT']);
+  assert.deepEqual([...f.document.querySelector('.result-header').children].map(node=>node.tagName),['NAV','SELECT']);
   const query=f.document.getElementById('RoomQuery'); query.focus();
   assert.equal(form.classList.contains('search-expanded'),true);
   f.document.querySelector('.view-heading h1').click(); assert.equal(form.classList.contains('search-expanded'),false);
@@ -427,7 +427,7 @@ test('room pagination replaces pages, icons reflect access and mobile swipe igno
   f.emit({rooms:Array.from({length:50}, (_,i) => ({...rooms[0],Name:`Room ${i}`}))});
   assert.equal(f.document.querySelectorAll('.room-card').length,24);
   assert.equal(f.document.querySelector('.room-pagination span').textContent,'1 / 3');
-  assert.equal(f.document.querySelector('.room-filters').open,true);
+  assert.equal(f.document.querySelector('.room-filters').open,false);
   await f.window.happyDOM.close();
 });
 
@@ -1219,11 +1219,11 @@ test('contact layout toggles preserve the mounted list and use responsive defaul
  const list=f.document.getElementById('contact-list');
  assert.equal(list.dataset.layout,'auto');
  const buttons=f.document.querySelector('.contact-layout-buttons');
- assert.equal(buttons.querySelectorAll('svg').length,2);
- buttons.querySelector('[data-layout="rows"]').click();
+ assert.equal(buttons.querySelectorAll('svg').length,1);
+ buttons.querySelector('button').click();
  assert.equal(list.dataset.layout,'rows');
- assert.equal(buttons.querySelector('[data-layout="rows"]').getAttribute('aria-pressed'),'true');
- buttons.querySelector('[data-layout="grid"]').click();
+ assert.equal(buttons.querySelector('button').dataset.layout,'rows');
+ buttons.querySelector('button').click();
  assert.equal(list.dataset.layout,'grid');
  assert.equal(f.document.getElementById('contact-list'),list);
  await f.window.happyDOM.close();

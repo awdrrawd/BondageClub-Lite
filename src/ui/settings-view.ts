@@ -20,7 +20,7 @@ export interface SettingsContext {
 }
 export function buildSettingsView(context: SettingsContext): HTMLElement {
     const section = el("section", "settings-view");
-    section.append(el("p", "eyebrow", t("m055")), el("h1", "", t("m056")));
+    section.append(el("p", "eyebrow", t("m055")));
     const panel = el("div", "settings-card");
     panel.append(el("h2", "", t("settings.appearance")));
     const theme = select(t("settings.theme"), (["default", "midnight", "forest"] as const).map(value => [value, t(`theme.${value}`)]), context.settings.theme);
@@ -54,7 +54,13 @@ export function buildSettingsView(context: SettingsContext): HTMLElement {
     ];
     section.append(jumps);
     for (const [id, label, panels] of groups) {
-      const anchor = el("a", "button ghost", label) as HTMLAnchorElement; anchor.href = `#settings-${id}`; jumps.append(anchor);
+      const anchor = el("a", "button ghost", label) as HTMLAnchorElement; anchor.href = `#settings-${id}`;
+      if (id === 'appearance') anchor.setAttribute('aria-current', 'location');
+      anchor.addEventListener('click', () => {
+        for (const link of jumps.querySelectorAll('a')) link.removeAttribute('aria-current');
+        anchor.setAttribute('aria-current', 'location');
+      });
+      jumps.append(anchor);
       const group = el("section", "settings-group"); group.id = `settings-${id}`; group.append(el("h2", "", label), ...panels); section.append(group);
     }
     section.append(disconnect);
