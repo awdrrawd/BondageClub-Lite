@@ -460,5 +460,8 @@
   "follow.unavailable": "無法跟隨：目的房間不可用或權限已變更。",
   "media.acv": "ACV 影片／音樂網址轉換",
   "media.acvHelp": "啟用時，支援網站的網址會提供觀看／聆聽按鈕，無需另行許可；停用時只顯示超連結網址。點擊按鈕才載入播放器，送出的訊息保持原網址。一般圖片及影音直連仍使用媒體網域許可。",
-  "media.supported": "支援網站（展開查看）"
+  "media.supported": "支援網站（展開查看）",
+  "delivery.pending": "傳送中，等待伺服器回傳",
+  "delivery.confirmed": "伺服器已回傳",
+  "delivery.unconfirmed": "尚未確認（可能延遲或斷線），請先確認聊天紀錄，避免重複傳送"
 }

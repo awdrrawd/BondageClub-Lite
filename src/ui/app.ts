@@ -197,6 +197,7 @@ export class LiteApp {
       // Preserve the mounted authenticated view across synchronization and reconnection.
       if (previous && !ownerChanged && !!snapshot.player===!!previous.player && (snapshot.player || snapshot.phase===previous.phase) && this.viewRoom()?.Name === oldViewRoom) {
         this.updateHeader();
+        this.updateDeliveryStatus();
         this.updateChatLog();
         if (snapshot.characters !== previous.characters || snapshot.room !== previous.room || snapshot.player !== previous.player || snapshot.cuddlePartner !== previous.cuddlePartner) this.updateRoomInfo();
         if (snapshot.rooms !== previous.rooms) this.refreshRoomResults?.();
@@ -813,6 +814,13 @@ export class LiteApp {
     panel.append(this.field(t("performance.history"), history), this.field(t("performance.visible"), visible)); return panel;
   }
 
+  private updateDeliveryStatus(): void { const node = document.getElementById("delivery-status"); if (node) this.fillDeliveryStatus(node); }
+  private fillDeliveryStatus(node: HTMLElement): void {
+    node.replaceChildren();
+    for (const item of this.snapshot?.deliveries || []) node.append(this.el("div", `delivery-${item.status}`, `${t(`delivery.${item.status}`)} · ${item.text.slice(0, 80)}`));
+    node.hidden = !node.childElementCount;
+  }
+
   private updateSummon(): void { const node = document.getElementById("summon-notice"); if (node) this.fillSummon(node); }
   private fillSummon(node: HTMLElement): void {
     node.replaceChildren(); const summon = this.snapshot?.summon; node.hidden = !summon && !this.snapshot?.leashHolder;
@@ -1215,8 +1223,10 @@ export class LiteApp {
       catch (error) { this.localNotice(error instanceof Error ? error.message : t("m167")); }
     });
     if (this.replyTarget) reply.append(this.replyIndicator());
+    const delivery = this.el("div", "delivery-status"); delivery.id = "delivery-status"; delivery.setAttribute("role", "status");
+    this.fillDeliveryStatus(delivery);
     bot.prepend(reply);
-    chat.append(topMenu, struggle, log, bot);
+    chat.append(topMenu, struggle, log, delivery, bot);
     layout.append(sidebar, chat);
     return layout;
   }

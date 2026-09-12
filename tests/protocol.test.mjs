@@ -1165,3 +1165,30 @@ test('plain media URLs remain unchanged on the wire when sent as a native reply'
  assert.equal(f.state().messages.at(-1).text,url);
  assert.equal(f.state().messages.at(-1).nativeId,messageId);
 });
+
+
+test('delivery requires a matching server echo and late echoes resolve uncertainty', async () => {
+ const f=await setup('PROD');f.handlers.get('ChatRoomSync')({Name:'Room',Character:[]});
+ f.client.sendChat('delivery test');
+ const packet=f.sent.at(-1).payload, self=f.state().player.MemberNumber;
+ assert.equal(f.state().deliveries.at(-1).status,'pending');
+ f.handlers.get('ChatRoomMessage')({...packet,Sender:self+1});
+ assert.equal(f.state().deliveries.at(-1).status,'pending');
+ for(const callback of [...f.timers.values()]) callback();
+ assert.equal(f.state().deliveries.at(-1).status,'unconfirmed');
+ const sent=f.sent.length;
+ f.handlers.get('ChatRoomMessage')({...packet,Sender:self});
+ assert.equal(f.state().deliveries.at(-1).status,'confirmed');
+ assert.equal(f.sent.length,sent,'no automatic resend');
+ f.client.disconnect();
+});
+
+test('local whisper display never confirms delivery and disconnect clears pending timers', async () => {
+ const f=await setup('PROD');f.handlers.get('ChatRoomSync')({Name:'Room',Character:[{MemberNumber:55,Name:'Friend'}]});
+ f.client.sendChat('/w 55 hello');
+ assert.equal(f.state().deliveries.at(-1).status,'pending');
+ assert.equal(f.state().whispers.at(-1).text,'hello');
+ f.handlers.get('disconnect')('transport close');
+ assert.equal(f.state().deliveries.at(-1).status,'unconfirmed');
+ f.client.disconnect();assert.equal(f.timers.size,0);
+});

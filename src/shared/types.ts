@@ -143,6 +143,7 @@ export interface DisplayMessage {
 }
 
 export interface ClientSnapshot {
+  deliveries?: { id: string; text: string; status: "pending" | "confirmed" | "unconfirmed" }[];
   cuddleRequest?: { sender: number; name: string; expires: number } | null;
   cuddlePartner?: number | null;
   whispers?: DisplayMessage[];

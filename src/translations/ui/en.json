@@ -460,5 +460,8 @@
   "follow.unavailable": "Cannot follow: destination unavailable or permission changed.",
   "media.acv": "ACV video/music link conversion",
   "media.acvHelp": "When enabled, supported website links offer a watch/listen button without a permission prompt. When disabled, they remain hyperlinks. Players load only on click; outgoing URLs stay unchanged. Direct image and media files still use origin permissions.",
-  "media.supported": "Supported websites (expand)"
+  "media.supported": "Supported websites (expand)",
+  "delivery.pending": "Sending — awaiting server echo",
+  "delivery.confirmed": "Server echo confirmed",
+  "delivery.unconfirmed": "Unconfirmed (delayed or disconnected). Check chat before resending."
 }

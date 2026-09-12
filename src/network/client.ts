@@ -295,6 +295,7 @@ export class BcLiteClient {
   }
 
   disconnect(): void {
+    this.interruptDeliveries();
     this.cancelTravel(); this.leash.clear();
     this.searches.reset(true);
     this.cuddlePair = null; this.cuddlePeers.clear();
@@ -563,8 +564,24 @@ export class BcLiteClient {
     if (["Chat", "Whisper", "Emote"].includes(message.Type)) message.Dictionary.push({ Tag: "MsgId", MsgId: crypto.randomUUID() });
     if (replyId && replyId.length <= 256 && ["Chat", "Whisper", "Emote"].includes(message.Type)) message.Dictionary.push({ Tag: "ReplyId", ReplyId: replyId });
     this.lastChatAt = Date.now();
+    const id = String(message.Dictionary.find(entry => entry.Tag === "MsgId")?.MsgId || crypto.randomUUID());
+    if (!message.Dictionary.some(entry => entry.Tag === "MsgId")) message.Dictionary.push({ Tag: "MsgId", MsgId: id });
+    if (this.deliveryTimers.size >= 20) { const oldest = this.deliveryTimers.keys().next().value!; window.clearTimeout(this.deliveryTimers.get(oldest)); this.deliveryTimers.delete(oldest); }
+    this.patch({ deliveries: [...(this.state.deliveries || []).slice(-19), { id, text, status: "pending" }] });
+    this.deliveryTimers.set(id, window.setTimeout(() => this.settleDelivery(id, "unconfirmed"), 15000));
     this.socket!.emit("ChatRoomChat", message);
     if (message.Type === "Whisper") this.handleMessage({ ...message, Sender: this.state.player?.MemberNumber });
+  }
+
+  private deliveryTimers = new Map<string, number>();
+  private settleDelivery(id: string, status: "confirmed" | "unconfirmed"): void {
+    window.clearTimeout(this.deliveryTimers.get(id)); this.deliveryTimers.delete(id);
+    this.patch({ deliveries: this.state.deliveries?.map(item => item.id === id ? { ...item, status } : item) });
+  }
+  private interruptDeliveries(): void {
+    for (const timer of this.deliveryTimers.values()) window.clearTimeout(timer);
+    this.deliveryTimers.clear();
+    this.patch({ deliveries: this.state.deliveries?.map(item => item.status === "pending" ? { ...item, status: "unconfirmed" } : item) });
   }
 
   private connectSocket(): void {
@@ -720,7 +737,11 @@ export class BcLiteClient {
     this.socket.on("ChatRoomSyncRoomProperties", (room: Partial<RoomSync>) => {
       if (this.state.room) this.patch({ room: { ...this.state.room, ...room } });
     });
-    this.socket.on("ChatRoomMessage", (message: ChatMessage) => this.handleMessage(message));
+    this.socket.on("ChatRoomMessage", (message: ChatMessage) => {
+      const id = Array.isArray(message?.Dictionary) ? message.Dictionary.find(entry => entry?.Tag === "MsgId")?.MsgId : undefined;
+      if (message?.Sender === this.state.player?.MemberNumber && typeof id === "string" && this.state.deliveries?.some(item => item.id === id)) this.settleDelivery(id, "confirmed");
+      this.handleMessage(message);
+    });
     this.socket.on("ForceDisconnect", (reason: unknown) => {
       this.patch({ summon: null });
       this.clearRecovery();
@@ -737,6 +758,7 @@ export class BcLiteClient {
       this.socket?.disconnect();
     });
     this.socket.on("disconnect", (reason) => {
+      this.interruptDeliveries();
       this.searches.reset();
       this.cancelTravel(); this.leash.clear();
       this.patch({ summon: null });

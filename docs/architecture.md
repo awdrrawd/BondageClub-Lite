@@ -177,3 +177,9 @@ English: Settings composition, unread accounting, room-search retries and UI res
 ## 原生回覆與 ACV 顯示
 
 回覆正文只含使用者輸入，UI 僅對有原生 MsgId 的聊天／悄悄話／Emote 提供回覆；client 以官方 ReplyId 字典送出，無 ID 時不產生文字引用。`media/providers.ts` 以精確 host 與路徑建立播放器網址；`MediaConsent` 管理 ACV 開關、來源許可及停止播放。原始訊息不經轉換，沒有 DOM 掃描計時器。支援範圍見[網址與安全詞](links-safeword-tests.md)。
+
+### 訊息傳送確認 / Delivery confirmation
+
+送出的聊天以 MsgId 追蹤，僅自己帳號的伺服器回傳可確認。15 秒未回傳或斷線標記未確認，不自動重送；遲到回傳仍可確認。最多保留最近 20 筆狀態。私訊本機副本不算確認，伺服器未回傳時維持未確認。此狀態不是對方已讀證明。
+
+Outgoing messages are confirmed only by a matching server echo from the sender. A 15-second timeout or disconnect marks delivery unconfirmed; no automatic resend occurs. Late echoes can confirm the latest 20 tracked messages. Local whisper copies do not confirm delivery. This is not a read receipt.
