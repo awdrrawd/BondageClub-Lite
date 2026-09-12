@@ -36,7 +36,18 @@ onMessage(callback) 回傳取消訂閱函式。只通知新加入的訊息，不
 - activityOptions(memberNumber)：取得原生 BC 活動與不可用原因。
 - sendActivity(memberNumber, group, name)：每次重新檢查權限及嚴格活動條件，不啟用寬鬆相容模式。
 
-每個插件的發送入口至少相隔 1500 毫秒，另受客戶端原有共同限制。失敗會 throw；送出不等於對端接受。活動權限目前只接受自己或明確 Everyone（AllowedInteractions=0；缺值時讀取舊欄位 ItemPermission）的對象；受限關係權限或缺資料會拒絕，尚未完整重現官方 owner／lover／白名單／支配聲望判斷。
+每個插件的發送入口至少相隔 1500 毫秒，另受客戶端原有共同限制。失敗會 throw；送出不等於對端接受。活動權限依官方 `ServerChatRoomGetAllowItem` 的線上玩家規則檢查：
+
+| 等級 | 可互動條件（自己與已確認主人優先允許） |
+| --- | --- |
+| 0 | 所有人 |
+| 1 | 不在對象黑名單 |
+| 2 | 不在黑名單，且在白名單、是戀人，或自身支配聲望 +25 ≥ 對象 |
+| 3 | 在對象白名單或是戀人 |
+| 4 | 是戀人 |
+| 5 | 僅自己或主人 |
+
+主人依對象 Ownership.MemberNumber，戀人依發起者 Lovership；來源優先使用最新房間角色資料。AllowedInteractions 缺值時讀 ItemPermission。缺少或格式錯誤的必要名單／聲望不推定允許；已收到的空 Reputation 依官方規則視為聲望 0。這是線上活動的權限判斷，不包含 NPC、物品鎖、換裝或道具專用條件。
 
 UI 與插件共用 `action/interaction-permission.ts`；UI 相容模式也不會略過權限檢查，貼貼則沿用獨立的雙方確認流程。
 
@@ -68,4 +79,4 @@ else window.addEventListener('bclite:ready', start, { once: true });
 
 ## English summary
 
-BCLite API v1 exposes live classified message subscriptions, minimal state, chat/BEEP sending and conservative native activities. Register a plugin, explicitly opt into sending/private messages, and dispose it when disabled. No history replay, raw sockets, credentials, inventory writes, admin/map operations or Mod SDK compatibility. Restricted or unknown interaction permissions fail closed; successful submission is not server acceptance. Same-page scripts are trusted code, not sandboxed extensions.
+BCLite API v1 exposes live classified message subscriptions, minimal state, chat/BEEP sending and conservative native activities. Register a plugin, explicitly opt into sending/private messages, and dispose it when disabled. No history replay, raw sockets, credentials, inventory writes, admin/map operations or Mod SDK compatibility. Online permission levels 0–5 include ownership, source-side lovership, target lists and dominance; missing required data fails closed; successful submission is not server acceptance. Same-page scripts are trusted code, not sandboxed extensions.

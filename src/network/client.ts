@@ -206,7 +206,7 @@ export class BcLiteClient {
     const room = this.returnRoom || (remembered === undefined ? this.validRoomName(this.state.player?.LastChatRoom?.Name) : remembered);
     this.returnRoom = null;
     if (room) { this.recordConnection("rejoin-attempt"); this.join(room); }
-    const search = this.searches.recovery; this.searches.recovery = null;
+    const search = this.searches.takeRecovery();
     if (search) this.search(search);
   }
 
@@ -275,7 +275,7 @@ export class BcLiteClient {
   }
 
   disconnect(): void {
-    this.searches.recovery = null; this.searches.queued = null; this.searches.pending = false;
+    this.searches.reset(true);
     this.cuddlePair = null; this.cuddlePeers.clear();
     this.departed.clear();
     this.summonRule = { enabled: false, members: [], text: "Come to my room immediately" };
@@ -552,7 +552,7 @@ export class BcLiteClient {
       if (this.canSend() && this.recoveryTimer !== null) { this.clearRecovery(); this.recordConnection("probe-response"); }
     });
     this.socket.on("connect", () => {
-      this.searches.pending = false; this.searches.queued = null; this.clearSearchTimer();
+      this.searches.reset();
       this.clearRecovery();
       this.recordConnection("connected");
       if (!this.credentials) return;
@@ -599,10 +599,8 @@ export class BcLiteClient {
       if (this.loginAccepted && this.state.phase === "waiting-server") this.finishLogin();
     });
     this.socket.on("ChatRoomSearchResult", (rooms: RoomSearchResult[]) => {
-      if (!this.searches.pending) return;
-      this.searches.pending = false;
-      this.clearSearchTimer();
-      const queued = this.searches.queued; this.searches.queued = null;
+      const queued = this.searches.complete();
+      if (queued === false) return;
       if (queued) { this.search(queued); return; }
       if (!Array.isArray(rooms)) { this.patch({ status: t("m217") }); return; }
       const safeRooms = rooms;
@@ -694,7 +692,7 @@ export class BcLiteClient {
       this.socket?.disconnect();
     });
     this.socket.on("disconnect", (reason) => {
-      this.searches.pending = false; this.searches.queued = null;
+      this.searches.reset();
       this.patch({ summon: null });
       this.clearRecovery();
       this.recordConnection(["ping timeout", "transport close", "transport error", "io server disconnect", "io client disconnect"].includes(reason) ? reason : "disconnected");

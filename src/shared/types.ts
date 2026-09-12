@@ -28,6 +28,9 @@ export interface PlayerSummary extends CharacterSummary {
 }
 
 export interface CharacterSummary {
+  BlackList?: number[];
+  WhiteList?: number[];
+  Reputation?: Array<{ Type: string; Value: number }>;
   ItemPermission?: number;
   AllowedInteractions?: number;
   LabelColor?: string;

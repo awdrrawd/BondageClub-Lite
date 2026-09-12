@@ -1045,3 +1045,13 @@ test('UI compatibility cannot bypass shared unknown or restricted interaction pe
  }
  assert.ok(!f.sent.some(packet=>packet.event==='ChatRoomChat'&&packet.payload.Type==='Activity'));
 });
+
+test('relationship activity permission is revoked immediately by character sync',async()=>{
+ const base={Name:'Test',Appearance:[{Group:'BodyUpper',Name:'Normal'}],ArousalSettings:{Active:'Manual',Activity:'z'.repeat(100),Zone:'f'.repeat(30)}};
+ const f=await setup('PROD',true,base);
+ const target={...base,MemberNumber:55,AllowedInteractions:3,WhiteList:[123]};
+ f.handlers.get('ChatRoomSync')({Name:'Room',Character:[{...base,MemberNumber:123,Lovership:[]},target]});
+ assert.equal(f.client.activityOptions(55,true).find(o=>o.name==='Whisper').reason,null);
+ f.handlers.get('ChatRoomSyncCharacter')({Character:{...target,WhiteList:[]}});
+ for(const mode of [false,true]) assert.throws(()=>f.client.sendActivity(55,'ItemEars','Whisper',mode));
+});

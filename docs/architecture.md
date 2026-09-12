@@ -149,7 +149,7 @@ UI 預覽禁止外部媒體，且不包含在正式建置。happy-dom、fake-ind
 
 ## 插件 API
 
-src/extensions/api.ts 建立 BCLite v1，同步事件由 client.subscribeMessages 提供，與畫面／歷史快照訂閱分離。插件只能透過現有 client 方法送出，原生活動使用嚴格條件及保守權限檢查。沒有暴露帳密、Socket、外觀寫入及房主／地圖功能。完整介面見[插件 API](plugin-api.md)。
+src/extensions/api.ts 建立 BCLite v1，同步事件由 client.subscribeMessages 提供，與畫面／歷史快照訂閱分離。插件只能透過現有 client 方法送出，原生活動使用嚴格條件及共用線上玩家權限檢查。沒有暴露帳密、Socket、外觀寫入及房主／地圖功能。完整介面見[插件 API](plugin-api.md)。
 
 ## 架構檢視與後續整理
 
@@ -163,8 +163,9 @@ src/extensions/api.ts 建立 BCLite v1，同步事件由 client.subscribeMessage
 - `network/room-search.ts` 管理搜尋排隊、逾時及重連重試。`network/client.ts` 仍是唯一 Socket 擁有者，搜尋模組只透過注入的操作發送請求。
 - `platform/lifetime.ts` 統一取消 UI 訂閱、全域事件與計時器。`LiteApp.dispose()` 清理媒體、音效、常亮、對話框並等待歷史批次寫入；不等同登出，不主動切斷共用 client。`BCLite.dispose()` 可另行撤銷所有插件及橋接訂閱。
 - `tests/load-typescript.mjs` 用語法樹移除模組宣告，保留字串內容；測試仍明確注入依賴，Vite 專用的 chunks 也以宣告名稱替換，不再全面取代 export 字串。
-- `action/interaction-permission.ts` 提供 UI 與插件共用的保守互動權限。優先讀 AllowedInteractions，缺值時接受舊欄位 ItemPermission；自己或 Everyone 可繼續驗證活動，其餘受限關係與缺資料拒絕。相容模式不繞過此檢查。貼貼維持獨立的雙方確認與只改自身欄位流程。
+- `action/interaction-permission.ts` 集中官方線上玩家 0–5 級互動規則：主人、戀人、白名單、黑名單與支配聲望。UI 與插件每次送出均使用最新快照檢查；缺資料不推定允許，相容模式不繞過。貼貼維持獨立的雙方確認與只改自身欄位流程。
+- 搜尋模組以 reset／complete／takeRecovery 管理狀態轉移，client 不直接修改搜尋排隊或重連欄位。
 
-這次調整模組責任與清理入口，沒有實作完整官方關係／物品引擎。貼貼協定協調、帳戶與房間畫面仍由 client／LiteApp 統籌；沒有為了縮短檔案而把同一狀態任意分散到多個 Socket 或視圖控制器。
+這次調整模組責任與清理入口，已補齊線上互動關係規則；未新增物品操作。貼貼協定協調、帳戶與房間畫面仍由 client／LiteApp 統籌；沒有為了縮短檔案而把同一狀態任意分散到多個 Socket 或視圖控制器。
 
-English: Settings composition, unread accounting, room-search retries and UI resource cleanup now have dedicated modules. UI and plugins share conservative interaction permissions. Tests remove module declarations structurally while preserving source strings. The client remains the sole socket owner; disposal of a UI does not disconnect it. Full official relationship and inventory rules are outside this refactor.
+English: Settings composition, unread accounting, room-search retries and UI resource cleanup now have dedicated modules. UI and plugins share online permission levels 0–5, including ownership, lovers, lists and dominance, with missing-data rejection. Tests remove module declarations structurally while preserving source strings. The client remains the sole socket owner; disposal of a UI does not disconnect it. NPC and inventory operations remain outside this refactor.
