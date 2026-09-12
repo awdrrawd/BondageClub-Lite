@@ -1,6 +1,6 @@
 # URL 與安全詞驗收
 
-[文件導覽](README.md) · [保存與資料流向](privacy-and-appearance.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture/index.html)
+[文件導覽](README.md) · [保存與資料流向](privacy-and-appearance.md) · [架構導覽（HTML）](https://bondageclub-lite.pages.dev/docs/architecture/)
 
 ## 共用 Lite 確認與通知
 

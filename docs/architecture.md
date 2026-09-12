@@ -1,6 +1,6 @@
 # 客戶端架構
 
-[文件導覽](README.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture/index.html) · [翻譯貢獻](../src/translations/README.md)
+[文件導覽](README.md) · [架構導覽（HTML）](https://bondageclub-lite.pages.dev/docs/architecture/) · [翻譯貢獻](../src/translations/README.md)
 
 本頁是模組責任與資料流的維護基準；HTML 提供可獨立部署的摘要。
 

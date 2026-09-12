@@ -1,6 +1,6 @@
 # ECHO 貼貼與配對驗收
 
-[文件導覽](README.md) · [活動條件](chat-native-identity-tests.md) · [外觀保存界線](privacy-and-appearance.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture/index.html)
+[文件導覽](README.md) · [活動條件](chat-native-identity-tests.md) · [外觀保存界線](privacy-and-appearance.md) · [架構導覽（HTML）](https://bondageclub-lite.pages.dev/docs/architecture/)
 
 ## 實作範圍
 

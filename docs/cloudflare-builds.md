@@ -1,6 +1,6 @@
 # Cloudflare 建置觸發範圍
 
-[文件導覽](README.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture/index.html) · [部署與驗收](deployment-and-tests.md)
+[文件導覽](README.md) · [架構導覽（HTML）](https://bondageclub-lite.pages.dev/docs/architecture/) · [部署與驗收](deployment-and-tests.md)
 
 目標網站：[bondageclub-lite.pages.dev](https://bondageclub-lite.pages.dev/)。在後台核對專案的 pages.dev 網址相符後再套用規則。
 

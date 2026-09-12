@@ -1,6 +1,6 @@
 # 第三方動作文字來源
 
-[文件導覽](README.md) · [架構導覽（HTML）](https://github.com/awdrrawd/BondageClub-Lite/blob/Mater/docs/architecture/index.html)
+[文件導覽](README.md) · [架構導覽（HTML）](https://bondageclub-lite.pages.dev/docs/architecture/)
 
 `scripts/build-plugin-catalog.mjs` 只解析本機來源的字面值，不執行插件。來源整理於 `src/translations/action/{xiaosu,lscg,echo}/`（英文基底＋中文差異），再由編譯器合併成按需載入產物；人工修正放 `src/translations/overrides/`；未收錄動作可使用封包提供的可讀替代文字。
 
