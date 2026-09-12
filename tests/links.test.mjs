@@ -116,3 +116,16 @@ test('direct videos use inline controls without autoplay; webpages and insecure 
   assert.equal(node.querySelectorAll('a').length, 4);
   await window.happyDOM.close();
 });
+
+
+test('media settings separate permanent and session grants without repeated always labels',async context=>{
+ const window=new Window({url:'https://lite.example'});context.after(()=>window.happyDOM.close());
+ const consent=new MediaConsent(window.document),node=window.document.createElement('div');
+ appendChatLinks(node,'https://permanent.example/a.png',consent);node.querySelectorAll('button')[1].click();
+ const temporary=window.document.createElement('div');appendChatLinks(temporary,'https://session.example/a.png',consent);temporary.querySelector('button').click();
+ const panel=consent.buildSettings();assert.equal(panel.querySelectorAll('.media-origin-list').length,2);
+ assert.deepEqual([...panel.querySelectorAll('.media-origin-address')].map(n=>n.textContent),['https://permanent.example','https://session.example']);
+ assert.ok(!panel.querySelector('.media-origin-groups').textContent.includes('總是許可'));assert.equal(panel.querySelectorAll('.media-origin-revoke').length,2);
+ panel.querySelector('.media-origin-revoke').click();assert.deepEqual(JSON.parse(window.localStorage.getItem('bc-lite-media-origins-v1')),[]);
+ assert.equal(panel.querySelectorAll('.media-origin-row').length,1);
+});

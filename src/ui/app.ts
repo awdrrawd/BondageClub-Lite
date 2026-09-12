@@ -146,7 +146,7 @@ export class LiteApp {
     });
     try {
       const saved = JSON.parse(localStorage.getItem("bc-lite-display-v1") || "{}");
-      this.settings = { background: saved.background === true, largeText: saved.largeText === true, timestamps: saved.timestamps !== false, locale: saved.locale === "en" ? "en" : "zh", theme: ["default", "midnight", "forest"].includes(saved.theme) ? saved.theme : "default" };
+      this.settings = { background: saved.background === true, largeText: saved.largeText === true, timestamps: saved.timestamps !== false, locale: saved.locale === "ru" ? "ru" : saved.locale === "en" ? "en" : "zh", theme: ["default", "midnight", "forest"].includes(saved.theme) ? saved.theme : "default" };
     } catch { /* Storage can be unavailable in private browsing. */ }
     try {
       const savedAccount = localStorage.getItem("bc-lite-account-v1");
@@ -219,7 +219,7 @@ export class LiteApp {
 
   private applySettings(): void {
     document.documentElement.dataset.theme = this.settings.theme;
-    document.documentElement.lang = getLocale() === "zh" ? "zh-Hant" : "en";
+    document.documentElement.lang = getLocale() === "zh" ? "zh-Hant" : getLocale();
     document.querySelector('meta[name="description"]')?.setAttribute("content", t("site.description"));
     document.body.classList.toggle("scenic", this.settings.background);
     document.body.classList.toggle("large-text", this.settings.largeText);
@@ -233,16 +233,16 @@ export class LiteApp {
   }
 
   private languageControl(): HTMLElement {
-    const select = this.select(t("locale.label"), [["zh", t("locale.zh")], ["en", t("locale.en")]], getLocale());
+    const select = this.select(t("locale.label"), [["zh", t("locale.zh")], ["en", t("locale.en")], ["ru", t("locale.ru")]], getLocale());
     select.id = "InterfaceLocale";
     select.addEventListener("change", () => {
-      this.settings.locale = select.value === "en" ? "en" : "zh";
+      this.settings.locale = select.value === "ru" ? "ru" : select.value === "en" ? "en" : "zh";
       setLocale(this.settings.locale); this.applySettings();
       try { localStorage.setItem("bc-lite-display-v1", JSON.stringify(this.settings)); } catch { this.localNotice(t("m060")); }
       this.client.relocalize(); this.render();
       if (this.snapshot?.player) this.refreshCatalog();
     });
-    const control = iconSelect(select, {zh: "zh", en: "en"}, "translate", true);
+    const control = iconSelect(select, {zh: "zh", en: "en", ru: "ru"}, "translate", true);
     control.classList.add("locale-picker"); return control;
   }
 
@@ -457,7 +457,7 @@ export class LiteApp {
   private buildFriends(privatePage = false): HTMLElement {
     const section = this.el("section", privatePage ? "friends-view private-page" : "friends-view");
     if (!privatePage) section.append(this.el("p", "eyebrow", t("friends.list")));
-    section.append(this.el("h1", "", privatePage ? t("private.title") : t("m016")));
+    section.setAttribute("aria-label", privatePage ? t("private.title") : t("m016"));
     if (!privatePage) section.append(this.el("p", "muted", t("m017")));
     const toolbar = this.el("form", "toolbar contact-toolbar");
     const refresh = this.button("", "ghost friend-refresh", "button");
@@ -1492,6 +1492,8 @@ export class LiteApp {
   private buildFooter(): HTMLElement {
     const footer = this.el("footer", "app-footer");
     footer.append(this.el("span", "", "BC Lite · Social preview · Relay v1"), this.el("span", "", t("m178")));
+    const repository=this.el("a", "", t("footer.repository")) as HTMLAnchorElement;
+    repository.href="https://github.com/awdrrawd/BondageClub-Lite/tree/Mater"; repository.target="_blank"; repository.rel="noopener noreferrer";footer.append(repository);
     return footer;
   }
 

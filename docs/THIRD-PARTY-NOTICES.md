@@ -14,7 +14,7 @@
 ## BC 文字資料與 BIO
 
 - `lz-string`：MIT，用於解析 BC 帶 U+256C 標記的 UTF16 壓縮 BIO；不執行 BIO 內容。
-- `src/translations/bc/{messages,actions,items,groups}/` 的 `zh.json`（差異）、`en.json`（基底）：由本機 `BCJS/Bondage-College-master/BondageClub` 的 `Screens/Interface`、`Assets/Female3DCG/AssetStrings`、`Assets/Female3DCG/Female3DCG`、`Screens/Online/ChatRoom/Text_ChatRoom`、`Screens/Character/Preference/ActivityDictionary` 的 CSV 及 TW／CN 翻譯文字機械轉換。BC 文字資料權利屬原作者，不納入 Lite 自有程式的 MIT 授權聲明。
+- `src/translations/bc/{messages,actions,items,groups}/` 的 `zh.json`／`ru.json`（差異）、`en.json`（基底）：由本機 `BCJS/Bondage-College-master/BondageClub` 的 `Screens/Interface`、`Assets/Female3DCG/AssetStrings`、`Assets/Female3DCG/Female3DCG`、`Screens/Online/ChatRoom/Text_ChatRoom`、`Screens/Character/Preference/ActivityDictionary` 的 CSV 及 TW／CN／RU 翻譯文字機械轉換。BC 文字資料權利屬原作者，不納入 Lite 自有程式的 MIT 授權聲明。
 - 轉換腳本：`node scripts/build-text-catalog.mjs [BondageClub來源目錄]`。產物已隨專案保存，Cloudflare 建置不需要你的本機 BC 倉庫，也不在玩家登入時下載原始倉庫。
 - 只取文字資料，未引入 BC 遊戲執行程式、服裝圖片或人物渲染。
 - `src/action/native-data.json`：由同一本機 BC Female3DCG 定義表靜態擷取活動 ID、目標部位、前置条件與基礎身體名稱，供受限原生活動判定；資料權利屬 BC 原作者。

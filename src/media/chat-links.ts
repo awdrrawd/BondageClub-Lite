@@ -88,20 +88,27 @@ export class MediaConsent {
     const panel = this.document.createElement("section"); panel.className = "settings-card";
     const title = this.document.createElement("h2"); title.textContent = t("media.manage"); panel.append(title);
     const note = this.document.createElement("p"); note.textContent = t("media.help"); panel.append(note);
-    const list = this.document.createElement("div"); panel.append(list);
+    const list = this.document.createElement("div"); list.className="media-origin-groups"; panel.append(list);
     const render = () => {
       list.replaceChildren();
       const origins = [...new Set([...this.remembered, ...this.session])].sort();
       if (!origins.length) list.textContent = t("media.empty");
+      const permanent=this.document.createElement('div'), temporary=this.document.createElement('div');
+      permanent.className='media-origin-list';temporary.className='media-origin-list';
+      for(const [box,label,show] of [[permanent,t('media.permanent'),origins.some(origin=>this.remembered.has(origin))],[temporary,t('media.once'),origins.some(origin=>!this.remembered.has(origin))]] as const){
+        if(show){const heading=this.document.createElement('h3');heading.textContent=label;box.append(heading);list.append(box);}
+      }
       for (const origin of origins) {
-        const row = this.document.createElement("div"); row.textContent = `${origin} · ${t(this.remembered.has(origin) ? "media.always" : "media.once")} `;
-        const remove = this.document.createElement("button"); remove.type = "button"; remove.className = "button ghost"; remove.textContent = t("media.remove");
+        const row = this.document.createElement("div"); row.className="media-origin-row";
+        const address=this.document.createElement("span");address.className="media-origin-address";address.textContent=origin; row.append(address);
+
+        const remove = this.document.createElement("button"); remove.type = "button"; remove.className = "button ghost media-origin-revoke"; remove.textContent = t("media.remove");
         remove.addEventListener("click", () => {
           const next = new Set(this.remembered); next.delete(origin);
           try { if (this.remembered.has(origin)) this.document.defaultView!.localStorage.setItem(this.key, JSON.stringify([...next])); }
           catch { showNotice(t("media.storageError"),this.document); return; }
           this.remembered = next; this.session.delete(origin); this.refresh(); render();
-        }); row.append(remove); list.append(row);
+        }); row.append(remove); (this.remembered.has(origin)?permanent:temporary).append(row);
       }
     }; render(); return panel;
   }

@@ -452,5 +452,8 @@
   "history.column.senderName": "發送者名稱",
   "history.column.targetId": "接收者編號",
   "history.column.targetName": "接收者名稱",
-  "history.column.text": "訊息"
+  "history.column.text": "訊息",
+  "locale.ru": "Русский",
+  "footer.repository": "GitHub 倉庫",
+  "media.permanent": "永久許可"
 }

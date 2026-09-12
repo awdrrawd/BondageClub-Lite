@@ -545,3 +545,7 @@ html[data-ui-preview] .app-nav { bottom:var(--preview-height); }
 }
 
 #connection-banner[hidden]{display:none}.history-search-dialog{width:min(900px,94vw)}.history-search-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.history-search-results{display:grid;gap:8px;max-height:40vh;overflow:auto}.history-search-result{text-align:left;white-space:pre-wrap;overflow-wrap:anywhere}.history-search-context{max-height:35vh;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}.search-hit{border-left:3px solid currentColor;padding-left:8px}.private-unread:empty{display:none}@media(max-width:600px){.history-search-form{grid-template-columns:1fr}}
+
+.media-origin-list{border:1px solid var(--border,#68527c);border-radius:12px;padding:12px;max-height:320px;overflow:auto}.media-origin-row{display:flex;align-items:center;gap:12px;padding:8px 0}.media-origin-address{flex:1;min-width:0;overflow-wrap:anywhere}.media-origin-revoke{color:#ff8b8b;flex-shrink:0}.app-footer a{color:inherit;text-underline-offset:3px}
+
+.media-origin-groups{display:grid;gap:12px}.media-origin-list h3{margin:0 0 8px;font-size:1rem}

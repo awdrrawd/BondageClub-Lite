@@ -11,7 +11,7 @@ An unofficial, lightweight text client for Bondage Club, focused on chat without
 - Private-message unread indicators, replies and separate notification sound toggles.
 - Local history search and TXT, HTML and Excel export.
 - Automatic reconnection, with the chat view and drafts preserved during temporary disconnections. Messages are never resent automatically.
-- Chinese and English interfaces, mobile layouts, profile viewing and text activities.
+- Chinese, English and Russian interfaces, mobile layouts, profile viewing and text activities.
 
 Wardrobe tools, character rendering and full plugin functionality are not included.
 

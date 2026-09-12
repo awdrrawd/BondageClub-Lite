@@ -452,5 +452,8 @@
   "history.column.senderName": "Sender name",
   "history.column.targetId": "Recipient ID",
   "history.column.targetName": "Recipient name",
-  "history.column.text": "Message"
+  "history.column.text": "Message",
+  "locale.ru": "Русский",
+  "footer.repository": "GitHub repository",
+  "media.permanent": "Permanent permissions"
 }

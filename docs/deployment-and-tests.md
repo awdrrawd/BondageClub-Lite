@@ -109,3 +109,7 @@ npm run dev:relay
 ```
 
 開啟 http://127.0.0.1:8788 。另一個終端可執行 `node scripts/smoke-relay.mjs`，只測中繼與 BC Socket.IO 握手，不傳 AccountLogin。
+
+## 使用者腳本的 CSP 樣式警告
+
+正式站使用 style-src self，只載入本站樣式檔。若錯誤來源為 userscript.html，先停用該站的使用者腳本後重新整理，以確認是否由擴充腳本插入內嵌樣式造成。畫面正常時不需為單一腳本放寬整站 CSP；畫面異常則檢查 Console 的來源與行號。Lite 的樣式修改放在 src/ui/style.css；不為外部腳本加入 unsafe-inline。

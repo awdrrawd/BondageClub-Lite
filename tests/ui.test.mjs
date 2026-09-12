@@ -1091,3 +1091,17 @@ test('local search renders literal text and opens isolated context', async conte
   assert.equal(f.document.getElementById('InputChat').value,'');assert.ok(!f.calls.some(c=>typeof c==='string'&&c.includes('needle')));
   f.emit({player:{...f.state().player,MemberNumber:999}});assert.equal(f.document.querySelector('.history-search-dialog'),null);
 });
+
+
+test('Russian selection preserves player text and draft and exposes repository footer', async context=>{
+ const f=setup();context.after(()=>f.window.happyDOM.close());
+ f.emit({phase:'in-room',room:{Name:'房間 Original'},messages:[{id:'ru-test',sender:55,senderName:'Alice',type:'Chat',text:'Player text 中文',time:new Date()}]});
+ const input=f.document.getElementById('InputChat');input.value='草稿 draft';input.dispatchEvent(new f.window.Event('input'));
+ const select=f.document.getElementById('InterfaceLocale');select.value='ru';select.dispatchEvent(new f.window.Event('change'));
+ assert.equal(f.document.documentElement.lang,'ru');assert.equal(JSON.parse(f.window.localStorage.getItem('bc-lite-display-v1')).locale,'ru');
+ assert.equal(f.document.getElementById('nav-settings').textContent,'Настройки');
+ assert.equal(f.document.getElementById('InputChat').value,'草稿 draft');assert.match(f.document.getElementById('TextAreaChatLog').textContent,/Player text 中文/);
+ assert.equal(f.document.querySelector('.app-footer a').href,'https://github.com/awdrrawd/BondageClub-Lite/tree/Mater');
+ f.document.getElementById('nav-private').click();assert.equal(f.document.querySelector('.private-page > h1'),null);
+ f.document.getElementById('nav-friends').click();assert.equal(f.document.querySelector('.friends-view > h1'),null);
+});
