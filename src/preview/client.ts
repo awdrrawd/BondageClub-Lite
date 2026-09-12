@@ -1,4 +1,4 @@
-import type { UiClient } from "../ui/app";
+import type { UiClient } from "../ui/client-contract";
 import type { ClientSnapshot, DisplayMessage, RoomSync } from "../shared/types";
 
 /** Synthetic session only: no real client inheritance, sockets, fetch, credentials or persistent data. */

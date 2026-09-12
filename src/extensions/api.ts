@@ -1,10 +1,11 @@
-import type { BcLiteClient } from "../network/client";
+import type { ExtensionClient, MessageKind, PluginMessage, PluginOptions } from "./types";
 import type { ClientSnapshot, DisplayMessage } from "../shared/types";
 
-export function classifyMessage(message: DisplayMessage) {
+const messageKinds = { Chat: "chat", Whisper: "whisper", Emote: "emote", Action: "action", Activity: "activity", ServerMessage: "server", Local: "local", Beep: "beep" } as const;
+
+export function classifyMessage(message: DisplayMessage): MessageKind {
   if (message.presence) return "presence";
-  const types = { Chat: "chat", Whisper: "whisper", Emote: "emote", Action: "action", Activity: "activity", ServerMessage: "server", Local: "local", Beep: "beep" } as const;
-  return types[message.type] ?? "unknown";
+  return messageKinds[message.type] ?? "unknown";
 }
 
 // Conservative subset of ServerChatRoomGetAllowItem. Restricted relationship
@@ -17,14 +18,14 @@ export function interactionPermission(state: Readonly<ClientSnapshot> | undefine
   return target.AllowedInteractions === undefined ? "permission-unknown" : "restricted-permission";
 }
 
-export function createExtensionAPI(client: Pick<BcLiteClient, "subscribe" | "subscribeMessages" | "sendChat" | "sendBeep" | "activityOptions" | "sendActivity">) {
+export function createExtensionAPI(client: ExtensionClient) {
   let state: Readonly<ClientSnapshot>;
   client.subscribe(value => { state = value; });
   const plugins = new Set<string>();
   return Object.freeze({
     client: "Lite", apiVersion: 1,
     capabilities: Object.freeze({ messages: true, chat: true, beep: true, nativeActivities: true, inventory: false, roomAdmin: false, musicControl: false, map: false, modSdkCompatible: false }),
-    registerPlugin(id: string, options: { allowSend?: boolean; privateMessages?: boolean } = {}) {
+    registerPlugin(id: string, options: PluginOptions = {}) {
       if (!/^[a-z0-9][a-z0-9._-]{0,63}$/i.test(id) || plugins.has(id)) throw new Error("Invalid or duplicate plugin id");
       plugins.add(id);
       const allowSend = options.allowSend === true, privateMessages = options.privateMessages === true;
@@ -47,7 +48,7 @@ export function createExtensionAPI(client: Pick<BcLiteClient, "subscribe" | "sub
           return { phase: state.phase, self: state.player?.MemberNumber ?? null, room: state.room?.Name ?? null,
             members: state.characters.map(c => ({ memberNumber: c.MemberNumber, name: c.Nickname || c.Name })) };
         },
-        onMessage(callback: (event: Readonly<{ id: string; kind: string; type: string; text: string; sender: number | null; target: number | null; self: boolean; room: string | null; timestamp: number; key: string | null }>) => unknown) {
+        onMessage(callback: (event: PluginMessage) => unknown) {
           alive();
           if (typeof callback !== "function") throw new Error("Callback required");
           const off = client.subscribeMessages(message => {

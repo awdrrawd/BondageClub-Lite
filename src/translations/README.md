@@ -14,6 +14,7 @@
 | 新增插件物品／部位名称 | `items/插件名稱/en.json`、`groups/插件名稱/en.json` 及語言差異 |
 | 更新 BC 官方文字 | `npm run catalog:bc -- 上游BC目錄` |
 | 更新現有三個插件的靜態擷取文字 | `npm run catalog:plugins` |
+| 人工更新擴展活動前置條件 | `npm run catalog:rules -- components目錄`（不納入自動同步） |
 | 更新 ECHO 衣物名稱 | `npm run catalog:items`（可傳入 components 目錄） |
 
 `bc/{messages,actions,items,groups}/` 與目前 `action/xiaosu`、`action/lscg`、`action/echo`、`items/echo`、`groups/echo` 是擷取器管理的資料，再擷取會覆寫。不希望被覆寫的貢獻放 `overrides/`；擷取腳本不接觸它。上游更新造成鍵名移除或改動時，人工覆寫也需要核對，不能只依賴舊鍵一直有效。

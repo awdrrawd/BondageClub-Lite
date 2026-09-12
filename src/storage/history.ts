@@ -1,7 +1,6 @@
 import type { ClientSnapshot, DisplayMessage } from '../shared/types';
 
 export type HistoryPolicy = { recentDays: number; roomDays: number; privateDays: number };
-export const defaultHistoryPolicy: HistoryPolicy = { recentDays: 30, roomDays: 7, privateDays: 7 };
 export function historyPolicy(value: Partial<HistoryPolicy> = {}): HistoryPolicy {
   const choice = (n: unknown, allowed: number[], fallback: number) => typeof n === 'number' && allowed.includes(n) ? n : fallback;
   return { recentDays: choice(value.recentDays, [0, 7, 14, 30], 30), roomDays: choice(value.roomDays, [0, 1, 3, 7], 7), privateDays: choice(value.privateDays, [0, 1, 3, 7], 7) };

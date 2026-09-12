@@ -26,10 +26,11 @@ Cloudflare Pages 靜態資源 → 瀏覽器 LiteApp
 
 | 位置 | 責任 |
 | --- | --- |
-| src/main.ts | 啟動 UI |
+| src/main.ts | 正式入口：建立 LiteApp、注入 bcClient 並掛載 BCLite API |
 | src/network/client.ts | 唯一 Socket.IO 擁有者；登入、重連、快照、搜尋、房間、好友、送出驗證、外觀寫入例外 |
 | src/network/speech.ts | 讀取發送者提供的 Dictionary.Original；沒有原文就保留收到的文字，不破解語音混淆 |
 | src/shared/types.ts | Lite 使用的協定資料子集 |
+| src/ui/client-contract.ts、src/extensions/types.ts | UI／預覽及插件橋接的型別契約；僅型別引用 client，不載入網路實作 |
 | src/ui/app.ts | 訂閱快照、導覽、局部 DOM 更新、草稿、歷史分頁及帳戶切換 |
 | src/ui/room-list.ts、private-messages.ts | 房間排序／可加入狀態；私訊合併與排序快取 |
 | src/ui/history-search.ts | 本機歷史搜尋，每頁 50 筆；同房間／同對話上下文，帳戶與請求序號隔離 |
@@ -134,7 +135,7 @@ npm run dev:ui
 
 build／dev 的前置步驟重建文字產物；開發伺服器運行期間修改翻譯後需另跑 `npm run catalog:compile`。只有更新上游擷取資料才需本機 BC／插件來源目錄。不要手改 generated/。
 
-`scripts/legacy/extract-ui-i18n.mjs` 是已完成的一次性遷移工具，不應重新執行來覆寫現行翻譯。
+已完成的一次性 UI 翻譯遷移腳本已移除；需要查閱時使用 Git 歷史。
 
 UI 預覽禁止外部媒體，且不包含在正式建置。happy-dom、fake-indexeddb 與模擬 socket 驗證邏輯、節點身分與競態，不能取代真實版面、手機鍵盤、Cloudflare PROD 或雙人插件測試。第三方來源與授權依[文件導覽](README.md)查閱。
 
@@ -149,3 +150,19 @@ UI 預覽禁止外部媒體，且不包含在正式建置。happy-dom、fake-ind
 ## 插件 API
 
 src/extensions/api.ts 建立 BCLite v1，同步事件由 client.subscribeMessages 提供，與畫面／歷史快照訂閱分離。插件只能透過現有 client 方法送出，原生活動使用嚴格條件及保守權限檢查。沒有暴露帳密、Socket、外觀寫入及房主／地圖功能。完整介面見[插件 API](plugin-api.md)。
+
+## 架構檢視與後續整理
+
+目前靜態執行期 import 圖無循環。ui/app.ts 只匯出類別，建構時注入 UiClient（定義於 ui/client-contract.ts）與掛載節點；正式入口與 preview/main.ts 各自建立實例。離線預覽的執行期依賴不包含 network/client.ts。TypeScript 已啟用未使用局部變數／參數檢查，但它不涵蓋所有未使用 export、動態翻譯鍵或外部插件 API。
+
+已清除無引用的 defaultHistoryPolicy、測試專用 activityInventoryReason 包裝及已完成的 UI 遷移工具。build-extension-rules.mjs 仍有人工更新用途，動態載入的翻譯、插件相容分支與 BCLite 公開入口保留。
+
+仍值得逐步拆分：
+
+- ui/app.ts 同時負責頁面建構、草稿／未讀／歷史視窗、帳戶重設與全域事件。優先抽出設定／資料頁，再分離聊天閱讀狀態；保留 DOM 身分測試，避免重新引入定時重建。
+- network/client.ts 是唯一 Socket 擁有者，這個邊界應保留；貼貼、搜尋重試及好友查詢可抽成受 client 調用的狀態模組，不讓各模組自行建立 Socket。
+- LiteApp 仍以整頁單一實例為生命週期，尚無統一 dispose。未來支援熱重載或多實例前，需統一取消訂閱、timer 與全域事件；目前測試已有失敗時清理保護。
+- 測試仍大量用移除 import 加 VM 注入來執行 TypeScript，耦合來源文字結構。後續應建立共用測試載入方式；本輪未將測試框架整套替換。
+- 插件 API 的限制權限是保守子集，與 UI 相容模式不同；不要把它當完整官方權限引擎。擴展操作前應先建立共享權限模組。
+
+以上是維護項目，不是已完成的分拆；本輪沒有改寫通訊或外觀操作。

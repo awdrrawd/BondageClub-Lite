@@ -4,30 +4,16 @@
 
 目標網站：[bondageclub-lite.pages.dev](https://bondageclub-lite.pages.dev/)。在後台核對專案的 pages.dev 網址相符後再套用規則。
 
-只改 Markdown、一般 docs 文件或測試時，不需要重新部署網站。架構 HTML／CSS 是正式網頁，修改時仍需部署。
+只改 Markdown 或測試時，不需要重新部署網站。架構 HTML／CSS 是正式網頁，修改時仍需部署。
 
 ## 套用設定（Cloudflare 後台）
 
 進入 Workers & Pages → 本專案 → Settings → Build → Build watch paths，分別填入下列規則並儲存。
 
-Include paths：
+Include paths（維持預設，未來新增目錄也能自動建置）：
 
 ```text
-src/*
-public/*
-functions/*
-scripts/*
-docs/architecture/*
-index.html
-package.json
-package-lock.json
-vite.config.*
-tsconfig*.json
-wrangler.*
-.npmrc
-.nvmrc
-.node-version
-.cloudflare/*
+*
 ```
 
 Exclude paths：
@@ -45,14 +31,14 @@ src/action/generated/*
 
 | 變更 | 觸發建置 |
 | --- | --- |
-| README、docs 下的 Markdown／授權原文 | 否 |
+| README、docs 下的 Markdown | 否 |
 | 測試及模擬 UI 預覽 | 否 |
 | src 程式、翻譯 JSON、public 中繼／靜態資源 | 是 |
 | 建置腳本、依賴、Vite／TypeScript／Wrangler 設定 | 是 |
 | docs/architecture 的 HTML／CSS | 是 |
 | 同次推送同時包含 MD 與程式變更 | 是 |
 
-Cloudflare 的 * 會匹配子目錄，先排除再檢查包含；因此不能排除 docs/* 後再嘗試包含架構頁。新增加會影響正式網站的頂層目錄時，也要更新後台規則。首次套用建議比較一次純 MD 推送與一次程式推送的建置紀錄；目前倉庫測試只驗證規則範例，不代表已修改雲端設定。
+Cloudflare 的 * 會匹配子目錄，先排除再檢查包含；因此不能排除 docs/* 後再嘗試包含架構頁。新目錄預設會觸發；docs 中非 MD 檔案、ui-preview.html 或工作流程檔也會觸發，除非另有排除。首次套用建議比較一次純 MD 推送與一次程式推送的建置紀錄；目前倉庫測試只驗證規則範例，不代表已修改雲端設定。
 
 空變更推送，以及包含至少 3000 個檔案變更或 20 次提交的大型推送，Cloudflare 可能略過路徑判斷而建置。手動重試部署也應視為手動操作。詳見 [Cloudflare 官方 Build watch paths](https://developers.cloudflare.com/pages/configuration/build-watch-paths/)。
 

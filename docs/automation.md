@@ -9,7 +9,7 @@
 - **Site health**：手動檢查正式站首頁、/docs/architecture/ 和 /api/relay-status。檢查內容與 HTTP 狀態，不登入 BC，也不證明 PROD 登入或 WebSocket 正常。
 - 本機完整驗證：先執行 npm ci，再執行 npm run ci。只檢查文件可用 npm run check:docs；線上健康檢查用 npm run check:site。
 
-文件檢查涵蓋本機 Markdown 連結、圖片及參照目的地是否存在；不連網檢查外部網址，也不驗證標題錨點。Actions 僅要求 contents: read；不需要 BC 帳密、Cloudflare Token 或自動合併權限。
+文件檢查涵蓋本機 Markdown 連結、圖片及參照目的地是否存在；不連網檢查外部網址，也不驗證標題錨點。一般 CI 與 Site health 僅要求 contents: read；BC 資料更新另需 contents／pull-requests 寫入權限以提出 PR。不需要 BC 帳密、Cloudflare Token 或自動合併權限。
 
 若所有測試顯示通過卻沒有最後總結，可能是測試程序尚有存活資源。npm test 對每個測試程序設定 60 秒診斷期限；逾時會輸出 TEST WORKER TIMEOUT、測試檔、Node／平台及資源建立堆疊，並以失敗退出。GitHub 與 Cloudflare 都適用；這是診斷與等待上限，不代表已修復資源洩漏。
 
@@ -18,7 +18,7 @@
 1. 提交並推送這次變更。到倉庫 **Actions → CI** 確認 Verify 成功。手動工作流程與 Dependabot 設定需存在於預設分支；目前工作流程的 push 分支為 Mater，若變更主要分支請同步調整。
 2. 如果 Actions 被停用，到 **Settings → Actions → General** 啟用；允許 actions/checkout 與 actions/setup-node。Workflow permissions 保持唯讀即可。
 3. 建議到 **Settings → Rules → Rulesets → New branch ruleset**，目標選 Mater、Enforcement 選 Active，啟用 **Require a pull request before merging** 與 **Require status checks to pass**，加入曾成功跑過的 **Verify**。個人維護可不要求額外審核人；啟用後日常修改改走分支及 PR。
-4. 到 **Settings → Code security**（部分介面顯示 Code security and analysis），啟用 **Dependabot alerts** 與 **Dependabot security updates**。每週版本更新由倉庫設定檔提供；更新 PR 仍需查看 CI 結果並自行合併。
+4. 到 **Settings → Advanced Security**（部分介面顯示 Code security 或 Code security and analysis），啟用 **Dependabot alerts** 與 **Dependabot security updates**。每週版本更新由倉庫設定檔提供；更新 PR 仍需查看 CI 結果並自行合併。
 
 CI 整個工作流程不使用 paths 過濾，讓文件 PR 仍能取得 Verify 成功結果，避免必要檢查一直 Pending。規則是否可用依倉庫可見度與 GitHub 方案而定。
 

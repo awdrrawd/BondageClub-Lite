@@ -137,9 +137,6 @@ export function createActivityInventoryCheck(actor: CharacterSummary, target: Ch
   return unsupported ? "native.unsupported" : null;
   };
 }
-export function activityInventoryReason(actor: CharacterSummary, target: CharacterSummary, group: string, prerequisites: string[] = []): string | null {
-  return createActivityInventoryCheck(actor, target)(group, prerequisites);
-}
 export function activityReason(actor: CharacterSummary, target: CharacterSummary, group: string, name: string, room: { BlockCategory?: string[]; MapType?: string }, checkInventory = createActivityInventoryCheck(actor, target)): string | null {
   const activity = nativeActivities.find(value => value.name === name);
   const self = actor.MemberNumber === target.MemberNumber;

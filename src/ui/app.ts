@@ -1,6 +1,6 @@
 import { t, getLocale, setLocale, type Locale } from "../i18n";
 import "./style.css";
-import { bcClient } from "../network/client";
+import type { UiClient } from "./client-contract";
 import { decodeBiography } from "../profile/biography";
 import { contactName } from "../profile/friend-names";
 import { HistoryStore, historyOwner } from "../storage/history";
@@ -24,13 +24,10 @@ import { isMobileLayout, bindPageSwipe } from "../platform/mobile";
 import { canJoinRoom, sortRooms, type RoomSort } from "./room-list";
 import type { CharacterSummary, ClientSnapshot, DisplayMessage, RoomCreateOptions, RoomSearchRequest, RoomSearchResult, RoomSync } from "../shared/types";
 
-const app = document.querySelector<HTMLDivElement>("#app");
-if (!app) throw new Error(t("m001"));
-
 const roomLanguageIcons: Record<string, IconName> = { CN:'zh', EN:'en', DE:'de', FR:'fr', ES:'es', RU:'ru', UA:'ua' };
-export type UiClient = Pick<typeof bcClient, "restoreMessages" | "recordLifecycle" | "resumeConnection" | "setMessageLimit" | "subscribe" | "setTextCatalog" | "relocalize" | "disconnect" | "refreshFriends" | "setFriend" | "sendChat" | "sendBeep" | "requestLoverRoom" | "connectionDiagnostics" | "acceptSummon" | "dismissSummon" | "configureSummons" | "search" | "leave" | "join" | "login" | "createRoom" | "clearMessages" | "respondCuddle" | "cuddleInfo" | "activateSafeword" | "activityOptions" | "sendActivity">;
 export class LiteApp {
   private client: UiClient;
+  private root: HTMLElement;
   private history: HistorySession;
   private historyError = false;
   private restoringHistory = false;
@@ -93,7 +90,9 @@ export class LiteApp {
   private renderedLogs = new WeakMap<Element, DisplayMessage[]>();
   private settings = { background: false, largeText: false, timestamps: true, locale: "zh" as Locale, theme: "default" };
 
-  constructor(client: UiClient = bcClient) {
+  constructor(client: UiClient, root = document.querySelector<HTMLElement>("#app")) {
+    if (!root) throw new Error(t("m001"));
+    this.root = root;
     document.addEventListener('pointerdown',()=>{void this.sounds.unlock().catch(()=>{});});
     document.addEventListener('keydown',()=>{void this.sounds.unlock().catch(()=>{});});
     window.matchMedia("(max-width: 760px)").addEventListener("change", () => {
@@ -138,8 +137,8 @@ export class LiteApp {
     window.addEventListener("pageshow", () => resume("pageshow"));
     window.addEventListener("online", () => resume("online"));
     window.addEventListener("offline", () => this.client.recordLifecycle("offline"));
-    app!.addEventListener("compositionstart", () => { this.composing = true; });
-    app!.addEventListener("compositionend", () => {
+    this.root.addEventListener("compositionstart", () => { this.composing = true; });
+    this.root.addEventListener("compositionend", () => {
       this.composing = false;
       // The final input event follows compositionend. Read its draft before replacing controls.
       window.setTimeout(() => { if (this.renderPending) { this.renderPending = false; this.render(); } }, 0);
@@ -365,9 +364,9 @@ export class LiteApp {
     const oldScroll = oldLog?.scrollTop;
     const oldRoom = oldLog?.dataset.room;
 
-    this.mediaConsent.dispose(app!);
+    this.mediaConsent.dispose(this.root);
     this.refreshRoomResults = null;
-    app!.replaceChildren(this.buildShell());
+    this.root.replaceChildren(this.buildShell());
     this.updateHeader();
     const nextLog = document.getElementById("TextAreaChatLog");
     if (nextLog) nextLog.scrollTop = oldRoom === this.snapshot.room?.Name && oldScroll !== undefined ? oldScroll : nextLog.scrollHeight;
@@ -1509,5 +1508,3 @@ export class LiteApp {
   }
   private localNotice(message: string): void { this.notice = message; showNotice(message); }
 }
-
-if (!document.documentElement.hasAttribute("data-ui-preview")) new LiteApp();

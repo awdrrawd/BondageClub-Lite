@@ -4,11 +4,13 @@
 
 Lite 提供 window.BCLite（apiVersion: 1），入口建立後發出 bclite:ready。這是同頁 JavaScript API，不是遠端 HTTP API，也不是官方 BC Mod SDK 相容層。插件與頁面具有同等存取能力；API 選項是功能約定，不是沙箱。不要載入不信任的腳本。
 
+TypeScript 契約位於 src/extensions/types.ts：PluginOptions、PluginMessage、MessageKind。這些型別與執行期 API 分離，不增加網路依賴。
+
 ## 註冊與訊息
 
 registerPlugin(id, { allowSend: false, privateMessages: false }) 回傳插件實例。同一 id 不能重複註冊；dispose() 移除監聽並停用該實例。發送與私訊訂閱各自明確啟用。getState() 僅提供 phase、self、room、members，不提供帳密、Socket、完整快照或外觀。
 
-onMessage(callback) 回傳取消訂閱函式。只通知新加入的訊息，不重播历史、翻譯重繪或搜尋結果。事件不可修改，回呼失敗不影響其他監聽器；async 回呼不保證依序完成。
+onMessage(callback) 回傳取消訂閱函式。只通知新加入的訊息，不重播歷史、翻譯重繪或搜尋結果。事件不可修改，回呼失敗不影響其他監聽器；async 回呼不保證依序完成。
 
 | kind | 原始 type | 意義 |
 | --- | --- | --- |

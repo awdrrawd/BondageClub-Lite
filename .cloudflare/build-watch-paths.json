@@ -1,20 +1,6 @@
 {
   "path_includes": [
-    "src/*",
-    "public/*",
-    "functions/*",
-    "scripts/*",
-    "docs/architecture/*",
-    "index.html",
-    "package.json",
-    "package-lock.json",
-    "vite.config.*",
-    "tsconfig*.json",
-    "wrangler.*",
-    ".npmrc",
-    ".nvmrc",
-    ".node-version",
-    ".cloudflare/*"
+    "*"
   ],
   "path_excludes": [
     "*.md",
