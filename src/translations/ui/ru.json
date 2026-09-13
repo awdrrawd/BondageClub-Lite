@@ -283,7 +283,7 @@
   "relation.submissive": "Подчинённый",
   "relation.present": "Да",
   "locale.label": "Язык интерфейса и сообщений",
-  "locale.zh": "中文",
+  "locale.zh": "繁體中文",
   "locale.en": "English",
   "locale.ru": "Русский",
   "footer.repository": "Репозиторий GitHub",
@@ -471,5 +471,11 @@
   "settings.chat": "Чат",
   "chatFont.chat": "Размер текста комнаты",
   "chatFont.private": "Размер личных сообщений",
-  "sounds.mention": "Звук при упоминании"
+  "sounds.mention": "Звук при упоминании",
+  "locale.de": "Deutsch",
+  "locale.fr": "Français",
+  "locale.zh-cn": "简体中文",
+  "locale.uk": "Українська",
+  "locale.ja": "日本語",
+  "locale.ko": "한국어"
 }

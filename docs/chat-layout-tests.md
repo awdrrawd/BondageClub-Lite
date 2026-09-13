@@ -48,7 +48,7 @@
 
 ## 外觀與語言選單
 
-設定提供外觀／功能／效能／保存／隱私分類跳轉，主題為經典紫、午夜藍、森林綠，僅本機偏好。flag-icons 的 HK／GB／RU SVG 分別搭配中文／English／Русский 文字標籤；房間語言另含 DE／FR／ES／RU／UA。桌面與手機共用 SVG 選單，保留語言名稱。國旗以本站獨立 SVG 檔隨站打包，不請求 CDN；MIT 授權位於 `public/licenses/flag-icons-MIT.txt`。刷新圖示來自 Phosphor，沿用其 MIT 授權。
+設定提供外觀／功能／效能／保存／隱私分類跳轉，主題為經典紫、午夜藍、森林綠，僅本機偏好。介面語言提供英文、德文、法文、俄文、簡體中文、繁體中文、烏克蘭文、日文與韓文，分別搭配 GB／DE／FR／RU／CN／TW／UA／JP／KR 國旗和語言自稱；房間語言維持 BC 協定原有選项（CN 沿用 HK 圖示）。桌面與手機共用 SVG 選單，保留語言名稱。國旗以本站獨立 SVG 檔隨站打包，不請求 CDN；MIT 授權位於 `public/licenses/flag-icons-MIT.txt`。刷新圖示來自 Phosphor，沿用其 MIT 授權。
 
 ## 版面與 DOM 手動測試
 

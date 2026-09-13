@@ -17,11 +17,15 @@ import fr from './icons/flag-fr.svg?no-inline';
 import es from './icons/flag-es.svg?no-inline';
 import ru from './icons/flag-ru.svg?no-inline';
 import ua from './icons/flag-ua.svg?no-inline';
+import tw from './icons/flag-tw.svg?no-inline';
+import cn from './icons/flag-cn.svg?no-inline';
+import jp from './icons/flag-jp.svg?no-inline';
+import kr from './icons/flag-kr.svg?no-inline';
 const grid = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>';
 const rows = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18M3 12h18M3 19h18"/></svg>';
-const sources = { grid, rows, search, female, male, mixed, translate, faders, room, chats, users, gear, refresh, zh, en, de, fr, es, ru, ua };
+const sources = { grid, rows, search, female, male, mixed, translate, faders, room, chats, users, gear, refresh, zh, en, de, fr, es, ru, ua, tw, cn, jp, kr };
 export type IconName = keyof typeof sources;
-const flagNames = new Set<IconName>(["zh", "en", "de", "fr", "es", "ru", "ua"]);
+const flagNames = new Set<IconName>(["zh", "en", "de", "fr", "es", "ru", "ua", "tw", "cn", "jp", "kr"]);
 export function icon(name: IconName): SVGSVGElement {
   if (flagNames.has(name)) {
     // Image documents isolate SVG IDs and avoid hundreds of inline coat-of-arms nodes per room card.

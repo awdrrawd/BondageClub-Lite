@@ -26,21 +26,34 @@ function translation(path) {
 const catalog = {};
 const englishCatalog = {};
 const russianCatalog = {};
+const additionalLocales = { de: 'DE', fr: 'FR', uk: 'UA', 'zh-cn': 'CN', ja: 'JP', ko: 'KR' };
+const additionalCatalogs = Object.fromEntries(Object.keys(additionalLocales).map(locale => [locale, {}]));
+function additionalTranslations(file) {
+  return Object.fromEntries(Object.entries(additionalLocales).map(([locale, suffix]) => [locale, translation(resolve(root, file + '_' + suffix + '.txt'))]));
+}
+function collectAdditional(key, english, translations) {
+  for (const [locale, dictionary] of Object.entries(translations)) {
+    const translated = dictionary.get(english.trim());
+    if (validTranslation(english, translated)) additionalCatalogs[locale][key] = translated;
+  }
+}
 // Invalid upstream substitutions fall back to English instead of losing actors or item names.
-function validRussian(english, translated) {
+function validTranslation(english, translated) {
   if(!translated)return false;
   const tokens=text=>[...new Set(text.match(/\b(?:SourceCharacter|DestinationCharacter|TargetCharacter(?:Name)?|FocusAssetGroup|PrevAsset|NextAsset|(?:Target)?Pronoun(?:Possessive|Subject|Object))\b/g) || [])].sort().join('|');
   return tokens(english)===tokens(translated);
 }
 for (const file of ['Screens/Interface', 'Assets/Female3DCG/AssetStrings', 'Screens/Online/ChatRoom/Text_ChatRoom', 'Screens/Character/Preference/ActivityDictionary']) {
+  const translations = additionalTranslations(file);
   const ru = translation(resolve(root, file + '_RU.txt'));
   const cn = translation(resolve(root, file + '_CN.txt'));
   const tw = translation(resolve(root, file + '_TW.txt'));
   for (const [key, english] of csv(readFileSync(resolve(root, file + '.csv'), 'utf8'))) {
-    if (key && english) { catalog[key] = tw.get(english.trim()) || cn.get(english.trim()) || english; englishCatalog[key] = english; const translated=ru.get(english.trim()); if(validRussian(english,translated))russianCatalog[key]=translated; }
+    if (key && english) { catalog[key] = tw.get(english.trim()) || cn.get(english.trim()) || english; englishCatalog[key] = english; const translated=ru.get(english.trim()); if(validTranslation(english,translated))russianCatalog[key]=translated; collectAdditional(key, english, translations); }
   }
 }
 const assetFile = 'Assets/Female3DCG/Female3DCG';
+const additionalAssets = additionalTranslations(assetFile);
 const ruAssets = translation(resolve(root, assetFile + '_RU.txt'));
 const cnAssets = translation(resolve(root, assetFile + '_CN.txt'));
 const twAssets = translation(resolve(root, assetFile + '_TW.txt'));
@@ -49,7 +62,8 @@ for (const [group, asset, english] of csv(readFileSync(resolve(root, assetFile +
   const key = asset ? `Asset.${group}.${asset}` : `Group.${group}`;
   catalog[key] = twAssets.get(english.trim()) || cnAssets.get(english.trim()) || english;
   englishCatalog[key] = english;
-  const translated=ruAssets.get(english.trim());if(validRussian(english,translated))russianCatalog[key]=translated;
+  const translated=ruAssets.get(english.trim());if(validTranslation(english,translated))russianCatalog[key]=translated;
+  collectAdditional(key, english, additionalAssets);
 }
 writeBcCatalog(englishCatalog, catalog);
 for(const category of ['messages','actions','items','groups']) {
@@ -57,4 +71,11 @@ for(const category of ['messages','actions','items','groups']) {
   writeJson('src/translations/bc/'+category+'/ru.json',Object.fromEntries(Object.entries(delta).filter(([key])=>bcCategory(key)===category)));
 }
 console.log('Russian translations: '+Object.keys(russianCatalog).length);
+for (const [locale, dictionary] of Object.entries(additionalCatalogs)) {
+  const delta = localeDelta(englishCatalog, dictionary);
+  for (const category of ['messages', 'actions', 'items', 'groups']) {
+    writeJson(`src/translations/bc/${category}/${locale}.json`, Object.fromEntries(Object.entries(delta).filter(([key]) => bcCategory(key) === category)));
+  }
+  console.log(`${locale} translations: ${Object.keys(delta).length}`);
+}
 console.log(`Generated ${Object.keys(catalog).length} text entries`);

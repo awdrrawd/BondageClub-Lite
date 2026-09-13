@@ -6,7 +6,7 @@ import vm from 'node:vm';
 import { Window } from 'happy-dom';
 import { IDBFactory } from 'fake-indexeddb';
 import LZString from 'lz-string';
-import { t, getLocale, setLocale } from './i18n-helper.mjs';
+import { t, getLocale, setLocale, locales, isLocale } from './i18n-helper.mjs';
 import { appendChatLinks, MediaConsent } from './links-helper.mjs';
 import { afcLovers } from './community-helper.mjs';
 import { definitions } from './native-helper.mjs';
@@ -34,7 +34,7 @@ afterEach(async () => {
   for (const result of results) if (result.status === 'rejected') throw result.reason;
 });
 
-function setup(savedAccount, savedPerformance, indexedDBFactory) {
+function setup(savedAccount, savedPerformance, indexedDBFactory, savedDisplay) {
   setLocale('zh');
   const window = new Window({ url: 'https://lite.example', settings: { disableCSSFileLoading: true, disableJavaScriptFileLoading: true } });
   const intervalHandles = new Set();
@@ -62,6 +62,7 @@ function setup(savedAccount, savedPerformance, indexedDBFactory) {
   const StabilityControls = new Function('document', 'window', 't', 'URL', stabilitySource + ';return StabilityControls;')(window.document, window, t, window.URL);
   window.document.body.innerHTML = '<div id="app"></div>';
   if (savedAccount) window.localStorage.setItem('bc-lite-account-v1', savedAccount);
+  if (savedDisplay) window.localStorage.setItem('bc-lite-display-v1', JSON.stringify(savedDisplay));
   if (savedPerformance) window.localStorage.setItem('bc-lite-performance-v1', savedPerformance);
   let current = { phase: 'ready', status: 'Ready', player: { Name: 'Tester', MemberNumber: 123, FriendList: [55], Appearance: [] }, room: null, rooms: [], characters: [], messages: [], friends: [], friendsQueryState: 'idle', friendsStatus: '尚未查詢', beeps: [] };
   let listener;
@@ -102,7 +103,7 @@ function setup(savedAccount, savedPerformance, indexedDBFactory) {
   const UnreadState = new Function(uiSource('src/ui/unread-state.ts')+';return UnreadState;')();
   const PrivateMessages = new Function(...Object.keys(history),uiSource('src/ui/private-messages.ts')+';return PrivateMessages;')(...Object.values(history));
   const createMentionPicker = new Function('document','window',uiSource('src/ui/mention-picker.ts')+';return createMentionPicker;')(window.document,window);
-  instance = vm.runInNewContext(source + "\nnew LiteApp(bcClient);", { createMentionPicker, UnreadState, Lifetime, buildSettingsView, ...history, ...dom, ...modal, MessageSounds, openHistorySearch, buildHistorySettings, contactCard, PrivateMessages, HistorySession:sessionClass(window), contactName, window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, openActivityDialog, icon, iconSelect, nameColor, sortRooms, canJoinRoom, isMobileLayout, bindPageSwipe, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
+  instance = vm.runInNewContext(source + "\nnew LiteApp(bcClient);", { createMentionPicker, UnreadState, Lifetime, buildSettingsView, ...history, ...dom, ...modal, MessageSounds, openHistorySearch, buildHistorySettings, contactCard, PrivateMessages, HistorySession:sessionClass(window), contactName, window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, openActivityDialog, icon, iconSelect, nameColor, sortRooms, canJoinRoom, isMobileLayout, bindPageSwipe, loadTextCatalog: async () => ({}), t, getLocale, setLocale, locales, isLocale });
   return { instance, window, document: window.document, calls, replies, intervals, client:bcClient, state: () => current, emit(change) { if (change.friendsStatus === '查詢完成') change.friendsQueryState = 'ready'; current = { ...current, ...change }; listener(current); } };
 }
 
@@ -286,9 +287,9 @@ test('private history pages stay bounded and freeze while reading older messages
   await f.window.happyDOM.close();
 });
 
-test('room language flags and desktop region labels share the SVG picker, Chinese uses Hong Kong', async () => {
+test('room language flags and desktop region labels share the SVG picker, Traditional Chinese uses Taiwan', async () => {
   const f=setup();
-  assert.match(f.document.querySelector('.locale-picker summary image').getAttribute('href'),/flag-hk\.svg/);
+  assert.match(f.document.querySelector('.locale-picker summary image').getAttribute('href'),/flag-tw\.svg/);
   const language=f.document.querySelector('.room-language');
   for (const [code,flag] of [['CN','hk'],['EN','gb'],['DE','de'],['FR','fr'],['ES','es'],['RU','ru'],['UA','ua']]) {
     assert.match(language.querySelector(`[data-value="${code}"] image`).getAttribute('href'),new RegExp(`flag-${flag}\\.svg`));
@@ -1142,6 +1143,28 @@ test('Russian selection preserves player text and draft and exposes repository f
  assert.equal(f.document.querySelector('.app-footer a').href,'https://github.com/awdrrawd/BondageClub-Lite/tree/Mater');
  f.document.getElementById('nav-private').click();assert.equal(f.document.querySelector('.private-page > h1'),null);
  f.document.getElementById('nav-friends').click();assert.equal(f.document.querySelector('.friends-view > h1'),null);
+});
+
+test('every language has its flag, preserves drafts and reloads saved preferences', async () => {
+ const f=setup();
+ const flags={en:'gb',de:'de',fr:'fr',ru:'ru','zh-cn':'cn',zh:'tw',uk:'ua',ja:'jp',ko:'kr'};
+ f.emit({phase:'in-room',room:{Name:'房間 Original'},messages:[{id:'language-test',sender:55,senderName:'Alice',type:'Chat',text:'Player text 中文',time:new Date()}]});
+ for(const locale of locales){
+   const input=f.document.getElementById('InputChat');input.value='草稿 draft';input.dispatchEvent(new f.window.Event('input'));
+   const option=f.document.querySelector(`.locale-picker [data-value="${locale}"]`);
+   assert.match(option.querySelector('image').getAttribute('href'),new RegExp(`flag-${flags[locale]}\\.svg`));
+   option.click();
+   assert.equal(f.document.documentElement.lang,locale==='zh'?'zh-Hant':locale);
+   assert.equal(f.document.getElementById('InputChat').value,'草稿 draft');
+   assert.ok(f.document.querySelector('[data-message-id="language-test"]').textContent.includes('Player text 中文'));
+   const saved=JSON.parse(f.window.localStorage.getItem('bc-lite-display-v1'));
+   assert.equal(saved.locale,locale);
+   const restored=setup(undefined,undefined,undefined,saved);
+   assert.equal(restored.document.getElementById('InterfaceLocale').value,locale);
+   assert.equal(restored.document.documentElement.lang,locale==='zh'?'zh-Hant':locale);
+ }
+ const fallback=setup(undefined,undefined,undefined,{locale:'constructor'});
+ assert.equal(fallback.document.getElementById('InterfaceLocale').value,'zh');
 });
 
 test('disposing the UI releases subscriptions and global lifecycle handlers',async()=>{

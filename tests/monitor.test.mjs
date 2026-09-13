@@ -36,3 +36,25 @@ test('missing metrics remain unknown and truncated results cannot look complete'
  assert.throws(()=>summarize({},date,'Lite'));
  assert.equal(summarize({...account,total:[{sum:{requests:0,errors:0}}]},date,'Lite').requests,0);
 });
+
+test('Pages query uses the String scalar shown by the dashboard',async()=>{
+ let captured;
+ const monitor=createMonitor({clock:()=>date,fetcher:async(url,options)=>{
+   captured=JSON.parse(options.body).query;
+   return Response.json({data:{viewer:{accounts:[account]}}});
+ }});
+ const result=await (await monitor(request(),env,'Relay')).json();
+ assert.equal(result.state,'ready');
+ assert.equal((captured.match(/: String/g)||[]).length,5);
+ assert.ok(!captured.includes(': string'));
+ assert.equal((captured.match(/pagesFunctionsInvocationsAdaptiveGroups\(/g)||[]).length,3);
+});
+
+test('failure categories expose no raw upstream messages',async()=>{
+ for (const [message,reason] of [['Unknown type String private-token','query_schema'],['not authorized private-token','authorization'],['query limit exceeded private-token','query_limit']]) {
+  const monitor=createMonitor({clock:()=>date,fetcher:async()=>Response.json({errors:[{message}]})});
+  const result=await (await monitor(request(),env,'Relay')).json();
+  assert.equal(result.reason,reason);
+  assert.ok(!JSON.stringify(result).includes('private-token'));
+ }
+});

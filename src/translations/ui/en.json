@@ -282,7 +282,7 @@
   "relation.owner": "Owner",
   "relation.submissive": "Submissive",
   "locale.label": "Interface & message language",
-  "locale.zh": "中文",
+  "locale.zh": "繁體中文",
   "locale.en": "English",
   "composer.placeholder": "Message…",
   "composer.help": "* or /me: emote; (: OOC; .a: action; /w ID: whisper",
@@ -471,5 +471,11 @@
   "settings.chat": "Chat",
   "chatFont.chat": "Room text size",
   "chatFont.private": "Private text size",
-  "sounds.mention": "Play a sound when mentioned"
+  "sounds.mention": "Play a sound when mentioned",
+  "locale.de": "Deutsch",
+  "locale.fr": "Français",
+  "locale.zh-cn": "简体中文",
+  "locale.uk": "Українська",
+  "locale.ja": "日本語",
+  "locale.ko": "한국어"
 }

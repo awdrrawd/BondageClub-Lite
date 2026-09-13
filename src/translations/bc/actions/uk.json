@@ -1,0 +1,10 @@
+{
+  "ActionActivateSafewordRelease": "SourceCharacter використали PronounPossessive стоп-слово і хочуть, щоб їх звільнили. PronounSubject виводяться з кімнати для PronounPossessive безпеки.",
+  "ActionActivateSafewordRevert": "SourceCharacter використали PronounPossessive safeword. Please check for PronounPossessive well-being.",
+  "ActionAddLock": "SourceCharacter додає NextAsset на FocusAssetGroup гравця DestinationCharacter PrevAsset.",
+  "ActionChangeColor": "SourceCharacter міняє колір предмету <NextAsset | FocusAssetGroup> гравця DestinationCharacter.",
+  "ActionCoin": "SourceCharacter кидає монетку. Результат: CoinResult.",
+  "ActionDice": "SourceCharacter кидає кубик (DiceType). Результат: DiceResult.",
+  "ActionEscape": "SourceCharacter вибирається з PrevAsset.",
+  "ActionLock": "SourceCharacter замикає предмет <NextAsset | FocusAssetGroup> гравця DestinationCharacter."
+}

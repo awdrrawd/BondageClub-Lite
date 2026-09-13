@@ -4,6 +4,17 @@
 
 兩個倉庫各自部署 `/monitor/`，只看本站 Worker 用量，不連遊戲伺服器、不登入、不發聊天或測試流量。可以公開分享，但彙總數字也會透露使用規模與高峰時段；不希望公開時，把 MONITOR_ENABLED 設為 false 並重新部署。
 
+## 直接訪問
+
+| 專案 | 監看頁 | 網頁版操作說明 | Markdown 原文 |
+| --- | --- | --- | --- |
+| BC Relay | [開啟監看](https://bondageclub-relay.pages.dev/monitor/) | [操作說明](https://bondageclub-relay.pages.dev/monitor/guide.html) | [monitor.md](https://bondageclub-relay.pages.dev/monitor/monitor.md) |
+| BC Lite | [開啟監看](https://bondageclub-lite.pages.dev/monitor/) | [操作說明](https://bondageclub-lite.pages.dev/monitor/guide.html) | [monitor.md](https://bondageclub-lite.pages.dev/monitor/monitor.md) |
+
+`/monitor` 會轉向 `/monitor/`，不需要先開首頁。Markdown 原文由 `docs/monitor.md` 在組建時複製，不需另外維護；瀏覽器可能顯示原文或下載，閱讀排版請使用網頁版操作說明。上述新增路徑須在本次變更部署成功後才會生效。
+
+監看頁可公開訪問，但只有設定好下方 Cloudflare 環境變數後才會有統計資料；未啟用不代表請求量為零。若自行部署，將網址換成自己的網域即可，統計仍只查詢該部署設定的專案。
+
 ## 提供的資料
 
 - 今日請求（UTC）、最近 24 小時請求及 Worker 執行錯誤。

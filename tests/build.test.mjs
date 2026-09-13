@@ -16,7 +16,7 @@ test("production build contains the static shell and security headers", async ()
   const worker = await readFile(new URL('dist/_worker.js', root), 'utf8');
   assert.match(worker, /UPSTREAM/);
   const routes = JSON.parse(await readFile(new URL('dist/_routes.json', root), 'utf8'));
-  assert.deepEqual(routes.include, ['/socket.io/*', '/api/relay-status']);
+  assert.deepEqual(routes.include, ['/socket.io/*', '/api/relay-status', '/api/monitor']);
   assert.doesNotMatch(headers, /unsafe-inline|unsafe-eval/);
 });
 
@@ -35,13 +35,14 @@ test('used flags ship as local hashed SVG assets rather than embedded JS strings
  const html=await readFile(new URL('dist/index.html',root),'utf8');
  const script=html.match(/src="([^"]*assets\/index-[\w-]+\.js)"/)[1];
  const js=await readFile(new URL('dist/'+script.replace(/^\//,''),root),'utf8');
- for(const flag of ['hk','gb','de','fr','es','ru','ua']){
+ const flags=['hk','gb','de','fr','es','ru','ua','tw','cn','jp','kr'];
+ for(const flag of flags){
   const file=files.find(file=>file.startsWith('flag-'+flag+'-')&&file.endsWith('.svg'));assert.ok(file,flag);
   const svg=await readFile(new URL('dist/assets/'+file,root),'utf8');assert.match(svg,/<svg/);
   assert.doesNotMatch(svg,/<script|<foreignObject|\bonload=|(?:href|src)=["']https?:/i);
   assert.ok(js.includes(file));assert.ok(!js.includes('flag-icons-'+flag));
  }
- assert.ok(!files.some(file=>/^flag-tw-/.test(file)),'unused flags are not shipped');
+ assert.equal(files.filter(file=>/^flag-.*\.svg$/.test(file)).length,flags.length,'only used flags are shipped');
 });
 
 

@@ -1,7 +1,7 @@
 import { createMentionPicker } from './mention-picker';
 import { UnreadState } from "./unread-state";
 import { buildSettingsView } from "./settings-view";
-import { t, getLocale, setLocale, type Locale } from "../i18n";
+import { t, getLocale, setLocale, locales, isLocale, type Locale } from "../i18n";
 import "./style.css";
 import { Lifetime } from "../platform/lifetime";
 import type { UiClient } from "./client-contract";
@@ -151,7 +151,7 @@ export class LiteApp {
     });
     try {
       const saved = JSON.parse(localStorage.getItem("bc-lite-display-v1") || "{}");
-      this.settings = { background: saved.background === true, largeText: saved.largeText === true, timestamps: saved.timestamps !== false, locale: saved.locale === "ru" ? "ru" : saved.locale === "en" ? "en" : "zh", theme: ["default", "midnight", "forest"].includes(saved.theme) ? saved.theme : "default" };
+      this.settings = { background: saved.background === true, largeText: saved.largeText === true, timestamps: saved.timestamps !== false, locale: isLocale(saved.locale) ? saved.locale : "zh", theme: ["default", "midnight", "forest"].includes(saved.theme) ? saved.theme : "default" };
     } catch { /* Storage can be unavailable in private browsing. */ }
     try {
       const savedAccount = localStorage.getItem("bc-lite-account-v1");
@@ -251,16 +251,16 @@ export class LiteApp {
   }
 
   private languageControl(): HTMLElement {
-    const select = this.select(t("locale.label"), [["zh", t("locale.zh")], ["en", t("locale.en")], ["ru", t("locale.ru")]], getLocale());
+    const select = this.select(t("locale.label"), locales.map(locale => [locale, t(`locale.${locale}`)]), getLocale());
     select.id = "InterfaceLocale";
     select.addEventListener("change", () => {
-      this.settings.locale = select.value === "ru" ? "ru" : select.value === "en" ? "en" : "zh";
+      this.settings.locale = isLocale(select.value) ? select.value : "zh";
       setLocale(this.settings.locale); this.applySettings();
       try { localStorage.setItem("bc-lite-display-v1", JSON.stringify(this.settings)); } catch { this.localNotice(t("m060")); }
       this.client.relocalize(); this.render();
       if (this.snapshot?.player) this.refreshCatalog();
     });
-    const control = iconSelect(select, {zh: "zh", en: "en", ru: "ru"}, "translate", true);
+    const control = iconSelect(select, {zh: "tw", "zh-cn": "cn", en: "en", de: "de", fr: "fr", ru: "ru", uk: "ua", ja: "jp", ko: "kr"}, "translate", true);
     control.classList.add("locale-picker"); return control;
   }
 

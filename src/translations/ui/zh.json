@@ -282,7 +282,7 @@
   "relation.owner": "主人",
   "relation.submissive": "順從者",
   "locale.label": "介面與訊息語言",
-  "locale.zh": "中文",
+  "locale.zh": "繁體中文",
   "locale.en": "English",
   "composer.placeholder": "輸入訊息…",
   "composer.help": "* 或 /me 為 emote，( 為 OOC，.a 為動作；/w 編號 悄悄話",
@@ -471,5 +471,11 @@
   "settings.chat": "聊天",
   "chatFont.chat": "房間文字大小",
   "chatFont.private": "私聊文字大小",
-  "sounds.mention": "被 @ 提及時播放音效"
+  "sounds.mention": "被 @ 提及時播放音效",
+  "locale.de": "Deutsch",
+  "locale.fr": "Français",
+  "locale.zh-cn": "简体中文",
+  "locale.uk": "Українська",
+  "locale.ja": "日本語",
+  "locale.ko": "한국어"
 }

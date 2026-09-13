@@ -43,7 +43,10 @@ export function createMonitor({fetcher=(...args)=>fetch(...args), clock=()=>Date
     if (!/^[a-f0-9]{32}$/i.test(account || '') || !token || !script || script.length > 256) return response({state:'not_configured',project:label});
     const dataset=env.MONITOR_DATASET || 'pagesFunctionsInvocationsAdaptiveGroups';
     if (!['pagesFunctionsInvocationsAdaptiveGroups','workersInvocationsAdaptive'].includes(dataset)) return response({state:'not_configured',project:label});
-    const key = JSON.stringify([account,token,script,dataset]);
+    // Pages uses GraphQL String; Workers analytics uses the custom string scalar.
+    const query = QUERY.replaceAll('workersInvocationsAdaptive',dataset)
+      .replaceAll(': string', dataset === 'pagesFunctionsInvocationsAdaptiveGroups' ? ': String' : ': string');
+    const key = JSON.stringify([account,token,script,dataset,query]);
     if (key !== configKey) { memo=undefined; pending=undefined; configKey=key; }
     const now=clock();
     if (memo && memo.expires > now) return response(memo.data);
@@ -51,7 +54,7 @@ export function createMonitor({fetcher=(...args)=>fetch(...args), clock=()=>Date
       // A configuration fingerprint prevents serving a previous project's cached metrics.
       const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(key));
       const fingerprint=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');
-      const cacheKey=new Request(`${url.origin}/__monitor_cache_v1/${fingerprint}`);
+      const cacheKey=new Request(`${url.origin}/__monitor_cache_v2/${fingerprint}`);
       const cache=globalThis.caches?.default;
       try {
         const hit=await cache?.match(cacheKey);
@@ -61,21 +64,30 @@ export function createMonitor({fetcher=(...args)=>fetch(...args), clock=()=>Date
           if (expires>clock()) return {data,expires};
         }
       } catch { /* Cache is an optimization, not an availability requirement. */ }
-      let data;
+      let data, reason = 'network';
       try {
         const end=new Date(now).toISOString();
         const res=await fetcher('https://api.cloudflare.com/client/v4/graphql',{
           method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
-          body:JSON.stringify({query:QUERY.replaceAll('workersInvocationsAdaptive',dataset),variables:{account,script,start:new Date(now-86400000).toISOString(),today:end.slice(0,10)+'T00:00:00.000Z',end}}),
+          body:JSON.stringify({query,variables:{account,script,start:new Date(now-86400000).toISOString(),today:end.slice(0,10)+'T00:00:00.000Z',end}}),
           signal:AbortSignal.timeout(10000),redirect:'error',
         });
+        reason = res.status === 401 || res.status === 403 ? 'authorization' : res.status === 429 ? 'rate_limit' : 'upstream_http';
         if (!res.ok) throw new Error('upstream');
+        reason = 'invalid_response';
         const body=await res.json();
-        if (body.errors?.length) throw new Error('graphql');
+        if (body.errors?.length) {
+          const messages = body.errors.map(error => String(error.message || '')).join(' ');
+          reason = /permission|not authorized|unauthorized|authentication|access denied|forbidden/i.test(messages) ? 'authorization'
+            : /limit|quota|too many|too wide/i.test(messages) ? 'query_limit'
+            : /unknown|type|syntax|field|argument|variable|enum/i.test(messages) ? 'query_schema' : 'graphql';
+          throw new Error('graphql');
+        }
+        reason = 'response_shape';
         data=summarize(body.data?.viewer?.accounts?.[0],now,label);
       } catch {
         // Never send CF errors, token, script identifiers or raw response fields to visitors.
-        data={state:'unavailable',project:label,updatedAt:new Date(now).toISOString()};
+        data={state:'unavailable',reason,project:label,updatedAt:new Date(now).toISOString()};
       }
       try { await cache?.put(cacheKey,new Response(JSON.stringify(data),{headers:{'Content-Type':'application/json','Cache-Control':'public, max-age=300'}})); } catch {}
       return {data,expires:now+TTL};
