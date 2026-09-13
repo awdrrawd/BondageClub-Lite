@@ -1,7 +1,7 @@
 import LZString from 'lz-string';
 import { loadTypeScript } from './load-typescript.mjs';
 import { interactionPermission } from "./permissions-helper.mjs";
-import { renderAction, dictionaryText } from './action-helper.mjs';
+import { renderAction, dictionaryText, pronounEntries } from './action-helper.mjs';
 import { receivedSpeech } from './speech-helper.mjs';
 import { nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, definitions, activityAsset } from './native-helper.mjs';
 import { extensionActivities, extensionText } from './extensions-helper.mjs';
@@ -40,7 +40,7 @@ async function setup(environment, relayAvailable = true, account = {}, storage =
     decodeFriendNames, contactName,
     hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState, createCuddleItem, receivedSpeech, activityAsset,
     localStorage: { getItem(key) { return storage.get(key) ?? null; }, setItem(key, value) { storage.set(key, value); } },
-    io: () => socket, nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, extensionActivities, extensionText, renderAction, dictionaryText, t, localizeStatus, validAppearance, copyAppearance, releaseAppearance, afcLovers, embeddedAction,
+    io: () => socket, nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, extensionActivities, extensionText, renderAction, dictionaryText, pronounEntries, t, localizeStatus, validAppearance, copyAppearance, releaseAppearance, afcLovers, embeddedAction,
     exports: {},
     require: () => ({ io: () => socket }),
     window: { setTimeout(fn) { timers.set(++timerId, fn); return timerId; }, clearTimeout(id) { timers.delete(id); } },
@@ -1202,6 +1202,32 @@ test('LSCG nuzzle uses bundled translation before embedded English fallback',()=
  const catalog=JSON.parse(readFileSync('src/translations/action/lscg/zh.json','utf8'));
  const text=renderAction(key,'Activity',[{Tag:`MISSING TEXT IN "ActivityDictionary.csv": ${key}`,Text:"SourceCharacter nuzzles underneath TargetCharacter's hand."},{Tag:'SourceCharacter',Text:'LikoBot'},{Tag:'TargetCharacter',Text:'莉柯莉絲'}],catalog);
  assert.equal(text,'LikoBot 在 莉柯莉絲 的手掌下親暱地蹭蹭。');
+});
+
+test('received ECHO actions resolve source and target pronouns independently', async () => {
+ const f=await setup('PROD');
+ f.handlers.get('ChatRoomSync')({Name:'Room',Character:[
+  {MemberNumber:55,Name:'PronounPossessive',Appearance:[{Group:'Pronouns',Name:'HeHim'}]},
+  {MemberNumber:56,Name:'Friend',Appearance:[{Group:'Pronouns',Name:'TheyThem'}]},
+ ]});
+ const key='EchoPronounTest';
+ f.handlers.get('ChatRoomMessage')({Sender:55,Type:'Activity',Content:key,Dictionary:[
+  {SourceCharacter:55},{TargetCharacter:56},
+  {Tag:`MISSING TEXT IN "ActivityDictionary.csv": ${key}`,Text:'SourceCharacter scratches PronounPossessive head beside TargetPronounObject.'},
+ ]});
+ const translation=f.state().messages.at(-1).translation;
+ const catalog=JSON.parse(readFileSync('src/translations/bc/messages/en.json','utf8'));
+ assert.equal(renderAction(key,'Activity',translation.dictionary,catalog),'PronounPossessive scratches his head beside them.');
+ f.client.disconnect();
+});
+
+test('extension actions share official pronoun lookup and default to SheHer', () => {
+ const key='ChatSelf-ItemHead-EchoPronounTest';
+ const catalog={...JSON.parse(readFileSync('src/translations/bc/messages/en.json','utf8')),[key]:'SourceCharacter scratches PronounPossessive head.'};
+ for(const [asset,expected] of [[undefined,'her'],['HeHim','his'],['TheyThem','their'],['ItIt','its']]) {
+  const actor={MemberNumber:55,Name:'Alice',Appearance:asset?[{Group:'Pronouns',Name:asset}]:[]};
+  assert.equal(extensionText(key,'ItemHead',actor,actor,catalog),`Alice scratches ${expected} head.`);
+ }
 });
 
 

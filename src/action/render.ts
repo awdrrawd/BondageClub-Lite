@@ -1,6 +1,12 @@
 import { t } from "../i18n";
 import type { DictionaryEntry } from "../shared/types";
 import { embeddedAction, literalAction } from "./embedded";
+/** BC derives source/target pronouns from the Pronouns appearance asset. */
+export function pronounEntries(character: { Appearance?: unknown[] } | undefined, prefix = "Pronoun"): DictionaryEntry[] {
+  const item = character?.Appearance?.find(raw => raw && typeof raw === "object" && (raw as { Group?: string }).Group === "Pronouns") as { Name?: string } | undefined;
+  const name = ["SheHer", "HeHim", "TheyThem", "ItIt"].includes(item?.Name || "") ? item!.Name! : "SheHer";
+  return ["Possessive", "Self", "Subject", "Object"].map(type => ({ Tag: `${prefix}${type}`, TextToLookUp: `Pronoun${type}${name}` }));
+}
 export function dictionaryText(entry: DictionaryEntry): string | null {
   if (typeof entry.Text === "string") return entry.Text;
   if (typeof entry.CharacterName === "string") return entry.CharacterName;

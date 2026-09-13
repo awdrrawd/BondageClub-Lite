@@ -1,5 +1,5 @@
 import entries from "./extension-data.json";
-import { renderAction } from "./render";
+import { renderAction, pronounEntries } from "./render";
 import { textGroup } from "./labels";
 import type { CharacterSummary } from "../shared/types";
 
@@ -14,7 +14,8 @@ export function extensionText(key: string, group: string, actor: CharacterSummar
     { Tag: "SourceCharacter", Text: name(actor) },
     { Tag: "DestinationCharacter", Text: name(target) },
     { Tag: "TargetCharacter", Text: name(target) },
-    { Tag: "PronounPossessive", Text: name(actor) },
+    ...pronounEntries(actor),
+    ...pronounEntries(target, "TargetPronoun"),
     { FocusGroupName: group },
   ], catalog);
 }

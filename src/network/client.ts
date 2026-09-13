@@ -6,7 +6,7 @@ import { RoomSearch } from "./room-search";
 import { t, localizeStatus } from "../i18n";
 import { afcLovers } from "../profile/afc";
 import { decodeFriendNames, contactName } from "../profile/friend-names";
-import { renderAction, dictionaryText } from "../action/render";
+import { renderAction, dictionaryText, pronounEntries } from "../action/render";
 import { nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, activityAsset } from "../action/native";
 import { receivedSpeech } from "./speech";
 import { extensionActivities, extensionText } from "../action/extensions";
@@ -886,6 +886,9 @@ export class BcLiteClient {
       if (name) for (const tag of tags) if (!dictionary.some(entry => entry.Tag === tag)) dictionary.push({ Tag: tag, Text: name });
     }
     const translated = ["Action", "Activity", "ServerMessage"].includes(message.Type);
+    if (translated) for (const entry of [...pronounEntries(sourceCharacter), ...pronounEntries(targetCharacter, "TargetPronoun")]) {
+      if (!dictionary.some(value => value.Tag === entry.Tag)) dictionary.push(entry);
+    }
     const cuddle = /^ChatOther-(ItemTorso|ItemTorso2|ItemArms)-(钻进怀里|抱入怀中)$/.exec(message.Content);
     if (message.Type === "Activity" && cuddle && sourceId === message.Sender && targetId === this.state.player?.MemberNumber && sender && sender.MemberNumber !== this.state.player?.MemberNumber && this.canSend() && this.state.room && !cuddleReason(this.cuddleSelf(), sender) && Date.now() - this.cuddleRequestAt > 10000) {
       this.cuddleRequestAt = Date.now(); this.patch({ cuddleRequest: { sender: sender.MemberNumber, name: cuddle[2], expires: Date.now() + 60000 } });
