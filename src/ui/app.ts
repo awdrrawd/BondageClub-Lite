@@ -1238,9 +1238,6 @@ export class LiteApp {
     const topMenu = this.el("div", "chat-room-top-menu");
     topMenu.id = "chat-room-top-menu";
     const roomTitle = this.el("strong", "room-title", state.room!.Name); roomTitle.title = state.room!.Name;
-    roomTitle.setAttribute('role','button'); roomTitle.tabIndex=0;
-    const openMembers=()=>{this.membersOpen=!this.membersOpen;this.updateRoomInfo();};
-    roomTitle.addEventListener('click',openMembers);roomTitle.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openMembers();}});
     topMenu.append(roomTitle, this.el("span", "room-population", `${state.characters.length}/${state.room!.Limit}`));
     const toggle = this.button(this.membersOpen ? t("m160") : t("m161"), "ghost mobile-members", "button");
     toggle.addEventListener("click", () => { this.membersOpen = !this.membersOpen; this.updateRoomInfo(); });
@@ -1254,7 +1251,11 @@ export class LiteApp {
     });
     const jump = this.button(t("m163"), "secondary", "button"); jump.id = "new-messages"; jump.hidden = !this.historyEndId;
     jump.addEventListener("click", () => { this.historyEndId = null; this.updateChatLog(true); });
-    sidebar.append(toggle); topMenu.append(jump);
+    sidebar.append(toggle);
+    const membersOpener = this.button(t("m161"), "ghost mobile-members room-members-open", "button");
+    membersOpener.setAttribute('aria-label', t('m161'));
+    membersOpener.addEventListener('click', () => { this.membersOpen = true; this.updateRoomInfo(); });
+    topMenu.append(membersOpener, jump);
     const messageMenu=this.el('details','room-message-menu');
     const messageSummary=this.el('summary','button ghost',t('history.chat')); messageMenu.append(messageSummary);
     const messageActions=this.el('div','room-message-actions'); messageMenu.append(messageActions); topMenu.append(messageMenu);

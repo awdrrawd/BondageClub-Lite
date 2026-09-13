@@ -72,7 +72,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); box-sha
 .button { min-height: 42px; padding: .65rem 1rem; color: #fff; background: transparent; font-weight: 700; }
 .button.primary { width: 100%; color: #191521; border: 1px solid transparent; background: var(--accent); font-weight:600; }
 .button.secondary { border-color: var(--line); background: var(--panel-2); }
-.button.ghost { color: var(--muted); background: #ffffff05; }
+.button.ghost { min-height:44px; padding:.65rem 1rem; color:var(--muted); background:#ffffff05; border:1px solid var(--line); border-radius:10px; font-size:.75rem; font-weight:700; display:inline-flex; align-items:center; justify-content:center; gap:.35rem; }
 .button.danger { color: var(--danger); border-color: #ff8b8b55; }
 .login-card .button + .button { width: 100%; margin-top: .65rem; }
 .security-note { margin: 1.25rem 0 0; color: #8f8395; font-size: .75rem; line-height: 1.55; }
@@ -727,7 +727,10 @@ input, textarea, [contenteditable="true"], .message-content, .message-content *,
 .private-page .private-incoming > .message-reply { left:calc(100% + 5px); right:auto; }
 .private-page .private-outgoing > .message-reply { right:calc(100% + 5px); left:auto; }
 .private-page .message-content { font-size:1rem; }
-.member-panel > .mobile-members { margin-top:auto; flex-shrink:0; }
+.member-panel > .mobile-members { display:inline-flex; margin-top:auto; flex-shrink:0; }
+.room-info > .mobile-members { display:none; }
 .chat-message.message-presence, .chat-message.type-local { grid-template-columns:minmax(0,1fr) auto auto; }
 
 .chat-room-top-menu > .button.ghost, .room-message-menu > summary { min-height:44px; padding:.65rem 1rem; }
+.room-message-actions > .button.ghost { min-height:44px; padding:.65rem 1rem; }
+@media(max-width:760px) { .button.ghost { font-size:.875rem; } }
