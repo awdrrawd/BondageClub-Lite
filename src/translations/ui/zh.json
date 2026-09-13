@@ -156,7 +156,7 @@
   "m121": "建立失敗",
   "m122": "受限",
   "m123": "好友 {0}",
-  "m124": "隱藏／限定可見",
+  "m124": "私人",
   "m125": "已滿",
   "m126": "地圖 {0}",
   "m127": "沒有房間描述",
@@ -465,5 +465,7 @@
   "delivery.confirmed": "伺服器已回傳",
   "delivery.unconfirmed": "尚未確認（可能延遲或斷線），請先確認聊天紀錄，避免重複傳送",
   "contacts.grid": "格狀排列",
-  "contacts.rows": "列狀排列"
+  "contacts.rows": "列狀排列",
+  "rooms.details": "房間詳情",
+  "rooms.noKnownFriends": "沒有已知好友或關係資料"
 }

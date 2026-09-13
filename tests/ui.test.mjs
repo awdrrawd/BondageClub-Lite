@@ -418,7 +418,11 @@ test('room pagination replaces pages, icons reflect access and mobile swipe igno
   f.document.querySelector('[aria-label="下一頁"]').click();
   assert.equal(f.document.querySelectorAll('.room-card').length,3);
   assert.ok(f.document.querySelector('.room-list').textContent.includes('🔒'));
-  assert.equal(f.document.querySelector('[aria-label="下一頁"]').disabled,true);
+  assert.equal(f.document.querySelector('[aria-label="下一頁"]').disabled,false);
+  f.document.querySelector('[aria-label="下一頁"]').click();
+  assert.equal(f.document.querySelector('.room-pagination span').textContent,'1 / 3');
+  f.document.querySelector('[aria-label="上一頁"]').click();
+  assert.equal(f.document.querySelector('.room-pagination span').textContent,'3 / 3');
   const sort = f.document.querySelector('[aria-label="房間排序"]'); sort.value='count'; sort.dispatchEvent(new f.window.Event('change'));
   assert.equal(f.document.querySelector('.room-pagination span').textContent,'1 / 3');
   f.emit({rooms:[]});
@@ -1226,5 +1230,20 @@ test('contact layout toggles preserve the mounted list and use responsive defaul
  buttons.querySelector('button').click();
  assert.equal(list.dataset.layout,'grid');
  assert.equal(f.document.getElementById('contact-list'),list);
+ await f.window.happyDOM.close();
+});
+
+
+test('room info opens known friend relationships without joining',async()=>{
+ const f=setup();
+ f.emit({friends:[{MemberNumber:55,MemberName:'Friend',Type:'Lover'}],rooms:[{Name:'Details',Space:'X',Description:'Details text',MemberCount:1,MemberLimit:10,CanJoin:true,Friends:[{MemberNumber:55}]}]});
+ const before=f.calls.length;
+ f.document.querySelector('.room-detail-button').click();
+ const dialog=f.document.querySelector('dialog[open]');
+ assert.ok(dialog);assert.match(dialog.textContent,/#55/);
+ assert.match(dialog.textContent,/Details text/);
+ assert.equal(f.calls.length,before);
+ dialog.querySelector('.dialog-close').click();
+ assert.equal(f.document.querySelector('dialog[open]'),null);
  await f.window.happyDOM.close();
 });

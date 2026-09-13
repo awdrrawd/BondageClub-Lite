@@ -20,7 +20,7 @@ export interface SettingsContext {
 }
 export function buildSettingsView(context: SettingsContext): HTMLElement {
     const section = el("section", "settings-view");
-    section.append(el("p", "eyebrow", t("m055")));
+    section.append(el("p", "eyebrow", "SETTINGS"));
     const panel = el("div", "settings-card");
     panel.append(el("h2", "", t("settings.appearance")));
     const theme = select(t("settings.theme"), (["default", "midnight", "forest"] as const).map(value => [value, t(`theme.${value}`)]), context.settings.theme);

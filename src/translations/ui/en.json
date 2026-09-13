@@ -156,7 +156,7 @@
   "m121": "Creation failed",
   "m122": "Restricted",
   "m123": "Friends: {0}",
-  "m124": "Hidden / limited visibility",
+  "m124": "Private",
   "m125": "Full",
   "m126": "Map: {0}",
   "m127": "No room description",
@@ -465,5 +465,7 @@
   "delivery.confirmed": "Server echo confirmed",
   "delivery.unconfirmed": "Unconfirmed (delayed or disconnected). Check chat before resending.",
   "contacts.grid": "Grid layout",
-  "contacts.rows": "List layout"
+  "contacts.rows": "List layout",
+  "rooms.details": "Room details",
+  "rooms.noKnownFriends": "No known friends or relationships"
 }

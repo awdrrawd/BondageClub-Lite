@@ -437,6 +437,10 @@ export class LiteApp {
     } else {
       content.append(this.buildSearch());
     }
+    if (state.player && this.tab !== 'settings') {
+      const labels: Record<string,string> = { rooms:'ROOM SEARCH', chat:'CHAT ROOM', private:'WHISPER AND BEEP', friends:'FRIENDS' };
+      content.prepend(this.el('p','eyebrow page-eyebrow',labels[this.tab] || 'ROOM SEARCH'));
+    }
     header.append(summon);
     this.fillSummon(summon);
     const banner=this.el('p','notice');banner.id='connection-banner';banner.setAttribute('role','status');
@@ -559,6 +563,8 @@ export class LiteApp {
     const peerName = this.contactName(this.contact);
     const heading = this.el("div", "private-heading");
     add.disabled = !this.contact;
+    add.classList.add('private-add-friend');
+    add.hidden = !!this.snapshot!.player?.FriendList?.includes(this.contact) || this.snapshot!.friends.some(friend => friend.MemberNumber === this.contact && friend.Type === 'Friend');
     heading.append(back, this.el("h2", "", this.contact ? `${peerName || t("private.title")} · #${this.contact}` : t("m035")), add);
     const paging = this.el("nav", "toolbar private-history-controls"); paging.setAttribute("aria-label", t("history.title"));
     const older = this.button(t("history.older"), "ghost", "button"); older.dataset.history = "older";
@@ -599,6 +605,8 @@ export class LiteApp {
     if (status) status.textContent = this.snapshot!.friendsStatus;
     const refresh = document.querySelector<HTMLButtonElement>(".friend-refresh");
     if (refresh) { refresh.disabled = this.snapshot!.friendsQueryState === "loading"; refresh.setAttribute("aria-busy", String(refresh.disabled)); refresh.title = `${t("m018")} · ${this.snapshot!.friendsStatus}`; }
+    const add = document.querySelector<HTMLButtonElement>('.private-add-friend');
+    if (add) add.hidden = !!this.snapshot!.player?.FriendList?.includes(this.contact) || this.snapshot!.friends.some(friend => friend.MemberNumber === this.contact && friend.Type === 'Friend');
     this.updateBeepLog();
     this.updateConnectionControls();
   }
@@ -1014,14 +1022,14 @@ export class LiteApp {
     this.roomPage = Math.min(this.roomPage, pages - 1);
     const pager = this.el("nav", "room-pagination"); pager.setAttribute("aria-label", t("rooms.pagination"));
     const turn = (delta: number) => {
-      const next = Math.max(0, Math.min(pages - 1, this.roomPage + delta));
+      const next = (this.roomPage + delta + pages) % pages;
       if (next !== this.roomPage) { this.roomPage = next; drawPage(); }
     };
     const drawPage = () => {
       const cards = ordered.length ? ordered.slice(this.roomPage * pageSize, (this.roomPage + 1) * pageSize).map(room => this.roomCard(room)) : [this.el('div','empty-state',t('m102'))];
       this.syncElements(rooms,cards,node=>JSON.stringify([node.dataset.roomName,node.dataset.roomSpace]));
-      const previous = this.button("‹", "ghost", "button"); previous.setAttribute("aria-label", t("rooms.previous")); previous.disabled = this.roomPage === 0;
-      const next = this.button("›", "ghost", "button"); next.setAttribute("aria-label", t("rooms.next")); next.disabled = this.roomPage === pages - 1;
+      const previous = this.button("‹", "ghost", "button"); previous.setAttribute("aria-label", t("rooms.previous")); previous.disabled = pages === 1;
+      const next = this.button("›", "ghost", "button"); next.setAttribute("aria-label", t("rooms.next")); next.disabled = pages === 1;
       previous.addEventListener("click", () => turn(-1)); next.addEventListener("click", () => turn(1));
       const status = this.el("span", "", `${this.roomPage + 1} / ${pages}`); status.setAttribute("aria-live", "polite");
       this.syncElements(pager,[previous,status,next],node=>node.getAttribute('aria-label') || 'status');
@@ -1073,6 +1081,27 @@ export class LiteApp {
   private roomCard(room: RoomSearchResult): HTMLElement {
     const card = this.el("article", "room-card");
     card.dataset.roomName = room.Name; card.dataset.roomSpace = room.Space;
+    const info = this.button('i', 'ghost room-detail-button', 'button');
+    info.setAttribute('aria-label', t('rooms.details'));
+    info.addEventListener('click', () => {
+      const dialog = this.el('dialog','profile-dialog') as HTMLDialogElement;
+      dialog.append(this.el('h2','',room.Name),this.el('p','',room.Description || t('m127')));
+      const state = this.snapshot!;
+      const ids = new Set([...(room.Friends || []).map(friend => friend.MemberNumber), ...this.roomLovers(room).map(lover => lover.memberNumber)]);
+      for (const id of ids) {
+        const friend = state.friends.find(friend => friend.MemberNumber === id);
+        const relations = new Set<string>();
+        if (state.player?.FriendList?.includes(id)) relations.add(t('relation.friend'));
+        if (state.player?.Ownership?.MemberNumber === id) relations.add(t('relation.owner'));
+        if (state.player?.Lovership?.some(lover => lover.MemberNumber === id) || this.roomLovers(room).some(lover => lover.memberNumber === id)) relations.add(t('relation.lover'));
+        if (friend?.Type) relations.add(({Friend:t('relation.friend'),Owner:t('relation.owner'),Lover:t('relation.lover'),Submissive:t('relation.submissive')} as Record<string,string>)[friend.Type] || friend.Type);
+        dialog.append(this.el('p','',`${this.contactName(id) || '#'+id} #${id} · ${[...relations].join(' / ') || t('relation.friend')}`));
+      }
+      if (!ids.size) dialog.append(this.el('p','muted',t('rooms.noKnownFriends')));
+      const close=this.button('×','ghost dialog-close','button'); close.setAttribute('aria-label',t('m173')); close.addEventListener('click',()=>dialog.close());
+      dialog.append(close); dialog.addEventListener('close',()=>dialog.remove()); document.body.append(dialog); dialog.showModal();
+    });
+
     const top = this.el("div", "room-card-top");
     const meta = this.el("div", "room-tags");
     const languageTag = this.el("span", "tag room-language-tag", room.Language || "—");
@@ -1097,7 +1126,7 @@ export class LiteApp {
     const join = this.button(available ? t("m129") : t("m130"), available ? "secondary" : "ghost", "button");
     join.disabled = !available || this.snapshot!.phase === "joining";
     join.addEventListener("click", () => this.joinRoom(room.Name));
-    card.append(join);
+    card.append(join, info);
     return card;
   }
 
