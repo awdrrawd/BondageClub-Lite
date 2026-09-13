@@ -38,3 +38,7 @@ Credentials and game traffic pass through the deployment's Cloudflare relay. Use
 ## License
 
 Original code is licensed under [MIT](LICENSE). Third-party assets and text retain their [respective licenses](docs/THIRD-PARTY-NOTICES.md).
+
+## Public load monitor
+
+Open `/monitor/` after deployment. Only this project's aggregate requests, execution errors and CPU percentiles are public; no game connection probes. Read-only Cloudflare secrets must be configured first. [Setup and privacy](docs/monitor.md).

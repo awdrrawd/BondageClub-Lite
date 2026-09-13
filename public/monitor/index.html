@@ -1,0 +1,10 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cloudflare · 負載監看 / Load monitor</title><link rel="stylesheet" href="./monitor.css"><script defer src="./monitor.js"></script></head><body><main>
+<nav><a href="/">← 首頁 / Home</a><button id="language" type="button">English</button></nav>
+<p class="eyebrow">CLOUDFLARE · OPERATOR METRICS</p><h1 id="title">負載監看</h1><p id="intro">供維護者查看用量與負載，也開放其他人參考。</p>
+<div class="toolbar"><strong id="project">—</strong><button id="refresh" type="button">重新整理</button></div><p id="status" role="status">讀取中…</p>
+<section id="cards" aria-label="Metrics"></section>
+<h2 id="chartTitle">最近 24 小時請求量</h2><div id="chart" role="img"></div>
+<details><summary id="tableTitle">每小時數據（UTC）</summary><div class="table-wrap"><table><thead><tr><th id="hourLabel">UTC</th><th id="requestsLabel">請求</th><th id="errorsLabel">錯誤</th></tr></thead><tbody id="rows"></tbody></table></div></details>
+<p id="updated">—</p><p id="limits" class="muted"></p>
+<footer><a id="dashboard" href="https://dash.cloudflare.com/" target="_blank" rel="noopener noreferrer">Cloudflare 管理台 ↗</a><a id="integration" href="./guide.html">接入／移植說明</a><a href="https://bondageclub-lite.pages.dev/monitor/">Lite</a><a href="https://bondageclub-relay.pages.dev/monitor/">Relay</a><a href="https://developers.cloudflare.com/workers/observability/metrics-and-analytics/">Cloudflare docs</a></footer>
+</main></body></html>

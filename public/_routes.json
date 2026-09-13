@@ -1,5 +1,9 @@
 {
   "version": 1,
-  "include": ["/socket.io/*", "/api/relay-status"],
+  "include": [
+    "/socket.io/*",
+    "/api/relay-status",
+    "/api/monitor"
+  ],
   "exclude": []
 }

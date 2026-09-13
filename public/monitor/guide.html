@@ -1,0 +1,19 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>監看接入 / Monitor integration</title><link rel="stylesheet" href="./monitor.css"></head><body><main class="guide">
+<nav><a href="./">← 監看 / Monitor</a><a href="#en">English ↓</a></nav>
+<p class="eyebrow">OPERATOR GUIDE</p><h1>監看接入與移植</h1>
+<p>這個頁面主要供站點維護者查看負載，也可以公開讓使用者參考。它不是遊戲狀態公告，也不提供任何帳號或服務控制權限。</p>
+<h2>維護者日常使用</h2><ul><li>查看今日請求、24 小時趨勢、Worker 執行錯誤與 CPU 百分位數。</li><li>異常時回 Cloudflare 管理台檢查原始統計與設定；公開頁不是帳單或完整診斷工具。</li><li>統計有延遲；CPU P50／P99 是單次執行分布，不能當作累積 CPU 或連線延遲。</li></ul>
+<h2>別人也想接入？</h2><p>可以參考並部署到自己的 Cloudflare Pages。每個部署使用自己的唯讀 Token、Account ID 與正式環境 scriptName，不使用本站憑證，也不需要連到本站 API。</p>
+<ol><li>從 <a href="https://github.com/awdrrawd/BondageClub-Relay">Relay 倉庫</a>取得 <code>src/_monitor.js</code>、<code>src/monitor/</code>。Lite 的對應檔案在 <code>public/</code>。</li><li>在輸出目錄放置 <code>_monitor.js</code> 與 <code>monitor/</code>，讓现有 Worker 引入下方路由。不要覆蓋原本的 Worker。</li><li>把 <code>/api/monitor</code> 加入 <code>_routes.json</code> 的 include；保留其他既有路由。</li><li>在自己的 Cloudflare Production 設定 <code>MONITOR_ENABLED=true</code>，並以 Secret 保存 <code>MONITOR_ACCOUNT_ID</code>、<code>MONITOR_API_TOKEN</code>、<code>MONITOR_SCRIPT_NAME</code>。Token 僅需 Account Analytics Read，限定自己的帳號。</li><li><code>MONITOR_DATASET</code> 預設為 <code>pagesFunctionsInvocationsAdaptiveGroups</code>；若管理台查詢使用 <code>workersInvocationsAdaptive</code>，才改用該值。</li><li>重新部署，開啟 <code>/monitor/</code>，與 Cloudflare 同時段統計核對。調整頁尾連結、專案標籤與授權標示，避免使用者誤認為是原作者的部署。</li></ol>
+<pre><code>import {monitor} from './_monitor.js';
+// 放在既有 fetch handler、靜態檔案 fallback 之前：
+if (url.pathname === '/api/monitor') {
+  return monitor(request, env, '你的專案名称');
+}</code></pre>
+<p>找不到 scriptName 或要檢查資料集時，參考倉庫的 <code>docs/monitor.md</code>。目前是 Cloudflare API 專用範例，不是可直接套用於所有雲端平台的監控服務。</p>
+<h2>公開範圍</h2><p>所有訪客看到同一份彙總資料，不區分管理者登入。Secret、內部識別碼、日誌、訪客與聊天內容都不公開。若以後需要帳單或帳號層級資料，應另外建立有登入保護的管理頁，不加入這個公開 API。公開用量仍會透露站點流量規模。</p>
+<p>本範例供學習與研究，不保證穩定性或持續服務；免費額度用盡可能中斷，部署者自行管理額度與費用。來源授權以倉庫 LICENSE 為準。</p>
+<section id="en" lang="en"><h2>Integration / reuse guide</h2><p>This is an operator-focused dashboard that can also be viewed publicly. It shows aggregate platform usage, not game availability, billing or service controls. All visitors see the same data; there is no privileged admin mode.</p>
+<ol><li>Copy <code>src/_monitor.js</code> and <code>src/monitor/</code> from Relay (under <code>public/</code> in Lite) into your deployment output.</li><li>Import the handler into your existing Worker, add the route shown above before the asset fallback, and include <code>/api/monitor</code> in <code>_routes.json</code>. Keep existing routes.</li><li>Use your own read-only Account Analytics token and account/script identifiers in Production secrets. Enable <code>MONITOR_ENABLED</code>. Never reuse another deployment's credentials.</li><li>Select the dataset used by your Cloudflare metrics query, deploy and compare results with the dashboard.</li><li>Replace project labels/footer links and preserve applicable license notices. Setup details are in <code>docs/monitor.md</code> in the repository.</li></ol>
+<p>CPU percentiles are per-execution values; metrics can be delayed or sampled. Account-wide billing and private diagnostics belong in a separate authenticated management page. Public aggregates still reveal traffic patterns. This Cloudflare-specific example is for learning, carries no availability guarantee, and each operator manages their own quotas and charges.</p></section>
+</main></body></html>

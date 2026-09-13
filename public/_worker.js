@@ -1,3 +1,4 @@
+import {monitor} from './_monitor.js';
 // Pages advanced-mode Worker. Keep frames opaque: Cloudflare bridges the
 // upgraded connection, including Engine.IO heartbeat and binary packets.
 const UPSTREAM = "https://bondage-club-server.herokuapp.com/socket.io/";
@@ -12,6 +13,7 @@ function json(data, status = 200) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname === "/api/monitor") return monitor(request, env, "BC Lite");
     if (url.pathname === "/api/relay-status") {
       return json({ service: "bc-lite-relay", version: 1, transport: "websocket",
         upstream: UPSTREAM, bcOrigin: env.BC_ORIGIN || DEFAULT_BC_ORIGIN,

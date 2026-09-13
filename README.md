@@ -38,3 +38,7 @@ npm run dev:ui
 ## 授權
 
 自有程式採用 [MIT](LICENSE)。第三方素材與文字依[各來源授權](docs/THIRD-PARTY-NOTICES.md)。
+
+## 公開負載監看
+
+部署後開啟 `/monitor/`。只公開本站彙總請求、執行錯誤與 CPU 百分位數，不檢查遊戲連線；需先設定唯讀 Cloudflare Secret。[設定與隱私說明](docs/monitor.md)
