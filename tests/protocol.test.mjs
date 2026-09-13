@@ -1192,3 +1192,11 @@ test('local whisper display never confirms delivery and disconnect clears pendin
  assert.equal(f.state().deliveries.at(-1).status,'unconfirmed');
  f.client.disconnect();assert.equal(f.timers.size,0);
 });
+
+
+test('LSCG nuzzle uses bundled translation before embedded English fallback',()=>{
+ const key='ChatOther-ItemHands-LSCG_Nuzzle';
+ const catalog=JSON.parse(readFileSync('src/translations/action/lscg/zh.json','utf8'));
+ const text=renderAction(key,'Activity',[{Tag:`MISSING TEXT IN "ActivityDictionary.csv": ${key}`,Text:"SourceCharacter nuzzles underneath TargetCharacter's hand."},{Tag:'SourceCharacter',Text:'LikoBot'},{Tag:'TargetCharacter',Text:'莉柯莉絲'}],catalog);
+ assert.equal(text,'LikoBot 在 莉柯莉絲 的手掌下親暱地蹭蹭。');
+});

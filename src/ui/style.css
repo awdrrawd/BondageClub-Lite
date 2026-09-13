@@ -695,3 +695,19 @@ input, textarea, [contenteditable="true"], .message-content, .message-content *,
  .chat-active .room-view, .private-active .private-page { flex:1; height:auto; min-height:0; }
  .chat-room-top-menu > .room-title { grid-column:auto; }
 }
+
+.chat-room-top-menu { display:flex; align-items:center; flex-wrap:nowrap; gap:.5rem; }
+.chat-room-top-menu .room-title { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.room-population { flex-shrink:0; }
+.room-message-menu { margin-left:auto; position:relative; flex-shrink:0; }
+.room-message-menu summary { list-style:none; cursor:pointer; }
+.room-message-menu summary::-webkit-details-marker { display:none; }
+.room-message-actions { position:absolute; top:100%; right:0; z-index:20; display:grid; gap:.3rem; padding:.5rem; min-width:150px; background:var(--panel); border:1px solid var(--line); border-radius:10px; }
+.room-card .room-detail-button { position:absolute; top:.4rem; right:.4rem; width:30px; height:30px; min-height:30px; min-width:30px; padding:0; margin:0; }
+.activity-option { position:relative; overflow:hidden; border-radius:9px; }
+.activity-option > .button { padding:1.2rem .7rem .7rem 2rem; }
+.activity-source { position:absolute; z-index:1; left:-25px; top:12px; width:100px; text-align:center; transform:rotate(-45deg); background:var(--accent); color:var(--bg); font-size:10px; line-height:17px; pointer-events:none; }
+.activity-info { position:absolute; top:.5rem; right:3.6rem; width:36px; height:44px; }
+.activity-all { position:absolute; top:.5rem; right:6.2rem; }
+.activity-all [aria-pressed=true] { color:var(--accent); border-color:var(--accent); }
+.activity-dialog > h2 { padding-right:10rem; }

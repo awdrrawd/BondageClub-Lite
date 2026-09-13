@@ -1,1 +1,22 @@
-{}
+{
+  "ChatOther-ItemHead-LSCG_Nuzzle": "SourceCharacter 用臉輕蹭 TargetCharacter 的頭側。",
+  "Label-ChatOther-ItemHead-LSCG_Nuzzle": "親暱蹭蹭",
+  "ChatOther-ItemNeck-LSCG_Nuzzle": "SourceCharacter 依偎著輕蹭 TargetCharacter 的脖子。",
+  "Label-ChatOther-ItemNeck-LSCG_Nuzzle": "親暱蹭蹭",
+  "ChatOther-ItemArms-LSCG_Nuzzle": "SourceCharacter 鑽進 TargetCharacter 的臂彎輕蹭。",
+  "Label-ChatOther-ItemArms-LSCG_Nuzzle": "親暱蹭蹭",
+  "ChatOther-ItemHands-LSCG_Nuzzle": "SourceCharacter 在 TargetCharacter 的手掌下親暱地蹭蹭。",
+  "Label-ChatOther-ItemHands-LSCG_Nuzzle": "親暱蹭蹭",
+  "ChatOther-ItemBreast-LSCG_Nuzzle": "SourceCharacter 依偎著輕蹭 TargetCharacter 的胸部。",
+  "Label-ChatOther-ItemBreast-LSCG_Nuzzle": "親暱蹭蹭",
+  "ChatOther-ItemTorso-LSCG_Nuzzle": "SourceCharacter 親暱地依偎著 TargetCharacter。",
+  "Label-ChatOther-ItemTorso-LSCG_Nuzzle": "親暱蹭蹭",
+  "ChatOther-ItemPelvis-LSCG_Nuzzle": "SourceCharacter 親暱地依偎著 TargetCharacter。",
+  "Label-ChatOther-ItemPelvis-LSCG_Nuzzle": "親暱蹭蹭",
+  "ChatOther-ItemLegs-LSCG_Nuzzle": "SourceCharacter 用臉輕蹭 TargetCharacter 的大腿。",
+  "Label-ChatOther-ItemLegs-LSCG_Nuzzle": "親暱蹭蹭",
+  "ChatOther-ItemFeet-LSCG_Nuzzle": "SourceCharacter 沿著 TargetCharacter 的腿輕蹭。",
+  "Label-ChatOther-ItemFeet-LSCG_Nuzzle": "親暱蹭蹭",
+  "ChatOther-ItemBoots-LSCG_Nuzzle": "SourceCharacter 在 TargetCharacter 的腳下輕蹭。",
+  "Label-ChatOther-ItemBoots-LSCG_Nuzzle": "親暱蹭蹭"
+}

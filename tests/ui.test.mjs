@@ -348,7 +348,8 @@ test('all actions defaults off, reveals restrictions without enabling them and r
   dialog.querySelector('[data-body-group="ItemHead"]').dispatchEvent(new f.window.Event('click'));
   const mode=dialog.querySelector('input[type=checkbox]');
   assert.equal(mode.checked,false);
-  assert.match(mode.parentElement.textContent,/全部動作/);
+  assert.match(mode.parentElement.textContent,/ALL/);
+  assert.equal(dialog.querySelector('.activity-info').getAttribute('aria-expanded'),'false');
   assert.equal(dialog.querySelector('.activity-option button'),null);
   mode.checked=true; mode.dispatchEvent(new f.window.Event('change'));
   assert.equal(dialog.querySelector('.activity-option button').disabled,false);

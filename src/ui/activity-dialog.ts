@@ -9,10 +9,14 @@ export function openActivityDialog(name: string, getOptions: (compatibility: boo
   const close = document.createElement("button"); close.type = "button"; close.className = "button ghost dialog-close"; close.textContent = "×"; close.setAttribute("aria-label", t("m173"));
   close.addEventListener("click", () => dialog.close());
   dialog.addEventListener("close", () => dialog.remove());
-  const help = document.createElement("p"); help.className = "muted"; help.textContent = t("native.help");
+  const help = document.createElement("p"); help.className = "muted"; help.textContent = t("native.help"); help.hidden = true;
   const mode = document.createElement("label"); mode.className = "checkbox";
   const allActions = document.createElement("input"); allActions.type = "checkbox"; allActions.checked = false;
-  mode.append(allActions, document.createTextNode(t("interaction.allActions")));
+  mode.className='activity-all'; allActions.hidden=true; mode.append(allActions);
+  const allButton=document.createElement('button'); allButton.type='button'; allButton.className='button ghost'; allButton.textContent='ALL'; allButton.title=t('interaction.allActions'); allButton.setAttribute('aria-pressed','false');
+  allButton.addEventListener('click',()=>{allActions.checked=!allActions.checked;allButton.setAttribute('aria-pressed',String(allActions.checked));allActions.dispatchEvent(new window.Event('change'));}); mode.append(allButton);
+  const info=document.createElement('button');info.type='button';info.className='button ghost activity-info';info.textContent='i';info.setAttribute('aria-label',t('rooms.details'));info.setAttribute('aria-expanded','false');
+  info.addEventListener('click',()=>{help.hidden=!help.hidden;info.setAttribute('aria-expanded',String(!help.hidden));});
   const layout = document.createElement("div"); layout.className = "activity-layout";
   const body = document.createElement("div"); body.className = "body-picker";
   const ns = "http://www.w3.org/2000/svg";
@@ -39,7 +43,8 @@ export function openActivityDialog(name: string, getOptions: (compatibility: boo
     for (const option of options.values()) {
       const row = document.createElement("div"); row.className = "activity-option";
       const action = document.createElement("button"); action.type = "button"; action.className = "button secondary";
-      action.textContent = `${option.source && option.source !== "BC" ? `${option.source} · ` : ""}${option.label}`; action.disabled = Boolean(option.reason);
+      action.textContent = option.label;
+      if(option.source){const ribbon=document.createElement('span');ribbon.className='activity-source';ribbon.textContent=option.source;row.append(ribbon);action.setAttribute('aria-label',`${option.label} (${option.source})`);} action.disabled = Boolean(option.reason);
       action.addEventListener("click", () => {
         try { if (send(option.group, option.name, allActions.checked) !== false) status.textContent = t("interaction.sent"); }
         catch (error) { status.textContent = error instanceof Error ? error.message : String(error); }
@@ -72,6 +77,6 @@ export function openActivityDialog(name: string, getOptions: (compatibility: boo
   allActions.addEventListener("change", () => { if (selectedGroup) select(selectedGroup, selected.textContent || selectedGroup); });
   dialog.addEventListener("activity-refresh", () => { if (selectedGroup) select(selectedGroup, selected.textContent || selectedGroup, false); });
   body.append(svg); results.append(back, selected, status, activities); layout.append(body, results);
-  dialog.append(heading, close, help, mode, layout); document.body.append(dialog); dialog.showModal();
+  dialog.append(heading, close, info, help, mode, layout); document.body.append(dialog); dialog.showModal();
   return dialog;
 }

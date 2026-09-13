@@ -1099,6 +1099,9 @@ export class LiteApp {
       }
       if (!ids.size) dialog.append(this.el('p','muted',t('rooms.noKnownFriends')));
       const close=this.button('×','ghost dialog-close','button'); close.setAttribute('aria-label',t('m173')); close.addEventListener('click',()=>dialog.close());
+      const join=this.button(t('m129'),'secondary','button'); join.disabled=!canJoinRoom(room) || this.snapshot!.phase==='joining';
+      join.addEventListener('click',()=>{dialog.close();this.joinRoom(room.Name);}); dialog.append(join);
+      dialog.addEventListener('click',event=>{if(event.target===dialog){const box=dialog.getBoundingClientRect();if(event.clientX<box.left || event.clientX>box.right || event.clientY<box.top || event.clientY>box.bottom)dialog.close();}});
       dialog.append(close); dialog.addEventListener('close',()=>dialog.remove()); document.body.append(dialog); dialog.showModal();
     });
 
@@ -1256,11 +1259,15 @@ export class LiteApp {
     });
     const jump = this.button(t("m163"), "secondary", "button"); jump.id = "new-messages"; jump.hidden = !this.historyEndId;
     jump.addEventListener("click", () => { this.historyEndId = null; this.updateChatLog(true); });
-    topMenu.append(toggle, history, jump);
-    const search=this.button(t('searchHistory.title'),'ghost','button');search.addEventListener('click',()=>openHistorySearch(this.history,()=>historyOwner(this.snapshot!)));topMenu.append(search);
+    topMenu.append(toggle, jump);
+    const messageMenu=this.el('details','room-message-menu');
+    const messageSummary=this.el('summary','button ghost',t('history.chat')); messageMenu.append(messageSummary);
+    const messageActions=this.el('div','room-message-actions'); messageMenu.append(messageActions); topMenu.append(messageMenu);
+    messageActions.append(history);
+    const search=this.button(t('searchHistory.title'),'ghost','button');search.addEventListener('click',()=>openHistorySearch(this.history,()=>historyOwner(this.snapshot!)));messageActions.append(search);
     const clear = this.button(t("chat.clear"), "ghost clear-messages", "button");
     clear.addEventListener("click", () => this.confirmAction(t("chat.clearConfirm"),()=>{ this.replyTarget = null; this.historyEndId = null; void this.history.clearRoom().catch(() => this.localNotice(t("history.error"))); this.client.clearMessages(); document.getElementById("chat-room-reply-indicator")?.replaceChildren(); this.updateChatLog(true); }));
-    topMenu.append(clear);
+    messageActions.append(clear);
     const mobileLeave = this.button(t("m164"), "ghost", "button");
     mobileLeave.classList.add('leave-room');
     mobileLeave.addEventListener("click", () => this.client.leave());
