@@ -354,7 +354,7 @@
   "interaction.smileText": "{0}對{1}微笑。",
   "interaction.hugText": "{0}擁抱了{1}。",
   "summon.title": "BCX 相容召喚",
-  "summon.help": "使用 Lite 本次登入的允許名單，支援 BCX 招喚文字。只有符合文字且附房名的普通 BEEP 才會提示；接受後重查名單、黑名單與房間可用性，再前往。不載入 BCX 私有強制規則。",
+  "summon.help": "接收自己 BCX 的招喚規則：依允許名單、招喚詞或 summon 及倒數時間前往。只讀 ExtensionSettings.BCX；缺少規則、停用或不支援的觸發條件不接受。此開關不修改 BCX 設定。",
   "summon.enabled": "啟用召喚接收",
   "summon.members": "允許的玩家 ID（逗號分隔）",
   "summon.text": "召喚文字（也接受 summon）",

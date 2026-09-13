@@ -354,7 +354,7 @@
   "interaction.smileText": "{0} smiles at {1}.",
   "interaction.hugText": "{0} hugs {1}.",
   "summon.title": "BCX-compatible summons",
-  "summon.help": "These are Lite permissions, not the BCX private rule engine. When enabled, only listed accounts sending matching ordinary BEEPs with a room name can prompt a summon. You confirm before moving; BCX control packets receive no response.",
+  "summon.help": "Receive summons using your BCX allowed members, phrase or summon, and delay. Reads ExtensionSettings.BCX only; missing, disabled or unsupported conditional rules are rejected. This switch does not modify BCX settings.",
   "summon.enabled": "Enable summon reception",
   "summon.members": "Allowed member IDs (comma-separated)",
   "summon.text": "Summoning text (also accepts summon)",

@@ -1,3 +1,4 @@
+import { bcxSummon } from './bcx-summon';
 import { canFollowLeash } from "../action/leash";
 import { LeashSession } from "./leash-session";
 import { interactionPermission } from "../action/interaction-permission";
@@ -174,15 +175,18 @@ export class BcLiteClient {
   configureSummons(enabled: boolean, members: number[], text: string): void {
     if (members.length > 100 || members.some(id => !Number.isSafeInteger(id) || id <= 0) || !text.trim() || text.length > 200) throw new Error(t("summon.invalid"));
     this.cancelTravel();
+    if (this.summonTimer !== null) window.clearTimeout(this.summonTimer); this.summonTimer = null;
     this.summonRule = { enabled, members: [...new Set(members)], text: text.trim() };
     this.patch({ summon: null });
   }
   private summonAllowed(member: number): boolean {
     const self = {...this.state.player, ...this.state.characters.find(c => c.MemberNumber === this.state.player?.MemberNumber)};
-    return Number.isSafeInteger(member) && member > 0 && member !== self.MemberNumber && this.summonRule.enabled && this.summonRule.members.includes(member) && ![self.BlackList,self.GhostList].some(list => list !== undefined && (!Array.isArray(list) || list.includes(member)));
+    return Number.isSafeInteger(member) && member > 0 && member !== self.MemberNumber && this.summonRule.enabled && !!bcxSummon(this.state)?.members.includes(member) && ![self.BlackList,self.GhostList].some(list => list !== undefined && (!Array.isArray(list) || list.includes(member)));
   }
-  dismissSummon(): void { this.cancelTravel(); this.patch({ summon: null }); }
+  private summonTimer: number | null = null;
+  dismissSummon(): void { if (this.summonTimer !== null) window.clearTimeout(this.summonTimer); this.summonTimer = null; this.cancelTravel(); this.patch({ summon: null }); }
   acceptSummon(): void {
+    if (this.summonTimer !== null) window.clearTimeout(this.summonTimer); this.summonTimer = null;
     const summon = this.state.summon;
     if (!summon || !this.summonRule.enabled || !this.summonAllowed(summon.sender) || summon.expires < Date.now() || !this.canSend() || !["ready", "in-room"].includes(this.state.phase)) throw new Error(t("summon.expired"));
     this.patch({ summon: null });
@@ -295,6 +299,7 @@ export class BcLiteClient {
   }
 
   disconnect(): void {
+    if (this.summonTimer !== null) window.clearTimeout(this.summonTimer); this.summonTimer = null;
     this.interruptDeliveries();
     this.cancelTravel(); this.leash.clear();
     this.searches.reset(true);
@@ -627,8 +632,10 @@ export class BcLiteClient {
         }
         return;
       }
-      if (data && !data.BeepType && this.summonRule.enabled && this.summonAllowed(data.MemberNumber!) && typeof data.Message === "string" && (data.Message.trim().toLowerCase() === "summon" || data.Message.toLowerCase().startsWith(this.summonRule.text.toLowerCase())) && typeof data.ChatRoomName === "string" && data.ChatRoomName.trim() && data.ChatRoomName.length <= 100 && ["X", "M", ""].includes(data.ChatRoomSpace ?? "invalid")) {
-        this.patch({ summon: { sender: data.MemberNumber!, room: data.ChatRoomName, space: data.ChatRoomSpace!, expires: Date.now() + 60000 } });
+      if (data && !data.BeepType && this.summonRule.enabled && this.summonAllowed(data.MemberNumber!) && typeof data.Message === "string" && (data.Message.trim().toLowerCase() === "summon" || data.Message.toLowerCase().startsWith((bcxSummon(this.state)?.text || "\u0000").toLowerCase())) && typeof data.ChatRoomName === "string" && data.ChatRoomName.trim() && data.ChatRoomName.length <= 100 && ["X", "M", ""].includes(data.ChatRoomSpace ?? "invalid")) {
+        this.patch({ summon: { sender: data.MemberNumber!, room: data.ChatRoomName, space: data.ChatRoomSpace!, expires: Date.now() + ((bcxSummon(this.state)?.seconds || 0) + 60) * 1000 } });
+        if (this.summonTimer !== null) window.clearTimeout(this.summonTimer);
+        this.summonTimer = window.setTimeout(() => { this.summonTimer = null; try { this.acceptSummon(); } catch { this.dismissSummon(); } }, (bcxSummon(this.state)?.seconds || 0) * 1000);
       }
       if (data?.BeepType === "afcBeep") {
         if (!afcLovers(this.state.player).some(lover => lover.memberNumber === data.MemberNumber)) return;
@@ -759,6 +766,7 @@ export class BcLiteClient {
       this.socket?.disconnect();
     });
     this.socket.on("disconnect", (reason) => {
+      if (this.summonTimer !== null) window.clearTimeout(this.summonTimer); this.summonTimer = null;
       this.interruptDeliveries();
       this.searches.reset();
       this.cancelTravel(); this.leash.clear();
@@ -813,6 +821,7 @@ export class BcLiteClient {
       // Preserve complete AEE/SCA/ECHO bundles, including unknown Property/Craft
       // fields. Loading an asset registry here would silently strip plugin items.
       Appearance: validAppearance(value.Appearance) ? copyAppearance(value.Appearance) : Array.isArray(value.Appearance) ? value.Appearance : undefined,
+      ExtensionSettings: value.ExtensionSettings && typeof value.ExtensionSettings === "object" ? value.ExtensionSettings as Record<string, unknown> : undefined,
       OnlineSharedSettings: value.OnlineSharedSettings && typeof value.OnlineSharedSettings === "object" ? value.OnlineSharedSettings : undefined };
     const previous = this.state.player;
     const changedAccount = previous && (previous.MemberNumber !== player.MemberNumber || previous.Environment !== player.Environment);

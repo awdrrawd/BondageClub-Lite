@@ -18,6 +18,7 @@ export interface PlayerSummary extends CharacterSummary {
   FriendNames?: Record<number, string>;
   /** Opaque server bundles: never rebuild with an incomplete asset registry. */
   Appearance?: unknown[];
+  ExtensionSettings?: Record<string, unknown>;
   OnlineSharedSettings?: Record<string, unknown>;
   Environment?: string;
   AccountName: string;
@@ -92,6 +93,7 @@ export interface RoomCreateOptions {
 }
 
 export interface RoomSync {
+  Visibility?: string[];
   BlockCategory?: string[];
   MapType?: string;
   Game?: string;

@@ -1,3 +1,4 @@
+import LZString from 'lz-string';
 import { loadTypeScript } from './load-typescript.mjs';
 import { interactionPermission } from "./permissions-helper.mjs";
 import { renderAction, dictionaryText } from './action-helper.mjs';
@@ -32,6 +33,7 @@ async function setup(environment, relayAvailable = true, account = {}, storage =
   };
   const RoomSearch = new Function("window", loadTypeScript("src/network/room-search.ts")+";return RoomSearch;")({setTimeout(fn){timers.set(++timerId,fn);return timerId;},clearTimeout(id){timers.delete(id);}});
   const context = {
+    bcxSummon: new Function("LZString",loadTypeScript("src/network/bcx-summon.ts")+";return bcxSummon;")(LZString),
     RoomSearch, interactionPermission,
     canFollowLeash: new Function('definitions','interactionPermission',loadTypeScript('src/action/leash.ts')+';return canFollowLeash;')(definitions,interactionPermission),
     LeashSession: new Function(loadTypeScript('src/network/leash-session.ts')+';return LeashSession;')(),
@@ -559,6 +561,7 @@ test('BCX-compatible summons require opt-in, allowed sender, ordinary beep, matc
   const f = await setup('PROD'); const receive = f.handlers.get('AccountBeep');
   const beep = { MemberNumber: 55, MemberName: 'Allowed', Message: 'summon', ChatRoomName: 'Target', ChatRoomSpace: 'X' };
   receive(beep); assert.equal(f.state().summon, null);
+  f.state().player.ExtensionSettings = {BCX:LZString.compressToBase64(JSON.stringify({disabledModules:[],conditions:{rules:{requirements:{},conditions:{alt_forced_summoning:{active:true,data:{enforce:true,customData:{allowedMembers:[55],summoningText:'Come here',summonTime:15}}}}}}}))};
   f.client.configureSummons(true, [55], 'Come here');
   for (const change of [{ MemberNumber: 66 }, { Message: 'other' }, { BeepType: 'BCX' }, { ChatRoomName: '' }, { ChatRoomSpace: 'invalid' }]) {
     receive({ ...beep, ...change }); assert.equal(f.state().summon, null);
@@ -1117,7 +1120,7 @@ test('summon permission is rechecked after search and blacklist beats the local 
  const f=await setup('PROD',true,{BlackList:[55]});f.client.configureSummons(true,[55],'Come here');
  const beep={MemberNumber:55,Message:'summon',ChatRoomName:'Destination',ChatRoomSpace:'X'};
  f.handlers.get('AccountBeep')(beep);assert.equal(f.state().summon,null);
- const g=await setup('PROD');g.client.configureSummons(true,[55],'Come here');
+ const g=await setup('PROD');g.state().player.ExtensionSettings={BCX:LZString.compressToBase64(JSON.stringify({disabledModules:[],conditions:{rules:{requirements:{},conditions:{alt_forced_summoning:{active:true,data:{customData:{allowedMembers:[55],summoningText:'Come here',summonTime:15}}}}}}}))};g.client.configureSummons(true,[55],'Come here');
  g.handlers.get('AccountBeep')(beep);g.client.acceptSummon();g.client.configureSummons(false,[],'Come here');
  g.handlers.get('ChatRoomSearchResult')([destination]);assert.equal(g.sent.some(p=>p.event==='ChatRoomJoin'),false);
 });
@@ -1199,4 +1202,18 @@ test('LSCG nuzzle uses bundled translation before embedded English fallback',()=
  const catalog=JSON.parse(readFileSync('src/translations/action/lscg/zh.json','utf8'));
  const text=renderAction(key,'Activity',[{Tag:`MISSING TEXT IN "ActivityDictionary.csv": ${key}`,Text:"SourceCharacter nuzzles underneath TargetCharacter's hand."},{Tag:'SourceCharacter',Text:'LikoBot'},{Tag:'TargetCharacter',Text:'莉柯莉絲'}],catalog);
  assert.equal(text,'LikoBot 在 莉柯莉絲 的手掌下親暱地蹭蹭。');
+});
+
+
+test('BCX summon permission comes from own storage, not caller supplied members',async()=>{
+ const f=await setup('PROD');f.client.configureSummons(true,[55],'Come here');
+ const beep={MemberNumber:55,Message:'summon',ChatRoomName:'There',ChatRoomSpace:'X'};
+ f.handlers.get('AccountBeep')(beep);assert.equal(f.state().summon,null);
+ const data={disabledModules:[],conditions:{rules:{requirements:{},conditions:{alt_forced_summoning:{active:true,data:{enforce:true,customData:{allowedMembers:[55],summoningText:'Come here',summonTime:15}}}}}}};
+ f.state().player.ExtensionSettings={BCX:LZString.compressToBase64(JSON.stringify(data))};
+ f.handlers.get('AccountBeep')(beep);assert.equal(f.state().summon.sender,55);
+ data.conditions.rules.conditions.alt_forced_summoning.data.enforce=false;
+ f.state().player.ExtensionSettings.BCX=LZString.compressToBase64(JSON.stringify(data));
+ assert.throws(()=>f.client.acceptSummon());
+ f.client.disconnect();assert.equal(f.timers.size,0);
 });

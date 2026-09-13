@@ -137,7 +137,7 @@ test('message corrections and member drawer toggles retain the composer and unre
   const input=f.document.getElementById('InputChat'), log=f.document.getElementById('TextAreaChatLog'), second=log.lastChild;
   f.emit({messages:[{...messages[0],text:'corrected'},messages[1]]});
   assert.match(log.textContent,/corrected/); assert.equal(log.lastChild,second); assert.equal(f.document.getElementById('InputChat'),input);
-  f.document.querySelector('.chat-room-top-menu .mobile-members').click();
+  f.document.querySelector('.member-panel > .mobile-members').click();
   assert.ok(f.document.querySelector('.room-view').classList.contains('members-open')); assert.equal(f.document.getElementById('TextAreaChatLog'),log);
   f.document.querySelector('.member-panel .mobile-members').click(); assert.equal(f.document.getElementById('InputChat'),input);
   await f.window.happyDOM.close();
@@ -623,7 +623,7 @@ test('BC-style rows keep metadata separate and clicking a name composes an unsen
   const row = f.document.querySelector('.chat-message.type-chat');
   assert.match(row.querySelector('.message-content').textContent, /Friend: message 0/);
   assert.match(row.querySelector('.message-meta').textContent, /#55/);
-  assert.ok(row.querySelector('.message-meta .message-reply'));
+  assert.ok(row.querySelector(':scope > .message-reply'));
   const input = f.document.getElementById('InputChat'); input.value = 'draft'; input.dispatchEvent(new f.window.Event('input'));
   row.querySelector('.message-author').click();
   assert.equal(f.document.getElementById('InputChat').value, '/W 55 draft');
@@ -693,7 +693,7 @@ test('header contains safety in requested order and outside clicks dismiss membe
   assert.equal(header.children[2].id, 'room-safeword');
   assert.equal(header.children[3].querySelector('select').id, 'InterfaceLocale');
   assert.equal(f.document.querySelector('.chat-room-top-menu #room-safeword'), null);
-  f.document.querySelector('.chat-room-top-menu .mobile-members').click();
+  f.document.querySelector('.member-panel > .mobile-members').click();
   assert.ok(f.document.querySelector('.members-open'));
   const input = f.document.getElementById('InputChat'); input.value = 'draft'; input.dispatchEvent(new f.window.Event('input')); input.click();
   assert.equal(f.document.querySelector('.members-open'), null);
@@ -1209,7 +1209,7 @@ test('delivery notices show only pending or unconfirmed messages without rebuild
  assert.equal(f.document.getElementById('delivery-status').hidden,false);
  assert.ok(f.document.querySelector('.delivery-pending'));
  f.emit({deliveries:[{...item,status:'unconfirmed'}]});
- assert.ok(f.document.querySelector('.delivery-unconfirmed'));
+ assert.equal(f.document.querySelector('.delivery-unconfirmed'),null);
  f.emit({deliveries:[{...item,status:'confirmed'}]});
  assert.equal(f.document.getElementById('delivery-status').hidden,true);
  assert.equal(f.document.getElementById('delivery-status').textContent,'');

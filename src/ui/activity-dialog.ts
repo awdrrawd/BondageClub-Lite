@@ -44,7 +44,7 @@ export function openActivityDialog(name: string, getOptions: (compatibility: boo
       const row = document.createElement("div"); row.className = "activity-option";
       const action = document.createElement("button"); action.type = "button"; action.className = "button secondary";
       action.textContent = option.label;
-      if(option.source){const ribbon=document.createElement('span');ribbon.className='activity-source';ribbon.textContent=option.source;row.append(ribbon);action.setAttribute('aria-label',`${option.label} (${option.source})`);} action.disabled = Boolean(option.reason);
+      if(option.source && option.source !== "BC"){const ribbon=document.createElement('span');ribbon.className='activity-source';ribbon.textContent=option.source;row.append(ribbon);action.setAttribute('aria-label',`${option.label} (${option.source})`);} action.disabled = Boolean(option.reason);
       action.addEventListener("click", () => {
         try { if (send(option.group, option.name, allActions.checked) !== false) status.textContent = t("interaction.sent"); }
         catch (error) { status.textContent = error instanceof Error ? error.message : String(error); }

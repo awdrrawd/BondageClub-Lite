@@ -183,3 +183,7 @@ English: Settings composition, unread accounting, room-search retries and UI res
 送出的聊天以 MsgId 追蹤，僅自己帳號的伺服器回傳可確認。15 秒未回傳或斷線標記未確認，不自動重送；遲到回傳仍可確認。最多保留最近 20 筆狀態。私訊本機副本不算確認，伺服器未回傳時維持未確認。此狀態不是對方已讀證明。
 
 Outgoing messages are confirmed only by a matching server echo from the sender. A 15-second timeout or disconnect marks delivery unconfirmed; no automatic resend occurs. Late echoes can confirm the latest 20 tracked messages. Local whisper copies do not confirm delivery. This is not a read receipt.
+
+BCX 招喚現在只讀自己的 `ExtensionSettings.BCX`（LZString Base64）：`conditions.rules.conditions.alt_forced_summoning`。接收開關不寫入 BCX。支援名單、招喚詞、倒數及房間／房名／指定玩家觸發條件；角色觸發等不支援條件拒絕執行。OnlineSharedSettings 未提供相同完整私有規則，不作權限後備來源。
+
+BCX summons read the player’s private ExtensionSettings.BCX storage, never the local allowlist. Unsupported conditions fail closed. Unconfirmed delivery notices are hidden because missing echoes do not prove delivery failure.

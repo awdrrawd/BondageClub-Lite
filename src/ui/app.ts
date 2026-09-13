@@ -865,7 +865,7 @@ export class LiteApp {
   private fillDeliveryStatus(node: HTMLElement): void {
     node.replaceChildren();
     for (const item of this.snapshot?.deliveries || []) {
-      if (item.status === "confirmed") continue;
+      if (item.status !== "pending") continue;
       node.append(this.el("div", `delivery-${item.status}`, `${t(`delivery.${item.status}`)} · ${item.text.slice(0, 80)}`));
     }
     node.hidden = !node.childElementCount;
@@ -882,16 +882,8 @@ export class LiteApp {
   }
   private buildSummonSettings(): HTMLElement {
     const panel = this.el("section", "settings-card");
-    panel.append(this.el("h2", "", t("summon.title")), this.el("p", "", t("summon.help")), this.checkbox(t("summon.enabled"), this.summonConfig.enabled, value => { this.summonConfig.enabled = value; if (!value) this.client.configureSummons(false, [], this.summonConfig.text || "summon"); }));
-    const members = this.input("SummonMembers", t("summon.members"), "text", this.summonConfig.members);
-    const text = this.input("SummonText", t("summon.text"), "text", this.summonConfig.text);
-    members.addEventListener("input", () => { this.summonConfig.members = members.value; }); text.addEventListener("input", () => { this.summonConfig.text = text.value; });
-    const save = this.button(t("summon.save"), "secondary", "button");
-    save.addEventListener("click", () => this.run(() => {
-      const ids = members.value.trim() ? members.value.trim().split(/[\s,，]+/).map(value => /^\d+$/.test(value) ? Number(value) : NaN) : [];
-      this.client.configureSummons(this.summonConfig.enabled, ids, text.value);
-    }));
-    panel.append(this.field(t("summon.members"), members), this.field(t("summon.text"), text), save); return panel;
+    panel.append(this.el("h2", "", t("summon.title")), this.el("p", "", t("summon.help")), this.checkbox(t("summon.enabled"), this.summonConfig.enabled, value => { this.summonConfig.enabled = value; this.client.configureSummons(value, [], "summon"); }));
+    return panel;
   }
 
   private searchRooms(all = false): void {
@@ -1182,7 +1174,7 @@ export class LiteApp {
     const layout = document.querySelector('.room-view');
     if (!layout || !room) return;
     layout.classList.toggle('members-open', this.membersOpen);
-    this.setText(layout.querySelector('.chat-room-top-menu .mobile-members'), this.membersOpen ? t('m160') : t('m161'));
+    this.setText(layout.querySelector('.member-panel > .mobile-members'), this.membersOpen ? t('m160') : t('m161'));
     this.setText(layout.querySelector('.room-info h1'), room.Name);
     this.setText(layout.querySelector('.room-info p:not(.eyebrow)'), room.Description || t('m127'));
 
@@ -1246,6 +1238,9 @@ export class LiteApp {
     const topMenu = this.el("div", "chat-room-top-menu");
     topMenu.id = "chat-room-top-menu";
     const roomTitle = this.el("strong", "room-title", state.room!.Name); roomTitle.title = state.room!.Name;
+    roomTitle.setAttribute('role','button'); roomTitle.tabIndex=0;
+    const openMembers=()=>{this.membersOpen=!this.membersOpen;this.updateRoomInfo();};
+    roomTitle.addEventListener('click',openMembers);roomTitle.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openMembers();}});
     topMenu.append(roomTitle, this.el("span", "room-population", `${state.characters.length}/${state.room!.Limit}`));
     const toggle = this.button(this.membersOpen ? t("m160") : t("m161"), "ghost mobile-members", "button");
     toggle.addEventListener("click", () => { this.membersOpen = !this.membersOpen; this.updateRoomInfo(); });
@@ -1259,7 +1254,7 @@ export class LiteApp {
     });
     const jump = this.button(t("m163"), "secondary", "button"); jump.id = "new-messages"; jump.hidden = !this.historyEndId;
     jump.addEventListener("click", () => { this.historyEndId = null; this.updateChatLog(true); });
-    topMenu.append(toggle, jump);
+    sidebar.append(toggle); topMenu.append(jump);
     const messageMenu=this.el('details','room-message-menu');
     const messageSummary=this.el('summary','button ghost',t('history.chat')); messageMenu.append(messageSummary);
     const messageActions=this.el('div','room-message-actions'); messageMenu.append(messageActions); topMenu.append(messageMenu);
@@ -1326,14 +1321,14 @@ export class LiteApp {
     const content = this.el("span", "message-content");
     const meta = this.el("span", "message-meta");
     const name = ((message.type === "Beep" || message.type === "Whisper") && message.sender && message.sender !== this.snapshot!.player?.MemberNumber ? contactName(this.snapshot!, message.sender, message.senderName) : message.senderName).replace(/\s+#\d+$/, "");
-    if (message.sender && !message.presence) {
+    if (message.sender && !message.presence && this.tab !== "private") {
       const author = this.button(name, "message-author", "button");
       const character = this.snapshot!.characters.find(c => c.MemberNumber === message.sender) || (this.snapshot!.player?.MemberNumber === message.sender ? this.snapshot!.player : undefined);
       author.style.color = nameColor(message.labelColor || character?.LabelColor, message.sender);
       author.addEventListener("click", () => this.composeWhisper(message.sender!)); content.append(author);
     }
-    if (message.type === "Whisper" || message.type === "Beep") content.append(this.el("span", "message-target", ` → ${message.targetName?.replace(/\s+#\d+$/, "") || "#" + message.target} `));
-    if (message.type === "Chat" || message.type === "Whisper" || message.type === "Beep") content.append(document.createTextNode(": "));
+    if (this.tab !== "private" && (message.type === "Whisper" || message.type === "Beep")) content.append(this.el("span", "message-target", ` → ${message.targetName?.replace(/\s+#\d+$/, "") || "#" + message.target} `));
+    if (this.tab !== "private" && (message.type === "Chat" || message.type === "Whisper" || message.type === "Beep")) content.append(document.createTextNode(": "));
     else content.append(document.createTextNode(" "));
     content.append(this.chatText("span", "message-text", message.text));
     if (message.text.startsWith("(") && ["Chat", "Whisper", "Beep"].includes(message.type)) row.classList.add("is-ooc");
@@ -1342,7 +1337,7 @@ export class LiteApp {
     row.append(content, meta);
     if (this.canReply(message)) {
       const reply = this.button(t("reply.button"), "ghost message-reply", "button");
-      reply.addEventListener("click", () => this.selectReply(message)); meta.append(reply);
+      reply.addEventListener("click", () => this.selectReply(message)); row.append(reply);
     }
     return row;
   }
