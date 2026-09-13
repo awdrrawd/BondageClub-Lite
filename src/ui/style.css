@@ -712,16 +712,20 @@ input, textarea, [contenteditable="true"], .message-content, .message-content *,
 .activity-all [aria-pressed=true] { color:var(--accent); border-color:var(--accent); }
 .activity-dialog > h2 { padding-right:10rem; }
 
-.activity-source { width:98px; line-height:15px; font-size:11px; }
+.activity-source { width:98px; line-height:15px; font-size:calc(11px + 1pt); }
 .dialog-close, .activity-info, .activity-all > .button { width:36px; height:36px; min-width:36px; min-height:36px; padding:0; display:inline-flex; align-items:center; justify-content:center; }
 .activity-info { right:calc(.5rem + 41px); }
 .activity-all { right:calc(.5rem + 82px); }
 .chat-message { grid-template-columns:minmax(0,1fr) auto auto; }
 .chat-message > .message-reply { grid-column:2; grid-row:1; align-self:center; }
 .chat-message > .message-meta { grid-column:3; grid-row:1; font-size:.5625rem; }
-.private-page .chat-message { display:flex; flex-direction:column; }
+.private-page .chat-message { display:flex; flex-direction:column; position:relative; overflow:visible; max-width:min(88%, calc(100% - 4rem)); }
 .private-page .message-author, .private-page .message-target, .private-page .message-id { display:none; }
-.private-page .message-meta { flex-direction:row; gap:.4rem; font-size:.5625rem; }
+.private-page .message-meta { flex-direction:row; justify-content:space-between; align-items:center; align-self:stretch; width:100%; gap:1rem; font-size:.5625rem; }
+.private-page .message-meta .private-channel-label { margin-right:auto; }
+.private-page .chat-message > .message-reply { position:absolute; top:50%; transform:translateY(-50%); margin:0; white-space:nowrap; }
+.private-page .private-incoming > .message-reply { left:calc(100% + 5px); right:auto; }
+.private-page .private-outgoing > .message-reply { right:calc(100% + 5px); left:auto; }
 .private-page .message-content { font-size:1rem; }
 .member-panel > .mobile-members { margin-top:auto; flex-shrink:0; }
 .chat-message.message-presence, .chat-message.type-local { grid-template-columns:minmax(0,1fr) auto auto; }
