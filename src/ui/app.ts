@@ -163,6 +163,7 @@ export class LiteApp {
     } catch { /* Use bounded defaults for unavailable or malformed storage. */ }
     this.visibleMessages = this.performance.visible;
     this.client.setMessageLimit(this.performance.history);
+    this.applyChatFonts();
     this.applySettings();
     this.lifetime.add(this.client.subscribe((snapshot) => {
       if (this.lifetime.disposed) return;
@@ -293,6 +294,11 @@ export class LiteApp {
   private observeIncoming(baseline:boolean): void {
     const state=this.snapshot!;
     if(!state.player)return;
+    for(const message of state.messages){
+      if(!this.mentionSeen.has(message.id) && !baseline && message.type==='Chat' && message.sender!==state.player.MemberNumber && new RegExp(`@[^@\\n]{0,100}#${state.player.MemberNumber}(?=\\s|$|[.,!?，。！？])`).test(message.text)) void this.sounds.play('mention').catch(()=>{});
+      this.mentionSeen.add(message.id);
+    }
+    this.mentionSeen=new Set(state.messages.map(message=>message.id));
     const messages:DisplayMessage[]=[...(state.whispers || state.messages.filter(m=>m.type==='Whisper')), ...state.beeps.map(m=>({id:m.id,type:'Beep' as const,sender:m.incoming?m.memberNumber:state.player!.MemberNumber,target:m.incoming?state.player!.MemberNumber:m.memberNumber,senderName:m.name,text:m.text,time:m.time}))];
     const log=document.getElementById('beep-log');
     const incoming=this.unread.observe(messages,state.player.MemberNumber,baseline,sender =>
@@ -806,7 +812,7 @@ export class LiteApp {
       accountPrivacyNote: () => this.accountPrivacyNote(),
       forgetAccount: () => { this.rememberAccount = false; this.saveAccountPreference(); },
       disconnect: () => this.client.disconnect(), confirmAction: (message, action) => this.confirmAction(message, action),
-      buildSoundSettings: () => this.buildSoundSettings(), buildSummonSettings: () => this.buildSummonSettings(),
+      buildChatSettings: () => this.buildChatSettings(), buildSoundSettings: () => this.buildSoundSettings(), buildSummonSettings: () => this.buildSummonSettings(),
       buildPerformanceSettings: () => this.buildPerformanceSettings(), buildHistorySettings: () => this.buildHistorySettings(),
       stabilityPanel: () => this.stability.build(() => this.client.connectionDiagnostics(), () => this.client.resumeConnection()),
       mediaPanel: () => this.mediaConsent.buildSettings(),
@@ -817,6 +823,22 @@ export class LiteApp {
     const panel=buildHistorySettings({history:this.history, owner:()=>this.snapshot ? historyOwner(this.snapshot) : '', hasError:()=>this.historyError, notice:message=>this.localNotice(message)});
     const search=this.button(t('searchHistory.title'),'secondary','button');search.id='open-history-search';search.addEventListener('click',()=>openHistorySearch(this.history,()=>historyOwner(this.snapshot!)));panel.prepend(search);return panel;
   }
+  private chatFonts = { chat: 12, private: 12 };
+  private mentionSeen = new Set<string>();
+  private applyChatFonts(): void {
+    try { const saved=JSON.parse(localStorage.getItem('bc-lite-chat-fonts-v1') || '{}'); for(const key of ['chat','private'] as const) if(Number.isFinite(saved[key]) && saved[key]>=8 && saved[key]<=30) this.chatFonts[key]=saved[key]; } catch { /* optional preference */ }
+    for(const key of ['chat','private'] as const) document.documentElement.style.setProperty(`--${key}-font-size`,`${this.chatFonts[key]}pt`);
+  }
+  private buildChatSettings(): HTMLElement {
+    const panel=this.el('section','settings-card');panel.append(this.el('h2','',t('settings.chat')));
+    for(const key of ['chat','private'] as const){
+      const input=this.input(`ChatFont-${key}`,t(`chatFont.${key}`),'number',String(this.chatFonts[key]));input.min='8';input.max='30';input.step='0.5';
+      input.addEventListener('change',()=>{const value=Number(input.value);if(!Number.isFinite(value)||value<8||value>30){input.value=String(this.chatFonts[key]);return;}this.chatFonts[key]=value;try{localStorage.setItem('bc-lite-chat-fonts-v1',JSON.stringify(this.chatFonts));}catch{}document.documentElement.style.setProperty(`--${key}-font-size`,`${value}pt`);});
+      panel.append(this.field(`${t(`chatFont.${key}`)} (pt)`,input));
+    }
+    panel.append(this.checkbox(t('sounds.mention'),this.sounds.enabled.mention,value=>{void this.sounds.enable('mention',value).catch(()=>this.localNotice(t('sounds.failed')));}));return panel;
+  }
+
   private buildSoundSettings(): HTMLElement {
     const panel=this.el('section','settings-card sound-settings');panel.append(this.el('h2','',t('sounds.title')),this.el('p','muted',t('sounds.help')));
     for(const kind of ['beep','whisper'] as const){
@@ -1279,10 +1301,38 @@ export class LiteApp {
     const input = document.createElement("textarea"); input.id = "InputChat"; input.placeholder = t("composer.placeholder"); input.title = t("composer.help"); input.setAttribute("aria-label", t("composer.placeholder")); input.maxLength = 1000; input.value = this.chatDraft;
     const length = this.el("span", "input-chat-length", `${this.chatDraft.length}/1000`); length.id = "InputChatLength";
     input.addEventListener("input", () => { this.chatDraft = input.value; length.textContent = `${input.value.length}/1000`; });
+    const mentionList=this.el('div','mention-list');mentionList.hidden=true;mentionList.setAttribute('role','listbox');
+    let mentionStart=-1, mentionIndex=0;
+    const refreshMentions=()=>{
+      const prefix=input.value.slice(0,input.selectionStart),match=prefix.match(/(?:^|\s)@([^@\s]*)$/u);
+      mentionList.replaceChildren();mentionList.hidden=true;if(!match)return;
+      mentionStart=prefix.lastIndexOf('@');mentionIndex=0;
+      const query=match[1].toLowerCase();
+      for(const person of this.snapshot!.characters.filter(person=>(person.Nickname||person.Name||'').toLowerCase().includes(query)||String(person.MemberNumber).includes(query))){
+        const name=person.Nickname||person.Name||String(person.MemberNumber);
+        const choice=this.button(`${name} #${person.MemberNumber}`,'ghost','button');choice.setAttribute('role','option');
+        choice.addEventListener('pointerdown',event=>event.preventDefault());
+        choice.addEventListener('click',()=>{const token=`@${name}#${person.MemberNumber} `;if(input.value.length-(input.selectionStart-mentionStart)+token.length>1000)return;input.setRangeText(token,mentionStart,input.selectionStart,'end');this.chatDraft=input.value;length.textContent=`${input.value.length}/1000`;mentionList.hidden=true;input.focus();});mentionList.append(choice);
+      }
+      mentionList.hidden=!mentionList.childElementCount;
+    };
+    input.addEventListener('input',()=>{if(!this.composing)refreshMentions();});
+    input.addEventListener('keydown',event=>{
+      if(mentionList.hidden||event.isComposing)return;
+      const choices=Array.from(mentionList.querySelectorAll<HTMLButtonElement>('button'));
+      if(event.key==='Escape'){mentionList.hidden=true;event.preventDefault();event.stopImmediatePropagation();}
+      else if(['ArrowDown','ArrowUp','Enter'].includes(event.key)){
+        event.preventDefault();event.stopImmediatePropagation();
+        if(event.key==='Enter'){choices[mentionIndex]?.click();return;}
+        mentionIndex=(mentionIndex+(event.key==='ArrowDown'?1:-1)+choices.length)%choices.length;
+        choices.forEach((choice,index)=>choice.setAttribute('aria-selected',String(index===mentionIndex)));choices[mentionIndex]?.scrollIntoView?.({block:'nearest'});
+      }
+    });
+    input.addEventListener('blur',()=>{if(!mentionList.contains(document.activeElement))mentionList.hidden=true;});
     input.addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey && !event.isComposing && event.keyCode !== 229) { event.preventDefault(); bot.requestSubmit(); } });
     const buttons = this.el("div", "chat-room-buttons-div"); buttons.id = "chat-room-buttons-div";
     const inner = this.el("div", "chat-room-buttons"); inner.id = "chat-room-buttons";
-    const send = this.button(t("m166"), "primary", "submit"); inner.append(length, send); buttons.append(inner); bot.append(input, buttons);
+    const send = this.button(t("m166"), "primary", "submit"); inner.append(length, send); buttons.append(inner); bot.append(input, buttons); bot.append(mentionList);
     bot.addEventListener("submit", (event) => {
       event.preventDefault();
       if (!this.chatDraft.trim()) return;

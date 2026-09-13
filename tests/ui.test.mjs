@@ -1248,3 +1248,24 @@ test('room info opens known friend relationships without joining',async()=>{
  assert.equal(f.document.querySelector('dialog[open]'),null);
  await f.window.happyDOM.close();
 });
+
+
+test('mentions insert an ID-bearing tag without sending and Escape dismisses suggestions',async()=>{
+ const f=setup();f.emit({phase:'in-room',room:{Name:'Room'},characters:[{MemberNumber:55,Name:'Friend'},{MemberNumber:66,Name:'Other'}],messages:[]});
+ const input=f.document.getElementById('InputChat');input.value='hello @';input.setSelectionRange(7,7);input.dispatchEvent(new f.window.Event('input'));
+ const list=f.document.querySelector('.mention-list');assert.equal(list.hidden,false);assert.equal(list.querySelectorAll('button').length,2);
+ const before=f.calls.length;input.dispatchEvent(new f.window.KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));
+ assert.equal(input.value,'hello @Friend#55 ');assert.equal(list.hidden,true);assert.equal(f.calls.length,before);
+ input.value='@';input.setSelectionRange(1,1);input.dispatchEvent(new f.window.Event('input'));input.dispatchEvent(new f.window.KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));assert.equal(list.hidden,true);
+ await f.window.happyDOM.close();
+});
+
+test('chat font settings persist independent pt sizes and reject out-of-range input',async()=>{
+ const f=setup();f.document.getElementById('nav-settings').click();
+ const input=f.document.getElementById('ChatFont-chat');input.value='16.5';input.dispatchEvent(new f.window.Event('change'));
+ assert.equal(f.document.documentElement.style.getPropertyValue('--chat-font-size'),'16.5pt');
+ assert.equal(JSON.parse(f.window.localStorage.getItem('bc-lite-chat-fonts-v1')).private,12);
+ input.value='99';input.dispatchEvent(new f.window.Event('change'));assert.equal(input.value,'16.5');
+ assert.ok(f.document.querySelector('.settings-sticky > .eyebrow'));assert.ok(f.document.querySelector('.settings-sticky > .settings-jumps'));
+ await f.window.happyDOM.close();
+});

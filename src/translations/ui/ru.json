@@ -467,5 +467,9 @@
   "contacts.grid": "Сетка",
   "contacts.rows": "Список",
   "rooms.details": "Сведения о комнате",
-  "rooms.noKnownFriends": "Нет данных о друзьях или отношениях"
+  "rooms.noKnownFriends": "Нет данных о друзьях или отношениях",
+  "settings.chat": "Чат",
+  "chatFont.chat": "Размер текста комнаты",
+  "chatFont.private": "Размер личных сообщений",
+  "sounds.mention": "Звук при упоминании"
 }

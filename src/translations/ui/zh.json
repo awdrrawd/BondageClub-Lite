@@ -467,5 +467,9 @@
   "contacts.grid": "格狀排列",
   "contacts.rows": "列狀排列",
   "rooms.details": "房間詳情",
-  "rooms.noKnownFriends": "沒有已知好友或關係資料"
+  "rooms.noKnownFriends": "沒有已知好友或關係資料",
+  "settings.chat": "聊天",
+  "chatFont.chat": "房間文字大小",
+  "chatFont.private": "私聊文字大小",
+  "sounds.mention": "被 @ 提及時播放音效"
 }

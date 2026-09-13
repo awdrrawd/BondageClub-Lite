@@ -17,6 +17,6 @@ test('sounds are opt-in, independently persisted, gesture-unlocked and burst-lim
   await s.play('whisper',true);assert.deepEqual(tones,[660]);
   await s.play('beep');assert.equal(tones.length,1);
   await s.enable('whisper',true);assert.deepEqual(tones,[660,880]);
-  await s.enable('beep',false);assert.deepEqual(new Sounds().enabled,{beep:false,whisper:true});
+  await s.enable('beep',false);assert.deepEqual(new Sounds().enabled,{beep:false,whisper:true,mention:false});
   s.stop();await s.play('whisper',true);assert.equal(tones.length,2);
 });

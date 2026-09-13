@@ -467,5 +467,9 @@
   "contacts.grid": "Grid layout",
   "contacts.rows": "List layout",
   "rooms.details": "Room details",
-  "rooms.noKnownFriends": "No known friends or relationships"
+  "rooms.noKnownFriends": "No known friends or relationships",
+  "settings.chat": "Chat",
+  "chatFont.chat": "Room text size",
+  "chatFont.private": "Private text size",
+  "sounds.mention": "Play a sound when mentioned"
 }

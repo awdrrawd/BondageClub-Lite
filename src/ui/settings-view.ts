@@ -12,6 +12,7 @@ export interface SettingsContext {
  disconnect(): void;
  confirmAction(message: string, action: () => void): void;
  buildSoundSettings(): HTMLElement;
+ buildChatSettings(): HTMLElement;
  buildSummonSettings(): HTMLElement;
  buildPerformanceSettings(): HTMLElement;
  buildHistorySettings(): HTMLElement;
@@ -47,12 +48,14 @@ export function buildSettingsView(context: SettingsContext): HTMLElement {
     const jumps = el("nav", "settings-jumps"); jumps.setAttribute("aria-label", t("settings.jump"));
     const groups: Array<[string, string, HTMLElement[]]> = [
       ["appearance", t("settings.appearance"), [panel]],
+      ["chat", t("settings.chat"), [context.buildChatSettings()]],
       ["function", t("settings.function"), [context.buildSoundSettings(), context.buildSummonSettings(), compatibility]],
       ["performance", t("settings.performance"), [context.buildPerformanceSettings(), context.stabilityPanel()]],
       ["storage", t("settings.storage"), [context.buildHistorySettings()]],
       ["privacy", t("settings.privacy"), [privacy, context.mediaPanel()]],
     ];
-    section.append(jumps);
+    const sticky=el("div","settings-sticky");
+    sticky.append(section.firstElementChild!,jumps); section.append(sticky);
     for (const [id, label, panels] of groups) {
       const anchor = el("a", "button ghost", label) as HTMLAnchorElement; anchor.href = `#settings-${id}`;
       if (id === 'appearance') anchor.setAttribute('aria-current', 'location');
