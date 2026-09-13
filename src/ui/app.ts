@@ -1,3 +1,4 @@
+import { createMentionPicker } from './mention-picker';
 import { UnreadState } from "./unread-state";
 import { buildSettingsView } from "./settings-view";
 import { t, getLocale, setLocale, type Locale } from "../i18n";
@@ -406,8 +407,6 @@ export class LiteApp {
     const header = this.el("header", "app-header");
     const brand = this.el("div", "brand");
     brand.append(this.el("span", "brand-mark", "BC"), this.el("div", "", "Lite"));
-    const connection = this.el("div", `connection phase-${state.phase}`);
-    connection.append(this.el("span", "status-dot"), this.el("span", "", state.status));
     const statusControls = this.el("div", "header-status-controls");
     const localeControl = this.languageControl();
     localeControl.classList.add("header-locale");
@@ -430,6 +429,7 @@ export class LiteApp {
     const summon = this.el("div", "summon-notice"); summon.id = "summon-notice";
 
     const content = this.el("div", "app-content");
+    content.classList.toggle("settings-content",!!state.player && this.tab === "settings");
     if (!state.player) {
       content.append(this.buildLogin());
     } else if (this.tab === "friends") {
@@ -1301,34 +1301,7 @@ export class LiteApp {
     const input = document.createElement("textarea"); input.id = "InputChat"; input.placeholder = t("composer.placeholder"); input.title = t("composer.help"); input.setAttribute("aria-label", t("composer.placeholder")); input.maxLength = 1000; input.value = this.chatDraft;
     const length = this.el("span", "input-chat-length", `${this.chatDraft.length}/1000`); length.id = "InputChatLength";
     input.addEventListener("input", () => { this.chatDraft = input.value; length.textContent = `${input.value.length}/1000`; });
-    const mentionList=this.el('div','mention-list');mentionList.hidden=true;mentionList.setAttribute('role','listbox');
-    let mentionStart=-1, mentionIndex=0;
-    const refreshMentions=()=>{
-      const prefix=input.value.slice(0,input.selectionStart),match=prefix.match(/(?:^|\s)@([^@\s]*)$/u);
-      mentionList.replaceChildren();mentionList.hidden=true;if(!match)return;
-      mentionStart=prefix.lastIndexOf('@');mentionIndex=0;
-      const query=match[1].toLowerCase();
-      for(const person of this.snapshot!.characters.filter(person=>(person.Nickname||person.Name||'').toLowerCase().includes(query)||String(person.MemberNumber).includes(query))){
-        const name=person.Nickname||person.Name||String(person.MemberNumber);
-        const choice=this.button(`${name} #${person.MemberNumber}`,'ghost','button');choice.setAttribute('role','option');
-        choice.addEventListener('pointerdown',event=>event.preventDefault());
-        choice.addEventListener('click',()=>{const token=`@${name}#${person.MemberNumber} `;if(input.value.length-(input.selectionStart-mentionStart)+token.length>1000)return;input.setRangeText(token,mentionStart,input.selectionStart,'end');this.chatDraft=input.value;length.textContent=`${input.value.length}/1000`;mentionList.hidden=true;input.focus();});mentionList.append(choice);
-      }
-      mentionList.hidden=!mentionList.childElementCount;
-    };
-    input.addEventListener('input',()=>{if(!this.composing)refreshMentions();});
-    input.addEventListener('keydown',event=>{
-      if(mentionList.hidden||event.isComposing)return;
-      const choices=Array.from(mentionList.querySelectorAll<HTMLButtonElement>('button'));
-      if(event.key==='Escape'){mentionList.hidden=true;event.preventDefault();event.stopImmediatePropagation();}
-      else if(['ArrowDown','ArrowUp','Enter'].includes(event.key)){
-        event.preventDefault();event.stopImmediatePropagation();
-        if(event.key==='Enter'){choices[mentionIndex]?.click();return;}
-        mentionIndex=(mentionIndex+(event.key==='ArrowDown'?1:-1)+choices.length)%choices.length;
-        choices.forEach((choice,index)=>choice.setAttribute('aria-selected',String(index===mentionIndex)));choices[mentionIndex]?.scrollIntoView?.({block:'nearest'});
-      }
-    });
-    input.addEventListener('blur',()=>{if(!mentionList.contains(document.activeElement))mentionList.hidden=true;});
+    const mentionList=createMentionPicker(input,()=>this.snapshot!.characters);
     input.addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey && !event.isComposing && event.keyCode !== 229) { event.preventDefault(); bot.requestSubmit(); } });
     const buttons = this.el("div", "chat-room-buttons-div"); buttons.id = "chat-room-buttons-div";
     const inner = this.el("div", "chat-room-buttons"); inner.id = "chat-room-buttons";

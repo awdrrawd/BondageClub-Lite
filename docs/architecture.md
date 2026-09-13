@@ -187,3 +187,7 @@ Outgoing messages are confirmed only by a matching server echo from the sender. 
 BCX 招喚現在只讀自己的 `ExtensionSettings.BCX`（LZString Base64）：`conditions.rules.conditions.alt_forced_summoning`。接收開關不寫入 BCX。支援名單、招喚詞、倒數及房間／房名／指定玩家觸發條件；角色觸發等不支援條件拒絕執行。OnlineSharedSettings 未提供相同完整私有規則，不作權限後備來源。
 
 BCX summons read the player’s private ExtensionSettings.BCX storage, never the local allowlist. Unsupported conditions fail closed. Unconfirmed delivery notices are hidden because missing echoes do not prove delivery failure.
+
+`ui/mention-picker.ts` 統一管理房間輸入框的 TAG 候選、中文輸入法與鍵盤／觸控選取，不增加全域監聽、定時掃描或個人資料網路查詢。設定导覽由 `.settings-sticky` 單一元素負責固定，按鈕與斜標樣式集中維護。
+
+`ui/mention-picker.ts` owns composer-local suggestions and input handling. Settings navigation has one sticky container; no polling or global mention listeners are required.

@@ -101,7 +101,8 @@ function setup(savedAccount, savedPerformance, indexedDBFactory) {
   const contactCard = new Function('t','el',uiSource('src/ui/contact-card.ts')+';return contactCard;')(t,dom.el);
   const UnreadState = new Function(uiSource('src/ui/unread-state.ts')+';return UnreadState;')();
   const PrivateMessages = new Function(...Object.keys(history),uiSource('src/ui/private-messages.ts')+';return PrivateMessages;')(...Object.values(history));
-  instance = vm.runInNewContext(source + "\nnew LiteApp(bcClient);", { UnreadState, Lifetime, buildSettingsView, ...history, ...dom, ...modal, MessageSounds, openHistorySearch, buildHistorySettings, contactCard, PrivateMessages, HistorySession:sessionClass(window), contactName, window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, openActivityDialog, icon, iconSelect, nameColor, sortRooms, canJoinRoom, isMobileLayout, bindPageSwipe, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
+  const createMentionPicker = new Function('document','window',uiSource('src/ui/mention-picker.ts')+';return createMentionPicker;')(window.document,window);
+  instance = vm.runInNewContext(source + "\nnew LiteApp(bcClient);", { createMentionPicker, UnreadState, Lifetime, buildSettingsView, ...history, ...dom, ...modal, MessageSounds, openHistorySearch, buildHistorySettings, contactCard, PrivateMessages, HistorySession:sessionClass(window), contactName, window, document: window.document, localStorage: window.localStorage, bcClient, decodeBiography, appendChatLinks, MediaConsent, afcLovers, StabilityControls, openActivityDialog, icon, iconSelect, nameColor, sortRooms, canJoinRoom, isMobileLayout, bindPageSwipe, loadTextCatalog: async () => ({}), t, getLocale, setLocale });
   return { instance, window, document: window.document, calls, replies, intervals, client:bcClient, state: () => current, emit(change) { if (change.friendsStatus === '查詢完成') change.friendsQueryState = 'ready'; current = { ...current, ...change }; listener(current); } };
 }
 
@@ -1267,5 +1268,19 @@ test('chat font settings persist independent pt sizes and reject out-of-range in
  assert.equal(JSON.parse(f.window.localStorage.getItem('bc-lite-chat-fonts-v1')).private,12);
  input.value='99';input.dispatchEvent(new f.window.Event('change'));assert.equal(input.value,'16.5');
  assert.ok(f.document.querySelector('.settings-sticky > .eyebrow'));assert.ok(f.document.querySelector('.settings-sticky > .settings-jumps'));
+ await f.window.happyDOM.close();
+});
+
+
+test('mention picker handles fullwidth input, names with spaces and IME completion',async()=>{
+ const f=setup();f.emit({phase:'in-room',room:{Name:'Room'},characters:[{MemberNumber:55,Name:'Original Name',Nickname:'Nick Name'}],messages:[]});
+ const input=f.document.getElementById('InputChat'),list=f.document.querySelector('.mention-list');
+ input.value='你好＠Original';input.setSelectionRange(input.value.length,input.value.length);input.dispatchEvent(new f.window.Event('input'));
+ assert.equal(list.hidden,false);assert.equal(list.querySelectorAll('button').length,1);
+ input.dispatchEvent(new f.window.CompositionEvent('compositionstart'));assert.equal(list.hidden,true);
+ input.value='你好@Nick Name';input.setSelectionRange(input.value.length,input.value.length);input.dispatchEvent(new f.window.CompositionEvent('compositionend'));
+ assert.equal(list.hidden,false);list.querySelector('button').click();assert.equal(input.value,'你好@Nick Name#55 ');
+ input.value='@55';input.setSelectionRange(3,3);input.dispatchEvent(new f.window.Event('focus'));assert.equal(list.hidden,false);
+ input.value='mail@example.org';input.setSelectionRange(input.value.length,input.value.length);input.dispatchEvent(new f.window.Event('input'));assert.equal(list.hidden,true);
  await f.window.happyDOM.close();
 });
