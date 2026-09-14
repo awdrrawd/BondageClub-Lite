@@ -59,12 +59,12 @@ test('Japanese and Korean core actions preserve actors, item names and fallback'
    const catalog=gameCatalog(locale);
    const overrides=read(`../src/translations/overrides/${locale}.json`);
    const tokens=text=>[...text.matchAll(/SourceCharacter|DestinationCharacter|TargetCharacter|NextAsset|PrevAsset|FocusAssetGroup/g)].map(m=>m[0]).sort();
-   for(const [key,text]of Object.entries(overrides))assert.deepEqual(tokens(text),tokens(english[key]),`${locale}: ${key}`);
+   for(const [key,text]of Object.entries(overrides).filter(([key])=>key.startsWith('Action')))assert.deepEqual(tokens(text),tokens(english[key]),`${locale}: ${key}`);
    assert.notEqual(catalog.ActionUse,english.ActionUse);
    for(const key of Object.keys(english).filter(key=>key.startsWith('Group.')&&Object.hasOwn(overrides,key)))assert.notEqual(catalog[key],english[key]);
    const result=renderAction('ActionUse','Action',[{Tag:'SourceCharacter',Text:'Alice'},{Tag:'DestinationCharacter',Text:'Bob'},{Tag:'NextAsset',AssetName:'HempRope',GroupName:'ItemArms',CraftName:'Custom 中文 =x'},{FocusGroupName:'ItemArms'}],catalog);
    for(const text of ['Alice','Bob','Custom 中文 =x',catalog['Group.ItemArms']])assert.ok(result.includes(text),`${locale}: ${result}`);
-   assert.equal(catalog.ActionDice,english.ActionDice);
+   assert.notEqual(catalog.ActionDice,english.ActionDice);
  }
 });
 

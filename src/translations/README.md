@@ -59,7 +59,13 @@ UI 文案不同於動作差異檔：所有 `ui/*.json` 的鍵與 `{0}` 等數字
 
 本次新增的德、法、烏、日、韓介面以英文文案產生機器翻譯初稿，已人工修正常用控制項、房間／歷史記錄用詞和重要提示，仍歡迎母語使用者校對。簡體介面從現有繁體文案轉換，維持相同功能說明。網站只載入隨站打包的文字，不會呼叫線上翻譯服務，也不翻譯玩家聊天、姓名、房名或自訂物品名稱。
 
-遊戲字典的覆蓋率與介面不同：德、法、烏、簡體使用本機 BC 上游已有譯文；缺漏回退英文。目前上游沒有日韓資源，`overrides/ja.json`、`overrides/ko.json` 人工補上全部原生部位名稱及常用穿戴、移除、上鎖等動作。其他遊戲和插件句子仍可能顯示英文，不代表整個遊戲已全翻譯。人工補翻請放 overrides，避免被上游擷取覆蓋。
+動作字典已為全部支援語言補齊目前英文基底的 2,175 個動作相關文字鍵：`ChatSelf/ChatOther` 訊息、`Label-*` 按鈕、`Activity*` 名稱、`Action*` 系統動作、代名詞與動作部位名稱。涵蓋 BC、LSCG、XiaoSu 與 ECHO；德、法、俄、烏、簡體保留原有譯文並補缺，日韓沒有上游資源，使用本專案的補譯。補譯放在 `overrides/`，更新上游字典不會覆蓋。
+
+補譯先以公開字串產生機器翻譯初稿，日韓使用現有中文語意輔助；再以人工整理的用語、句型與例外修正。日韓各有 804 個按鈕文字及 527 個常用訊息套用整理過的用語／句型，LSCG 的其他語言共用名稱也另行校正。這是字串覆蓋率，不代表所有句子都經過母語人士審校；低頻插件敘述仍可繼續潤飾。未知動態訊息、玩家文字與尚未收錄的物品名稱仍保留原文，不等於整個遊戲已全翻譯。
+
+`node scripts/translate-action-catalogs.mjs ja ko` 是**手動維護工具**，會將公開的字典文字送至 Google 翻譯服務產生缺漏初稿，保護角色／物品佔位符並記錄未完成項目。它不會由 build、dev 或遊戲客戶端呼叫，也不讀取玩家聊天。接著可執行 `node scripts/refine-action-translations.mjs` 套用 `scripts/*glossary.json`、`scripts/action-language-corrections.json` 與 `scripts/action-sentence-corrections.json` 的人工校正。最後應檢查差異並執行測試；一般翻譯貢獻可直接修改 overrides，無須呼叫翻譯服務。
+
+`tests/action-translations.test.mjs` 檢查全部語言的動作覆蓋、佔位符、日韓殘留英文，以及壓縮字典載入後的按鈕與訊息翻譯。英語及中文原始模板的 TargetCharacter／DestinationCharacter 等合法差異會保留，不改寫玩家名稱。
 
 ## 建置與驗證
 
