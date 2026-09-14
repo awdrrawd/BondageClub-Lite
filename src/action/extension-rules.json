@@ -1,4 +1,10 @@
 {
+  "echo:摇晃耳朵": [
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:摇晃尾巴": [
+    "UnsupportedPluginPrerequisite"
+  ],
   "echo:竖起尾巴": [
     "Luzi_HasCatTail"
   ],
@@ -8,6 +14,12 @@
   "echo:舔尾巴": [
     "Luzi_TargetHasCatTail",
     "UseTongue"
+  ],
+  "echo:轻抚尾巴": [
+    "Luzi_TargetHasTail",
+    "UseArms",
+    "UseHands",
+    "UnsupportedPluginPrerequisite"
   ],
   "echo:衔尾": [
     "Luzi_TargetHasCatTail",
@@ -260,11 +272,98 @@
   "echo:触手缠绕手腕": [
     "Luzi_HasTentacles"
   ],
+  "echo:用嘴脱掉手套": [
+    "UseMouth",
+    "UnsupportedPluginPrerequisite",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:用嘴脱掉鞋子": [
+    "UseMouth",
+    "UnsupportedPluginPrerequisite",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:用嘴脱掉袜子": [
+    "UseMouth",
+    "UnsupportedPluginPrerequisite",
+    "UnsupportedPluginPrerequisite",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:挤出来球": [
+    "TargetZoneAccessible",
+    "UnsupportedPluginPrerequisite",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:看看裙底": [
+    "Luzi_CanWalk",
+    "Luzi_NotBlind",
+    "Luzi_TargetPelvisExposed",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:看看裙底真空": [
+    "Luzi_CanWalk",
+    "Luzi_NotBlind",
+    "Luzi_TargetPelvisExposed",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:剪刀剪掉上衣": [
+    "UseHands",
+    "UseArms",
+    "UnsupportedPluginPrerequisite",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:躺上去": [
+    "UnsupportedPluginPrerequisite",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:拉上床": [
+    "UseHands",
+    "UnsupportedPluginPrerequisite",
+    "UnsupportedPluginPrerequisite",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:手推车": [
+    "UseHands",
+    "Luzi_TargetLeashedOrCanBeLeashed",
+    "UnsupportedPluginPrerequisite",
+    "UnsupportedPluginPrerequisite",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:扛起": [
+    "UnsupportedPluginPrerequisite",
+    "UnsupportedPluginPrerequisite",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:拉到身边": [
+    "UseHands",
+    "Luzi_TargetLeashedOrCanBeLeashed",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:驾驶马车": [
+    "UseFeet",
+    "UnsupportedPluginPrerequisite",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:钻进怀里": [
+    "UnsupportedPluginPrerequisite",
+    "Luzi_CanWalk",
+    "UnsupportedPluginPrerequisite",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:抱入怀中": [
+    "UnsupportedPluginPrerequisite",
+    "Luzi_CanWalk",
+    "UnsupportedPluginPrerequisite",
+    "UnsupportedPluginPrerequisite"
+  ],
   "echo:躲到身后": [
     "Luzi_CharacterViewWithinReach"
   ],
   "echo:移动到身后": [
     "Luzi_CharacterViewWithinReach"
+  ],
+  "echo:骑上去": [
+    "UnsupportedPluginPrerequisite",
+    "UnsupportedPluginPrerequisite"
   ],
   "echo:剑架在脖子上": [
     "UseHands",
@@ -275,6 +374,44 @@
     "UseHands",
     "UseArms",
     "Luzi_HasSword"
+  ],
+  "echo:阿巴阿巴": [
+    "UseArms",
+    "UseHands",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:阿巴阿巴_瞄准": [
+    "UseArms",
+    "UseHands",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:跪下": [
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:站起来": [
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:跪着张开腿": [
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:跪着并拢腿": [
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:四肢着地": [
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:起身跪下": [
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:掰开双腿": [
+    "UseHands",
+    "UseArms",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:合并双腿": [
+    "UseHands",
+    "UseArms",
+    "UnsupportedPluginPrerequisite"
   ],
   "echo:挥手致意": [
     "UseHands",
@@ -368,6 +505,11 @@
     "UseHands",
     "UseArms"
   ],
+  "echo:贞操带互动": [
+    "UseArms",
+    "UseHands",
+    "UnsupportedPluginPrerequisite"
+  ],
   "echo:阴部轻蹭手": [
     "HasVagina",
     "Luzi_PrivateExposed"
@@ -383,6 +525,33 @@
     "Luzi_ActedZoneNaked"
   ],
   "echo:托起乳房": [],
+  "echo:夹紧双腿": [
+    "Luzi_TargetHasItemVulva",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:手指插进阴道": [
+    "UseHands",
+    "ZoneNaked",
+    "Luzi_ActedZoneNaked",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:拔出自己的手指": [
+    "UseHands",
+    "ZoneNaked",
+    "Luzi_ActedZoneNaked",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:蠕动手指": [
+    "UseHands",
+    "ZoneNaked",
+    "Luzi_ActedZoneNaked",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:快速抽插": [
+    "UseHands",
+    "ZoneNaked",
+    "UnsupportedPluginPrerequisite"
+  ],
   "echo:流出液体": [
     "Luzi_TargetHasItemVulva"
   ],
@@ -393,6 +562,52 @@
     "Luzi_CanWalk",
     "Luzi_HasPenis",
     "Luzi_PrivateExposed"
+  ],
+  "echo:玩偶蹭脸": [
+    "UseHands",
+    "UseArms",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:玩偶拍头": [
+    "UseHands",
+    "UseArms",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:玩偶戳戳": [
+    "UseHands",
+    "UseArms",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:玩偶蹭蹭": [
+    "UseHands",
+    "UseArms",
+    "UnsupportedPluginPrerequisite",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:钩住阴蒂环": [
+    "UseHands",
+    "Luzi_TargetHasItemVulvaPiercings",
+    "Luzi_TargetPelvisExposed",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:用手观察阴蒂环": [
+    "Luzi_NotBlind",
+    "UseHands",
+    "Luzi_TargetHasItemVulvaPiercings",
+    "Luzi_TargetPelvisExposed",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:拨弄阴蒂环": [
+    "UseHands",
+    "Luzi_TargetHasItemVulvaPiercings",
+    "Luzi_TargetPelvisExposed",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:拉扯阴蒂环": [
+    "UseHands",
+    "Luzi_TargetHasItemVulvaPiercings",
+    "Luzi_TargetPelvisExposed",
+    "UnsupportedPluginPrerequisite"
   ],
   "echo:捂住头": [
     "UseHands",
@@ -434,6 +649,16 @@
   "echo:脚按摩": [
     "UseFeet",
     "Luzi_TargetKneelOrAllFours"
+  ],
+  "echo:脚高处戳": [
+    "UseFeet",
+    "Luzi_IsStanding",
+    "UnsupportedPluginPrerequisite"
+  ],
+  "echo:脚戳中间": [
+    "UseFeet",
+    "Luzi_IsStanding",
+    "UnsupportedPluginPrerequisite"
   ],
   "echo:脚戳低处": [
     "UseFeet",
@@ -529,7 +754,424 @@
   "echo:口塞亲吻嘴唇": [
     "IsGagged"
   ],
+  "echo:叼牵绳": [
+    "UseMouth",
+    "UnsupportedPluginPrerequisite"
+  ],
   "echo:挣脱牵绳": [
     "Luzi_LeashedBy"
+  ],
+  "lscg:LSCG_Bap": [
+    "UseArms"
+  ],
+  "lscg:LSCG_Headbutt": [
+    "CanHeadbutt"
+  ],
+  "lscg:LSCG_Nuzzle": [
+    "ZoneAccessible"
+  ],
+  "lscg:LSCG_Hug": [
+    "UseArms"
+  ],
+  "lscg:LSCG_Tackle": [
+    "UseArms"
+  ],
+  "lscg:LSCG_Flop": [
+    "UseLegs"
+  ],
+  "lscg:LSCG_KissEyes": [
+    "ZoneAccessible"
+  ],
+  "lscg:LSCG_RubPussy": [
+    "ZoneAccessible",
+    "ZoneNaked",
+    "HasVagina"
+  ],
+  "lscg:LSCG_SlapPenis": [
+    "ZoneAccessible",
+    "ZoneNaked",
+    "CanUsePenis",
+    "HasPenis",
+    "Needs-PenetrateItem"
+  ],
+  "lscg:LSCG_FuckWithPussy": [
+    "ZoneAccessible",
+    "ZoneNaked",
+    "HasVagina",
+    "CanGrindWithPussy"
+  ],
+  "lscg:LSCG_FuckWithAss": [
+    "ZoneAccessible",
+    "ZoneNaked",
+    "TargetHasPenis",
+    "SourceAssEmpty"
+  ],
+  "lscg:LSCG_Eat": [
+    "ZoneAccessible",
+    "UseMouth",
+    "TargetNeeds-EdibleItem"
+  ],
+  "lscg:LSCG_Chew": [
+    "ZoneAccessible",
+    "TargetNeeds-ChewableItem"
+  ],
+  "lscg:LSCG_GrabTongue": [
+    "ZoneAccessible",
+    "UseHands",
+    "TargetCanUseTongue",
+    "TargetTongueIsNotGrabbed"
+  ],
+  "lscg:LSCG_ReleaseTongue": [
+    "ZoneAccessible",
+    "UseHands",
+    "TargetTongueIsGrabbed"
+  ],
+  "lscg:LSCG_HoldHand": [
+    "ZoneAccessible",
+    "TargetZoneAccessible",
+    "UseHands",
+    "TargetIsHandUnleashed"
+  ],
+  "lscg:LSCG_ReleaseHand": [
+    "ZoneAccessible",
+    "UseHands",
+    "TargetIsHandLeashed"
+  ],
+  "lscg:LSCG_ReleaseEar": [
+    "ZoneAccessible",
+    "UseHands",
+    "TargetIsEarPinched"
+  ],
+  "lscg:LSCG_Grab": [
+    "UseHands",
+    "TargetHornAvailable",
+    "TargetTailAvailable"
+  ],
+  "lscg:LSCG_Release": [
+    "TargetIsGrabbed"
+  ],
+  "lscg:LSCG_ReleaseNeck": [
+    "ZoneAccessible",
+    "UseHands",
+    "TargetIsNeckChoked"
+  ],
+  "lscg:LSCG_ReleaseCollar": [
+    "ZoneAccessible",
+    "UseHands",
+    "TargetIsCollarGrabbed"
+  ],
+  "lscg:LSCG_ReleaseMouth": [
+    "ZoneAccessible",
+    "UseHands",
+    "TargetIsHandGagged"
+  ],
+  "lscg:LSCG_GrabTongueWithFoot": [
+    "ZoneAccessible",
+    "UseFeet",
+    "TargetCanUseTongue",
+    "TargetCanToeTongueGrab"
+  ],
+  "lscg:LSCG_ReleaseFootGrabbedTongue": [
+    "ZoneAccessible",
+    "UseFeet",
+    "TargetTongueIsToeGrabbed"
+  ],
+  "lscg:LSCG_Tug": [
+    "UseHands",
+    "ZoneAccessible",
+    "ZoneNaked",
+    "HasCrotchRope"
+  ],
+  "lscg:LSCG_Flick": [
+    "UseHands",
+    "ZoneAccessible",
+    "CanCustomFlick"
+  ],
+  "lscg:LSCG_Chomp": [
+    "ZoneAccessible",
+    "UseMouth",
+    "CanChomp"
+  ],
+  "lscg:LSCG_ReleaseChomp": [
+    "IsChomping"
+  ],
+  "lscg:LSCG_SwallowLoad": [
+    "ZoneAccessible",
+    "TargetCanUseTongue",
+    "SourceCanSwallowSplatter"
+  ],
+  "lscg:LSCG_HighFive": [
+    "UseHands",
+    "CanHighFive"
+  ],
+  "xiaosu:XSAct_眯眼": [
+    "CanLook"
+  ],
+  "echo:XSAct_眯眼": [
+    "CanLook"
+  ],
+  "xiaosu:XSAct_眼神飘忽": [
+    "CanLook"
+  ],
+  "echo:XSAct_眼神飘忽": [
+    "CanLook"
+  ],
+  "xiaosu:XSAct_甩头发": [
+    "ItemHoodCovered"
+  ],
+  "echo:XSAct_甩头发": [
+    "ItemHoodCovered"
+  ],
+  "xiaosu:XSAct_大力甩头发": [
+    "ItemHoodCovered"
+  ],
+  "echo:XSAct_大力甩头发": [
+    "ItemHoodCovered"
+  ],
+  "xiaosu:XSAct_轻抚发梢": [
+    "ItemHoodCovered",
+    "TargetItemHoodCovered",
+    "UseArms"
+  ],
+  "echo:XSAct_轻抚发梢": [
+    "ItemHoodCovered",
+    "TargetItemHoodCovered",
+    "UseArms"
+  ],
+  "xiaosu:XSAct_叼起头发": [
+    "UseMouth",
+    "ItemHoodCovered",
+    "TargetItemHoodCovered"
+  ],
+  "echo:XSAct_叼起头发": [
+    "UseMouth",
+    "ItemHoodCovered",
+    "TargetItemHoodCovered"
+  ],
+  "xiaosu:XSAct_嗅头发": [
+    "ItemHoodCovered",
+    "TargetItemHoodCovered",
+    "ItemNoseCovered"
+  ],
+  "echo:XSAct_嗅头发": [
+    "ItemHoodCovered",
+    "TargetItemHoodCovered",
+    "ItemNoseCovered"
+  ],
+  "xiaosu:XSAct_绕头发": [
+    "UseArms",
+    "ItemHoodCovered",
+    "TargetItemHoodCovered"
+  ],
+  "echo:XSAct_绕头发": [
+    "UseArms",
+    "ItemHoodCovered",
+    "TargetItemHoodCovered"
+  ],
+  "xiaosu:XSAct_皱鼻子": [
+    "ItemHoodCovered",
+    "ItemNoseCovered"
+  ],
+  "echo:XSAct_皱鼻子": [
+    "ItemHoodCovered",
+    "ItemNoseCovered"
+  ],
+  "xiaosu:XSAct_打喷嚏": [
+    "UseMouth",
+    "ItemHoodCovered"
+  ],
+  "echo:XSAct_打喷嚏": [
+    "UseMouth",
+    "ItemHoodCovered"
+  ],
+  "xiaosu:XSAct_深呼吸": [
+    "UseMouth",
+    "ItemHoodCovered",
+    "ItemNoseCovered"
+  ],
+  "echo:XSAct_深呼吸": [
+    "UseMouth",
+    "ItemHoodCovered",
+    "ItemNoseCovered"
+  ],
+  "xiaosu:XSAct_低头": [
+    "ItemHoodCovered",
+    "MoveHead"
+  ],
+  "echo:XSAct_低头": [
+    "ItemHoodCovered",
+    "MoveHead"
+  ],
+  "xiaosu:XSAct_恳求的摇头": [
+    "MoveHead"
+  ],
+  "echo:XSAct_恳求的摇头": [
+    "MoveHead"
+  ],
+  "xiaosu:XSAct_恳求的看": [
+    "CanLook"
+  ],
+  "echo:XSAct_恳求的看": [
+    "CanLook"
+  ],
+  "xiaosu:XSAct_内八夹腿": [],
+  "echo:XSAct_内八夹腿": [],
+  "xiaosu:XSAct_噘嘴": [
+    "UseMouth"
+  ],
+  "echo:XSAct_噘嘴": [
+    "UseMouth"
+  ],
+  "xiaosu:XSAct_抿住嘴巴": [
+    "UseMouth"
+  ],
+  "echo:XSAct_抿住嘴巴": [
+    "UseMouth"
+  ],
+  "xiaosu:XSAct_瘪嘴": [
+    "UseMouth"
+  ],
+  "echo:XSAct_瘪嘴": [
+    "UseMouth"
+  ],
+  "xiaosu:XSAct_坐直身体": [],
+  "echo:XSAct_坐直身体": [],
+  "xiaosu:XSAct_挺胸收腹": [],
+  "echo:XSAct_挺胸收腹": [],
+  "xiaosu:XSAct_站直身体": [
+    "NotKneeling"
+  ],
+  "echo:XSAct_站直身体": [
+    "NotKneeling"
+  ],
+  "xiaosu:XSAct_身体一颤": [],
+  "echo:XSAct_身体一颤": [],
+  "xiaosu:XSAct_活动大腿": [],
+  "echo:XSAct_活动大腿": [],
+  "xiaosu:XSAct_活动手臂": [
+    "CantUseArms"
+  ],
+  "echo:XSAct_活动手臂": [
+    "CantUseArms"
+  ],
+  "xiaosu:XSAct_绷紧膝盖": [
+    "NotKneeling"
+  ],
+  "echo:XSAct_绷紧膝盖": [
+    "NotKneeling"
+  ],
+  "xiaosu:XSAct_绷直脚踝": [],
+  "echo:XSAct_绷直脚踝": [],
+  "xiaosu:XSAct_蜷缩脚趾": [],
+  "echo:XSAct_蜷缩脚趾": [],
+  "xiaosu:XSAct_踮脚": [
+    "CantUseFeet"
+  ],
+  "echo:XSAct_踮脚": [
+    "CantUseFeet"
+  ],
+  "xiaosu:XSAct_兴奋的伸出舌头": [
+    "UseMouth"
+  ],
+  "echo:XSAct_兴奋的伸出舌头": [
+    "UseMouth"
+  ],
+  "xiaosu:XSAct_兴奋的扭动": [],
+  "echo:XSAct_兴奋的扭动": [],
+  "xiaosu:XSAct_呼吸平复": [],
+  "echo:XSAct_呼吸平复": [],
+  "xiaosu:XSAct_呼吸紊乱": [],
+  "echo:XSAct_呼吸紊乱": [],
+  "xiaosu:XSAct_嘟囔着想说什么": [
+    "UseMouth"
+  ],
+  "echo:XSAct_嘟囔着想说什么": [
+    "UseMouth"
+  ],
+  "xiaosu:XSAct_失神的伸出舌头": [
+    "UseMouth"
+  ],
+  "echo:XSAct_失神的伸出舌头": [
+    "UseMouth"
+  ],
+  "xiaosu:XSAct_慢慢伸出舌头": [
+    "UseMouth"
+  ],
+  "echo:XSAct_慢慢伸出舌头": [
+    "UseMouth"
+  ],
+  "xiaosu:XSAct_微微摇头": [
+    "MoveHead"
+  ],
+  "echo:XSAct_微微摇头": [
+    "MoveHead"
+  ],
+  "xiaosu:XSAct_微微点头": [
+    "MoveHead"
+  ],
+  "echo:XSAct_微微点头": [
+    "MoveHead"
+  ],
+  "xiaosu:XSAct_身体颤抖的摇头": [
+    "MoveHead"
+  ],
+  "echo:XSAct_身体颤抖的摇头": [
+    "MoveHead"
+  ],
+  "xiaosu:XSAct_身体颤抖的点头": [
+    "MoveHead"
+  ],
+  "echo:XSAct_身体颤抖的点头": [
+    "MoveHead"
+  ],
+  "xiaosu:XSAct_歪头疑惑": [
+    "MoveHead"
+  ],
+  "echo:XSAct_歪头疑惑": [
+    "MoveHead"
+  ],
+  "xiaosu:XSAct_扭动身体": [],
+  "echo:XSAct_扭动身体": [],
+  "xiaosu:XSAct_活动四肢": [
+    "CantUseArms",
+    "CantUseFeet"
+  ],
+  "echo:XSAct_活动四肢": [
+    "CantUseArms",
+    "CantUseFeet"
+  ],
+  "xiaosu:XSAct_看他": [
+    "CanLook"
+  ],
+  "echo:XSAct_看他": [
+    "CanLook"
+  ],
+  "xiaosu:XSAct_缩脖子": [],
+  "echo:XSAct_缩脖子": [],
+  "xiaosu:XSAct_脸红喘气": [],
+  "echo:XSAct_脸红喘气": [],
+  "xiaosu:XSAct_轻声喘气": [],
+  "echo:XSAct_轻声喘气": [],
+  "xiaosu:XSAct_跺脚": [
+    "NotKneeling"
+  ],
+  "echo:XSAct_跺脚": [
+    "NotKneeling"
+  ],
+  "xiaosu:XSAct_头蹭": [],
+  "echo:XSAct_头蹭": [],
+  "xiaosu:XSAct_脸蹭": [],
+  "echo:XSAct_脸蹭": [],
+  "xiaosu:XSAct_鼻子蹭": [
+    "MoveHead"
+  ],
+  "echo:XSAct_鼻子蹭": [
+    "MoveHead"
+  ],
+  "xiaosu:XSAct_埋怀里": [
+    "MoveHead"
+  ],
+  "echo:XSAct_埋怀里": [
+    "MoveHead"
   ]
 }

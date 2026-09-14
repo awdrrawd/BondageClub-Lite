@@ -89,3 +89,30 @@ Data may be delayed/sampled and is not billing, remaining shared quota or game h
 專案顯示名稱由 Worker 的 `monitor(request, env, '名稱')` 第三個參數指定；頁尾 Lite／Relay 連結可替換為自己的站點。兩個倉庫不互相依賴，後續移植者也不依賴原站 API。保留原始 LICENSE 要求。若不是 Cloudflare Pages advanced mode，須自行調整路由與靜態檔案綁定。
 
 私人帳單、帳號全域數據、原始日誌或管理操作不屬於此公開頁的範圍；如需加入，應另外設置經驗證的管理入口。
+
+## 指標與平均值
+
+- 週平均：前 7 個完整 UTC 日的請求總量 ÷ 7。
+- 月平均：前 30 個完整 UTC 日的請求總量 ÷ 30，並非當月預測或活躍日平均。
+- 分母包含沒有流量的日期與部署前日期；整段 API 都沒有資料時顯示未知。
+- Pages 單次查詢區間最多一週，歷史以 7+7+7+7+2 日切成五個不重疊區間，放在獨立 GraphQL 請求。歷史查詢失敗不影響 24 小時統計。
+- 每次後端快取更新最多送出兩個 GraphQL HTTP 請求（主統計與歷史）；兩者並行、各有逾時限制，成功或失敗皆沿用五分鐘快取。
+- 執行錯誤率為最近 24 小時 errors / requests；零請求或缺值時未知。
+- 尖峰時段取最近 24 小時回傳小時資料的最大請求值，首尾小時可能未完整。
+- CPU P50/P99 是單次執行的微秒百分位數，不是總 CPU 或網路延遲。
+- 公開頁保留查詢失敗分類與執行錯誤總數；詳細 exception/stack 請在 Cloudflare 管理台查看，不會公開憑證或原始日誌。
+
+Weekly/monthly cards show requests per day over the previous 7/30 complete UTC days, including inactive and pre-deployment dates. History is split into windows of at most seven days and fetched independently; unavailable history never blocks the 24-hour metrics. Invocation errors are distinct from HTTP errors and game connectivity. Raw logs remain in Cloudflare.
+
+## 分頁與 UI 參考
+
+- 總覽：今日、24 小時請求、執行錯誤與錯誤率，以及請求趨勢。
+- 週月統計：7／30 日平均、期間總量與計算範圍。
+- 錯誤：執行錯誤、錯誤率、小時錯誤趨勢與排錯說明。
+- 效能：CPU P50/P99 與判讀方式；不以 CPU 推估連線延遲。
+- 點擊分頁不重新呼叫 API，支援方向鍵與 Home/End 切換；方法與限制預設收合。
+
+參考資訊層次與卡片編排，未複製程式碼或新增套件：
+[Umami](https://github.com/umami-software/umami)（查閱時約 38.8k stars）、
+[Plausible](https://github.com/plausible/analytics)（約 29.1k）、
+[Tremor](https://github.com/tremorlabs/tremor)（約 3.6k）。星數查閱日期：2026-09-14。

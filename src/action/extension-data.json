@@ -4,56 +4,99 @@
     "source": "echo",
     "self": false,
     "group": "ItemTorso",
-    "name": "躺上去"
+    "name": "躺上去",
+    "prerequisites": [
+      "UnsupportedPluginPrerequisite",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemTorso-拉上床",
     "source": "echo",
     "self": false,
     "group": "ItemTorso",
-    "name": "拉上床"
+    "name": "拉上床",
+    "prerequisites": [
+      "UseHands",
+      "UnsupportedPluginPrerequisite",
+      "UnsupportedPluginPrerequisite",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemArms-拉上床",
     "source": "echo",
     "self": false,
     "group": "ItemArms",
-    "name": "拉上床"
+    "name": "拉上床",
+    "prerequisites": [
+      "UseHands",
+      "UnsupportedPluginPrerequisite",
+      "UnsupportedPluginPrerequisite",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemTorso-手推车",
     "source": "echo",
     "self": false,
     "group": "ItemTorso",
-    "name": "手推车"
+    "name": "手推车",
+    "prerequisites": [
+      "UseHands",
+      "Luzi_TargetLeashedOrCanBeLeashed",
+      "UnsupportedPluginPrerequisite",
+      "UnsupportedPluginPrerequisite",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemTorso-扛起",
     "source": "echo",
     "self": false,
     "group": "ItemTorso",
-    "name": "扛起"
+    "name": "扛起",
+    "prerequisites": [
+      "UnsupportedPluginPrerequisite",
+      "UnsupportedPluginPrerequisite",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemTorso-拉到身边",
     "source": "echo",
     "self": false,
     "group": "ItemTorso",
-    "name": "拉到身边"
+    "name": "拉到身边",
+    "prerequisites": [
+      "UseHands",
+      "Luzi_TargetLeashedOrCanBeLeashed",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemNeckRestraints-拉到身边",
     "source": "echo",
     "self": false,
     "group": "ItemNeckRestraints",
-    "name": "拉到身边"
+    "name": "拉到身边",
+    "prerequisites": [
+      "UseHands",
+      "Luzi_TargetLeashedOrCanBeLeashed",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemNeck-拉到身边",
     "source": "echo",
     "self": false,
     "group": "ItemNeck",
-    "name": "拉到身边"
+    "name": "拉到身边",
+    "prerequisites": [
+      "UseHands",
+      "Luzi_TargetLeashedOrCanBeLeashed",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemTorso-躲到身后",
@@ -80,63 +123,112 @@
     "source": "echo",
     "self": false,
     "group": "ItemTorso",
-    "name": "钻进怀里"
+    "name": "钻进怀里",
+    "prerequisites": [
+      "UnsupportedPluginPrerequisite",
+      "Luzi_CanWalk",
+      "UnsupportedPluginPrerequisite",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemTorso2-钻进怀里",
     "source": "echo",
     "self": false,
     "group": "ItemTorso2",
-    "name": "钻进怀里"
+    "name": "钻进怀里",
+    "prerequisites": [
+      "UnsupportedPluginPrerequisite",
+      "Luzi_CanWalk",
+      "UnsupportedPluginPrerequisite",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemArms-钻进怀里",
     "source": "echo",
     "self": false,
     "group": "ItemArms",
-    "name": "钻进怀里"
+    "name": "钻进怀里",
+    "prerequisites": [
+      "UnsupportedPluginPrerequisite",
+      "Luzi_CanWalk",
+      "UnsupportedPluginPrerequisite",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemTorso-抱入怀中",
     "source": "echo",
     "self": false,
     "group": "ItemTorso",
-    "name": "抱入怀中"
+    "name": "抱入怀中",
+    "prerequisites": [
+      "UnsupportedPluginPrerequisite",
+      "Luzi_CanWalk",
+      "UnsupportedPluginPrerequisite",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemTorso2-抱入怀中",
     "source": "echo",
     "self": false,
     "group": "ItemTorso2",
-    "name": "抱入怀中"
+    "name": "抱入怀中",
+    "prerequisites": [
+      "UnsupportedPluginPrerequisite",
+      "Luzi_CanWalk",
+      "UnsupportedPluginPrerequisite",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemArms-抱入怀中",
     "source": "echo",
     "self": false,
     "group": "ItemArms",
-    "name": "抱入怀中"
+    "name": "抱入怀中",
+    "prerequisites": [
+      "UnsupportedPluginPrerequisite",
+      "Luzi_CanWalk",
+      "UnsupportedPluginPrerequisite",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemTorso-驾驶马车",
     "source": "echo",
     "self": false,
     "group": "ItemTorso",
-    "name": "驾驶马车"
+    "name": "驾驶马车",
+    "prerequisites": [
+      "UseFeet",
+      "UnsupportedPluginPrerequisite",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemTorso-骑上去",
     "source": "echo",
     "self": false,
     "group": "ItemTorso",
-    "name": "骑上去"
+    "name": "骑上去",
+    "prerequisites": [
+      "UnsupportedPluginPrerequisite",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemTorso2-骑上去",
     "source": "echo",
     "self": false,
     "group": "ItemTorso2",
-    "name": "骑上去"
+    "name": "骑上去",
+    "prerequisites": [
+      "UnsupportedPluginPrerequisite",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemBoots-宠物服爬到脚边",
@@ -238,7 +330,13 @@
     "source": "echo",
     "self": false,
     "group": "ItemButt",
-    "name": "轻抚尾巴"
+    "name": "轻抚尾巴",
+    "prerequisites": [
+      "Luzi_TargetHasTail",
+      "UseArms",
+      "UseHands",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemButt-衔尾",
@@ -919,56 +1017,84 @@
     "source": "echo",
     "self": false,
     "group": "ItemLegs",
-    "name": "掰开双腿"
+    "name": "掰开双腿",
+    "prerequisites": [
+      "UseHands",
+      "UseArms",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemLegs-合并双腿",
     "source": "echo",
     "self": false,
     "group": "ItemLegs",
-    "name": "合并双腿"
+    "name": "合并双腿",
+    "prerequisites": [
+      "UseHands",
+      "UseArms",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatSelf-ItemLegs-跪下",
     "source": "echo",
     "self": true,
     "group": "ItemLegs",
-    "name": "跪下"
+    "name": "跪下",
+    "prerequisites": [
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatSelf-ItemLegs-站起来",
     "source": "echo",
     "self": true,
     "group": "ItemLegs",
-    "name": "站起来"
+    "name": "站起来",
+    "prerequisites": [
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatSelf-ItemLegs-跪着张开腿",
     "source": "echo",
     "self": true,
     "group": "ItemLegs",
-    "name": "跪着张开腿"
+    "name": "跪着张开腿",
+    "prerequisites": [
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatSelf-ItemLegs-跪着并拢腿",
     "source": "echo",
     "self": true,
     "group": "ItemLegs",
-    "name": "跪着并拢腿"
+    "name": "跪着并拢腿",
+    "prerequisites": [
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatSelf-ItemBoots-四肢着地",
     "source": "echo",
     "self": true,
     "group": "ItemBoots",
-    "name": "四肢着地"
+    "name": "四肢着地",
+    "prerequisites": [
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatSelf-ItemBoots-起身跪下",
     "source": "echo",
     "self": true,
     "group": "ItemBoots",
-    "name": "起身跪下"
+    "name": "起身跪下",
+    "prerequisites": [
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth-张开嘴",
@@ -1125,7 +1251,11 @@
     "source": "echo",
     "self": true,
     "group": "ItemMouth",
-    "name": "叼牵绳"
+    "name": "叼牵绳",
+    "prerequisites": [
+      "UseMouth",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-挣脱牵绳",
@@ -1238,35 +1368,62 @@
     "source": "echo",
     "self": true,
     "group": "ItemLegs",
-    "name": "夹紧双腿"
+    "name": "夹紧双腿",
+    "prerequisites": [
+      "Luzi_TargetHasItemVulva",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemVulva-手指插进阴道",
     "source": "echo",
     "self": false,
     "group": "ItemVulva",
-    "name": "手指插进阴道"
+    "name": "手指插进阴道",
+    "prerequisites": [
+      "UseHands",
+      "ZoneNaked",
+      "Luzi_ActedZoneNaked",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemVulva-拔出自己的手指",
     "source": "echo",
     "self": false,
     "group": "ItemVulva",
-    "name": "拔出自己的手指"
+    "name": "拔出自己的手指",
+    "prerequisites": [
+      "UseHands",
+      "ZoneNaked",
+      "Luzi_ActedZoneNaked",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemVulva-蠕动手指",
     "source": "echo",
     "self": false,
     "group": "ItemVulva",
-    "name": "蠕动手指"
+    "name": "蠕动手指",
+    "prerequisites": [
+      "UseHands",
+      "ZoneNaked",
+      "Luzi_ActedZoneNaked",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemVulva-快速抽插",
     "source": "echo",
     "self": false,
     "group": "ItemVulva",
-    "name": "快速抽插"
+    "name": "快速抽插",
+    "prerequisites": [
+      "UseHands",
+      "ZoneNaked",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatSelf-ItemVulva-流出液体",
@@ -1522,21 +1679,37 @@
     "source": "echo",
     "self": false,
     "group": "ItemHead",
-    "name": "玩偶拍头"
+    "name": "玩偶拍头",
+    "prerequisites": [
+      "UseHands",
+      "UseArms",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-玩偶戳戳",
     "source": "echo",
     "self": false,
     "group": "ItemHands",
-    "name": "玩偶戳戳"
+    "name": "玩偶戳戳",
+    "prerequisites": [
+      "UseHands",
+      "UseArms",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-玩偶蹭蹭",
     "source": "echo",
     "self": false,
     "group": "ItemHands",
-    "name": "玩偶蹭蹭"
+    "name": "玩偶蹭蹭",
+    "prerequisites": [
+      "UseHands",
+      "UseArms",
+      "UnsupportedPluginPrerequisite",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemHead-撇眼",
@@ -1607,28 +1780,53 @@
     "source": "echo",
     "self": false,
     "group": "ItemVulvaPiercings",
-    "name": "钩住阴蒂环"
+    "name": "钩住阴蒂环",
+    "prerequisites": [
+      "UseHands",
+      "Luzi_TargetHasItemVulvaPiercings",
+      "Luzi_TargetPelvisExposed",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemVulvaPiercings-用手观察阴蒂环",
     "source": "echo",
     "self": false,
     "group": "ItemVulvaPiercings",
-    "name": "用手观察阴蒂环"
+    "name": "用手观察阴蒂环",
+    "prerequisites": [
+      "Luzi_NotBlind",
+      "UseHands",
+      "Luzi_TargetHasItemVulvaPiercings",
+      "Luzi_TargetPelvisExposed",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemVulvaPiercings-拨弄阴蒂环",
     "source": "echo",
     "self": false,
     "group": "ItemVulvaPiercings",
-    "name": "拨弄阴蒂环"
+    "name": "拨弄阴蒂环",
+    "prerequisites": [
+      "UseHands",
+      "Luzi_TargetHasItemVulvaPiercings",
+      "Luzi_TargetPelvisExposed",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemVulvaPiercings-拉扯阴蒂环",
     "source": "echo",
     "self": false,
     "group": "ItemVulvaPiercings",
-    "name": "拉扯阴蒂环"
+    "name": "拉扯阴蒂环",
+    "prerequisites": [
+      "UseHands",
+      "Luzi_TargetHasItemVulvaPiercings",
+      "Luzi_TargetPelvisExposed",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatSelf-ItemBoots-踮起脚尖",
@@ -1815,14 +2013,24 @@
     "source": "echo",
     "self": false,
     "group": "ItemVulva",
-    "name": "贞操带互动"
+    "name": "贞操带互动",
+    "prerequisites": [
+      "UseArms",
+      "UseHands",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemVulvaPiercings-贞操带互动",
     "source": "echo",
     "self": false,
     "group": "ItemVulvaPiercings",
-    "name": "贞操带互动"
+    "name": "贞操带互动",
+    "prerequisites": [
+      "UseArms",
+      "UseHands",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-嗅手",
@@ -1885,1483 +2093,2273 @@
     "source": "echo",
     "self": false,
     "group": "ItemHands",
-    "name": "用嘴脱掉手套"
+    "name": "用嘴脱掉手套",
+    "prerequisites": [
+      "UseMouth",
+      "UnsupportedPluginPrerequisite",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemBoots-用嘴脱掉鞋子",
     "source": "echo",
     "self": false,
     "group": "ItemBoots",
-    "name": "用嘴脱掉鞋子"
+    "name": "用嘴脱掉鞋子",
+    "prerequisites": [
+      "UseMouth",
+      "UnsupportedPluginPrerequisite",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemBoots-用嘴脱掉袜子",
     "source": "echo",
     "self": false,
     "group": "ItemBoots",
-    "name": "用嘴脱掉袜子"
+    "name": "用嘴脱掉袜子",
+    "prerequisites": [
+      "UseMouth",
+      "UnsupportedPluginPrerequisite",
+      "UnsupportedPluginPrerequisite",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemVulva-看看裙底",
     "source": "echo",
     "self": false,
     "group": "ItemVulva",
-    "name": "看看裙底"
+    "name": "看看裙底",
+    "prerequisites": [
+      "Luzi_CanWalk",
+      "Luzi_NotBlind",
+      "Luzi_TargetPelvisExposed",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemVulvaPiercings-看看裙底",
     "source": "echo",
     "self": false,
     "group": "ItemVulvaPiercings",
-    "name": "看看裙底"
+    "name": "看看裙底",
+    "prerequisites": [
+      "Luzi_CanWalk",
+      "Luzi_NotBlind",
+      "Luzi_TargetPelvisExposed",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemButt-看看裙底",
     "source": "echo",
     "self": false,
     "group": "ItemButt",
-    "name": "看看裙底"
+    "name": "看看裙底",
+    "prerequisites": [
+      "Luzi_CanWalk",
+      "Luzi_NotBlind",
+      "Luzi_TargetPelvisExposed",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemVulva-看看裙底真空",
     "source": "echo",
     "self": false,
     "group": "ItemVulva",
-    "name": "看看裙底真空"
+    "name": "看看裙底真空",
+    "prerequisites": [
+      "Luzi_CanWalk",
+      "Luzi_NotBlind",
+      "Luzi_TargetPelvisExposed",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemVulvaPiercings-看看裙底真空",
     "source": "echo",
     "self": false,
     "group": "ItemVulvaPiercings",
-    "name": "看看裙底真空"
+    "name": "看看裙底真空",
+    "prerequisites": [
+      "Luzi_CanWalk",
+      "Luzi_NotBlind",
+      "Luzi_TargetPelvisExposed",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatOther-ItemButt-看看裙底真空",
     "source": "echo",
     "self": false,
     "group": "ItemButt",
-    "name": "看看裙底真空"
+    "name": "看看裙底真空",
+    "prerequisites": [
+      "Luzi_CanWalk",
+      "Luzi_NotBlind",
+      "Luzi_TargetPelvisExposed",
+      "UnsupportedPluginPrerequisite"
+    ]
   },
   {
     "key": "ChatSelf-ItemHead-XSAct_眯眼",
     "source": "xiaosu",
     "self": true,
     "group": "ItemHead",
-    "name": "XSAct_眯眼"
+    "name": "XSAct_眯眼",
+    "prerequisites": [
+      "CanLook"
+    ]
   },
   {
     "key": "ChatSelf-ItemHead-XSAct_眼神飘忽",
     "source": "xiaosu",
     "self": true,
     "group": "ItemHead",
-    "name": "XSAct_眼神飘忽"
+    "name": "XSAct_眼神飘忽",
+    "prerequisites": [
+      "CanLook"
+    ]
   },
   {
     "key": "ChatSelf-ItemHood-XSAct_甩头发",
     "source": "xiaosu",
     "self": true,
     "group": "ItemHood",
-    "name": "XSAct_甩头发"
+    "name": "XSAct_甩头发",
+    "prerequisites": [
+      "ItemHoodCovered"
+    ]
   },
   {
     "key": "ChatSelf-ItemHood-XSAct_大力甩头发",
     "source": "xiaosu",
     "self": true,
     "group": "ItemHood",
-    "name": "XSAct_大力甩头发"
+    "name": "XSAct_大力甩头发",
+    "prerequisites": [
+      "ItemHoodCovered"
+    ]
   },
   {
     "key": "ChatOther-ItemHood-XSAct_轻抚发梢",
     "source": "xiaosu",
     "self": false,
     "group": "ItemHood",
-    "name": "XSAct_轻抚发梢"
+    "name": "XSAct_轻抚发梢",
+    "prerequisites": [
+      "ItemHoodCovered",
+      "TargetItemHoodCovered",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatSelf-ItemHood-XSAct_轻抚发梢",
     "source": "xiaosu",
     "self": true,
     "group": "ItemHood",
-    "name": "XSAct_轻抚发梢"
+    "name": "XSAct_轻抚发梢",
+    "prerequisites": [
+      "ItemHoodCovered",
+      "TargetItemHoodCovered",
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemHood-XSAct_叼起头发",
     "source": "xiaosu",
     "self": false,
     "group": "ItemHood",
-    "name": "XSAct_叼起头发"
+    "name": "XSAct_叼起头发",
+    "prerequisites": [
+      "UseMouth",
+      "ItemHoodCovered",
+      "TargetItemHoodCovered"
+    ]
   },
   {
     "key": "ChatSelf-ItemHood-XSAct_叼起头发",
     "source": "xiaosu",
     "self": true,
     "group": "ItemHood",
-    "name": "XSAct_叼起头发"
+    "name": "XSAct_叼起头发",
+    "prerequisites": [
+      "UseMouth",
+      "ItemHoodCovered",
+      "TargetItemHoodCovered"
+    ]
   },
   {
     "key": "ChatOther-ItemHood-XSAct_嗅头发",
     "source": "xiaosu",
     "self": false,
     "group": "ItemHood",
-    "name": "XSAct_嗅头发"
+    "name": "XSAct_嗅头发",
+    "prerequisites": [
+      "ItemHoodCovered",
+      "TargetItemHoodCovered",
+      "ItemNoseCovered"
+    ]
   },
   {
     "key": "ChatSelf-ItemHood-XSAct_嗅头发",
     "source": "xiaosu",
     "self": true,
     "group": "ItemHood",
-    "name": "XSAct_嗅头发"
+    "name": "XSAct_嗅头发",
+    "prerequisites": [
+      "ItemHoodCovered",
+      "TargetItemHoodCovered",
+      "ItemNoseCovered"
+    ]
   },
   {
     "key": "ChatOther-ItemHood-XSAct_绕头发",
     "source": "xiaosu",
     "self": false,
     "group": "ItemHood",
-    "name": "XSAct_绕头发"
+    "name": "XSAct_绕头发",
+    "prerequisites": [
+      "UseArms",
+      "ItemHoodCovered",
+      "TargetItemHoodCovered"
+    ]
   },
   {
     "key": "ChatSelf-ItemHood-XSAct_绕头发",
     "source": "xiaosu",
     "self": true,
     "group": "ItemHood",
-    "name": "XSAct_绕头发"
+    "name": "XSAct_绕头发",
+    "prerequisites": [
+      "UseArms",
+      "ItemHoodCovered",
+      "TargetItemHoodCovered"
+    ]
   },
   {
     "key": "ChatSelf-ItemNose-XSAct_皱鼻子",
     "source": "xiaosu",
     "self": true,
     "group": "ItemNose",
-    "name": "XSAct_皱鼻子"
+    "name": "XSAct_皱鼻子",
+    "prerequisites": [
+      "ItemHoodCovered",
+      "ItemNoseCovered"
+    ]
   },
   {
     "key": "ChatSelf-ItemNose-XSAct_打喷嚏",
     "source": "xiaosu",
     "self": true,
     "group": "ItemNose",
-    "name": "XSAct_打喷嚏"
+    "name": "XSAct_打喷嚏",
+    "prerequisites": [
+      "UseMouth",
+      "ItemHoodCovered"
+    ]
   },
   {
     "key": "ChatSelf-ItemNose-XSAct_深呼吸",
     "source": "xiaosu",
     "self": true,
     "group": "ItemNose",
-    "name": "XSAct_深呼吸"
+    "name": "XSAct_深呼吸",
+    "prerequisites": [
+      "UseMouth",
+      "ItemHoodCovered",
+      "ItemNoseCovered"
+    ]
   },
   {
     "key": "ChatSelf-ItemHood-XSAct_低头",
     "source": "xiaosu",
     "self": true,
     "group": "ItemHood",
-    "name": "XSAct_低头"
+    "name": "XSAct_低头",
+    "prerequisites": [
+      "ItemHoodCovered",
+      "MoveHead"
+    ]
   },
   {
     "key": "ChatOther-ItemHead-XSAct_恳求的摇头",
     "source": "xiaosu",
     "self": false,
     "group": "ItemHead",
-    "name": "XSAct_恳求的摇头"
+    "name": "XSAct_恳求的摇头",
+    "prerequisites": [
+      "MoveHead"
+    ]
   },
   {
     "key": "ChatOther-ItemHead-XSAct_恳求的看",
     "source": "xiaosu",
     "self": false,
     "group": "ItemHead",
-    "name": "XSAct_恳求的看"
+    "name": "XSAct_恳求的看",
+    "prerequisites": [
+      "CanLook"
+    ]
   },
   {
     "key": "ChatSelf-ItemLegs-XSAct_内八夹腿",
     "source": "xiaosu",
     "self": true,
     "group": "ItemLegs",
-    "name": "XSAct_内八夹腿"
+    "name": "XSAct_内八夹腿",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemMouth-XSAct_噘嘴",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth",
-    "name": "XSAct_噘嘴"
+    "name": "XSAct_噘嘴",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth2-XSAct_噘嘴",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth2",
-    "name": "XSAct_噘嘴"
+    "name": "XSAct_噘嘴",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth3-XSAct_噘嘴",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth3",
-    "name": "XSAct_噘嘴"
+    "name": "XSAct_噘嘴",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth-XSAct_抿住嘴巴",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth",
-    "name": "XSAct_抿住嘴巴"
+    "name": "XSAct_抿住嘴巴",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth2-XSAct_抿住嘴巴",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth2",
-    "name": "XSAct_抿住嘴巴"
+    "name": "XSAct_抿住嘴巴",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth3-XSAct_抿住嘴巴",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth3",
-    "name": "XSAct_抿住嘴巴"
+    "name": "XSAct_抿住嘴巴",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth-XSAct_瘪嘴",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth",
-    "name": "XSAct_瘪嘴"
+    "name": "XSAct_瘪嘴",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth2-XSAct_瘪嘴",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth2",
-    "name": "XSAct_瘪嘴"
+    "name": "XSAct_瘪嘴",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth3-XSAct_瘪嘴",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth3",
-    "name": "XSAct_瘪嘴"
+    "name": "XSAct_瘪嘴",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemTorso-XSAct_坐直身体",
     "source": "xiaosu",
     "self": true,
     "group": "ItemTorso",
-    "name": "XSAct_坐直身体"
+    "name": "XSAct_坐直身体",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemTorso2-XSAct_坐直身体",
     "source": "xiaosu",
     "self": true,
     "group": "ItemTorso2",
-    "name": "XSAct_坐直身体"
+    "name": "XSAct_坐直身体",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemBreast-XSAct_挺胸收腹",
     "source": "xiaosu",
     "self": true,
     "group": "ItemBreast",
-    "name": "XSAct_挺胸收腹"
+    "name": "XSAct_挺胸收腹",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemTorso-XSAct_站直身体",
     "source": "xiaosu",
     "self": true,
     "group": "ItemTorso",
-    "name": "XSAct_站直身体"
+    "name": "XSAct_站直身体",
+    "prerequisites": [
+      "NotKneeling"
+    ]
   },
   {
     "key": "ChatSelf-ItemTorso2-XSAct_站直身体",
     "source": "xiaosu",
     "self": true,
     "group": "ItemTorso2",
-    "name": "XSAct_站直身体"
+    "name": "XSAct_站直身体",
+    "prerequisites": [
+      "NotKneeling"
+    ]
   },
   {
     "key": "ChatSelf-ItemTorso-XSAct_身体一颤",
     "source": "xiaosu",
     "self": true,
     "group": "ItemTorso",
-    "name": "XSAct_身体一颤"
+    "name": "XSAct_身体一颤",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemTorso2-XSAct_身体一颤",
     "source": "xiaosu",
     "self": true,
     "group": "ItemTorso2",
-    "name": "XSAct_身体一颤"
+    "name": "XSAct_身体一颤",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemLegs-XSAct_活动大腿",
     "source": "xiaosu",
     "self": true,
     "group": "ItemLegs",
-    "name": "XSAct_活动大腿"
+    "name": "XSAct_活动大腿",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemArms-XSAct_活动手臂",
     "source": "xiaosu",
     "self": true,
     "group": "ItemArms",
-    "name": "XSAct_活动手臂"
+    "name": "XSAct_活动手臂",
+    "prerequisites": [
+      "CantUseArms"
+    ]
   },
   {
     "key": "ChatSelf-ItemLegs-XSAct_绷紧膝盖",
     "source": "xiaosu",
     "self": true,
     "group": "ItemLegs",
-    "name": "XSAct_绷紧膝盖"
+    "name": "XSAct_绷紧膝盖",
+    "prerequisites": [
+      "NotKneeling"
+    ]
   },
   {
     "key": "ChatSelf-ItemBoots-XSAct_绷直脚踝",
     "source": "xiaosu",
     "self": true,
     "group": "ItemBoots",
-    "name": "XSAct_绷直脚踝"
+    "name": "XSAct_绷直脚踝",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemBoots-XSAct_蜷缩脚趾",
     "source": "xiaosu",
     "self": true,
     "group": "ItemBoots",
-    "name": "XSAct_蜷缩脚趾"
+    "name": "XSAct_蜷缩脚趾",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemBoots-XSAct_踮脚",
     "source": "xiaosu",
     "self": true,
     "group": "ItemBoots",
-    "name": "XSAct_踮脚"
+    "name": "XSAct_踮脚",
+    "prerequisites": [
+      "CantUseFeet"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth-XSAct_兴奋的伸出舌头",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth",
-    "name": "XSAct_兴奋的伸出舌头"
+    "name": "XSAct_兴奋的伸出舌头",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth2-XSAct_兴奋的伸出舌头",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth2",
-    "name": "XSAct_兴奋的伸出舌头"
+    "name": "XSAct_兴奋的伸出舌头",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth3-XSAct_兴奋的伸出舌头",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth3",
-    "name": "XSAct_兴奋的伸出舌头"
+    "name": "XSAct_兴奋的伸出舌头",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemTorso-XSAct_兴奋的扭动",
     "source": "xiaosu",
     "self": true,
     "group": "ItemTorso",
-    "name": "XSAct_兴奋的扭动"
+    "name": "XSAct_兴奋的扭动",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemTorso2-XSAct_兴奋的扭动",
     "source": "xiaosu",
     "self": true,
     "group": "ItemTorso2",
-    "name": "XSAct_兴奋的扭动"
+    "name": "XSAct_兴奋的扭动",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemNose-XSAct_呼吸平复",
     "source": "xiaosu",
     "self": true,
     "group": "ItemNose",
-    "name": "XSAct_呼吸平复"
+    "name": "XSAct_呼吸平复",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemNose-XSAct_呼吸紊乱",
     "source": "xiaosu",
     "self": true,
     "group": "ItemNose",
-    "name": "XSAct_呼吸紊乱"
+    "name": "XSAct_呼吸紊乱",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemMouth-XSAct_嘟囔着想说什么",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth",
-    "name": "XSAct_嘟囔着想说什么"
+    "name": "XSAct_嘟囔着想说什么",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth2-XSAct_嘟囔着想说什么",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth2",
-    "name": "XSAct_嘟囔着想说什么"
+    "name": "XSAct_嘟囔着想说什么",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth3-XSAct_嘟囔着想说什么",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth3",
-    "name": "XSAct_嘟囔着想说什么"
+    "name": "XSAct_嘟囔着想说什么",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth-XSAct_失神的伸出舌头",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth",
-    "name": "XSAct_失神的伸出舌头"
+    "name": "XSAct_失神的伸出舌头",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth2-XSAct_失神的伸出舌头",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth2",
-    "name": "XSAct_失神的伸出舌头"
+    "name": "XSAct_失神的伸出舌头",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth3-XSAct_失神的伸出舌头",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth3",
-    "name": "XSAct_失神的伸出舌头"
+    "name": "XSAct_失神的伸出舌头",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth-XSAct_慢慢伸出舌头",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth",
-    "name": "XSAct_慢慢伸出舌头"
+    "name": "XSAct_慢慢伸出舌头",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth2-XSAct_慢慢伸出舌头",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth2",
-    "name": "XSAct_慢慢伸出舌头"
+    "name": "XSAct_慢慢伸出舌头",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth3-XSAct_慢慢伸出舌头",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth3",
-    "name": "XSAct_慢慢伸出舌头"
+    "name": "XSAct_慢慢伸出舌头",
+    "prerequisites": [
+      "UseMouth"
+    ]
   },
   {
     "key": "ChatSelf-ItemHead-XSAct_微微摇头",
     "source": "xiaosu",
     "self": true,
     "group": "ItemHead",
-    "name": "XSAct_微微摇头"
+    "name": "XSAct_微微摇头",
+    "prerequisites": [
+      "MoveHead"
+    ]
   },
   {
     "key": "ChatSelf-ItemHead-XSAct_微微点头",
     "source": "xiaosu",
     "self": true,
     "group": "ItemHead",
-    "name": "XSAct_微微点头"
+    "name": "XSAct_微微点头",
+    "prerequisites": [
+      "MoveHead"
+    ]
   },
   {
     "key": "ChatSelf-ItemHead-XSAct_身体颤抖的摇头",
     "source": "xiaosu",
     "self": true,
     "group": "ItemHead",
-    "name": "XSAct_身体颤抖的摇头"
+    "name": "XSAct_身体颤抖的摇头",
+    "prerequisites": [
+      "MoveHead"
+    ]
   },
   {
     "key": "ChatSelf-ItemHead-XSAct_身体颤抖的点头",
     "source": "xiaosu",
     "self": true,
     "group": "ItemHead",
-    "name": "XSAct_身体颤抖的点头"
+    "name": "XSAct_身体颤抖的点头",
+    "prerequisites": [
+      "MoveHead"
+    ]
   },
   {
     "key": "ChatSelf-ItemNeck-XSAct_歪头疑惑",
     "source": "xiaosu",
     "self": true,
     "group": "ItemNeck",
-    "name": "XSAct_歪头疑惑"
+    "name": "XSAct_歪头疑惑",
+    "prerequisites": [
+      "MoveHead"
+    ]
   },
   {
     "key": "ChatSelf-ItemTorso-XSAct_扭动身体",
     "source": "xiaosu",
     "self": true,
     "group": "ItemTorso",
-    "name": "XSAct_扭动身体"
+    "name": "XSAct_扭动身体",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemTorso2-XSAct_扭动身体",
     "source": "xiaosu",
     "self": true,
     "group": "ItemTorso2",
-    "name": "XSAct_扭动身体"
+    "name": "XSAct_扭动身体",
+    "prerequisites": []
   },
   {
     "key": "ChatOther-ItemHead-XSAct_看他",
     "source": "xiaosu",
     "self": false,
     "group": "ItemHead",
-    "name": "XSAct_看他"
+    "name": "XSAct_看他",
+    "prerequisites": [
+      "CanLook"
+    ]
   },
   {
     "key": "ChatSelf-ItemNeck-XSAct_缩脖子",
     "source": "xiaosu",
     "self": true,
     "group": "ItemNeck",
-    "name": "XSAct_缩脖子"
+    "name": "XSAct_缩脖子",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemMouth-XSAct_脸红喘气",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth",
-    "name": "XSAct_脸红喘气"
+    "name": "XSAct_脸红喘气",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemMouth2-XSAct_脸红喘气",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth2",
-    "name": "XSAct_脸红喘气"
+    "name": "XSAct_脸红喘气",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemMouth3-XSAct_脸红喘气",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth3",
-    "name": "XSAct_脸红喘气"
+    "name": "XSAct_脸红喘气",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemMouth-XSAct_轻声喘气",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth",
-    "name": "XSAct_轻声喘气"
+    "name": "XSAct_轻声喘气",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemMouth2-XSAct_轻声喘气",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth2",
-    "name": "XSAct_轻声喘气"
+    "name": "XSAct_轻声喘气",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemMouth3-XSAct_轻声喘气",
     "source": "xiaosu",
     "self": true,
     "group": "ItemMouth3",
-    "name": "XSAct_轻声喘气"
+    "name": "XSAct_轻声喘气",
+    "prerequisites": []
   },
   {
     "key": "ChatSelf-ItemBoots-XSAct_跺脚",
     "source": "xiaosu",
     "self": true,
     "group": "ItemBoots",
-    "name": "XSAct_跺脚"
+    "name": "XSAct_跺脚",
+    "prerequisites": [
+      "NotKneeling"
+    ]
   },
   {
     "key": "ChatOther-ItemHead-XSAct_头蹭",
     "source": "xiaosu",
     "self": false,
     "group": "ItemHead",
-    "name": "XSAct_头蹭"
+    "name": "XSAct_头蹭",
+    "prerequisites": []
   },
   {
     "key": "ChatOther-ItemNeck-XSAct_头蹭",
     "source": "xiaosu",
     "self": false,
     "group": "ItemNeck",
-    "name": "XSAct_头蹭"
+    "name": "XSAct_头蹭",
+    "prerequisites": []
   },
   {
     "key": "ChatOther-ItemBreast-XSAct_头蹭",
     "source": "xiaosu",
     "self": false,
     "group": "ItemBreast",
-    "name": "XSAct_头蹭"
+    "name": "XSAct_头蹭",
+    "prerequisites": []
   },
   {
     "key": "ChatOther-ItemArms-XSAct_头蹭",
     "source": "xiaosu",
     "self": false,
     "group": "ItemArms",
-    "name": "XSAct_头蹭"
+    "name": "XSAct_头蹭",
+    "prerequisites": []
   },
   {
     "key": "ChatOther-ItemLegs-XSAct_头蹭",
     "source": "xiaosu",
     "self": false,
     "group": "ItemLegs",
-    "name": "XSAct_头蹭"
+    "name": "XSAct_头蹭",
+    "prerequisites": []
   },
   {
     "key": "ChatOther-ItemFeet-XSAct_头蹭",
     "source": "xiaosu",
     "self": false,
     "group": "ItemFeet",
-    "name": "XSAct_头蹭"
+    "name": "XSAct_头蹭",
+    "prerequisites": []
   },
   {
     "key": "ChatOther-ItemBoots-XSAct_头蹭",
     "source": "xiaosu",
     "self": false,
     "group": "ItemBoots",
-    "name": "XSAct_头蹭"
+    "name": "XSAct_头蹭",
+    "prerequisites": []
   },
   {
     "key": "ChatOther-ItemPelvis-XSAct_头蹭",
     "source": "xiaosu",
     "self": false,
     "group": "ItemPelvis",
-    "name": "XSAct_头蹭"
+    "name": "XSAct_头蹭",
+    "prerequisites": []
   },
   {
     "key": "ChatOther-ItemHead-XSAct_脸蹭",
     "source": "xiaosu",
     "self": false,
     "group": "ItemHead",
-    "name": "XSAct_脸蹭"
+    "name": "XSAct_脸蹭",
+    "prerequisites": []
   },
   {
     "key": "ChatOther-ItemNeck-XSAct_脸蹭",
     "source": "xiaosu",
     "self": false,
     "group": "ItemNeck",
-    "name": "XSAct_脸蹭"
+    "name": "XSAct_脸蹭",
+    "prerequisites": []
   },
   {
     "key": "ChatOther-ItemBreast-XSAct_脸蹭",
     "source": "xiaosu",
     "self": false,
     "group": "ItemBreast",
-    "name": "XSAct_脸蹭"
+    "name": "XSAct_脸蹭",
+    "prerequisites": []
   },
   {
     "key": "ChatOther-ItemArms-XSAct_脸蹭",
     "source": "xiaosu",
     "self": false,
     "group": "ItemArms",
-    "name": "XSAct_脸蹭"
+    "name": "XSAct_脸蹭",
+    "prerequisites": []
   },
   {
     "key": "ChatOther-ItemLegs-XSAct_脸蹭",
     "source": "xiaosu",
     "self": false,
     "group": "ItemLegs",
-    "name": "XSAct_脸蹭"
+    "name": "XSAct_脸蹭",
+    "prerequisites": []
   },
   {
     "key": "ChatOther-ItemFeet-XSAct_脸蹭",
     "source": "xiaosu",
     "self": false,
     "group": "ItemFeet",
-    "name": "XSAct_脸蹭"
+    "name": "XSAct_脸蹭",
+    "prerequisites": []
   },
   {
     "key": "ChatOther-ItemBoots-XSAct_脸蹭",
     "source": "xiaosu",
     "self": false,
     "group": "ItemBoots",
-    "name": "XSAct_脸蹭"
+    "name": "XSAct_脸蹭",
+    "prerequisites": []
   },
   {
     "key": "ChatOther-ItemPelvis-XSAct_脸蹭",
     "source": "xiaosu",
     "self": false,
     "group": "ItemPelvis",
-    "name": "XSAct_脸蹭"
+    "name": "XSAct_脸蹭",
+    "prerequisites": []
   },
   {
     "key": "ChatOther-ItemHead-XSAct_鼻子蹭",
     "source": "xiaosu",
     "self": false,
     "group": "ItemHead",
-    "name": "XSAct_鼻子蹭"
+    "name": "XSAct_鼻子蹭",
+    "prerequisites": [
+      "MoveHead"
+    ]
   },
   {
     "key": "ChatOther-ItemNeck-XSAct_鼻子蹭",
     "source": "xiaosu",
     "self": false,
     "group": "ItemNeck",
-    "name": "XSAct_鼻子蹭"
+    "name": "XSAct_鼻子蹭",
+    "prerequisites": [
+      "MoveHead"
+    ]
   },
   {
     "key": "ChatOther-ItemBreast-XSAct_鼻子蹭",
     "source": "xiaosu",
     "self": false,
     "group": "ItemBreast",
-    "name": "XSAct_鼻子蹭"
+    "name": "XSAct_鼻子蹭",
+    "prerequisites": [
+      "MoveHead"
+    ]
   },
   {
     "key": "ChatOther-ItemArms-XSAct_鼻子蹭",
     "source": "xiaosu",
     "self": false,
     "group": "ItemArms",
-    "name": "XSAct_鼻子蹭"
+    "name": "XSAct_鼻子蹭",
+    "prerequisites": [
+      "MoveHead"
+    ]
   },
   {
     "key": "ChatOther-ItemLegs-XSAct_鼻子蹭",
     "source": "xiaosu",
     "self": false,
     "group": "ItemLegs",
-    "name": "XSAct_鼻子蹭"
+    "name": "XSAct_鼻子蹭",
+    "prerequisites": [
+      "MoveHead"
+    ]
   },
   {
     "key": "ChatOther-ItemFeet-XSAct_鼻子蹭",
     "source": "xiaosu",
     "self": false,
     "group": "ItemFeet",
-    "name": "XSAct_鼻子蹭"
+    "name": "XSAct_鼻子蹭",
+    "prerequisites": [
+      "MoveHead"
+    ]
   },
   {
     "key": "ChatOther-ItemBoots-XSAct_鼻子蹭",
     "source": "xiaosu",
     "self": false,
     "group": "ItemBoots",
-    "name": "XSAct_鼻子蹭"
+    "name": "XSAct_鼻子蹭",
+    "prerequisites": [
+      "MoveHead"
+    ]
   },
   {
     "key": "ChatOther-ItemPelvis-XSAct_鼻子蹭",
     "source": "xiaosu",
     "self": false,
     "group": "ItemPelvis",
-    "name": "XSAct_鼻子蹭"
+    "name": "XSAct_鼻子蹭",
+    "prerequisites": [
+      "MoveHead"
+    ]
   },
   {
     "key": "ChatOther-ItemBreast-XSAct_埋怀里",
     "source": "xiaosu",
     "self": false,
     "group": "ItemBreast",
-    "name": "XSAct_埋怀里"
+    "name": "XSAct_埋怀里",
+    "prerequisites": [
+      "MoveHead"
+    ]
   },
   {
     "key": "ChatOther-ItemHead-LSCG_Bap",
     "source": "lscg",
     "self": false,
     "group": "ItemHead",
-    "name": "LSCG_Bap"
+    "name": "LSCG_Bap",
+    "prerequisites": [
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemArms-LSCG_Headbutt",
     "source": "lscg",
     "self": false,
     "group": "ItemArms",
-    "name": "LSCG_Headbutt"
+    "name": "LSCG_Headbutt",
+    "prerequisites": [
+      "CanHeadbutt"
+    ]
   },
   {
     "key": "ChatOther-ItemHead-LSCG_Nuzzle",
     "source": "lscg",
     "self": false,
     "group": "ItemHead",
-    "name": "LSCG_Nuzzle"
+    "name": "LSCG_Nuzzle",
+    "prerequisites": [
+      "ZoneAccessible"
+    ]
   },
   {
     "key": "ChatOther-ItemNeck-LSCG_Nuzzle",
     "source": "lscg",
     "self": false,
     "group": "ItemNeck",
-    "name": "LSCG_Nuzzle"
+    "name": "LSCG_Nuzzle",
+    "prerequisites": [
+      "ZoneAccessible"
+    ]
   },
   {
     "key": "ChatOther-ItemArms-LSCG_Nuzzle",
     "source": "lscg",
     "self": false,
     "group": "ItemArms",
-    "name": "LSCG_Nuzzle"
+    "name": "LSCG_Nuzzle",
+    "prerequisites": [
+      "ZoneAccessible"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-LSCG_Nuzzle",
     "source": "lscg",
     "self": false,
     "group": "ItemHands",
-    "name": "LSCG_Nuzzle"
+    "name": "LSCG_Nuzzle",
+    "prerequisites": [
+      "ZoneAccessible"
+    ]
   },
   {
     "key": "ChatOther-ItemBreast-LSCG_Nuzzle",
     "source": "lscg",
     "self": false,
     "group": "ItemBreast",
-    "name": "LSCG_Nuzzle"
+    "name": "LSCG_Nuzzle",
+    "prerequisites": [
+      "ZoneAccessible"
+    ]
   },
   {
     "key": "ChatOther-ItemTorso-LSCG_Nuzzle",
     "source": "lscg",
     "self": false,
     "group": "ItemTorso",
-    "name": "LSCG_Nuzzle"
+    "name": "LSCG_Nuzzle",
+    "prerequisites": [
+      "ZoneAccessible"
+    ]
   },
   {
     "key": "ChatOther-ItemPelvis-LSCG_Nuzzle",
     "source": "lscg",
     "self": false,
     "group": "ItemPelvis",
-    "name": "LSCG_Nuzzle"
+    "name": "LSCG_Nuzzle",
+    "prerequisites": [
+      "ZoneAccessible"
+    ]
   },
   {
     "key": "ChatOther-ItemLegs-LSCG_Nuzzle",
     "source": "lscg",
     "self": false,
     "group": "ItemLegs",
-    "name": "LSCG_Nuzzle"
+    "name": "LSCG_Nuzzle",
+    "prerequisites": [
+      "ZoneAccessible"
+    ]
   },
   {
     "key": "ChatOther-ItemFeet-LSCG_Nuzzle",
     "source": "lscg",
     "self": false,
     "group": "ItemFeet",
-    "name": "LSCG_Nuzzle"
+    "name": "LSCG_Nuzzle",
+    "prerequisites": [
+      "ZoneAccessible"
+    ]
   },
   {
     "key": "ChatOther-ItemBoots-LSCG_Nuzzle",
     "source": "lscg",
     "self": false,
     "group": "ItemBoots",
-    "name": "LSCG_Nuzzle"
+    "name": "LSCG_Nuzzle",
+    "prerequisites": [
+      "ZoneAccessible"
+    ]
   },
   {
     "key": "ChatOther-ItemArms-LSCG_Hug",
     "source": "lscg",
     "self": false,
     "group": "ItemArms",
-    "name": "LSCG_Hug"
+    "name": "LSCG_Hug",
+    "prerequisites": [
+      "UseArms"
+    ]
   },
   {
     "key": "ChatSelf-ItemArms-LSCG_Hug",
     "source": "lscg",
     "self": true,
     "group": "ItemArms",
-    "name": "LSCG_Hug"
+    "name": "LSCG_Hug",
+    "prerequisites": [
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemArms-LSCG_Tackle",
     "source": "lscg",
     "self": false,
     "group": "ItemArms",
-    "name": "LSCG_Tackle"
+    "name": "LSCG_Tackle",
+    "prerequisites": [
+      "UseArms"
+    ]
   },
   {
     "key": "ChatOther-ItemArms-LSCG_Flop",
     "source": "lscg",
     "self": false,
     "group": "ItemArms",
-    "name": "LSCG_Flop"
+    "name": "LSCG_Flop",
+    "prerequisites": [
+      "UseLegs"
+    ]
   },
   {
     "key": "ChatOther-ItemHead-LSCG_KissEyes",
     "source": "lscg",
     "self": false,
     "group": "ItemHead",
-    "name": "LSCG_KissEyes"
+    "name": "LSCG_KissEyes",
+    "prerequisites": [
+      "ZoneAccessible"
+    ]
   },
   {
     "key": "ChatOther-ItemPenis-LSCG_RubPussy",
     "source": "lscg",
     "self": false,
     "group": "ItemPenis",
-    "name": "LSCG_RubPussy"
+    "name": "LSCG_RubPussy",
+    "prerequisites": [
+      "ZoneAccessible",
+      "ZoneNaked",
+      "HasVagina"
+    ]
   },
   {
     "key": "ChatOther-ItemHead-LSCG_SlapPenis",
     "source": "lscg",
     "self": false,
     "group": "ItemHead",
-    "name": "LSCG_SlapPenis"
+    "name": "LSCG_SlapPenis",
+    "prerequisites": [
+      "ZoneAccessible",
+      "ZoneNaked",
+      "CanUsePenis",
+      "HasPenis",
+      "Needs-PenetrateItem"
+    ]
   },
   {
     "key": "ChatOther-ItemMouth-LSCG_SlapPenis",
     "source": "lscg",
     "self": false,
     "group": "ItemMouth",
-    "name": "LSCG_SlapPenis"
+    "name": "LSCG_SlapPenis",
+    "prerequisites": [
+      "ZoneAccessible",
+      "ZoneNaked",
+      "CanUsePenis",
+      "HasPenis",
+      "Needs-PenetrateItem"
+    ]
   },
   {
     "key": "ChatOther-ItemVulva-LSCG_SlapPenis",
     "source": "lscg",
     "self": false,
     "group": "ItemVulva",
-    "name": "LSCG_SlapPenis"
+    "name": "LSCG_SlapPenis",
+    "prerequisites": [
+      "ZoneAccessible",
+      "ZoneNaked",
+      "CanUsePenis",
+      "HasPenis",
+      "Needs-PenetrateItem"
+    ]
   },
   {
     "key": "ChatOther-ItemBreast-LSCG_SlapPenis",
     "source": "lscg",
     "self": false,
     "group": "ItemBreast",
-    "name": "LSCG_SlapPenis"
+    "name": "LSCG_SlapPenis",
+    "prerequisites": [
+      "ZoneAccessible",
+      "ZoneNaked",
+      "CanUsePenis",
+      "HasPenis",
+      "Needs-PenetrateItem"
+    ]
   },
   {
     "key": "ChatOther-ItemLegs-LSCG_SlapPenis",
     "source": "lscg",
     "self": false,
     "group": "ItemLegs",
-    "name": "LSCG_SlapPenis"
+    "name": "LSCG_SlapPenis",
+    "prerequisites": [
+      "ZoneAccessible",
+      "ZoneNaked",
+      "CanUsePenis",
+      "HasPenis",
+      "Needs-PenetrateItem"
+    ]
   },
   {
     "key": "ChatOther-ItemFeet-LSCG_SlapPenis",
     "source": "lscg",
     "self": false,
     "group": "ItemFeet",
-    "name": "LSCG_SlapPenis"
+    "name": "LSCG_SlapPenis",
+    "prerequisites": [
+      "ZoneAccessible",
+      "ZoneNaked",
+      "CanUsePenis",
+      "HasPenis",
+      "Needs-PenetrateItem"
+    ]
   },
   {
     "key": "ChatOther-ItemBoots-LSCG_SlapPenis",
     "source": "lscg",
     "self": false,
     "group": "ItemBoots",
-    "name": "LSCG_SlapPenis"
+    "name": "LSCG_SlapPenis",
+    "prerequisites": [
+      "ZoneAccessible",
+      "ZoneNaked",
+      "CanUsePenis",
+      "HasPenis",
+      "Needs-PenetrateItem"
+    ]
   },
   {
     "key": "ChatOther-ItemButt-LSCG_SlapPenis",
     "source": "lscg",
     "self": false,
     "group": "ItemButt",
-    "name": "LSCG_SlapPenis"
+    "name": "LSCG_SlapPenis",
+    "prerequisites": [
+      "ZoneAccessible",
+      "ZoneNaked",
+      "CanUsePenis",
+      "HasPenis",
+      "Needs-PenetrateItem"
+    ]
   },
   {
     "key": "ChatOther-ItemNeck-LSCG_SlapPenis",
     "source": "lscg",
     "self": false,
     "group": "ItemNeck",
-    "name": "LSCG_SlapPenis"
+    "name": "LSCG_SlapPenis",
+    "prerequisites": [
+      "ZoneAccessible",
+      "ZoneNaked",
+      "CanUsePenis",
+      "HasPenis",
+      "Needs-PenetrateItem"
+    ]
   },
   {
     "key": "ChatOther-ItemArms-LSCG_SlapPenis",
     "source": "lscg",
     "self": false,
     "group": "ItemArms",
-    "name": "LSCG_SlapPenis"
+    "name": "LSCG_SlapPenis",
+    "prerequisites": [
+      "ZoneAccessible",
+      "ZoneNaked",
+      "CanUsePenis",
+      "HasPenis",
+      "Needs-PenetrateItem"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-LSCG_SlapPenis",
     "source": "lscg",
     "self": false,
     "group": "ItemHands",
-    "name": "LSCG_SlapPenis"
+    "name": "LSCG_SlapPenis",
+    "prerequisites": [
+      "ZoneAccessible",
+      "ZoneNaked",
+      "CanUsePenis",
+      "HasPenis",
+      "Needs-PenetrateItem"
+    ]
   },
   {
     "key": "ChatOther-ItemPenis-LSCG_SlapPenis",
     "source": "lscg",
     "self": false,
     "group": "ItemPenis",
-    "name": "LSCG_SlapPenis"
+    "name": "LSCG_SlapPenis",
+    "prerequisites": [
+      "ZoneAccessible",
+      "ZoneNaked",
+      "CanUsePenis",
+      "HasPenis",
+      "Needs-PenetrateItem"
+    ]
   },
   {
     "key": "ChatOther-ItemVulva-LSCG_FuckWithPussy",
     "source": "lscg",
     "self": false,
     "group": "ItemVulva",
-    "name": "LSCG_FuckWithPussy"
+    "name": "LSCG_FuckWithPussy",
+    "prerequisites": [
+      "ZoneAccessible",
+      "ZoneNaked",
+      "HasVagina",
+      "CanGrindWithPussy"
+    ]
   },
   {
     "key": "ChatOther-ItemPenis-LSCG_FuckWithPussy",
     "source": "lscg",
     "self": false,
     "group": "ItemPenis",
-    "name": "LSCG_FuckWithPussy"
+    "name": "LSCG_FuckWithPussy",
+    "prerequisites": [
+      "ZoneAccessible",
+      "ZoneNaked",
+      "HasVagina",
+      "CanGrindWithPussy"
+    ]
   },
   {
     "key": "ChatOther-ItemHead-LSCG_FuckWithPussy",
     "source": "lscg",
     "self": false,
     "group": "ItemHead",
-    "name": "LSCG_FuckWithPussy"
+    "name": "LSCG_FuckWithPussy",
+    "prerequisites": [
+      "ZoneAccessible",
+      "ZoneNaked",
+      "HasVagina",
+      "CanGrindWithPussy"
+    ]
   },
   {
     "key": "ChatOther-ItemVulva-LSCG_FuckWithAss",
     "source": "lscg",
     "self": false,
     "group": "ItemVulva",
-    "name": "LSCG_FuckWithAss"
+    "name": "LSCG_FuckWithAss",
+    "prerequisites": [
+      "ZoneAccessible",
+      "ZoneNaked",
+      "TargetHasPenis",
+      "SourceAssEmpty"
+    ]
   },
   {
     "key": "ChatOther-ItemPenis-LSCG_FuckWithAss",
     "source": "lscg",
     "self": false,
     "group": "ItemPenis",
-    "name": "LSCG_FuckWithAss"
+    "name": "LSCG_FuckWithAss",
+    "prerequisites": [
+      "ZoneAccessible",
+      "ZoneNaked",
+      "TargetHasPenis",
+      "SourceAssEmpty"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-LSCG_Eat",
     "source": "lscg",
     "self": false,
     "group": "ItemHands",
-    "name": "LSCG_Eat"
+    "name": "LSCG_Eat",
+    "prerequisites": [
+      "ZoneAccessible",
+      "UseMouth",
+      "TargetNeeds-EdibleItem"
+    ]
   },
   {
     "key": "ChatSelf-ItemHands-LSCG_Eat",
     "source": "lscg",
     "self": true,
     "group": "ItemHands",
-    "name": "LSCG_Eat"
+    "name": "LSCG_Eat",
+    "prerequisites": [
+      "ZoneAccessible",
+      "UseMouth",
+      "TargetNeeds-EdibleItem"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-LSCG_Chew",
     "source": "lscg",
     "self": false,
     "group": "ItemHands",
-    "name": "LSCG_Chew"
+    "name": "LSCG_Chew",
+    "prerequisites": [
+      "ZoneAccessible",
+      "TargetNeeds-ChewableItem"
+    ]
   },
   {
     "key": "ChatSelf-ItemHands-LSCG_Chew",
     "source": "lscg",
     "self": true,
     "group": "ItemHands",
-    "name": "LSCG_Chew"
+    "name": "LSCG_Chew",
+    "prerequisites": [
+      "ZoneAccessible",
+      "TargetNeeds-ChewableItem"
+    ]
   },
   {
     "key": "ChatOther-ItemMouth-LSCG_Chew",
     "source": "lscg",
     "self": false,
     "group": "ItemMouth",
-    "name": "LSCG_Chew"
+    "name": "LSCG_Chew",
+    "prerequisites": [
+      "ZoneAccessible",
+      "TargetNeeds-ChewableItem"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth-LSCG_Chew",
     "source": "lscg",
     "self": true,
     "group": "ItemMouth",
-    "name": "LSCG_Chew"
+    "name": "LSCG_Chew",
+    "prerequisites": [
+      "ZoneAccessible",
+      "TargetNeeds-ChewableItem"
+    ]
   },
   {
     "key": "ChatOther-ItemMouth-LSCG_GrabTongue",
     "source": "lscg",
     "self": false,
     "group": "ItemMouth",
-    "name": "LSCG_GrabTongue"
+    "name": "LSCG_GrabTongue",
+    "prerequisites": [
+      "ZoneAccessible",
+      "UseHands",
+      "TargetCanUseTongue",
+      "TargetTongueIsNotGrabbed"
+    ]
   },
   {
     "key": "ChatOther-ItemMouth-LSCG_ReleaseTongue",
     "source": "lscg",
     "self": false,
     "group": "ItemMouth",
-    "name": "LSCG_ReleaseTongue"
+    "name": "LSCG_ReleaseTongue",
+    "prerequisites": [
+      "ZoneAccessible",
+      "UseHands",
+      "TargetTongueIsGrabbed"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-LSCG_HoldHand",
     "source": "lscg",
     "self": false,
     "group": "ItemHands",
-    "name": "LSCG_HoldHand"
+    "name": "LSCG_HoldHand",
+    "prerequisites": [
+      "ZoneAccessible",
+      "TargetZoneAccessible",
+      "UseHands",
+      "TargetIsHandUnleashed"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-LSCG_ReleaseHand",
     "source": "lscg",
     "self": false,
     "group": "ItemHands",
-    "name": "LSCG_ReleaseHand"
+    "name": "LSCG_ReleaseHand",
+    "prerequisites": [
+      "ZoneAccessible",
+      "UseHands",
+      "TargetIsHandLeashed"
+    ]
   },
   {
     "key": "ChatOther-ItemEars-LSCG_ReleaseEar",
     "source": "lscg",
     "self": false,
     "group": "ItemEars",
-    "name": "LSCG_ReleaseEar"
+    "name": "LSCG_ReleaseEar",
+    "prerequisites": [
+      "ZoneAccessible",
+      "UseHands",
+      "TargetIsEarPinched"
+    ]
   },
   {
     "key": "ChatSelf-ItemEars-LSCG_ReleaseEar",
     "source": "lscg",
     "self": true,
     "group": "ItemEars",
-    "name": "LSCG_ReleaseEar"
+    "name": "LSCG_ReleaseEar",
+    "prerequisites": [
+      "ZoneAccessible",
+      "UseHands",
+      "TargetIsEarPinched"
+    ]
   },
   {
     "key": "ChatOther-ItemHood-LSCG_Grab",
     "source": "lscg",
     "self": false,
     "group": "ItemHood",
-    "name": "LSCG_Grab"
+    "name": "LSCG_Grab",
+    "prerequisites": [
+      "UseHands",
+      "TargetHornAvailable",
+      "TargetTailAvailable"
+    ]
   },
   {
     "key": "ChatOther-ItemButt-LSCG_Grab",
     "source": "lscg",
     "self": false,
     "group": "ItemButt",
-    "name": "LSCG_Grab"
+    "name": "LSCG_Grab",
+    "prerequisites": [
+      "UseHands",
+      "TargetHornAvailable",
+      "TargetTailAvailable"
+    ]
   },
   {
     "key": "ChatOther-ItemArms-LSCG_Release",
     "source": "lscg",
     "self": false,
     "group": "ItemArms",
-    "name": "LSCG_Release"
+    "name": "LSCG_Release",
+    "prerequisites": [
+      "TargetIsGrabbed"
+    ]
   },
   {
     "key": "ChatOther-ItemHood-LSCG_Release",
     "source": "lscg",
     "self": false,
     "group": "ItemHood",
-    "name": "LSCG_Release"
+    "name": "LSCG_Release",
+    "prerequisites": [
+      "TargetIsGrabbed"
+    ]
   },
   {
     "key": "ChatOther-ItemButt-LSCG_Release",
     "source": "lscg",
     "self": false,
     "group": "ItemButt",
-    "name": "LSCG_Release"
+    "name": "LSCG_Release",
+    "prerequisites": [
+      "TargetIsGrabbed"
+    ]
   },
   {
     "key": "ChatOther-ItemHead-LSCG_Release",
     "source": "lscg",
     "self": false,
     "group": "ItemHead",
-    "name": "LSCG_Release"
+    "name": "LSCG_Release",
+    "prerequisites": [
+      "TargetIsGrabbed"
+    ]
   },
   {
     "key": "ChatOther-ItemNose-LSCG_Release",
     "source": "lscg",
     "self": false,
     "group": "ItemNose",
-    "name": "LSCG_Release"
+    "name": "LSCG_Release",
+    "prerequisites": [
+      "TargetIsGrabbed"
+    ]
   },
   {
     "key": "ChatOther-ItemNipples-LSCG_Release",
     "source": "lscg",
     "self": false,
     "group": "ItemNipples",
-    "name": "LSCG_Release"
+    "name": "LSCG_Release",
+    "prerequisites": [
+      "TargetIsGrabbed"
+    ]
   },
   {
     "key": "ChatOther-ItemNeck-LSCG_ReleaseNeck",
     "source": "lscg",
     "self": false,
     "group": "ItemNeck",
-    "name": "LSCG_ReleaseNeck"
+    "name": "LSCG_ReleaseNeck",
+    "prerequisites": [
+      "ZoneAccessible",
+      "UseHands",
+      "TargetIsNeckChoked"
+    ]
   },
   {
     "key": "ChatSelf-ItemNeck-LSCG_ReleaseNeck",
     "source": "lscg",
     "self": true,
     "group": "ItemNeck",
-    "name": "LSCG_ReleaseNeck"
+    "name": "LSCG_ReleaseNeck",
+    "prerequisites": [
+      "ZoneAccessible",
+      "UseHands",
+      "TargetIsNeckChoked"
+    ]
   },
   {
     "key": "ChatOther-ItemNeck-LSCG_ReleaseCollar",
     "source": "lscg",
     "self": false,
     "group": "ItemNeck",
-    "name": "LSCG_ReleaseCollar"
+    "name": "LSCG_ReleaseCollar",
+    "prerequisites": [
+      "ZoneAccessible",
+      "UseHands",
+      "TargetIsCollarGrabbed"
+    ]
   },
   {
     "key": "ChatSelf-ItemNeck-LSCG_ReleaseCollar",
     "source": "lscg",
     "self": true,
     "group": "ItemNeck",
-    "name": "LSCG_ReleaseCollar"
+    "name": "LSCG_ReleaseCollar",
+    "prerequisites": [
+      "ZoneAccessible",
+      "UseHands",
+      "TargetIsCollarGrabbed"
+    ]
   },
   {
     "key": "ChatOther-ItemMouth-LSCG_ReleaseMouth",
     "source": "lscg",
     "self": false,
     "group": "ItemMouth",
-    "name": "LSCG_ReleaseMouth"
+    "name": "LSCG_ReleaseMouth",
+    "prerequisites": [
+      "ZoneAccessible",
+      "UseHands",
+      "TargetIsHandGagged"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth-LSCG_ReleaseMouth",
     "source": "lscg",
     "self": true,
     "group": "ItemMouth",
-    "name": "LSCG_ReleaseMouth"
+    "name": "LSCG_ReleaseMouth",
+    "prerequisites": [
+      "ZoneAccessible",
+      "UseHands",
+      "TargetIsHandGagged"
+    ]
   },
   {
     "key": "ChatOther-ItemHead-LSCG_ReleaseMouth",
     "source": "lscg",
     "self": false,
     "group": "ItemHead",
-    "name": "LSCG_ReleaseMouth"
+    "name": "LSCG_ReleaseMouth",
+    "prerequisites": [
+      "ZoneAccessible",
+      "UseHands",
+      "TargetIsHandGagged"
+    ]
   },
   {
     "key": "ChatSelf-ItemHead-LSCG_ReleaseMouth",
     "source": "lscg",
     "self": true,
     "group": "ItemHead",
-    "name": "LSCG_ReleaseMouth"
+    "name": "LSCG_ReleaseMouth",
+    "prerequisites": [
+      "ZoneAccessible",
+      "UseHands",
+      "TargetIsHandGagged"
+    ]
   },
   {
     "key": "ChatOther-ItemMouth-LSCG_GrabTongueWithFoot",
     "source": "lscg",
     "self": false,
     "group": "ItemMouth",
-    "name": "LSCG_GrabTongueWithFoot"
+    "name": "LSCG_GrabTongueWithFoot",
+    "prerequisites": [
+      "ZoneAccessible",
+      "UseFeet",
+      "TargetCanUseTongue",
+      "TargetCanToeTongueGrab"
+    ]
   },
   {
     "key": "ChatOther-ItemMouth-LSCG_ReleaseFootGrabbedTongue",
     "source": "lscg",
     "self": false,
     "group": "ItemMouth",
-    "name": "LSCG_ReleaseFootGrabbedTongue"
+    "name": "LSCG_ReleaseFootGrabbedTongue",
+    "prerequisites": [
+      "ZoneAccessible",
+      "UseFeet",
+      "TargetTongueIsToeGrabbed"
+    ]
   },
   {
     "key": "ChatOther-ItemPelvis-LSCG_Tug",
     "source": "lscg",
     "self": false,
     "group": "ItemPelvis",
-    "name": "LSCG_Tug"
+    "name": "LSCG_Tug",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "ZoneNaked",
+      "HasCrotchRope"
+    ]
   },
   {
     "key": "ChatSelf-ItemPelvis-LSCG_Tug",
     "source": "lscg",
     "self": true,
     "group": "ItemPelvis",
-    "name": "LSCG_Tug"
+    "name": "LSCG_Tug",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "ZoneNaked",
+      "HasCrotchRope"
+    ]
   },
   {
     "key": "ChatOther-ItemEars-LSCG_Flick",
     "source": "lscg",
     "self": false,
     "group": "ItemEars",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatSelf-ItemEars-LSCG_Flick",
     "source": "lscg",
     "self": true,
     "group": "ItemEars",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatOther-ItemNose-LSCG_Flick",
     "source": "lscg",
     "self": false,
     "group": "ItemNose",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatSelf-ItemNose-LSCG_Flick",
     "source": "lscg",
     "self": true,
     "group": "ItemNose",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatOther-ItemNipples-LSCG_Flick",
     "source": "lscg",
     "self": false,
     "group": "ItemNipples",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatSelf-ItemNipples-LSCG_Flick",
     "source": "lscg",
     "self": true,
     "group": "ItemNipples",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatOther-ItemButt-LSCG_Flick",
     "source": "lscg",
     "self": false,
     "group": "ItemButt",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatSelf-ItemButt-LSCG_Flick",
     "source": "lscg",
     "self": true,
     "group": "ItemButt",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatOther-ItemBoots-LSCG_Flick",
     "source": "lscg",
     "self": false,
     "group": "ItemBoots",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatSelf-ItemBoots-LSCG_Flick",
     "source": "lscg",
     "self": true,
     "group": "ItemBoots",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatOther-ItemHead-LSCG_Flick",
     "source": "lscg",
     "self": false,
     "group": "ItemHead",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatSelf-ItemHead-LSCG_Flick",
     "source": "lscg",
     "self": true,
     "group": "ItemHead",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatOther-ItemNeck-LSCG_Flick",
     "source": "lscg",
     "self": false,
     "group": "ItemNeck",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatSelf-ItemNeck-LSCG_Flick",
     "source": "lscg",
     "self": true,
     "group": "ItemNeck",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatOther-ItemLegs-LSCG_Flick",
     "source": "lscg",
     "self": false,
     "group": "ItemLegs",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatSelf-ItemLegs-LSCG_Flick",
     "source": "lscg",
     "self": true,
     "group": "ItemLegs",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatOther-ItemFeet-LSCG_Flick",
     "source": "lscg",
     "self": false,
     "group": "ItemFeet",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatSelf-ItemFeet-LSCG_Flick",
     "source": "lscg",
     "self": true,
     "group": "ItemFeet",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatOther-ItemVulvaPiercings-LSCG_Flick",
     "source": "lscg",
     "self": false,
     "group": "ItemVulvaPiercings",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatSelf-ItemVulvaPiercings-LSCG_Flick",
     "source": "lscg",
     "self": true,
     "group": "ItemVulvaPiercings",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatOther-ItemGlans-LSCG_Flick",
     "source": "lscg",
     "self": false,
     "group": "ItemGlans",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatSelf-ItemGlans-LSCG_Flick",
     "source": "lscg",
     "self": true,
     "group": "ItemGlans",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatOther-ItemVulva-LSCG_Flick",
     "source": "lscg",
     "self": false,
     "group": "ItemVulva",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatSelf-ItemVulva-LSCG_Flick",
     "source": "lscg",
     "self": true,
     "group": "ItemVulva",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatOther-ItemPenis-LSCG_Flick",
     "source": "lscg",
     "self": false,
     "group": "ItemPenis",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatSelf-ItemPenis-LSCG_Flick",
     "source": "lscg",
     "self": true,
     "group": "ItemPenis",
-    "name": "LSCG_Flick"
+    "name": "LSCG_Flick",
+    "prerequisites": [
+      "UseHands",
+      "ZoneAccessible",
+      "CanCustomFlick"
+    ]
   },
   {
     "key": "ChatOther-ItemArms-LSCG_Chomp",
     "source": "lscg",
     "self": false,
     "group": "ItemArms",
-    "name": "LSCG_Chomp"
+    "name": "LSCG_Chomp",
+    "prerequisites": [
+      "ZoneAccessible",
+      "UseMouth",
+      "CanChomp"
+    ]
   },
   {
     "key": "ChatOther-ItemFeet-LSCG_Chomp",
     "source": "lscg",
     "self": false,
     "group": "ItemFeet",
-    "name": "LSCG_Chomp"
+    "name": "LSCG_Chomp",
+    "prerequisites": [
+      "ZoneAccessible",
+      "UseMouth",
+      "CanChomp"
+    ]
   },
   {
     "key": "ChatOther-ItemButt-LSCG_Chomp",
     "source": "lscg",
     "self": false,
     "group": "ItemButt",
-    "name": "LSCG_Chomp"
+    "name": "LSCG_Chomp",
+    "prerequisites": [
+      "ZoneAccessible",
+      "UseMouth",
+      "CanChomp"
+    ]
   },
   {
     "key": "ChatOther-ItemNeck-LSCG_Chomp",
     "source": "lscg",
     "self": false,
     "group": "ItemNeck",
-    "name": "LSCG_Chomp"
+    "name": "LSCG_Chomp",
+    "prerequisites": [
+      "ZoneAccessible",
+      "UseMouth",
+      "CanChomp"
+    ]
   },
   {
     "key": "ChatOther-ItemArms-LSCG_ReleaseChomp",
     "source": "lscg",
     "self": false,
     "group": "ItemArms",
-    "name": "LSCG_ReleaseChomp"
+    "name": "LSCG_ReleaseChomp",
+    "prerequisites": [
+      "IsChomping"
+    ]
   },
   {
     "key": "ChatOther-ItemFeet-LSCG_ReleaseChomp",
     "source": "lscg",
     "self": false,
     "group": "ItemFeet",
-    "name": "LSCG_ReleaseChomp"
+    "name": "LSCG_ReleaseChomp",
+    "prerequisites": [
+      "IsChomping"
+    ]
   },
   {
     "key": "ChatOther-ItemButt-LSCG_ReleaseChomp",
     "source": "lscg",
     "self": false,
     "group": "ItemButt",
-    "name": "LSCG_ReleaseChomp"
+    "name": "LSCG_ReleaseChomp",
+    "prerequisites": [
+      "IsChomping"
+    ]
   },
   {
     "key": "ChatOther-ItemNeck-LSCG_ReleaseChomp",
     "source": "lscg",
     "self": false,
     "group": "ItemNeck",
-    "name": "LSCG_ReleaseChomp"
+    "name": "LSCG_ReleaseChomp",
+    "prerequisites": [
+      "IsChomping"
+    ]
   },
   {
     "key": "ChatOther-ItemMouth-LSCG_SwallowLoad",
     "source": "lscg",
     "self": false,
     "group": "ItemMouth",
-    "name": "LSCG_SwallowLoad"
+    "name": "LSCG_SwallowLoad",
+    "prerequisites": [
+      "ZoneAccessible",
+      "TargetCanUseTongue",
+      "SourceCanSwallowSplatter"
+    ]
   },
   {
     "key": "ChatSelf-ItemMouth-LSCG_SwallowLoad",
     "source": "lscg",
     "self": true,
     "group": "ItemMouth",
-    "name": "LSCG_SwallowLoad"
+    "name": "LSCG_SwallowLoad",
+    "prerequisites": [
+      "ZoneAccessible",
+      "TargetCanUseTongue",
+      "SourceCanSwallowSplatter"
+    ]
   },
   {
     "key": "ChatOther-ItemHands-LSCG_HighFive",
     "source": "lscg",
     "self": false,
     "group": "ItemHands",
-    "name": "LSCG_HighFive"
+    "name": "LSCG_HighFive",
+    "prerequisites": [
+      "UseHands",
+      "CanHighFive"
+    ]
   },
   {
     "key": "ChatSelf-ItemHands-LSCG_HighFive",
     "source": "lscg",
     "self": true,
     "group": "ItemHands",
-    "name": "LSCG_HighFive"
+    "name": "LSCG_HighFive",
+    "prerequisites": [
+      "UseHands",
+      "CanHighFive"
+    ]
   }
 ]

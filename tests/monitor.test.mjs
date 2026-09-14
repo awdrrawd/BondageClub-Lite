@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createMonitor, summarize} from '../public/_monitor.js';
+import {createMonitor as actualMonitor, summarize, historyQuery, summarizeHistory} from '../public/_monitor.js';
+// Existing 24h tests isolate the optional history request.
+const createMonitor=options=>actualMonitor({...options,fetcher:(url,init)=>JSON.parse(init.body).query.startsWith('query History') ? Promise.resolve(Response.json({errors:[{message:'history unavailable'}]})) : options.fetcher(url,init)});
 const date=Date.parse('2026-09-13T12:00:00Z');
 const env={MONITOR_ENABLED:'true',MONITOR_ACCOUNT_ID:'a'.repeat(32),MONITOR_API_TOKEN:'private-token',MONITOR_SCRIPT_NAME:'private-script'};
 const account={total:[{sum:{requests:100,errors:2},quantiles:{cpuTimeP50:150,cpuTimeP99:800}}],today:[{sum:{requests:20,errors:0}}],hours:[{dimensions:{datetimeHour:'2026-09-13T11:00:00Z',scriptName:'private-script'},sum:{requests:20,errors:0},secret:'do-not-publish'}]};
@@ -56,5 +58,45 @@ test('failure categories expose no raw upstream messages',async()=>{
   const result=await (await monitor(request(),env,'Relay')).json();
   assert.equal(result.reason,reason);
   assert.ok(!JSON.stringify(result).includes('private-token'));
+ }
+});
+
+test('monitor rejects redirects without forwarding the analytics token',async()=>{
+ let calls=0;
+ const monitor=createMonitor({clock:()=>date,fetcher:async(url,options)=>{
+  calls++;assert.equal(options.redirect,'manual');
+  return new Response(null,{status:302,headers:{Location:'https://other.example/'}});
+ }});
+ const data=await (await monitor(request(),env,'Lite')).json();
+ assert.equal(calls,1);assert.equal(data.state,'unavailable');assert.equal(data.reason,'upstream_http');
+});
+
+test('history splits thirty complete UTC days into non-overlapping windows no longer than a week',()=>{
+ const {variables,query}=historyQuery('pagesFunctionsInvocationsAdaptiveGroups',date);
+ assert.equal(variables.e0,'2026-09-13T00:00:00.000Z');
+ assert.equal(variables.s4,'2026-08-14T00:00:00.000Z');
+ for(let i=0;i<5;i++) {
+  assert.ok(Date.parse(variables.e0)>=Date.parse(variables['e'+i]));
+  assert.ok(Date.parse(variables['e'+i])-Date.parse(variables['s'+i])<=7*86400000);
+  if(i)assert.equal(variables['e'+i],variables['s'+(i-1)]);
+ }
+ const rows=Object.fromEntries(Array.from({length:5},(_,i)=>['p'+i,[{sum:{requests:i===4?20:70,errors:1}}]]));
+ const result=summarizeHistory(rows,variables);
+ assert.equal(result.week.dailyAverage,10);assert.equal(result.month.dailyAverage,10);
+ assert.equal(result.month.errors,5);
+ assert.ok(query.includes('$account: String'));
+ assert.equal(summarizeHistory(Object.fromEntries(Array.from({length:5},(_,i)=>['p'+i,[]])),variables).month.dailyAverage,null);
+ assert.throws(()=>summarizeHistory({},variables));
+});
+test('history failure preserves current metrics and success returns real averages',async()=>{
+ for(const fails of [true,false]) {
+ const monitor=actualMonitor({clock:()=>date,fetcher:async(url,init)=>{
+  if(JSON.parse(init.body).query.startsWith('query History'))return Response.json(fails?{errors:[{message:'private history failure'}]}:{data:{viewer:{accounts:[Object.fromEntries(Array.from({length:5},(_,i)=>['p'+i,[{sum:{requests:30,errors:0}}]]))]}}});
+  return Response.json({data:{viewer:{accounts:[account]}}});
+ }});
+ const result=await (await monitor(request(),env,'Lite')).json();
+ assert.equal(result.state,'ready');assert.equal(result.requests,100);
+ assert.equal(result.history.state,fails?'unavailable':'ready');
+ if(!fails)assert.equal(result.history.month.dailyAverage,5);
  }
 });

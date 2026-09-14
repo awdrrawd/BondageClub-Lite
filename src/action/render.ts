@@ -31,7 +31,8 @@ export function renderAction(content: string, type: string, dictionary: Dictiona
     if (literal !== undefined) return literal;
     const key = type === "ServerMessage" ? `ServerMessage${content}` : content;
     const fallback = content === "ActionUse" ? t("action.use") : content === "ActionRemove" ? t("action.remove") : content === "ActionSwap" ? t("action.swap") : content;
-    const template = (/-LSCG_/.test(content) && Object.hasOwn(catalog, content) ? catalog[content] : undefined) ?? embeddedAction(content, type, dictionary) ?? (Object.hasOwn(catalog, key) ? catalog[key] : Object.hasOwn(catalog, content) ? catalog[content] : fallback);
+    const known = Object.hasOwn(catalog, key) ? catalog[key] : Object.hasOwn(catalog, content) ? catalog[content] : undefined;
+    const template = (known && !/MISSING TEXT|MISSING ACTIVITY|STRING_RETRIEVAL_FAILED/.test(known) ? known : undefined) ?? embeddedAction(content, type, dictionary) ?? fallback;
     const entries = dictionary.map(entry => {
       const group = entry.GroupName ?? entry.AssetGroupName;
       if (entry.Tag && typeof entry.TextToLookUp === "string") return { ...entry, Text: catalog[entry.TextToLookUp] || entry.TextToLookUp };

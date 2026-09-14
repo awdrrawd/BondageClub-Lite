@@ -31,6 +31,31 @@ export function summarize(account, now, label) {
     cpuP50Us:number(total?.quantiles?.cpuTimeP50), cpuP99Us:number(total?.quantiles?.cpuTimeP99),
     todayRequests:number(today?.sum?.requests), hours};
 }
+// Five windows of at most seven complete UTC days respect Pages query limits.
+export function historyQuery(dataset, now) {
+  const end = Date.parse(new Date(now).toISOString().slice(0,10)+'T00:00:00Z');
+  const type = dataset === 'pagesFunctionsInvocationsAdaptiveGroups' ? 'String' : 'string';
+  const variables = {}, fields = [], declarations = [];
+  for (let i=0; i<5; i++) {
+    variables[`s${i}`]=new Date(end-Math.min((i+1)*7,30)*86400000).toISOString();
+    variables[`e${i}`]=new Date(end-i*7*86400000).toISOString();
+    declarations.push(`$s${i}: ${type}`,`$e${i}: ${type}`);
+    fields.push(`p${i}: ${dataset}(limit: 1, filter: {scriptName: $script, datetime_geq: $s${i}, datetime_lt: $e${i}}) {sum {requests errors}}`);
+  }
+  return {query:`query History($account: ${type}, $script: ${type}, ${declarations.join(',')}) {viewer {accounts(filter: {accountTag: $account}) {${fields.join(' ')}}}}`,variables};
+}
+export function summarizeHistory(account, variables) {
+  const parts=Array.from({length:5},(_,i)=>account?.[`p${i}`]);
+  if (parts.some(rows=>!Array.isArray(rows)||rows.length>1)) throw new Error('history shape');
+  const period=(rows,days,from)=>{
+    const present=rows.filter(part=>part.length);
+    const sum=key=>present.length && present.every(part=>number(part[0]?.sum?.[key])!==null)
+      ? present.reduce((total,part)=>total+part[0].sum[key],0) : null;
+    const requests=sum('requests'),errors=sum('errors');
+    return {days,from,to:variables.e0,requests,errors,dailyAverage:requests===null?null:requests/days};
+  };
+  return {state:'ready',week:period(parts.slice(0,1),7,variables.s0),month:period(parts,30,variables.s4)};
+}
 export function createMonitor({fetcher=(...args)=>fetch(...args), clock=()=>Date.now()}={}) {
   // Cache and single-flight are per isolate; edge cache also shares across isolates in a location.
   let memo, pending, configKey;
@@ -54,7 +79,7 @@ export function createMonitor({fetcher=(...args)=>fetch(...args), clock=()=>Date
       // A configuration fingerprint prevents serving a previous project's cached metrics.
       const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(key));
       const fingerprint=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');
-      const cacheKey=new Request(`${url.origin}/__monitor_cache_v2/${fingerprint}`);
+      const cacheKey=new Request(`${url.origin}/__monitor_cache_v4/${fingerprint}`);
       const cache=globalThis.caches?.default;
       try {
         const hit=await cache?.match(cacheKey);
@@ -64,13 +89,27 @@ export function createMonitor({fetcher=(...args)=>fetch(...args), clock=()=>Date
           if (expires>clock()) return {data,expires};
         }
       } catch { /* Cache is an optimization, not an availability requirement. */ }
+      const historyRequest = historyQuery(dataset,now);
+      const historyPromise = (async()=>{
+        try {
+          const res=await fetcher('https://api.cloudflare.com/client/v4/graphql',{
+            method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
+            body:JSON.stringify({query:historyRequest.query,variables:{...historyRequest.variables,account,script}}),
+            signal:AbortSignal.timeout(8000),redirect:'manual',
+          });
+          if(!res.ok) throw new Error('history HTTP');
+          const body=await res.json();
+          if(body.errors?.length) throw new Error('history query');
+          return summarizeHistory(body.data?.viewer?.accounts?.[0],historyRequest.variables);
+        } catch { return {state:'unavailable'}; }
+      })();
       let data, reason = 'network';
       try {
         const end=new Date(now).toISOString();
         const res=await fetcher('https://api.cloudflare.com/client/v4/graphql',{
           method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
           body:JSON.stringify({query,variables:{account,script,start:new Date(now-86400000).toISOString(),today:end.slice(0,10)+'T00:00:00.000Z',end}}),
-          signal:AbortSignal.timeout(10000),redirect:'error',
+          signal:AbortSignal.timeout(10000),redirect:'manual',
         });
         reason = res.status === 401 || res.status === 403 ? 'authorization' : res.status === 429 ? 'rate_limit' : 'upstream_http';
         if (!res.ok) throw new Error('upstream');
@@ -89,6 +128,8 @@ export function createMonitor({fetcher=(...args)=>fetch(...args), clock=()=>Date
         // Never send CF errors, token, script identifiers or raw response fields to visitors.
         data={state:'unavailable',reason,project:label,updatedAt:new Date(now).toISOString()};
       }
+      const history = await historyPromise;
+      if(data.state === 'ready' || data.state === 'no_data') data.history=history;
       try { await cache?.put(cacheKey,new Response(JSON.stringify(data),{headers:{'Content-Type':'application/json','Cache-Control':'public, max-age=300'}})); } catch {}
       return {data,expires:now+TTL};
     })();

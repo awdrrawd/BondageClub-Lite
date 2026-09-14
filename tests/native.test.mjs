@@ -3,6 +3,25 @@ import assert from 'node:assert/strict';
 import { activityReason, activityAvailability, activityInventoryReason, createActivityInventoryCheck, definitions } from './native-helper.mjs';
 const character = id => ({ MemberNumber: id, Name: 'Test', AssetFamily: 'Female3DCG', Appearance: [{ Group: 'BodyUpper', Name: definitions.bodies.BodyUpper[0] }], ArousalSettings: { Active: 'Manual', Activity: 'z'.repeat(100), Zone: 'f'.repeat(30) } });
 
+test('plugin checks follow source and target inventory, poses and custom state requirements', () => {
+  const actor=character(1), target=character(2);
+  const check = pre => createActivityInventoryCheck(actor,target)('ItemHead',[pre]);
+  assert.equal(check('CanHeadbutt'),null);
+  assert.equal(check('TargetIsHandLeashed'),'native.unsupported');
+  assert.equal(check('HasCrotchRope'),'native.blocked');
+  actor.Appearance.push({Group:'ItemHood',Name:'Custom',Property:{Effect:['FixedHead','BlindNormal']}});
+  assert.equal(check('CanHeadbutt'),'native.blocked');
+  assert.equal(check('CanLook'),'native.blocked');
+  assert.equal(check('ItemHoodCovered'),'native.blocked');
+  assert.equal(check('TargetItemHoodCovered'),null);
+  assert.equal(check('NotKneeling'),null);
+  actor.ActivePose=['Kneel'];
+  assert.equal(check('NotKneeling'),'native.blocked');
+  assert.equal(check('Luzi_IsKneeling'),null);
+  target.Appearance.push({Group:'ItemPelvis',Name:'Custom',Property:{Effect:['CrotchRope']}});
+  assert.equal(check('HasCrotchRope'),null);
+});
+
 test('Lite actor restraint policy retains actual tool, target and refusal checks', () => {
   const a=character(1),b=character(2);
   a.Appearance.push({Group:'ItemArms',Name:'Custom',Property:{Effect:['Block','MergedFingers','Freeze','BlockMouth','Enclose']}});

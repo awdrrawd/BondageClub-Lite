@@ -2,9 +2,14 @@
 <nav><a href="/">← 首頁 / Home</a><button id="language" type="button">English</button></nav>
 <p class="eyebrow">CLOUDFLARE · OPERATOR METRICS</p><h1 id="title">負載監看</h1><p id="intro">供維護者查看用量與負載，也開放其他人參考。</p>
 <div class="toolbar"><strong id="project">—</strong><button id="refresh" type="button">重新整理</button></div><p id="status" role="status">讀取中…</p>
-<section id="cards" aria-label="Metrics"></section>
-<h2 id="chartTitle">最近 24 小時請求量</h2><div id="chart" role="img"></div>
+<p id="updated">—</p><div id="view-tabs" role="tablist" aria-label="Analytics views">
+<button type="button" id="tab-overview" role="tab" aria-controls="view-panel" aria-selected="true" data-view="overview">總覽</button>
+<button type="button" id="tab-history" role="tab" aria-controls="view-panel" aria-selected="false" tabindex="-1" data-view="history">週月統計</button>
+<button type="button" id="tab-errors" role="tab" aria-controls="view-panel" aria-selected="false" tabindex="-1" data-view="errors">錯誤</button>
+<button type="button" id="tab-performance" role="tab" aria-controls="view-panel" aria-selected="false" tabindex="-1" data-view="performance">效能</button>
+</div><div id="view-panel" role="tabpanel" aria-labelledby="tab-overview"><section id="cards" aria-label="Metrics"></section>
+<section class="panel" id="chart-panel"><h2 id="chartTitle">最近 24 小時請求量</h2><div id="chart" role="img"></div>
 <details><summary id="tableTitle">每小時數據（UTC）</summary><div class="table-wrap"><table><thead><tr><th id="hourLabel">UTC</th><th id="requestsLabel">請求</th><th id="errorsLabel">錯誤</th></tr></thead><tbody id="rows"></tbody></table></div></details>
-<p id="updated">—</p><p id="limits" class="muted"></p>
-<footer><a id="dashboard" href="https://dash.cloudflare.com/" target="_blank" rel="noopener noreferrer">Cloudflare 管理台 ↗</a><a id="integration" href="./guide.html">接入／移植說明</a><a href="https://bondageclub-lite.pages.dev/monitor/">Lite</a><a href="https://bondageclub-relay.pages.dev/monitor/">Relay</a><a href="https://developers.cloudflare.com/workers/observability/metrics-and-analytics/">Cloudflare docs</a></footer>
+</section><section class="panel"><h2 id="insight-title"></h2><div id="insights"></div></section></div><details class="notes"><summary id="notes-label">統計說明與限制</summary><p id="limits" class="muted"></p></details>
+<footer><a href="./monitor.md">設定文件 / Setup (MD)</a><a id="dashboard" href="https://dash.cloudflare.com/" target="_blank" rel="noopener noreferrer">Cloudflare 管理台 ↗</a><a id="integration" href="./guide.html">接入／移植說明</a><a href="https://bondageclub-lite.pages.dev/monitor/">Lite</a><a href="https://bondageclub-relay.pages.dev/monitor/">Relay</a><a href="https://developers.cloudflare.com/workers/observability/metrics-and-analytics/">Cloudflare docs</a></footer>
 </main></body></html>

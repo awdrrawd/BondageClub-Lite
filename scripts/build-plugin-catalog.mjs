@@ -1,5 +1,5 @@
 // Extract literal dialogue data only: never evaluate plugin source or load its runtime.
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { writeCatalog } from './catalog-utils.mjs';
 import { join } from 'node:path';
 import { parse } from '@babel/parser';
@@ -68,6 +68,13 @@ function echo(dir) {
 echo('../BCJS/echo-activity-ext-main/src/components');
 for (const source of ['xiaosu', 'lscg', 'echo']) {
   const select = catalog => Object.fromEntries(Object.entries(catalog).filter(([key]) => (key.includes('-XSAct_') ? 'xiaosu' : key.includes('-LSCG_') ? 'lscg' : 'echo') === source));
-  writeCatalog(`src/translations/action/${source}`, select(catalogs.en), select(catalogs.zh));
+  const base = select(catalogs.en), localized = select(catalogs.zh);
+  // LSCG has English source only. Preserve the maintained Chinese translations
+  // when refreshing upstream metadata instead of replacing them with English.
+  const file = `src/translations/action/${source}/zh.json`;
+  if (source === 'lscg' && existsSync(file)) {
+    for (const [key, text] of Object.entries(JSON.parse(readFileSync(file, 'utf8')))) if (Object.hasOwn(base, key)) localized[key] = text;
+  }
+  writeCatalog(`src/translations/action/${source}`, base, localized);
   console.log(`${source}: ${Object.keys(select(catalogs.en)).length} literal plugin dialogues`);
 }

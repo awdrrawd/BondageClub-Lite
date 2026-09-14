@@ -366,7 +366,7 @@
   "summon.expired": "Summon expired or is no longer permitted.",
   "private.contacts": "Contacts",
   "afc.inRoom": "Extended lovers {0}",
-  "native.help": "Lite does not disable ordinary interactions because you are bound or gagged. Required items, target access, preferences and room rules still apply. Only available actions appear by default; All actions shows restrictions and skips unimplemented checks. Hover for reasons. Not the full BC engine; cuddling needs confirmation.",
+  "native.help": "Actions check restraints, required items, target access, preferences and room rules. ALL shows unavailable actions without bypassing their checks. Hover for reasons. Actions requiring unavailable plugin state remain disabled. Cuddling needs confirmation.",
   "interaction.allActions": "All actions",
   "interaction.noAvailable": "No available activities for this zone under the current conditions.",
   "interaction.body": "Body part selection diagram",

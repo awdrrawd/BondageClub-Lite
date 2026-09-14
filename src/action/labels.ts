@@ -5,7 +5,7 @@ const partAliases: Record<string, string> = {
 };
 export function canonicalPartGroup(group: string): string { return partAliases[group] || group; }
 export function hasPenis(character: CharacterSummary): boolean {
-  return Boolean(character.Appearance?.some(raw => { const item = raw as { Group?: string; Name?: string }; return item?.Group === "Pussy" && item.Name === "Penis"; }));
+  return Boolean(character.Appearance?.some(raw => { const item = raw as { Group?: string; Name?: string; Asset?: { Name?: string; Group?: { Name?: string } } }; return (item?.Asset?.Group?.Name ?? item?.Group) === "Pussy" && (item?.Asset?.Name ?? item?.Name) === "Penis"; }));
 }
 export function physicalGroup(group: string): string { return group === "ItemPenis" ? "ItemVulva" : group === "ItemGlans" ? "ItemVulvaPiercings" : group; }
 export function textGroup(group: string, character: CharacterSummary): string {

@@ -464,7 +464,7 @@ export class BcLiteClient {
     this.sendChat(`.a ${t(keys[action], [this.state.player?.Nickname || this.state.player?.Name, target.Nickname || target.Name])}`);
   }
 
-  activityOptions(memberNumber: number, compatibility = false, strictActor = false) {
+  activityOptions(memberNumber: number, compatibility = false, strictActor = true) {
     const actor = { ...this.state.player!, ...this.state.characters.find(c => c.MemberNumber === this.state.player?.MemberNumber) };
     const target = this.state.characters.find(c => c.MemberNumber === memberNumber);
     if (!target || !actor.MemberNumber || !this.state.room) return [];
@@ -486,16 +486,21 @@ export class BcLiteClient {
         };
       });
     });
-    const extensions = extensionActivities.filter(entry => entry.self === (actor.MemberNumber === memberNumber) && Object.hasOwn(this.textCatalog, entry.key) && (!["ItemPenis", "ItemGlans"].includes(entry.group) || hasPenis(target))).map(entry => ({
+    const extensionKeys = new Set(extensionActivities.map(entry => entry.key));
+    const extensions = extensionActivities.filter(entry => {
+      if (entry.self !== (actor.MemberNumber === memberNumber) || !Object.hasOwn(this.textCatalog, entry.key)) return false;
+      if (["ItemPenis", "ItemGlans"].includes(entry.group) && !hasPenis(target)) return false;
+      const mapped = textGroup(physicalGroup(entry.group), target);
+      // Anatomical aliases are text variants of one physical target, not duplicate actions.
+      return mapped === entry.group || !extensionKeys.has(entry.key.replace(`-${entry.group}-`, `-${mapped}-`));
+    }).map(entry => ({
       group: physicalGroup(entry.group), name: `${entry.source === "echo" && cuddleNames.includes(entry.name) ? "cuddle" : "text"}:${entry.key}`, groupLabel: this.textCatalog[`DialogGroupName${textGroup(physicalGroup(entry.group), target)}`] || this.textCatalog[`Group.${physicalGroup(entry.group)}`] || entry.group,
       label: entry.name === "钻进怀里" ? t("interaction.cuddleIn") : entry.name === "抱入怀中" ? t("interaction.cuddleHold") : activityLabel(entry.name, physicalGroup(entry.group), target, entry.self, this.textCatalog),
-      reason: !this.canSend() ? "native.data" : permissionReason || (this.state.room!.BlockCategory?.includes("Arousal") || target.ArousalSettings?.Active === "Inactive" ? "native.permission" : this.state.room!.MapType && this.state.room!.MapType !== "Never" ? "native.room" : checkInventory(physicalGroup(entry.group), entry.prerequisites ?? ["ZoneAccessible"])),
+      reason: !this.canSend() || !Array.isArray(actor.Appearance) || !Array.isArray(target.Appearance) ? "native.data" : permissionReason || (this.state.room!.BlockCategory?.includes("Arousal") || target.ArousalSettings?.Active === "Inactive" ? "native.permission" : this.state.room!.MapType && this.state.room!.MapType !== "Never" ? "native.room" : checkInventory(physicalGroup(entry.group), entry.prerequisites ?? ["UnsupportedPluginPrerequisite"])),
       warning: entry.source === "echo" && cuddleNames.includes(entry.name) ? "cuddle.help" : "interaction.textOnly", source: entry.source,
     }));
     for (const option of extensions) {
-      const availability = activityAvailability(option.reason, compatibility);
-      option.reason = availability.reason;
-      if (availability.warning) option.warning = availability.warning;
+      // Plugin runtime prerequisites are eligibility checks, never compatibility warnings.
       if (option.name.startsWith("cuddle:")) { option.reason = this.canSend() ? cuddleReason(this.cuddleSelf(), target) : "native.data"; option.warning = "cuddle.help"; }
     }
     if (this.safetyCurrent?.some(item => item.Group === "ItemMisc" && item.Name === "贴贴")) extensions.unshift({ group: "ItemTorso", name: "cuddle:stop", groupLabel: this.textCatalog["Group.ItemTorso"] || "ItemTorso", label: t("cuddle.stop"), reason: null, warning: "", source: "echo" });
@@ -520,7 +525,9 @@ export class BcLiteClient {
     }
     if (name.startsWith("text:")) {
       const target = this.state.characters.find(c => c.MemberNumber === memberNumber)!;
-      this.sendChat(`.a ${extensionText(name.slice(5), group, this.state.player!, target, this.textCatalog)}`);
+      const actor = { ...this.state.player!, ...this.state.characters.find(c => c.MemberNumber === this.state.player!.MemberNumber) };
+      const entry = extensionActivities.find(entry => entry.key === name.slice(5))!;
+      this.sendChat(`.a ${extensionText(entry.key, group, actor, target, this.textCatalog, activityAsset(actor, target, entry.name, entry.prerequisites))}`);
       return;
     }
     if (Date.now() - this.lastChatAt < 350) throw new Error(t("m210"));

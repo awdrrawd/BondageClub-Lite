@@ -3,6 +3,16 @@ import assert from 'node:assert/strict';
 import { literalAction } from './community-helper.mjs';
 import { renderAction } from './action-helper.mjs';
 
+test('known translated plugin messages take priority over embedded sender-language text', () => {
+  for (const suffix of ['LSCG_Bap', 'XSAct_Test', '撇眼']) {
+    const key = `ChatOther-ItemHead-${suffix}`;
+    const dictionary = [{ Tag: `MISSING TEXT IN "ActivityDictionary.csv": ${key}`, Text: 'English fallback' }, { Tag: 'SourceCharacter', Text: 'Alice' }];
+    assert.equal(renderAction(key, 'Activity', dictionary, {[key]: 'SourceCharacter 輕拍。'}), 'Alice 輕拍。');
+    assert.equal(renderAction(key, 'Activity', dictionary, {}), 'English fallback');
+    assert.equal(renderAction(key, 'Activity', dictionary, {[key]: 'MISSING ACTIVITY'}), 'English fallback');
+  }
+});
+
 // Wire format from LSCG src/utils.ts SendAction, not an activity CSV fallback.
 function lscgDictionary(text) {
   return [

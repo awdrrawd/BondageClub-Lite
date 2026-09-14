@@ -366,7 +366,7 @@
   "summon.expired": "L'invocation a expiré ou n'est plus autorisée.",
   "private.contacts": "Contacts",
   "afc.inRoom": "Amoureux étendus {0}",
-  "native.help": "Lite ne désactive pas les interactions ordinaires du seul fait que vous êtes attaché ou bâillonné. Les objets requis, l’accès à la cible, les préférences et les règles du salon restent applicables. Par défaut, seules les actions disponibles apparaissent. « Toutes les actions » affiche les restrictions et ignore les vérifications non implémentées. Survolez une action pour en connaître la raison. Lite ne reproduit pas tout le moteur BC ; les câlins nécessitent une confirmation.",
+  "native.help": "Les actions vérifient les entraves, les objets requis, les zones ciblées, les préférences et les règles du salon. ALL affiche les actions indisponibles sans ignorer les conditions. Survolez une action pour voir la raison. Les actions dont l’état du plugin est inconnu restent désactivées. Les câlins nécessitent une confirmation.",
   "interaction.allActions": "Toutes les actions",
   "interaction.noAvailable": "Aucune activité disponible pour cette zone dans les conditions actuelles.",
   "interaction.body": "Schéma de sélection des parties du corps",

@@ -68,8 +68,8 @@ function inventoryState(character: CharacterSummary) {
 }
 
 /** Resolve the actual worn item again at send time; never use an inventory-only item. */
-export function activityAsset(actor: CharacterSummary, target: CharacterSummary, name: string) {
-  const pre = nativeActivities.find(activity => activity.name === name)?.prerequisites.find(pre => /^(Target)?Needs-/.test(pre));
+export function activityAsset(actor: CharacterSummary, target: CharacterSummary, name: string, prerequisites?: string[]) {
+  const pre = (prerequisites ?? nativeActivities.find(activity => activity.name === name)?.prerequisites)?.find(pre => /^(Target)?Needs-/.test(pre));
   if (!pre) return null;
   const item = inventoryState(pre.startsWith("TargetNeeds-") ? target : actor).activityItem(pre.replace(/^(Target)?Needs-/, ""));
   return item ? { Tag: "ActivityAsset", AssetName: item.name, GroupName: item.group } : null;
@@ -78,6 +78,7 @@ export function activityAsset(actor: CharacterSummary, target: CharacterSummary,
 /** Check known item effects; unknown assets never invalidate unrelated activities. */
 export function createActivityInventoryCheck(actor: CharacterSummary, target: CharacterSummary, relaxActorRestraints = false) {
   const a = inventoryState(actor), b = inventoryState(target);
+  const kneels = (character: CharacterSummary, state: ReturnType<typeof inventoryState>) => state.effects.has("ForceKneel") || (character.ActivePose || []).some(pose => ["Kneel", "KneelingSpread"].includes(pose));
   return (group: string, prerequisites: string[] = []): string | null => {
   const zone = (definitions.zones as Record<string, number>)[group];
   const code = zone === undefined ? NaN : (target.ArousalSettings?.Zone?.charCodeAt(zone) ?? NaN) - 100;
@@ -94,6 +95,31 @@ export function createActivityInventoryCheck(actor: CharacterSummary, target: Ch
     if (relaxActorRestraints && ["UseMouth", "UseTongue", "UseHands", "UseArms", "UseFeet", "TargetZoneAccessible"].includes(pre)) continue;
     let allowed: boolean | undefined;
     switch (pre) {
+      case "CanHeadbutt": allowed = !a.effects.has("FixedHead"); break;
+      case "HasCrotchRope": allowed = b.effects.has("CrotchRope"); break;
+      case "ItemHoodCovered": allowed = !a.hasItem("ItemHood"); break;
+      case "TargetItemHoodCovered": allowed = !b.hasItem("ItemHood"); break;
+      case "ItemNoseCovered": allowed = !a.hasItem("ItemNose"); break;
+      case "CanLook": case "Luzi_NotBlind": allowed = ![...a.effects].some(effect => /^Blind/.test(effect)); break;
+      case "Kneeling": case "Luzi_IsKneeling": allowed = kneels(actor, a); break;
+      case "NotKneeling": allowed = !kneels(actor, a); break;
+      case "Luzi_IsAllFours": allowed = (actor.ActivePose || []).includes("AllFours"); break;
+      case "Luzi_TargetAllFours": allowed = (target.ActivePose || []).includes("AllFours"); break;
+      case "Luzi_KneelOrAllFours": allowed = kneels(actor, a) || (actor.ActivePose || []).includes("AllFours"); break;
+      case "Luzi_TargetKneelOrAllFours": allowed = kneels(target, b) || (target.ActivePose || []).includes("AllFours"); break;
+      case "Luzi_HasBreast": allowed = a.hasItem("BodyUpper", ["Small", "Normal", "Large", "XLarge"]); break;
+      case "Luzi_TargetHasBreast": allowed = b.hasItem("BodyUpper", ["Small", "Normal", "Large", "XLarge"]); break;
+      case "Luzi_HasKennel": allowed = b.hasItem("ItemDevices", ["Kennel"]); break;
+      case "Luzi_TargetHasItemVulva": allowed = b.hasItem("ItemVulva"); break;
+      case "Luzi_HasPetSuit": allowed = a.hasItem("ItemArms", ["ShinyPetSuit", "BitchSuit", "StrictLeatherPetCrawler", "乳胶宠物拘束服"])
+        || (a.hasItem("ItemArms", ["宠物服上", "PawPaddedPetsuitArms", "StrappedPetsuitArms"]) && a.hasItem("ItemLegs", ["宠物服下", "PawPaddedPetsuitLegs", "StrappedPetsuitLegs"])); break;
+      case "Luzi_Female": allowed = !a.hasItem("Pussy", ["Penis"]); break;
+      case "Luzi_TargetFemale": allowed = !b.hasItem("Pussy", ["Penis"]); break;
+      case "HasPenis": case "Luzi_HasPenis": allowed = a.hasItem("Pussy", ["Penis"]); break;
+      case "TargetHasPenis": allowed = b.hasItem("Pussy", ["Penis"]); break;
+      case "HasVagina": allowed = a.hasItem("Pussy", ["Pussy1", "Pussy2", "Pussy3"]); break;
+      case "CanUsePenis": allowed = !a.hasItem("Pussy", ["Penis"]) || a.naked("ItemVulva"); break;
+      case "VulvaEmpty": allowed = group !== "ItemVulva" || (b.hasItem("Pussy", ["Pussy1", "Pussy2", "Pussy3"]) && !b.effects.has("FillVulva")); break;
       case "UseMouth": allowed = !a.effects.has("BlockMouth") && !gagged; break;
       case "UseTongue": allowed = !a.effects.has("BlockMouth"); break;
       case "TargetMouthBlocked": allowed = b.effects.has("BlockMouth"); break;
@@ -102,7 +128,7 @@ export function createActivityInventoryCheck(actor: CharacterSummary, target: Ch
       case "UseHands": allowed = hands && !a.effects.has("MergedFingers"); break;
       case "UseArms": allowed = arms; break;
       case "CantUseArms": allowed = !arms; break;
-      case "UseFeet": allowed = walk; break;
+      case "UseFeet": case "UseLegs": case "Luzi_CanWalk": allowed = walk; break;
       case "CantUseFeet": allowed = !walk; break;
       case "TargetCanUseTongue": allowed = !b.effects.has("BlockMouth"); break;
       case "TargetMouthOpen": allowed = group !== "ItemMouth" || !b.groups.has("ItemMouth") || b.effects.has("OpenMouth"); break;

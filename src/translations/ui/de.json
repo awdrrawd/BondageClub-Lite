@@ -366,7 +366,7 @@
   "summon.expired": "Vorladung abgelaufen oder nicht mehr zulässig.",
   "private.contacts": "Kontakte",
   "afc.inRoom": "Erweiterte Liebhaber {0}",
-  "native.help": "Lite deaktiviert gewöhnliche Interaktionen nicht allein wegen Fesseln oder Knebeln. Benötigte Gegenstände, Zugriff auf das Ziel, Vorlieben und Raumregeln gelten weiterhin. Standardmäßig erscheinen nur verfügbare Aktionen. „Alle Aktionen“ zeigt Einschränkungen und überspringt nicht implementierte Prüfungen. Fahre mit dem Mauszeiger darüber, um die Gründe zu sehen. Lite bildet nicht die gesamte BC-Engine nach; Kuscheln erfordert eine Bestätigung.",
+  "native.help": "Aktionen prüfen Fesseln, benötigte Gegenstände, Zielbereiche, Vorlieben und Raumregeln. ALL zeigt nicht verfügbare Aktionen, ohne Prüfungen zu umgehen. Gründe erscheinen beim Darüberfahren. Aktionen mit unbekanntem Pluginzustand bleiben deaktiviert. Kuscheln erfordert eine Bestätigung.",
   "interaction.allActions": "Alle Aktionen",
   "interaction.noAvailable": "Unter den aktuellen Bedingungen sind für diese Zone keine Aktivitäten verfügbar.",
   "interaction.body": "Diagramm zur Auswahl von Körperteilen",

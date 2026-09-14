@@ -285,7 +285,7 @@ test('compatibility sends clothed online activity but never overrides explicit p
   assert.equal(f.sent.at(-1).payload.Type, 'Activity');
   actor.Appearance.push({ Group:'ItemMouth', Name:'BallGag', Property:{ Effect:[] } });
   f.handlers.get('ChatRoomSync')({ Name:'Room', Character:[actor, target] });
-  assert.equal(f.client.activityOptions(55, true).find(value => value.name === 'Whisper').reason, null);
+  assert.equal(f.client.activityOptions(55, true).find(value => value.name === 'Whisper').reason, 'native.blocked');
   actor.Appearance.pop();
   target.ArousalSettings = { ...base.ArousalSettings, Activity: 'd'.repeat(100) };
   f.handlers.get('ChatRoomSync')({ Name: 'Room', Character: [actor, target] });
@@ -294,6 +294,26 @@ test('compatibility sends clothed online activity but never overrides explicit p
   f.handlers.get('ChatRoomSync')({ Name: 'Room', BlockCategory: ['Arousal'], Character: [actor, target] });
   assert.equal(f.client.activityOptions(55, true).find(option => option.name === 'Whisper').reason, 'native.room');
   assert.ok(!f.sent.some(packet => ['AccountUpdate', 'ChatRoomCharacterUpdate'].includes(packet.event)));
+});
+
+test('plugin options and sends share strict checks, including custom prerequisites in ALL mode', async () => {
+  const base={AllowedInteractions:0,Name:'Test',Appearance:[{Group:'BodyUpper',Name:'Normal'}],ArousalSettings:{Active:'Manual',Activity:'z'.repeat(100),Zone:'f'.repeat(30)}};
+  const f=await setup('PROD',true,base);
+  f.client.setTextCatalog(gameCatalog('zh'));
+  const actor={...base,MemberNumber:123}, target={...base,MemberNumber:55};
+  const sync=()=>f.handlers.get('ChatRoomSync')({Name:'Room',Character:[actor,target]});
+  const bap='text:ChatOther-ItemHead-LSCG_Bap', release='text:ChatOther-ItemHands-LSCG_ReleaseHand';
+  sync();
+  assert.equal(f.client.activityOptions(55).find(o=>o.name===bap).reason,null);
+  for(const mode of [false,true]) {
+    assert.equal(f.client.activityOptions(55,mode).find(o=>o.name===release).reason,'native.unsupported');
+    assert.throws(()=>f.client.sendActivity(55,'ItemHands',release,mode));
+  }
+  actor.Appearance=[...base.Appearance,{Group:'ItemArms',Name:'Custom',Property:{Effect:['Block']}}]; sync();
+  for(const mode of [false,true]) {
+    assert.equal(f.client.activityOptions(55,mode).find(o=>o.name===bap).reason,'native.blocked');
+    assert.throws(()=>f.client.sendActivity(55,'ItemHead',bap,mode));
+  }
 });
 
 test('paw activities require the correct wearer in both modes while ordinary automatic-mode activities remain usable', async () => {
@@ -339,7 +359,8 @@ test('unknown plugin appearance does not disable equipment checks, while fresh r
   assert.equal(f.sent.at(-1).payload.Type,'Activity');
   actor.Appearance = [...actor.Appearance,{Group:'ItemMouth',Name:'PluginGag',Property:{Effect:['BlockMouth']}}];
   f.handlers.get('ChatRoomSync')({Name:'Room',Character:[actor,target]});
-  assert.equal(option(true).reason,null);
+  assert.equal(option(true).reason,'native.blocked');
+  assert.throws(()=>f.client.sendActivity(55,'ItemEars','Whisper',true));
   actor.Appearance = base.Appearance;
   target.ArousalSettings = {...base.ArousalSettings,Activity:'d'.repeat(100)};
   f.handlers.get('ChatRoomSync')({Name:'Room',Character:[actor,target]});

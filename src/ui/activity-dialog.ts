@@ -36,8 +36,8 @@ export function openActivityDialog(name: string, getOptions: (compatibility: boo
     for (const control of body.querySelectorAll("[data-body-group]")) control.setAttribute("aria-pressed", String(canonicalPartGroup(control.getAttribute("data-body-group") || "") === group));
     // Prefer an eligible sibling before deduplication, independent of upstream ordering.
     const options = new Map<string, ActivityOption>();
-    for (const option of getOptions(allActions.checked).filter(option => canonicalPartGroup(option.group) === group && (allActions.checked || !option.reason))) {
-      const identity = `${option.source}:${option.name.replace(/(Chat(?:Self|Other))-Item\w+-/, "$1-")}`;
+    for (const option of getOptions(false).filter(option => canonicalPartGroup(option.group) === group && (allActions.checked || !option.reason))) {
+      const identity = `${option.source}:${option.group}:${option.name}`;
       if (!options.has(identity) || (options.get(identity)!.reason && !option.reason)) options.set(identity, option);
     }
     for (const option of options.values()) {
@@ -46,7 +46,7 @@ export function openActivityDialog(name: string, getOptions: (compatibility: boo
       action.textContent = option.label;
       if(option.source && option.source !== "BC"){const ribbon=document.createElement('span');ribbon.className='activity-source';ribbon.textContent=option.source;row.append(ribbon);action.setAttribute('aria-label',`${option.label} (${option.source})`);} action.disabled = Boolean(option.reason);
       action.addEventListener("click", () => {
-        try { if (send(option.group, option.name, allActions.checked) !== false) status.textContent = t("interaction.sent"); }
+        try { if (send(option.group, option.name, false) !== false) status.textContent = t("interaction.sent"); }
         catch (error) { status.textContent = error instanceof Error ? error.message : String(error); }
       }); row.append(action);
       const explanation = option.reason || option.warning;

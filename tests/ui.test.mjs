@@ -332,7 +332,7 @@ test('body families light together, merge actions and show warnings only in tool
   for (const [group,count] of [['ItemMouth3',3],['ItemTorso2',2],['ItemNipplesPiercings',2]]) {
     dialog.querySelector(`[data-body-group="${group}"]`).dispatchEvent(new f.window.Event('click'));
     assert.equal(dialog.querySelectorAll('[aria-pressed="true"]').length,count);
-    assert.equal(dialog.querySelectorAll('.activity-option').length,1);
+    assert.equal(dialog.querySelectorAll('.activity-option').length,group === 'ItemTorso2' ? 2 : 1);
     assert.equal(dialog.querySelector('.activity-option small'),null);
     assert.ok(dialog.querySelector('.activity-option button').title);
   }
@@ -354,7 +354,7 @@ test('all actions defaults off, reveals restrictions without enabling them and r
   assert.equal(dialog.querySelector('.activity-info').getAttribute('aria-expanded'),'false');
   assert.equal(dialog.querySelector('.activity-option button'),null);
   mode.checked=true; mode.dispatchEvent(new f.window.Event('change'));
-  assert.equal(dialog.querySelector('.activity-option button').disabled,false);
+  assert.equal(dialog.querySelector('.activity-option button').disabled,true);
   blocked=true; f.emit({characters:[{MemberNumber:55,Name:'Friend',Appearance:[]}]});
   assert.equal(dialog.querySelector('.activity-option button').disabled,true);
   assert.ok(dialog.querySelector('.activity-option button').title);
@@ -363,11 +363,11 @@ test('all actions defaults off, reveals restrictions without enabling them and r
   assert.match(dialog.querySelector('[role=status]').textContent,/沒有可用動作/);
   blocked=false; f.emit({characters:[{MemberNumber:55,Name:'Friend'}]});
   mode.checked=true; mode.dispatchEvent(new f.window.Event('change'));
-  assert.equal(dialog.querySelector('.activity-option button').disabled,false);
+  assert.equal(dialog.querySelector('.activity-option button').disabled,true);
   await f.window.happyDOM.close();
 });
 
-test('merged all-actions menus prefer a usable sibling even when a blocked sibling appears first', async () => {
+test('all-actions menus retain distinct target groups and their individual restrictions', async () => {
   const f=setup();
   f.client.activityOptions=()=>[
     {group:'ItemTorso2',groupLabel:'軀幹',name:'Pet',label:'撫摸',reason:'native.blocked'},
@@ -378,8 +378,9 @@ test('merged all-actions menus prefer a usable sibling even when a blocked sibli
   const dialog=f.document.querySelector('.activity-dialog');
   const mode=dialog.querySelector('input'); mode.checked=true; mode.dispatchEvent(new f.window.Event('change'));
   dialog.querySelector('[data-body-group="ItemTorso2"]').dispatchEvent(new f.window.Event('click'));
-  assert.equal(dialog.querySelectorAll('.activity-option').length,1);
-  const action=dialog.querySelector('.activity-option button'); assert.equal(action.disabled,false); action.click();
+  assert.equal(dialog.querySelectorAll('.activity-option').length,2);
+  assert.equal(dialog.querySelector('.activity-option button').disabled,true);
+  const action=dialog.querySelector('.activity-option button:not(:disabled)'); action.click();
   assert.deepEqual(f.calls.at(-1),{activity:'Pet',group:'ItemTorso',id:55});
   await f.window.happyDOM.close();
 });

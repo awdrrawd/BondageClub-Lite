@@ -17,11 +17,11 @@
 | 人工更新擴展活動前置條件 | `npm run catalog:rules -- components目錄`（不納入自動同步） |
 | 更新 ECHO 衣物名稱 | `npm run catalog:items`（可傳入 components 目錄） |
 
-`bc/{messages,actions,items,groups}/` 與目前 `action/xiaosu`、`action/lscg`、`action/echo`、`items/echo`、`groups/echo` 是擷取器管理的資料，再擷取會覆寫。不希望被覆寫的貢獻放 `overrides/`；擷取腳本不接觸它。上游更新造成鍵名移除或改動時，人工覆寫也需要核對，不能只依賴舊鍵一直有效。
+`bc/{messages,actions,items,groups}/` 與目前 `action/xiaosu`、`action/echo`、`items/echo`、`groups/echo` 是擷取器管理的資料，再擷取會覆寫。不希望被覆寫的貢獻放 `overrides/`；擷取腳本不接觸它。LSCG 上游只有英文，`action/lscg/zh.json` 為人工補譯，再擷取會保留仍存在的鍵。上游更新造成鍵名移除或改動時，人工覆寫也需要核對，不能只依賴舊鍵一直有效。
 
 ## 英文基底與差異覆寫
 
-每個動作來源的 `en.json` 保存鍵與英文／原始句子。`zh.json` 只存與英文不同的內容：沒有翻譯時不寫該鍵，由英文回退。LSCG 的空 `{}` 中文檔是刻意的，不是遺失資料。不需要新增整份 `bc-messages-xx.json`。
+每個動作來源的 `en.json` 保存鍵與英文／原始句子。`zh.json` 只存與英文不同的內容：沒有翻譯時不寫該鍵，由英文回退。LSCG 的繁中檔包含已收錄動作的訊息與名稱補譯。不需要新增整份 `bc-messages-xx.json`。
 
 例：在 `overrides/zh.json` 合併新增一筆（不要覆蓋其他人的條目）：
 
@@ -35,7 +35,9 @@
 
 優先序：各來源英文＋選定語言 → `overrides/en.json` → `overrides/選定語言.json`。人工英文覆寫會影響所有語言，若只想改中文就只修改中文覆寫。不同來源不可重複宣告英文基底鍵；有意修改已有鍵請使用 overrides。
 
-**封包附帶原文仍優先於靜態表。** 這是為了保留插件動態句子；這類訊息目前不保證跟隨 UI 語言切換。新增靜態翻譯不會蓋掉封包原文，也不會執行插件。未知動態格式應在 `src/action/embedded.ts` 或新的純文字解析模組中支援，並加入測試。
+**已知訊息鍵優先使用字典，未知鍵才使用封包附帶原文。** 這讓 LSCG、XiaoSu 與 ECHO 的已收錄動作能隨語言切換。LSCG 的 `Beep → msg` 完整文字封包仍原樣呈現，避免改寫玩家姓名或任意文字；這類訊息沒有可供翻譯的動作鍵。未知動態格式應在 `src/action/embedded.ts` 或新的純文字解析模組中支援，並加入測試。
+
+動作規則由 `catalog:rules` 從 ECHO、LSCG、XiaoSu 擷取。LSCG 的 `CustomPrereqs` 會追加至一般條件；ECHO 非字串條件保留為未支援條件，不會當成沒有條件。清單與送出前共用檢查，ALL 只揭露不可用項目，不略過檢查。需要插件執行狀態而 Lite 無法確認的動作保持停用。
 
 UI 文案不同於動作差異檔：所有 `ui/*.json` 的鍵與 `{0}` 等數字佔位符必須和 `ui/en.json` 一致。UI 的鍵型別、支援語言列表及偏好驗證由 `src/i18n/index.ts` 管理。語言選單使用各語言自稱，所有字典的 `locale.*` 值保持一致。
 
