@@ -1,5 +1,6 @@
 // Mechanical conversion of BC text resources; no BC executable code or images.
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
+import { bcTextLocales } from './bc-text-locales.mjs';
 import { writeBcCatalog, writeJson, bcCategory, localeDelta } from './catalog-utils.mjs';
 import { resolve } from 'node:path';
 const root = resolve(process.argv[2] || '../BCJS/Bondage-College-master/BondageClub');
@@ -26,7 +27,7 @@ function translation(path) {
 const catalog = {};
 const englishCatalog = {};
 const russianCatalog = {};
-const additionalLocales = { de: 'DE', fr: 'FR', uk: 'UA', 'zh-cn': 'CN', ja: 'JP', ko: 'KR' };
+const additionalLocales = Object.fromEntries(Object.entries(bcTextLocales).filter(([locale]) => !['zh', 'ru'].includes(locale)));
 const additionalCatalogs = Object.fromEntries(Object.keys(additionalLocales).map(locale => [locale, {}]));
 function additionalTranslations(file) {
   return Object.fromEntries(Object.entries(additionalLocales).map(([locale, suffix]) => [locale, translation(resolve(root, file + '_' + suffix + '.txt'))]));
@@ -64,6 +65,21 @@ for (const [group, asset, english] of csv(readFileSync(resolve(root, assetFile +
   englishCatalog[key] = english;
   const translated=ruAssets.get(english.trim());if(validTranslation(english,translated))russianCatalog[key]=translated;
   collectAdditional(key, english, additionalAssets);
+}
+// Missing optional files (or individual untranslated entries) must not erase
+// existing translations. Only retain entries whose English source is unchanged;
+// changed/removed source keys must not inherit a potentially stale translation.
+// Read every previous base before writeBcCatalog replaces any files.
+for (const category of ['messages', 'actions', 'items', 'groups']) {
+  const directory = `src/translations/bc/${category}`;
+  const read = file => existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {};
+  const previousEnglish = read(`${directory}/en.json`);
+  for (const [locale, dictionary] of Object.entries({ zh: catalog, ru: russianCatalog, ...additionalCatalogs })) {
+    for (const [key, text] of Object.entries(read(`${directory}/${locale}.json`))) {
+      if (Object.hasOwn(englishCatalog, key) && previousEnglish[key] === englishCatalog[key]
+        && (!Object.hasOwn(dictionary, key) || dictionary[key] === englishCatalog[key])) dictionary[key] = text;
+    }
+  }
 }
 writeBcCatalog(englishCatalog, catalog);
 for(const category of ['messages','actions','items','groups']) {

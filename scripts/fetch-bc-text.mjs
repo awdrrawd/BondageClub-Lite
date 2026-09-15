@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { bcTextLocales } from './bc-text-locales.mjs';
 
 export const textSources = [
   'Screens/Interface', 'Assets/Female3DCG/AssetStrings',
@@ -18,7 +19,7 @@ export async function fetchBcText(destination, fetcher = fetch) {
   if (!/^[a-f0-9]{40}$/.test(sha ?? '')) throw new Error('Invalid mirror commit');
   let files = 0;
   for (const source of textSources) {
-    for (const suffix of ['.csv', '_CN.txt', '_TW.txt', '_RU.txt']) {
+    for (const suffix of ['.csv', ...Object.values(bcTextLocales).map(locale => `_${locale}.txt`)]) {
       const path = source + suffix;
       const response = await get(`https://raw.githubusercontent.com/${repo}/${sha}/${path}`);
       if (response.status === 404 && suffix !== '.csv') continue;
