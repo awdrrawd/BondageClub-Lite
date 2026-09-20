@@ -175,6 +175,8 @@
   "Asset.Hat.PoliceWomanHat": "Polizeihut",
   "Asset.Hat.Santa1": "Weihnachtsmütze",
   "Asset.Hat.WitchHat1": "Hexenhut",
+  "Asset.Head.Default": "Normal",
+  "Asset.Head.SmallEars": "Klein",
   "Asset.ItemArms.ArmbinderJacket": "Monohandschuh-Jacke",
   "Asset.ItemArms.BitchSuit": "Tieranzug",
   "Asset.ItemArms.Bolero": "Bolero-Zwangsjacke",

@@ -1,6 +1,6 @@
 {
-  "ActionActivateSafewordRelease": "SourceCharacter benutzt PronounPossessive Safeword möchte freigelassen werden. PronounSubject wird zu PronounPossessive Sicherheit aus dem Raum geführt.",
-  "ActionActivateSafewordRevert": "SourceCharacter benutzt PronounPossessive Safeword. Bitte kümmert euch um PronounPossessive Wohlbefinden.",
+  "ActionActivateSafewordRelease": "SourceCharacter benutzt PronounPossessive safeword möchte freigelassen werden. PronounSubject wird zu PronounPossessive Sicherheit aus dem Raum geführt.",
+  "ActionActivateSafewordRevert": "SourceCharacter benutzt PronounPossessive safeword. Bitte kümmert euch um PronounPossessive Wohlbefinden.",
   "ActionAddLock": "SourceCharacter ergänzt ein NextAsset zu DestinationCharacter FocusAssetGroup PrevAsset.",
   "ActionChangeColor": "SourceCharacter ändert die Farbe von NextAsset an DestinationCharacter FocusAssetGroup.",
   "ActionCoin": "SourceCharacter wirft eine Münze. Das Ergebnis ist: CoinResult.",
