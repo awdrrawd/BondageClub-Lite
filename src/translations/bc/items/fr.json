@@ -181,6 +181,8 @@
   "Asset.Hat.Veil1": "Voile demi-visage",
   "Asset.Hat.Veil2": "Voile complet",
   "Asset.Hat.WitchHat1": "Chapeau de sorcière",
+  "Asset.Head.Default": "Régulier",
+  "Asset.Head.SmallEars": "Petit",
   "Asset.ItemAddon.BedChains": "Chaînes de lit",
   "Asset.ItemAddon.BedRopes": "Cordes de lit",
   "Asset.ItemAddon.BedStraps": "Sangles de lit",
