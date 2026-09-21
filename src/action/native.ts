@@ -1,4 +1,5 @@
 import definitions from "./native-data.json";
+import { resolveItemProperties } from './item-properties';
 import type { CharacterSummary } from "../shared/types";
 export const nativeActivities = definitions.activities;
 
@@ -12,6 +13,7 @@ export function activityAvailability(reason: string | null, compatibility: boole
 type ItemRule = { Effect?: string[]; Block?: string[]; AllowActivityOn?: string[]; AllowActivity?: string[]; Expose?: string[]; unknown?: boolean };
 type AppearanceItem = { Group?: string; Name?: string; Property?: ItemRule; Asset?: ItemRule & { Name?: string; Group?: { Name?: string } } };
 function inventoryState(character: CharacterSummary) {
+  let incomplete = false;
   const effects = new Set<string>(), blocked = new Set<string>(), accessible = new Set<string>(), groups = new Set<string>();
   const items: { group: string; name: string; rule?: ItemRule; property?: ItemRule }[] = [];
   const strings = (value: unknown): string[] => Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
@@ -22,11 +24,14 @@ function inventoryState(character: CharacterSummary) {
     if (typeof group !== "string" || typeof name !== "string") continue;
     groups.add(group);
     const rule = item.Asset ?? (definitions.items as Record<string, ItemRule>)[`${group}/${name}`];
-    items.push({ group, name, rule, property: item.Property });
+    const resolved = resolveItemProperties(group, name, item.Property);
+    incomplete ||= resolved.unknown;
+    const effectiveProperty = resolved.property;
+    items.push({ group, name, rule, property: effectiveProperty });
     // BC CharacterGetEffects and activity zone blocking union Asset and Property arrays.
     for (const [key, result] of [["Effect", effects], ["Block", blocked], ["AllowActivityOn", accessible]] as const) {
       if (key === "Effect" || group.startsWith("Item")) {
-        for (const source of [rule, item.Property]) for (const value of strings(source?.[key])) result.add(value);
+        for (const source of [rule, effectiveProperty]) for (const value of strings(source?.[key])) result.add(value);
       }
     }
   }
@@ -64,7 +69,7 @@ function inventoryState(character: CharacterSummary) {
   };
   const activityItem = (activity: string) => items.find(item => property(item, "AllowActivity")?.includes(activity));
   const hasItem = (group: string, names?: string[]) => items.some(item => item.group === group && (!names || names.includes(item.name)));
-  return { effects, groups, naked, needs, hasItem, activityItem, blocked: (group: string, activity = false) => blocked.has(group) && !(activity && accessible.has(group)) };
+  return { effects, groups, naked, needs, hasItem, activityItem, incomplete, blocked: (group: string, activity = false) => blocked.has(group) && !(activity && accessible.has(group)) };
 }
 
 /** Resolve the actual worn item again at send time; never use an inventory-only item. */
@@ -80,6 +85,7 @@ export function createActivityInventoryCheck(actor: CharacterSummary, target: Ch
   const a = inventoryState(actor), b = inventoryState(target);
   const kneels = (character: CharacterSummary, state: ReturnType<typeof inventoryState>) => state.effects.has("ForceKneel") || (character.ActivePose || []).some(pose => ["Kneel", "KneelingSpread"].includes(pose));
   return (group: string, prerequisites: string[] = []): string | null => {
+  if (a.incomplete || b.incomplete) return 'native.data';
   const zone = (definitions.zones as Record<string, number>)[group];
   const code = zone === undefined ? NaN : (target.ArousalSettings?.Zone?.charCodeAt(zone) ?? NaN) - 100;
   if (Number.isFinite(code) && code >= 0 && code % 10 === 0) return "native.permission";

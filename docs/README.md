@@ -18,6 +18,7 @@
 | 本機歷史、搜尋、未讀、期限及 TXT／HTML／Excel 匯出 | [本機紀錄](local-history-and-contacts.md) |
 | 帳號、資料流向、媒體許可、通知音效與外觀保護 | [隱私與外觀](privacy-and-appearance.md) |
 | 原生活動、擴展文字、AFC、召喚與 Lite 識別 | [活動與社群協定](chat-native-identity-tests.md) |
+| R132 精簡物品屬性、共用解析與回歸測試 | [R132 相容性](r132-compatibility.md) |
 | ECHO 貼貼的確認、配對、寫入與雙人測試 | [貼貼驗收](echo-cuddle-tests.md) |
 | URL／影音許可、安全詞與確認對話框 | [媒體與安全詞](links-safeword-tests.md) |
 | 翻譯來源、覆寫與建置方法 | [翻譯貢獻指南](../src/translations/README.md) |

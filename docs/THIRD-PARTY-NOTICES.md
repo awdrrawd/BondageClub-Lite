@@ -20,3 +20,4 @@
 - 轉換腳本：`node scripts/build-text-catalog.mjs [BondageClub來源目錄]`。產物已隨專案保存，Cloudflare 建置不需要你的本機 BC 倉庫，也不在玩家登入時下載原始倉庫。
 - 只取文字資料，未引入 BC 遊戲執行程式、服裝圖片或人物渲染。
 - `src/action/native-data.json`：由同一本機 BC Female3DCG 定義表靜態擷取活動 ID、目標部位、前置条件與基礎身體名稱、道具效果及鎖具關係限制，供受限原生活動與牽引判定；資料權利屬 BC 原作者。
+- R132 起，`native-data.json` 與 `item-properties-data.json` 取自本機 `Bondage-College-Mirror-bondageclub` 的 Female3DCG、Female3DCGExtended、VibratorMode 與 SlaveCollar 設定。僅靜態擷取判定資料，不執行上游腳本；資料權利仍屬 BC 原作者。更新與使用界線見 [R132 相容性](r132-compatibility.md)。

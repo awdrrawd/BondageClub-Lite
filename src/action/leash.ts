@@ -1,4 +1,5 @@
 import definitions from './native-data.json';
+import { resolveItemProperties } from './item-properties';
 import { interactionPermission } from './interaction-permission';
 import type { CharacterSummary, ClientSnapshot } from '../shared/types';
 
@@ -17,7 +18,9 @@ export function canFollowLeash(state: Readonly<ClientSnapshot>, holder: Characte
     const item = raw as {Group?:string;Name?:string;Property?:{Effect?:unknown;LockedBy?:unknown}};
     const rule = (definitions.items as Record<string,{Effect?:string[];unknown?:boolean}>)[`${item.Group}/${item.Name}`];
     if (!rule || rule.unknown) return false;
-    const extra = item.Property?.Effect;
+    const resolved = resolveItemProperties(item.Group || '', item.Name || '', item.Property);
+    if (resolved.unknown) return false;
+    const extra = resolved.property.Effect;
     if (extra !== undefined && (!Array.isArray(extra) || !extra.every(effect => typeof effect === 'string'))) return false;
     const effects = [...(rule.Effect || []), ...(extra as string[] | undefined || [])];
     if (!effects.includes('Leash') && effects.some(effect => ['Tethered','Mounted','Enclose','OneWayEnclose'].includes(effect))) return false;

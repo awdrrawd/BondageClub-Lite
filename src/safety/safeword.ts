@@ -1,4 +1,5 @@
 import { isDecorativePluginItem } from './plugin-appearance';
+import { resolveItemProperties } from '../action/item-properties';
 /** Native Category=Item groups from BC Assets/Female3DCG/Female3DCG.js.
  * Never infer categories from prefixes: unknown plugin groups remain untouched.
  */
@@ -15,7 +16,8 @@ export function releaseAppearance(items: BundledItem[], owned: boolean): Bundled
     if (isDecorativePluginItem(item)) return true;
     if (item.Group === "ItemNeck" && item.Name === "SlaveCollar" && owned) {
       // CharacterReleaseTotal keeps an owned collar, removing its gameplay variant.
-      if (Array.isArray(item.Property?.Effect) && item.Property.Effect.length) item.Property = { TypeRecord: { noarch: 0 } };
+      const { property, unknown } = resolveItemProperties(item.Group, item.Name, item.Property);
+      if (unknown || property.Effect?.length) item.Property = { TypeRecord: { noarch: 0 } };
       return true;
     }
     return !ITEM_GROUPS.has(item.Group);

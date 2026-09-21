@@ -1,4 +1,5 @@
 import LZString from 'lz-string';
+import { resolveItemProperties } from './item-properties-helper.mjs';
 import { loadTypeScript } from './load-typescript.mjs';
 import { interactionPermission } from "./permissions-helper.mjs";
 import { renderAction, dictionaryText, pronounEntries } from './action-helper.mjs';
@@ -35,7 +36,7 @@ async function setup(environment, relayAvailable = true, account = {}, storage =
   const context = {
     bcxSummon: new Function("LZString",loadTypeScript("src/network/bcx-summon.ts")+";return bcxSummon;")(LZString),
     RoomSearch, interactionPermission,
-    canFollowLeash: new Function('definitions','interactionPermission',loadTypeScript('src/action/leash.ts')+';return canFollowLeash;')(definitions,interactionPermission),
+    canFollowLeash: new Function('definitions','interactionPermission','resolveItemProperties',loadTypeScript('src/action/leash.ts')+';return canFollowLeash;')(definitions,interactionPermission,resolveItemProperties),
     LeashSession: new Function(loadTypeScript('src/network/leash-session.ts')+';return LeashSession;')(),
     decodeFriendNames, contactName,
     hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState, createCuddleItem, receivedSpeech, activityAsset,
@@ -62,6 +63,28 @@ async function setup(environment, relayAvailable = true, account = {}, storage =
 }
 
 const request = { Query: '', Space: 'X', Language: '', Game: '', FullRooms: false, ShowLocked: true, SearchDescs: false };
+
+test('R132 minimized properties remain raw across all character synchronization paths', async () => {
+  const item = { Group: 'ItemArms', Name: 'DuctTape', Property: { TypeRecord: { typed: 1 } }, Craft: { Name: 'Partial craft', Effects: { Painful: 1 } } };
+  const f = await setup('PROD', true, { Appearance: [item] });
+  const actor = { MemberNumber: 55, Appearance: [] };
+  const check = character => {
+    assert.equal(createActivityInventoryCheck(actor, character)('ItemButt', ['ZoneAccessible']), 'native.blocked');
+    assert.equal(JSON.stringify(character.Appearance), JSON.stringify([item]));
+  };
+  check(f.state().player);
+  f.handlers.get('ChatRoomSync')({ Name: 'R132', Character: [{ MemberNumber: 123, Appearance: [item] }] });
+  check(f.state().characters[0]);
+  for (const event of ['ChatRoomSyncCharacter', 'ChatRoomSyncSingle']) {
+    f.handlers.get(event)({ Character: { MemberNumber: 123, Appearance: [item] } });
+    check(f.state().characters[0]);
+  }
+  f.handlers.get('ChatRoomSyncItem')({ Item: { Target: 123, ...item } });
+  check(f.state().characters[0]);
+  f.handlers.get('ChatRoomSyncMemberJoin')({ Character: { MemberNumber: 456, Appearance: [item] } });
+  check(f.state().characters.find(c => c.MemberNumber === 456));
+  assert.equal(f.sent.some(p => p.event === 'ChatRoomCharacterUpdate'), false);
+});
 
 test('AEE and SCA bundles survive login, unrelated updates and safeword release without loading plugin resources', async () => {
   const appearance=[
