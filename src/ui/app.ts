@@ -1167,7 +1167,7 @@ export class LiteApp {
     }
     panel.append(this.checkbox(t("m150"), fields.Fog, value => { fields.Fog = value; }));
     const blocks = this.el("fieldset", "search-options"); blocks.append(this.el("legend", "", t("m151")));
-    for (const category of ["ABDL", "SciFi", "Fantasy", "Leashing", "Photos", "Arousal", "Smoking"]) blocks.append(this.checkbox(category, fields.BlockCategory.includes(category), checked => { fields.BlockCategory = checked ? [...fields.BlockCategory, category] : fields.BlockCategory.filter(value => value !== category); }));
+    for (const category of ["ABDL", "SciFi", "Fantasy", "Leashing", "Photos", "Arousal", "Smoking", "Location"]) blocks.append(this.checkbox(category, fields.BlockCategory.includes(category), checked => { fields.BlockCategory = checked ? [...fields.BlockCategory, category] : fields.BlockCategory.filter(value => value !== category); }));
     panel.append(blocks);
     const advanced = this.el("details", "map-import"); advanced.append(this.el("summary", "", t("m152")));
     const json = document.createElement("textarea"); json.id = "CreateMapJSON"; json.value = fields.MapJSON; json.maxLength = 30000;

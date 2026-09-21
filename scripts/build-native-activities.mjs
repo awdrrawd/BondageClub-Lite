@@ -1,7 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { parse } from '@babel/parser';
 import { writeJson } from './catalog-utils.mjs';
-const source = readFileSync(process.argv[2] || '../BCJS/Bondage-College-master/BondageClub/Assets/Female3DCG/Female3DCG.js', 'utf8');
+import { dirname, join } from 'node:path';
+import { itemPropertiesCatalog } from './build-item-properties.mjs';
+const sourcePath = process.argv[2] || '../Bondage-College-Mirror-bondageclub/Assets/Female3DCG/Female3DCG.js';
+const source = readFileSync(sourcePath, 'utf8');
 function literal(node) {
   if (!node) return undefined;
   if (['StringLiteral', 'NumericLiteral', 'BooleanLiteral'].includes(node.type)) return node.value;
@@ -11,6 +14,7 @@ function literal(node) {
 }
 const ast = parse(source, { sourceType: 'script' });
 const activities = [], zones = {}, bodies = {}, geometry = {}, items = {}, locks = {};
+const assetDefinitions = {}, groupDefinitions = {};
 function walk(node) {
   if (!node || typeof node !== 'object') return;
   if (node.type === 'VariableDeclarator' && node.id.name === 'ActivityFemale3DCG') {
@@ -23,20 +27,11 @@ function walk(node) {
     if (typeof group === 'string' && Array.isArray(literal(props.Zone))) geometry[group] = literal(props.Zone);
     if (typeof group === 'string' && props.Asset?.type === 'ArrayExpression') bodies[group] = props.Asset.elements.map(node => node?.type === 'StringLiteral' ? node.value : literal(node)?.Name).filter(name => typeof name === 'string');
     if (typeof group === 'string' && props.Asset?.type === 'ArrayExpression') {
+      groupDefinitions[group] = literal(node);
       for (const node of props.Asset.elements) {
         const asset = node?.type === 'StringLiteral' ? { Name: node.value } : literal(node);
         if (!asset?.Name) continue;
-        if (asset.IsLock === true) locks[asset.Name] = { owner: asset.OwnerOnly === true, lover: asset.LoverOnly === true, family: asset.FamilyOnly === true };
-        const rule = {};
-        for (const key of ['Effect', 'Block', 'AllowActivityOn', 'AllowActivity', 'Expose']) {
-          const ownNode = node?.properties?.find(property => property.type === 'ObjectProperty' && (property.key.name || property.key.value) === key)?.value;
-          const inheritedNode = key === 'AllowActivityOn' ? undefined : props[key];
-          if ((ownNode && literal(ownNode) === undefined) || (!ownNode && inheritedNode && literal(inheritedNode) === undefined)) rule.unknown = true;
-          const values = asset[key] ?? literal(inheritedNode) ?? [];
-          if (Array.isArray(values) && values.every(value => typeof value === 'string')) { if (values.length) rule[key] = values; }
-          else rule.unknown = true;
-        }
-        items[`${group}/${asset.Name}`] = rule;
+        assetDefinitions[`${group}/${asset.Name}`] = asset;
       }
     }
   }
@@ -45,6 +40,26 @@ function walk(node) {
   }
 }
 walk(ast);
+// R132 also uses asset-level CopyConfig; resolve it before extracting gameplay defaults.
+function resolveAsset(key, visited = new Set()) {
+  if (visited.has(key)) throw new Error(`Cyclic asset config: ${key}`);
+  visited.add(key);
+  const asset = assetDefinitions[key];
+  if (!asset) throw new Error(`Missing asset config: ${key}`);
+  const copy = asset.CopyConfig;
+  return copy ? { ...resolveAsset(`${copy.GroupName ?? key.split('/')[0]}/${copy.AssetName}`, visited), ...asset } : asset;
+}
+for (const key of Object.keys(assetDefinitions)) {
+  const asset = resolveAsset(key), group = groupDefinitions[key.split('/')[0]], rule = {};
+  for (const field of ['Effect', 'Block', 'AllowActivityOn', 'AllowActivity', 'Expose']) {
+    const value = Object.hasOwn(asset, field) ? asset[field] : field === 'AllowActivityOn' ? [] : group[field] ?? [];
+    if (Array.isArray(value) && value.every(v => typeof v === 'string')) { if (value.length) rule[field] = value; }
+    else rule.unknown = true;
+  }
+  items[key] = rule;
+  if (asset.IsLock) locks[asset.Name] = { owner: asset.OwnerOnly === true, lover: asset.LoverOnly === true, family: asset.FamilyOnly === true };
+}
 const bodyGroups = ['BodyUpper', 'BodyLower', 'Height', 'Eyes', 'Eyes2', 'Eyebrows', 'Mouth', 'Blush', 'Fluids', 'Emoticon', 'HairFront', 'HairBack'];
 writeJson('src/action/native-data.json', { activities, zones, geometry, bodies: Object.fromEntries(Object.entries(bodies).filter(([group]) => bodyGroups.includes(group))), items, locks });
 console.log(`${activities.length} native activities, ${Object.keys(zones).length} zones`);
+writeJson('src/action/item-properties-data.json', itemPropertiesCatalog(join(dirname(sourcePath), 'Female3DCGExtended.js')));
