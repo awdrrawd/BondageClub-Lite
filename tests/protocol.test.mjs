@@ -339,6 +339,29 @@ test('plugin options and sends share strict checks, including custom prerequisit
   }
 });
 
+test('incomplete R132 item decoding does not hide native and plugin activities', async () => {
+  const base = {AllowedInteractions:0,Name:'Test',Appearance:[{Group:'BodyUpper',Name:'Normal'}],ArousalSettings:{Active:'Manual',Activity:'z'.repeat(100),Zone:'f'.repeat(30)}};
+  const f = await setup('PROD',true,base);
+  f.client.setTextCatalog(gameCatalog('zh'));
+  const actor = {...base,MemberNumber:123}, target = {...base,MemberNumber:55};
+  const sync = () => f.handlers.get('ChatRoomSync')({Name:'Room',Character:[actor,target]});
+  const available = mode => f.client.activityOptions(55,mode).filter(o=>!o.reason).map(o=>`${o.source}:${o.group}:${o.name}`).sort();
+  sync();
+  const baseline = [available(false), available(true)];
+  assert.ok(baseline[0].some(key=>key.startsWith('BC:')));
+  assert.ok(baseline[0].some(key=>!key.startsWith('BC:')));
+  // An invalid clothing variant used to disable the entire character's menu.
+  actor.Appearance = [{Group:'BodyUpper',Name:'Normal',Property:{TypeRecord:{typed:999}}}];
+  sync();
+  for (const [i,mode] of [false,true].entries()) assert.deepEqual(available(mode),baseline[i]);
+  target.Appearance = [...base.Appearance,{Group:'ItemMisc',Name:'HighSecurityPadlock'}];
+  sync();
+  for (const [i,mode] of [false,true].entries()) assert.deepEqual(available(mode),baseline[i]);
+  target.Appearance = [...base.Appearance,{Group:'ItemMisc',Name:'HighSecurityPadlock',Property:{Effect:['Enclose']}}];
+  sync();
+  assert.equal(f.client.activityOptions(55,true).find(o=>o.name==='Pet').reason,'native.blocked');
+});
+
 test('paw activities require the correct wearer in both modes while ordinary automatic-mode activities remain usable', async () => {
   const base={AllowedInteractions:0,Name:'Test',Appearance:[{Group:'BodyUpper',Name:'Normal'}],ArousalSettings:{Active:'Automatic',Activity:'z'.repeat(100),Zone:'f'.repeat(30)}};
   const f=await setup('PROD',true,base);

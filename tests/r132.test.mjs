@@ -39,10 +39,12 @@ test('R132 inherited configurations and vibration modes retain derived effects',
   for (const effect of ['Freeze', 'VulvaShaft', 'Vibrating']) assert.ok(child.property.Effect.includes(effect));
 });
 
-test('R132 invalid variants cannot become permissive in compatibility mode', () => {
+test('R132 invalid variants preserve explicit restrictions without invalidating unrelated activities', () => {
   const actor = { MemberNumber: 1, Appearance: [] };
   const target = { MemberNumber: 2, Appearance: [{ Group: 'ItemArms', Name: 'DuctTape', Property: { TypeRecord: { typed: 999 } } }] };
-  assert.equal(activityInventoryReason(actor, target, 'ItemButt', ['ZoneAccessible']), 'native.data');
+  assert.equal(activityInventoryReason(actor, target, 'ItemHead', ['CanLook']), null);
+  target.Appearance[0].Property.Block = ['ItemButt'];
+  assert.equal(activityInventoryReason(actor, target, 'ItemButt', ['ZoneAccessible']), 'native.blocked');
   assert.equal(activityAvailability('native.data', true).reason, 'native.data');
   assert.equal(resolveItemProperties('ItemMouth', 'DuctTape', { TypeRecord: [] }).unknown, true);
   assert.equal(resolveItemProperties('ItemMouth', 'DuctTape', { Effect: 'GagLight' }).unknown, true);

@@ -19,6 +19,8 @@
 
 `bc/{messages,actions,items,groups}/` 與目前 `action/xiaosu`、`action/echo`、`items/echo`、`groups/echo` 是擷取器管理的資料，再擷取會覆寫。不希望被覆寫的貢獻放 `overrides/`；擷取腳本不接觸它。LSCG 上游只有英文，`action/lscg/zh.json` 為人工補譯，再擷取會保留仍存在的鍵。上游更新造成鍵名移除或改動時，人工覆寫也需要核對，不能只依賴舊鍵一直有效。
 
+小酥直接使用插件 `translation` 的 EN／TW／CN／DE／FR／RU／UA 標籤和訊息，不由英文重新翻譯這些語言。先前只擷取 EN／TW，造成其餘語言的補譯覆蓋插件既有文字；現已移除這些重複覆寫。日韓維持 Lite 補譯。產生及修訂補譯時，即使上游譯文與英文拼法相同，也視為已有翻譯。
+
 ## 英文基底與差異覆寫
 
 每個動作來源的 `en.json` 保存鍵與英文／原始句子。`zh.json` 只存與英文不同的內容：沒有翻譯時不寫該鍵，由英文回退。LSCG 的繁中檔包含已收錄動作的訊息與名稱補譯。不需要新增整份 `bc-messages-xx.json`。

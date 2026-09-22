@@ -10,8 +10,8 @@ test('refreshing English-only LSCG source preserves maintained Chinese messages'
   const root=mkdtempSync(join(tmpdir(),'lite-plugin-catalog-'));
   t.after(()=>rmSync(root,{recursive:true,force:true}));
   const write=(file,text)=>{const path=join(root,file);mkdirSync(dirname(path),{recursive:true});writeFileSync(path,text);};
-  write('XiaoSuActivity/src/Modules/MActivity.ts','');
-  for(const language of ['TW','EN']) write(`XiaoSuActivity/translation/${language}.json`,'{"Activity":{}}');
+  write('XiaoSuActivity/src/Modules/MActivity.ts',"const activity={act:{Name:'XSAct_眯眼',Target:[],TargetSelf:['ItemHead']}};");
+  for(const language of ['TW','EN','CN','DE','FR','RU','UA']) write(`XiaoSuActivity/translation/${language}.json`,JSON.stringify({Activity:{'眯眼':`${language} label`,'眯眼.Desc.1':`{0} ${language} message`}}));
   write('BCJS/LSCG-main/src/Modules/activities.ts',`const bundle={Activity:{Name:'Bap'},Targets:[{Name:'ItemHead',TargetAction:'SourceCharacter baps TargetCharacter.'}]};`);
   mkdirSync(join(root,'BCJS/echo-activity-ext-main/src/components'),{recursive:true});
   write('lite/src/translations/action/lscg/zh.json','{"ChatOther-ItemHead-LSCG_Bap":"SourceCharacter 輕拍 TargetCharacter。"}');
@@ -19,6 +19,11 @@ test('refreshing English-only LSCG source preserves maintained Chinese messages'
   assert.equal(result.status,0,result.stderr);
   const zh=JSON.parse(readFileSync(join(root,'lite/src/translations/action/lscg/zh.json'),'utf8'));
   assert.equal(zh['ChatOther-ItemHead-LSCG_Bap'],'SourceCharacter 輕拍 TargetCharacter。');
+  for(const [locale,language] of Object.entries({'zh-cn':'CN',de:'DE',fr:'FR',ru:'RU',uk:'UA'})) {
+    const dictionary=JSON.parse(readFileSync(join(root,`lite/src/translations/action/xiaosu/${locale}.json`),'utf8'));
+    assert.equal(dictionary['Label-ChatSelf-ItemHead-XSAct_眯眼'],`${language} label`);
+    assert.equal(dictionary['ChatSelf-ItemHead-XSAct_眯眼'],`SourceCharacter ${language} message`);
+  }
 });
 
 test('LSCG Chinese covers every bundled message and label', () => {
