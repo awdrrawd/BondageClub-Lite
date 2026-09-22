@@ -34,6 +34,7 @@ async function setup(environment, relayAvailable = true, account = {}, storage =
   };
   const RoomSearch = new Function("window", loadTypeScript("src/network/room-search.ts")+";return RoomSearch;")({setTimeout(fn){timers.set(++timerId,fn);return timerId;},clearTimeout(id){timers.delete(id);}});
   const context = {
+    echoPresence: new Function(loadTypeScript('src/network/echo-presence.ts')+';return echoPresence;')(),
     bcxSummon: new Function("LZString",loadTypeScript("src/network/bcx-summon.ts")+";return bcxSummon;")(LZString),
     RoomSearch, interactionPermission,
     canFollowLeash: new Function('definitions','interactionPermission','resolveItemProperties',loadTypeScript('src/action/leash.ts')+';return canFollowLeash;')(definitions,interactionPermission,resolveItemProperties),
@@ -1269,6 +1270,33 @@ test('LSCG nuzzle uses bundled translation before embedded English fallback',()=
  const catalog=JSON.parse(readFileSync('src/translations/action/lscg/zh.json','utf8'));
  const text=renderAction(key,'Activity',[{Tag:`MISSING TEXT IN "ActivityDictionary.csv": ${key}`,Text:"SourceCharacter nuzzles underneath TargetCharacter's hand."},{Tag:'SourceCharacter',Text:'LikoBot'},{Tag:'TargetCharacter',Text:'莉柯莉絲'}],catalog);
  assert.equal(text,'LikoBot 在 莉柯莉絲 的手掌下親暱地蹭蹭。');
+});
+
+test('ECHO CharacterTag recognizes Lite bundle compatibility on room entry and newcomer join', async () => {
+  const f=await setup('PROD',true,{Appearance:[{Group:'BodyUpper',Name:'Normal'}]});
+  assert.equal(f.sent.some(p=>p.payload?.Content==='ECHO_INFO2'),false);
+  f.handlers.get('ChatRoomSync')({Name:'Room',Character:[{MemberNumber:123,Appearance:[{Group:'BodyUpper',Name:'Normal'}]}]});
+  const packet=f.sent.find(p=>p.payload?.Content==='ECHO_INFO2').payload;
+  assert.equal(packet.Type,'Hidden');
+  assert.equal(packet.Target,undefined);
+  const tag=packet.Dictionary.find(d=>d.Type==='ECHO_INFO2').Content['服装拓展'];
+  assert.equal(tag.version,'Lite-compat');
+  assert.equal(tag.client,'Lite');
+  assert.equal(tag.bundleOnly,true);
+  f.handlers.get('ChatRoomSync')({Name:'Room',Character:[{MemberNumber:123,Appearance:[{Group:'BodyUpper',Name:'Normal'}]}]});
+  assert.equal(f.sent.filter(p=>p.payload?.Content==='ECHO_INFO2').length,2);
+  // ECHO's use-validation predicate is the presence of this CharacterTag.
+  assert.ok(tag);
+  f.handlers.get('ChatRoomSyncMemberJoin')({Character:{MemberNumber:55,Name:'ECHO user'}});
+  assert.equal(f.sent.at(-1).payload.Content,'ECHO_INFO2');
+  assert.equal(f.sent.at(-1).payload.Target,55);
+  const item={Target:123,Group:'ItemArms',Name:'ECHO custom item',Property:{PluginData:{keep:true}},Craft:{Name:'custom'}};
+  f.handlers.get('ChatRoomSyncItem')({Item:item});
+  const received=f.state().characters.find(c=>c.MemberNumber===123).Appearance.find(i=>i.Group==='ItemArms');
+  assert.equal(received.Property.PluginData.keep,true);
+  const before=f.sent.length;
+  f.handlers.get('ChatRoomMessage')({...packet,Sender:55});
+  assert.equal(f.sent.length,before); // No handshake reply loop.
 });
 
 test('received ECHO actions resolve source and target pronouns independently', async () => {

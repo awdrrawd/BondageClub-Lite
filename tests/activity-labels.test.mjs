@@ -8,8 +8,8 @@ test('linked zones reuse canonical labels and a shared translated label needs on
   assert.equal(activityLabel('Hug','ItemTorso2',{},false,catalog),'抱抱');
   assert.equal(activityLabel('Kiss','ItemMouth3',{},false,catalog),'親吻');
   assert.equal(activityLabel('Touch','ItemNipplesPiercings',{},false,catalog),'輕觸');
-  assert.equal(activityLabel('LSCG_Nuzzle','ItemHead',{},false,gameCatalog('zh')),'蹭蹭');
-  assert.equal(activityLabel('LSCG_Nuzzle','ItemTorso2',{},false,gameCatalog('zh')),'蹭蹭');
+  assert.equal(activityLabel('LSCG_Nuzzle','ItemHead',{},false,gameCatalog('zh')),'親暱蹭蹭');
+  assert.equal(activityLabel('LSCG_Nuzzle','ItemTorso2',{},false,gameCatalog('zh')),'親暱蹭蹭');
   assert.equal(activityLabel('LSCG_Nuzzle','ItemHead',{},false,gameCatalog('en')),'Nuzzle');
 });
 test('activity labels follow self/other fallback and BC anatomical text aliases', () => {
@@ -23,6 +23,12 @@ test('activity labels follow self/other fallback and BC anatomical text aliases'
   const catalog = gameCatalog('zh');
   assert.ok(Object.keys(catalog).filter(k => k.startsWith('Label-') && k.includes('XSAct_')).length > 50);
   assert.equal(activityLabel('钻进怀里', 'ItemTorso', {}, false, gameCatalog('en')), 'Get In Arms');
+});
+
+test('specific body-part labels win over generic activity labels',()=>{
+  const catalog={'Label-Activity-LSCG_ReleaseMouth':'Generic','Label-ChatOther-ItemHead-LSCG_ReleaseMouth':'Uncover eyes'};
+  assert.equal(activityLabel('LSCG_ReleaseMouth','ItemHead',{},false,catalog),'Uncover eyes');
+  assert.equal(activityLabel('LSCG_ReleaseMouth','ItemMouth',{},false,catalog),'Generic');
 });
 test('cuddle state is reciprocal; occupancy does not block invitation eligibility', () => {
   const a = { MemberNumber: 1, Appearance: [{ Group: 'BodyUpper', Name: 'Normal' }] };

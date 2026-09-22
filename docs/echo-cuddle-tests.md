@@ -1,5 +1,11 @@
 # ECHO 貼貼與配對驗收
 
+## 道具相容廣播
+
+Lite 進房及整房重新同步時廣播 `Hidden/ECHO_INFO2`，新玩家加入時定向傳送。Dictionary 使用 `Type: ECHO_INFO2` 與 `Content["服装拓展"]`，依照 [CharacterTag 協定](https://github.com/SugarChain-Studio/bc-modding-utilities/blob/main/src/charaTag.js)。版本標示 `Lite-compat` 並附 `client: Lite`、`bundleOnly: true`；未宣告實際 ECHO 發行版或動作拓展。ECHO 的目標使用驗證只檢查服裝標籤是否存在，因此安裝 ECHO 的對方能通過這項辨識。
+
+Lite 保留收到的自訂道具外觀、Property 與 Craft，但不執行 ECHO 的渲染、定時效果或自訂操作介面；原版互動權限仍由對方及伺服器處理。沒有安裝 ECHO 的原版客戶端不會因此獲得自訂資產。收到標籤不自動回覆，避免廣播迴圈。需以完整 ECHO 客戶端與 Lite 雙帳號實測穿戴、移除、重新同步和觀看效果。
+
 [文件導覽](README.md) · [活動條件](chat-native-identity-tests.md) · [外觀保存界線](privacy-and-appearance.md) · [架構導覽（HTML）](https://bondageclub-lite.pages.dev/docs/architecture/)
 
 ## 實作範圍

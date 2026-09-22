@@ -149,5 +149,10 @@ function main() {
     for(const [key,text] of Object.entries(catalogs.en)) if(phrases[text] && !Object.hasOwn(upstream,key)) dictionary[key]=phrases[text];
     writeJson(file,dictionary);
   }
+  const labels=JSON.parse(readFileSync(new URL('./action-label-corrections.json',import.meta.url),'utf8'));
+  for(const [locale,reviewed] of Object.entries(labels)) {
+    const file=`src/translations/overrides/${locale}.json`;
+    writeJson(file,{...JSON.parse(readFileSync(file,'utf8')),...reviewed});
+  }
 }
 if(process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url)) main();
