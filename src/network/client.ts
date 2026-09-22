@@ -8,6 +8,7 @@ import { afcLovers } from "../profile/afc";
 import { decodeFriendNames, contactName } from "../profile/friend-names";
 import { renderAction, dictionaryText, pronounEntries } from "../action/render";
 import { nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, activityAsset } from "../action/native";
+import { echoPresence } from './echo-presence';
 import { receivedSpeech } from "./speech";
 import { extensionActivities, extensionText } from "../action/extensions";
 import { activityLabel, hasPenis, physicalGroup, textGroup } from "../action/labels";
@@ -545,6 +546,7 @@ export class BcLiteClient {
   private announceLite(target?: number): void {
     if (!this.canSend() || !this.state.room || target === this.state.player?.MemberNumber) return;
     this.socket!.emit("ChatRoomChat", { Type: "Hidden", Content: "BCLiteHello", Dictionary: [{ client: "Lite" }], ...(target ? { Target: target } : {}) });
+    this.socket!.emit('ChatRoomChat', echoPresence(target));
   }
 
   sendChat(raw: string, replyId?: string): void {
@@ -707,6 +709,7 @@ export class BcLiteClient {
       this.patch({ phase: "in-room", room, characters, cuddlePartner: this.cuddlePair?.peer ?? null, status: t("m223", [room.Name]) });
       if (!sameRoom) this.localMessage(t("m223", [room.Name]));
       if (!sameRoom) this.announceLite();
+      else if (this.canSend()) this.socket!.emit('ChatRoomChat', echoPresence());
       if (this.cuddlePair) this.syncCuddle();
     });
     this.socket.on("ChatRoomSyncMemberJoin", (data: { Character?: CharacterSummary }) => {
