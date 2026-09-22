@@ -363,6 +363,27 @@ test('incomplete R132 item decoding does not hide native and plugin activities',
   assert.equal(f.client.activityOptions(55,true).find(o=>o.name==='Pet').reason,'native.blocked');
 });
 
+test('NoMeter retains the same usable native actions as Manual without relaxing explicit refusals', async () => {
+  const base={AllowedInteractions:0,Name:'Test',Appearance:[{Group:'BodyUpper',Name:'Normal'}],ArousalSettings:{Active:'Manual',Activity:'z'.repeat(100),Zone:'f'.repeat(30)}};
+  const f=await setup('PROD',true,base);
+  const actor={...base,MemberNumber:123},target={...base,MemberNumber:55};
+  const sync=()=>f.handlers.get('ChatRoomSync')({Name:'Room',Character:[actor,target]});
+  const native=()=>f.client.activityOptions(55,false).filter(o=>o.source==='BC'&&!o.reason).map(o=>`${o.group}:${o.name}`);
+  sync(); const manual=native(); assert.ok(manual.length>0);
+  for(const Active of ['NoMeter','Hybrid','Automatic']) {
+    target.ArousalSettings={...base.ArousalSettings,Active};sync();
+    assert.deepEqual(native(),manual,Active);
+  }
+  target.ArousalSettings={...base.ArousalSettings,Active:'NoMeter'};sync();
+  f.client.sendActivity(55,'ItemHead','Pet',false);
+  assert.equal(f.sent.at(-1).payload.Type,'Activity');
+  target.ArousalSettings={...target.ArousalSettings,Zone:'d'.repeat(30)};sync();
+  assert.equal(native().length,0);
+  assert.throws(()=>f.client.sendActivity(55,'ItemHead','Pet',false));
+  target.ArousalSettings={...base.ArousalSettings,Active:'Inactive'};sync();
+  assert.equal(native().length,0);
+});
+
 test('paw activities require the correct wearer in both modes while ordinary automatic-mode activities remain usable', async () => {
   const base={AllowedInteractions:0,Name:'Test',Appearance:[{Group:'BodyUpper',Name:'Normal'}],ArousalSettings:{Active:'Automatic',Activity:'z'.repeat(100),Zone:'f'.repeat(30)}};
   const f=await setup('PROD',true,base);
