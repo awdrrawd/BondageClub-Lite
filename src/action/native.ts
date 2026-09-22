@@ -189,7 +189,7 @@ export function activityReason(actor: CharacterSummary, target: CharacterSummary
   // Local expression/arousal effects are execution limitations, not eligibility conditions.
   const settings = target.ArousalSettings;
   const zoneId = (definitions.zones as Record<string, number>)[group];
-  if (!settings || !["Manual", "Hybrid", "Automatic"].includes(settings.Active || "") || typeof settings.Zone !== "string" || zoneId === undefined || settings.Zone.length <= zoneId) return "native.preferences";
+  if (!settings || !["NoMeter", "Manual", "Hybrid", "Automatic"].includes(settings.Active || "") || typeof settings.Zone !== "string" || zoneId === undefined || settings.Zone.length <= zoneId) return "native.preferences";
   const zone = settings.Zone.charCodeAt(zoneId) - 100;
   if (zone < 0 || zone % 10 === 0) return "native.permission";
   for (const [character, receiving] of [[actor, false], [target, true]] as const) {
