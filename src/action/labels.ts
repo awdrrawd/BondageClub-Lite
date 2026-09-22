@@ -12,13 +12,13 @@ export function textGroup(group: string, character: CharacterSummary): string {
   return hasPenis(character) ? group === "ItemVulva" ? "ItemPenis" : group === "ItemVulvaPiercings" ? "ItemGlans" : group : group;
 }
 export function activityLabel(name: string, group: string, character: CharacterSummary, self: boolean, catalog: Record<string, string>): string {
-  for (const candidate of new Set([textGroup(group, character), group, canonicalPartGroup(group)])) {
-    for (const mode of self ? ["Self", "Other"] : ["Other", "Self"]) {
-      const value = catalog[`Label-Chat${mode}-${candidate}-${name}`];
-      if (value && !/MISSING TEXT|MISSING ACTIVITY|STRING_RETRIEVAL_FAILED/.test(value)) return value;
-    }
+  const groups = [...new Set([textGroup(group, character), group, canonicalPartGroup(group)])];
+  const modes = self ? ["Self", "Other"] : ["Other", "Self"];
+  const keys = groups.flatMap(candidate => modes.map(mode => `Label-Chat${mode}-${candidate}-${name}`));
+  keys.push(`Label-Activity-${name}`);
+  for (const key of keys) {
+    const value = catalog[key];
+    if (value && !/MISSING TEXT|MISSING ACTIVITY|STRING_RETRIEVAL_FAILED/.test(value)) return value;
   }
-  const common = catalog[`Label-Activity-${name}`];
-  if (common && !/MISSING TEXT|MISSING ACTIVITY|STRING_RETRIEVAL_FAILED/.test(common)) return common;
   return name.replace(/^(XSAct_|LSCG_)/, "");
 }

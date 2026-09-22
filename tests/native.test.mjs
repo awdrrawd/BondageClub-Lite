@@ -121,6 +121,21 @@ test('compatibility only relaxes incomplete emulation, never refusals or missing
   }
 });
 
+test('preference refusals override incomplete data while missing zones remain compatibility warnings', () => {
+  const actor = character(1), target = character(2);
+  const check = () => activityAvailability(activityReason(actor, target, 'ItemEars', 'Whisper', {}), true);
+  delete target.ArousalSettings.Zone;
+  assert.deepEqual(check(), { reason: null, warning: 'native.preferences' });
+  target.ArousalSettings.Activity = 'd'.repeat(100);
+  assert.equal(check().reason, 'native.permission');
+  delete target.ArousalSettings.Activity;
+  target.ArousalSettings.Active = 'Inactive';
+  assert.equal(check().reason, 'native.permission');
+  target.ArousalSettings.Active = 'NoMeter';
+  target.ArousalSettings.Zone = 'f'.repeat(30);
+  assert.deepEqual(check(), { reason: null, warning: '' });
+});
+
 test('inventory prerequisites inspect both characters and union runtime properties with native effects', () => {
   const actor = character(1), target = character(2);
   actor.Appearance[0].Property = { Effect:['Block', 'MergedFingers', 'Freeze'] };
