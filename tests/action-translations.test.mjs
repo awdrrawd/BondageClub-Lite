@@ -1,25 +1,49 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 import {compileCatalogs,packCatalogs} from '../scripts/compile-action-catalogs.mjs';
 import {actionKey,tokens,protect,restore} from '../scripts/translate-action-catalogs.mjs';
 import {reviewedLabel,reviewedMessage} from '../scripts/refine-action-translations.mjs';
 import {renderAction} from './action-helper.mjs';
 import {activityLabel} from './activity-helper.mjs';
+import {xiaosuCatalog,xiaosuLocales} from '../scripts/xiaosu-catalog.mjs';
 
 const catalogs=compileCatalogs();
 const languages=['de','fr','ru','uk','zh-cn','zh','ja','ko'];
 const keys=Object.keys(catalogs.en).filter(actionKey);
 const read=locale=>JSON.parse(readFileSync(`src/translations/overrides/${locale}.json`,'utf8'));
 
+test('XiaoSu keeps upstream labels and messages in every provided language',()=>{
+  for(const locale of Object.keys(xiaosuLocales)) {
+    const upstream=JSON.parse(readFileSync(`src/translations/action/xiaosu/${locale}.json`,'utf8'));
+    const compiled={...catalogs.en,...catalogs[locale]};
+    assert.equal(Object.keys(upstream).length,200);
+    for(const [key,text] of Object.entries(upstream)) assert.equal(compiled[key],text,`${locale}: ${key}`);
+    const other=locale==='zh-cn'?'眯眼':locale==='zh'?'瞇眼':upstream['Label-ChatSelf-ItemHead-XSAct_眯眼'];
+    assert.equal(activityLabel('XSAct_眯眼','ItemHead',{},true,compiled),other);
+    assert.equal(activityLabel('XSAct_甩头发','ItemHood',{},true,compiled),upstream['Label-ChatSelf-ItemHood-XSAct_甩头发']);
+  }
+});
+
+test('XiaoSu extraction substitutes participants and body parts without retranslating',()=>{
+  const source={'测试':'原生名称','测试.Desc.0':'{0}触碰{1}的{2}。','测试.Desc.1':'{0}触碰自己的{2}。',ItemHead:'头部'};
+  assert.deepEqual(xiaosuCatalog(['Label-ChatOther-ItemHead-XSAct_测试','ChatOther-ItemHead-XSAct_测试','ChatSelf-ItemHead-XSAct_测试'],source),{
+    'Label-ChatOther-ItemHead-XSAct_测试':'原生名称',
+    'ChatOther-ItemHead-XSAct_测试':'SourceCharacter触碰TargetCharacter的头部。',
+    'ChatSelf-ItemHead-XSAct_测试':'SourceCharacter触碰自己的头部。'
+  });
+});
+
 test('every supported language explicitly covers messages and activity labels',()=>{
   assert.ok(keys.length>=2175);
   for(const locale of languages) {
     const overrides=read(locale);
+    const file=`src/translations/action/xiaosu/${locale}.json`;
+    const upstream=existsSync(file)?JSON.parse(readFileSync(file,'utf8')):{};
     for(const key of keys) {
       // Identical spellings such as French Massage are valid explicit translations.
-      assert.ok(Object.hasOwn(catalogs[locale],key)||Object.hasOwn(overrides,key),`${locale}: ${key}`);
-      const value=overrides[key]||catalogs[locale][key];
+      assert.ok(Object.hasOwn(catalogs[locale],key)||Object.hasOwn(overrides,key)||Object.hasOwn(upstream,key),`${locale}: ${key}`);
+      const value=overrides[key]||catalogs[locale][key]||upstream[key];
       assert.ok(value.trim(),`${locale}: ${key}`);
       assert.doesNotMatch(value,/⟦|⟧|MISSING TEXT|MISSING ACTIVITY|STRING_RETRIEVAL_FAILED/,`${locale}: ${key}`);
     }

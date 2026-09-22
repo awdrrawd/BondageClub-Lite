@@ -1,6 +1,6 @@
 // Reviewed Japanese/Korean terminology and native sentence patterns. Run after
 // generating drafts; this keeps short labels and common actions consistent.
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { compileCatalogs } from './compile-action-catalogs.mjs';
@@ -144,7 +144,9 @@ function main() {
   const corrections=JSON.parse(readFileSync(new URL('./action-language-corrections.json',import.meta.url),'utf8'));
   for(const [locale,phrases] of Object.entries(corrections)) {
     const file=`src/translations/overrides/${locale}.json`,dictionary=JSON.parse(readFileSync(file,'utf8'));
-    for(const [key,text] of Object.entries(catalogs.en)) if(phrases[text]) dictionary[key]=phrases[text];
+    const upstreamFile=`src/translations/action/xiaosu/${locale}.json`;
+    const upstream=existsSync(upstreamFile)?JSON.parse(readFileSync(upstreamFile,'utf8')):{};
+    for(const [key,text] of Object.entries(catalogs.en)) if(phrases[text] && !Object.hasOwn(upstream,key)) dictionary[key]=phrases[text];
     writeJson(file,dictionary);
   }
 }

@@ -40,9 +40,11 @@ async function main() {
   for (const locale of process.argv.slice(2).length ? process.argv.slice(2) : ['ja','ko','uk','fr','de','ru','zh-cn','zh']) {
     const file = `src/translations/overrides/${locale}.json`;
     const dictionary = existsSync(file) ? JSON.parse(readFileSync(file,'utf8')) : {};
+    const upstreamFile = `src/translations/action/xiaosu/${locale}.json`;
+    const upstream = existsSync(upstreamFile) ? JSON.parse(readFileSync(upstreamFile, 'utf8')) : {};
     const groups = new Map();
     for (const key of keys) {
-      if (Object.hasOwn(catalogs[locale] || {},key) || Object.hasOwn(dictionary,key)) continue;
+      if (Object.hasOwn(upstream,key) || Object.hasOwn(catalogs[locale] || {},key) || Object.hasOwn(dictionary,key)) continue;
       // Existing Chinese messages provide clearer context for short East Asian
       // action phrases than isolated English words such as Pet, Scratch or Nuzzle.
       const source = ['ja','ko'].includes(locale) ? catalogs.zh[key] || catalogs.en[key] : catalogs.en[key];

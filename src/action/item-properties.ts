@@ -39,7 +39,7 @@ export function resolveItemProperties(group: string, name: string, raw?: Record<
   if (config) {
     const defaults = visit(config);
     // Old full bundles and plugin overrides remain authoritative when supplied.
-    for (const key of keys) if (property[key] === undefined && defaults[key] !== undefined) property[key] = [...defaults[key]!];
+    if (!unknown) for (const key of keys) if (property[key] === undefined && defaults[key] !== undefined) property[key] = [...defaults[key]!];
   }
   const effects = Array.isArray(property.Effect) ? [...property.Effect] : [];
   if (typeof raw?.LockedBy === 'string' && raw.LockedBy) effects.push('Lock');
