@@ -3,6 +3,25 @@ import { resolveItemProperties } from './item-properties';
 import type { CharacterSummary } from "../shared/types";
 export const nativeActivities = definitions.activities;
 
+function activityZoneCode(character: CharacterSummary, group: string): number {
+  const id = (definitions.zones as Record<string, number>)[group];
+  return id === undefined ? NaN : (character.ArousalSettings?.Zone?.charCodeAt(id) ?? NaN) - 100;
+}
+
+/** Explicit refusals must take precedence over incomplete local data. */
+function activityPreferenceReason(actor: CharacterSummary, target: CharacterSummary, group: string, id: number): string | null {
+  const settings = target.ArousalSettings;
+  const zone = activityZoneCode(target, group);
+  if (settings?.Active === "Inactive" || (Number.isFinite(zone) && zone >= 0 && zone % 10 === 0)) return "native.permission";
+  for (const [character, receiving] of [[actor, false], [target, true]] as const) {
+    // BC permits missing activity preferences.
+    const encoded = (character.ArousalSettings?.Activity?.charCodeAt(id) ?? NaN) - 100;
+    if ((receiving ? encoded % 10 : Math.floor(encoded / 10)) === 0) return "native.permission";
+  }
+  if (!settings || !["NoMeter", "Manual", "Hybrid", "Automatic"].includes(settings.Active || "") || !Number.isFinite(zone)) return "native.preferences";
+  return zone < 0 ? "native.permission" : null;
+}
+
 /** Incomplete local emulation is not an explicit refusal. Never relax known restrictions. */
 export function activityAvailability(reason: string | null, compatibility: boolean) {
   if (compatibility && reason && ["native.equipment", "native.unsupported", "native.preferences"].includes(reason)) {
@@ -59,15 +78,9 @@ function inventoryState(character: CharacterSummary) {
     }
     return true;
   };
-  const needs = (activity: string): boolean | undefined => {
-    const values = items.map(item => property(item, "AllowActivity"));
-    if (values.some(value => value?.includes(activity))) return true;
-    // Unknown unrelated assets are not evidence of owning the required tool.
-    return false;
-  };
   const activityItem = (activity: string) => items.find(item => property(item, "AllowActivity")?.includes(activity));
   const hasItem = (group: string, names?: string[]) => items.some(item => item.group === group && (!names || names.includes(item.name)));
-  return { effects, groups, naked, needs, hasItem, activityItem, blocked: (group: string, activity = false) => blocked.has(group) && !(activity && accessible.has(group)) };
+  return { effects, groups, naked, hasItem, activityItem, blocked: (group: string, activity = false) => blocked.has(group) && !(activity && accessible.has(group)) };
 }
 
 /** Resolve the actual worn item again at send time; never use an inventory-only item. */
@@ -83,8 +96,7 @@ export function createActivityInventoryCheck(actor: CharacterSummary, target: Ch
   const a = inventoryState(actor), b = inventoryState(target);
   const kneels = (character: CharacterSummary, state: ReturnType<typeof inventoryState>) => state.effects.has("ForceKneel") || (character.ActivePose || []).some(pose => ["Kneel", "KneelingSpread"].includes(pose));
   return (group: string, prerequisites: string[] = []): string | null => {
-  const zone = (definitions.zones as Record<string, number>)[group];
-  const code = zone === undefined ? NaN : (target.ArousalSettings?.Zone?.charCodeAt(zone) ?? NaN) - 100;
+  const code = activityZoneCode(target, group);
   if (Number.isFinite(code) && code >= 0 && code % 10 === 0) return "native.permission";
   if (actor.MemberNumber !== target.MemberNumber && ((!relaxActorRestraints && a.effects.has("Enclose")) || b.effects.has("Enclose"))) return "native.blocked";
   const walk = !["Freeze", "Tethered", "Mounted"].some(effect => a.effects.has(effect));
@@ -127,7 +139,7 @@ export function createActivityInventoryCheck(actor: CharacterSummary, target: Ch
       case "UseTongue": allowed = !a.effects.has("BlockMouth"); break;
       case "TargetMouthBlocked": allowed = b.effects.has("BlockMouth"); break;
       case "IsGagged": allowed = gagged; break;
-      case "TargetKneeling": allowed = b.effects.has("ForceKneel") || (target.ActivePose || []).some(pose => ["Kneel", "KneelingSpread"].includes(pose)); break;
+      case "TargetKneeling": allowed = kneels(target, b); break;
       case "UseHands": allowed = hands && !a.effects.has("MergedFingers"); break;
       case "UseArms": allowed = arms; break;
       case "CantUseArms": allowed = !arms; break;
@@ -157,8 +169,8 @@ export function createActivityInventoryCheck(actor: CharacterSummary, target: Ch
       default:
         // Lite also offers ordinary bare-hand scratching; tool variants still carry ActivityAsset.
         if (pre === "Needs-Scratch" && (relaxActorRestraints || a.naked("ItemHands"))) allowed = true;
-        else if (pre.startsWith("Needs-")) allowed = a.needs(pre.slice(6));
-        else if (pre.startsWith("TargetNeeds-")) allowed = b.needs(pre.slice(12));
+        else if (pre.startsWith("Needs-")) allowed = !!a.activityItem(pre.slice(6));
+        else if (pre.startsWith("TargetNeeds-")) allowed = !!b.activityItem(pre.slice(12));
         if (allowed === undefined) unsupported = true;
     }
     if (allowed === false) return "native.blocked";
@@ -173,30 +185,13 @@ export function activityReason(actor: CharacterSummary, target: CharacterSummary
   if (!activity || !(self ? activity.self : activity.target).includes(group)) return "native.target";
   if (room.BlockCategory?.includes("Arousal") || (room.MapType && room.MapType !== "Never")) return "native.room";
   // Check explicit refusals before limitations, so compatibility mode cannot bypass them.
-  if (target.ArousalSettings?.Active === "Inactive") return "native.permission";
-  const knownZone = (definitions.zones as Record<string, number>)[group];
-  const zoneCode = (target.ArousalSettings?.Zone?.charCodeAt(knownZone) ?? NaN) - 100;
-  if (Number.isFinite(zoneCode) && zoneCode >= 0 && zoneCode % 10 === 0) return "native.permission";
-  for (const [character, receiving] of [[actor, false], [target, true]] as const) {
-    const encoded = (character.ArousalSettings?.Activity?.charCodeAt(activity.id) ?? NaN) - 100;
-    if ((receiving ? encoded % 10 : Math.floor(encoded / 10)) === 0) return "native.permission";
-  }
+  const preferenceReason = activityPreferenceReason(actor, target, group, activity.id);
+  if (preferenceReason === "native.permission") return preferenceReason;
   // CharacterLoadOnline creates Female3DCG characters; raw online bundles omit this field.
   if ((actor.AssetFamily ?? "Female3DCG") !== "Female3DCG" || (target.AssetFamily ?? "Female3DCG") !== "Female3DCG") return "native.data";
   if (![actor, target].every(character => Array.isArray(character.Appearance) && character.Appearance.length)) return "native.data";
   const inventoryReason = checkInventory(group, activity.prerequisites);
   if (inventoryReason) return inventoryReason;
   // Local expression/arousal effects are execution limitations, not eligibility conditions.
-  const settings = target.ArousalSettings;
-  const zoneId = (definitions.zones as Record<string, number>)[group];
-  if (!settings || !["NoMeter", "Manual", "Hybrid", "Automatic"].includes(settings.Active || "") || typeof settings.Zone !== "string" || zoneId === undefined || settings.Zone.length <= zoneId) return "native.preferences";
-  const zone = settings.Zone.charCodeAt(zoneId) - 100;
-  if (zone < 0 || zone % 10 === 0) return "native.permission";
-  for (const [character, receiving] of [[actor, false], [target, true]] as const) {
-    if (typeof character.ArousalSettings?.Activity !== "string") continue; // BC permits missing activity preferences.
-    const encoded = character.ArousalSettings.Activity.charCodeAt(activity.id) - 100;
-    const value = receiving ? encoded % 10 : Math.floor(encoded / 10);
-    if (value === 0) return "native.permission";
-  }
-  return null;
+  return preferenceReason;
 }
