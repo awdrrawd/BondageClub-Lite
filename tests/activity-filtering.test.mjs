@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { parseExpression } from '@babel/parser';
-import { activityInventoryReason, activityReason, activityAssets, definitions } from './native-helper.mjs';
+import { activityInventoryReason, activityReason, activityAssets, createActivityContext, definitions } from './native-helper.mjs';
 import { readPrerequisite, expandActivityTemplate } from '../scripts/activity-prerequisites.mjs';
 
 const character = MemberNumber => ({ MemberNumber, Appearance: [], ArousalSettings: { Active:'NoMeter', Activity:'z'.repeat(100), Zone:'f'.repeat(30) } });
@@ -102,4 +102,25 @@ test('native catalog has no unsupported prerequisites for valid character pairs'
   for(const activity of definitions.activities) for(const group of activity.target) {
     assert.notEqual(activityReason(a,b,group,activity.name,{}),'native.unsupported',`${activity.name}/${group}`);
   }
+});
+
+test('full and minimized Appearance enforce default-type permissions identically and preserve input',()=>{
+  const a=character(1), b=character(2);
+  b.BlockItems={ItemMouth:{DuctTape:['typed0']}};
+  for(const Property of [undefined,{TypeRecord:{typed:0},Effect:['GagVeryLight']}]) {
+    a.Appearance=[item('ItemMouth','DuctTape',Property)];
+    const before=JSON.stringify(a);
+    const context=createActivityContext(a,b);
+    assert.equal(context.assets('ChewItem')[0].reason,'native.permission');
+    assert.equal(context.checkInventory('ItemMouth',['Needs-ChewItem']),'native.blocked');
+    assert.equal(JSON.stringify(a),before);
+  }
+});
+
+test('shared ownership checks match online trial ownership without requiring full collaring',()=>{
+  const a=character(1),b=character(2);
+  a.Ownership={MemberNumber:99,Stage:0}; b.Ownership={MemberNumber:99,Stage:0};
+  assert.equal(activityInventoryReason(a,b,'ItemArms',['Sisters']),null);
+  b.Ownership.MemberNumber=100;
+  assert.equal(activityInventoryReason(a,b,'ItemArms',['Sisters']),'native.blocked');
 });

@@ -10,6 +10,7 @@ const keys = ['Effect', 'Block', 'AllowActivity', 'AllowActivityOn', 'Expose', '
 export function resolveItemProperties(group: string, name: string, raw?: Record<string, unknown>) {
   const property: ItemProperties = { ...raw };
   const record = raw?.TypeRecord && typeof raw.TypeRecord === 'object' ? raw.TypeRecord as Record<string, unknown> : {};
+  const typeRecord = { ...record };
   let unknown = keys.some(key => raw?.[key] !== undefined && (!Array.isArray(raw[key]) || !(raw[key] as unknown[]).every(v => typeof v === 'string')));
   if (raw?.TypeRecord !== undefined && (raw.TypeRecord === null || typeof raw.TypeRecord !== 'object' || Array.isArray(raw.TypeRecord))) unknown = true;
   const base = (definitions.items as Record<string, ItemProperties>)[`${group}/${name}`];
@@ -22,6 +23,7 @@ export function resolveItemProperties(group: string, name: string, raw?: Record<
     function select(options: Option[], key: string) {
       const value = record[key] ?? 0;
       if (typeof value !== 'number' || !Number.isInteger(value) || !options[value]) { unknown = true; return; }
+      typeRecord[key] = value;
       const option = options[value];
       for (const k of keys) if (option.property[k]) {
         result[k] = config.kind === 'modular' ? [...new Set([...(result[k] ?? []), ...option.property[k]!])] : [...option.property[k]!];
@@ -40,6 +42,7 @@ export function resolveItemProperties(group: string, name: string, raw?: Record<
     const defaults = visit(config);
     // Old full bundles and plugin overrides remain authoritative when supplied.
     if (!unknown) for (const key of keys) if (property[key] === undefined && defaults[key] !== undefined) property[key] = [...defaults[key]!];
+    if (!unknown && Object.keys(typeRecord).length) property.TypeRecord = typeRecord;
   }
   const effects = Array.isArray(property.Effect) ? [...property.Effect] : [];
   if (typeof raw?.LockedBy === 'string' && raw.LockedBy) effects.push('Lock');

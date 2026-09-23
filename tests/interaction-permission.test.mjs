@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { interactionPermission } from './permissions-helper.mjs';
+import { interactionPermission, activityItemPermission } from './permissions-helper.mjs';
 
 function state(level, target = {}, actor = {}) {
  return {phase:'in-room',room:{Name:'Room'},player:{MemberNumber:1},characters:[
@@ -39,4 +39,37 @@ test('permissions use current room source data and source-side online relationsh
  assert.equal(interactionPermission(f,2),null);
  f.characters[1].AllowedInteractions=5;
  assert.equal(interactionPermission(f,2),'restricted-permission');
+});
+
+test('interaction direction uses the receiving character level, not both levels ANDed together',()=>{
+  const f=state(0,{}, {AllowedInteractions:5});
+  assert.equal(interactionPermission(f,2),null);
+  const reversed={...f,player:f.characters[1]};
+  assert.equal(interactionPermission(reversed,1),'restricted-permission');
+});
+
+test('wire and loaded item permissions enforce the same whole-item and default-type blocks',()=>{
+  const actor={MemberNumber:1}, base={MemberNumber:2,AllowedInteractions:0};
+  for (const restriction of [
+    {BlockItems:[{Group:'ItemHandheld',Name:'Tool',Type:'typed0'}]},
+    {BlockItems:{ItemHandheld:{Tool:['typed0']}}},
+    {PermissionItems:{'ItemHandheld/Tool':{TypePermissions:{typed0:'Block'}}}},
+    {BlockItems:{ItemHandheld:{Tool:['']}}},
+  ]) {
+    assert.equal(activityItemPermission(actor,{...base,...restriction},'ItemHandheld','Tool',{typed:0}),'native.permission');
+    assert.equal(activityItemPermission(actor,{...base,...restriction},'ItemHandheld','Other',{typed:0}),null);
+  }
+  assert.equal(activityItemPermission(actor,{...base,BlockItems:{ItemHandheld:{Tool:['typed1']}}},'ItemHandheld','Tool',{typed:0}),null);
+});
+
+test('limited items use target-side relationships and whitelist rules independently of general access',()=>{
+  const actor={MemberNumber:1,Lovership:[{MemberNumber:2}]};
+  const target={MemberNumber:2,AllowedInteractions:0,LimitedItems:{ItemHandheld:{Tool:['']}}};
+  const check=extra=>activityItemPermission(actor,{...target,...extra},'ItemHandheld','Tool');
+  assert.equal(check({}),'native.permission');
+  assert.equal(check({Lovership:[{MemberNumber:1,Stage:0}]}),null);
+  assert.equal(check({Ownership:{MemberNumber:1,Stage:0}}),null);
+  assert.equal(check({WhiteList:[1]}),null);
+  assert.equal(check({AllowedInteractions:3,WhiteList:[1]}),'native.permission');
+  assert.equal(check({Ownership:{MemberNumber:1},BlockItems:{ItemHandheld:{Tool:['']}}}),'native.permission');
 });

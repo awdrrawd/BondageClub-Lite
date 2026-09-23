@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { activityReason, activityAvailability, activityInventoryReason, createActivityInventoryCheck, definitions } from './native-helper.mjs';
+import { activityReason, activityInventoryReason, createActivityInventoryCheck, definitions } from './native-helper.mjs';
 const character = id => ({ MemberNumber: id, Name: 'Test', AssetFamily: 'Female3DCG', Appearance: [{ Group: 'BodyUpper', Name: definitions.bodies.BodyUpper[0] }], ArousalSettings: { Active: 'Manual', Activity: 'z'.repeat(100), Zone: 'f'.repeat(30) } });
 
 test('plugin checks follow source and target inventory, poses and custom state requirements', () => {
@@ -22,12 +22,12 @@ test('plugin checks follow source and target inventory, poses and custom state r
   assert.equal(check('HasCrotchRope'),null);
 });
 
-test('Lite actor restraint policy retains actual tool, target and refusal checks', () => {
+test('actor restraints, tools and target restrictions use the same strict policy', () => {
   const a=character(1),b=character(2);
   a.Appearance.push({Group:'ItemArms',Name:'Custom',Property:{Effect:['Block','MergedFingers','Freeze','BlockMouth','Enclose']}});
   const check=createActivityInventoryCheck(a,b,true);
-  assert.equal(check('ItemHead',['UseHands','UseArms','UseFeet','UseMouth','UseTongue']),null);
-  assert.equal(check('ItemHead',['CantUseArms']),null);
+  assert.equal(check('ItemHead',['UseHands','UseArms','UseFeet','UseMouth','UseTongue']),'native.blocked');
+  assert.equal(check('ItemHead',['CantUseArms']),'native.blocked');
   assert.equal(check('ItemHead',['Needs-BrushItem']),'native.blocked');
   assert.equal(check('ItemHead',['Luzi_HasWings']),'native.blocked');
   b.Appearance.push({Group:'ItemHood',Name:'Custom',Property:{Block:['ItemHead']}});
@@ -42,7 +42,7 @@ test('scratch requires nails or a tool while care is barehanded; wings require t
   assert.equal(activityReason(a,b,'ItemHead','TakeCare',{}),null);
   assert.equal(activityReason(a,b,'ItemHead','BrushItem',{}),'native.blocked');
   a.Appearance.push({Group:'Cloth',Name:'UnknownDress'});
-  assert.equal(activityAvailability(activityReason(a,b,'ItemHead','BrushItem',{}),true).reason,'native.blocked');
+  assert.equal(activityReason(a,b,'ItemHead','BrushItem',{}),'native.blocked');
   a.Appearance.push({Asset:{Name:'Comb',Group:{Name:'ItemHandheld'},AllowActivity:['BrushItem']}});
   assert.equal(activityReason(a,b,'ItemHead','BrushItem',{}),null);
   assert.equal(activityInventoryReason(a,b,'ItemArms',['Luzi_HasWings']),'native.blocked');
@@ -114,28 +114,19 @@ test('ordinary poses and missing activity strings do not disable all native acti
   assert.equal(activityInventoryReason(actor,target,'ItemEars',['TargetKneeling']),null);
 });
 
-test('compatibility only relaxes incomplete emulation, never refusals or missing characters', () => {
-  for (const reason of ['native.data','native.blocked','native.permission','native.room','native.target']) assert.equal(activityAvailability(reason,true).reason,reason);
-  for (const reason of ['native.equipment','native.unsupported','native.preferences']) {
-    assert.equal(activityAvailability(reason,true).reason,null);
-    assert.equal(activityAvailability(reason,true).warning,reason);
-    assert.equal(activityAvailability(reason,false).reason,reason);
-  }
-});
-
-test('preference refusals override incomplete data while missing zones remain compatibility warnings', () => {
+test('preference refusals override incomplete data and missing zones never authorize sending', () => {
   const actor = character(1), target = character(2);
-  const check = () => activityAvailability(activityReason(actor, target, 'ItemEars', 'Whisper', {}), true);
+  const check = () => activityReason(actor, target, 'ItemEars', 'Whisper', {});
   delete target.ArousalSettings.Zone;
-  assert.deepEqual(check(), { reason: null, warning: 'native.preferences' });
+  assert.equal(check(), 'native.preferences');
   target.ArousalSettings.Activity = 'd'.repeat(100);
-  assert.equal(check().reason, 'native.permission');
+  assert.equal(check(), 'native.permission');
   delete target.ArousalSettings.Activity;
   target.ArousalSettings.Active = 'Inactive';
-  assert.equal(check().reason, 'native.permission');
+  assert.equal(check(), 'native.permission');
   target.ArousalSettings.Active = 'NoMeter';
   target.ArousalSettings.Zone = 'f'.repeat(30);
-  assert.deepEqual(check(), { reason: null, warning: '' });
+  assert.equal(check(), null);
 });
 
 test('inventory prerequisites inspect both characters and union runtime properties with native effects', () => {

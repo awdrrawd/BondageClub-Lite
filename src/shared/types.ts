@@ -34,6 +34,10 @@ export interface CharacterSummary {
   WhiteList?: number[];
   Reputation?: Array<{ Type: string; Value: number }>;
   ItemPermission?: number;
+  /** Wire permissions may use legacy rows or R132 grouped objects. */
+  BlockItems?: unknown;
+  LimitedItems?: unknown;
+  PermissionItems?: Record<string, { Permission?: string; TypePermissions?: Record<string, string> }>;
   AllowedInteractions?: number;
   LabelColor?: string;
   AssetFamily?: string;
@@ -49,6 +53,18 @@ export interface CharacterSummary {
   MemberNumber: number;
   Name: string;
   Nickname?: string;
+}
+
+export interface ActivityOption {
+  group: string;
+  groupLabel: string;
+  name: string;
+  label: string;
+  reason: string | null;
+  warning?: string;
+  source?: string;
+  assetKey?: string;
+  asset?: { Tag: string; AssetName: string; GroupName: string };
 }
 
 export interface RoomSearchRequest {

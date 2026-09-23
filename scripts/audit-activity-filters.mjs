@@ -6,6 +6,7 @@ import vm from 'node:vm';
 import assert from 'node:assert/strict';
 import {definitions, nativeActivities, createActivityInventoryCheck} from '../tests/native-helper.mjs';
 import {resolveItemProperties} from '../tests/item-properties-helper.mjs';
+import {interactionPermission, activityItemPermission} from '../tests/permissions-helper.mjs';
 const root=process.argv[2] || '../Bondage-College-Mirror-bondageclub';
 const ctx=vm.createContext({console, CommonIsObject:v=>!!v&&typeof v==='object', CommonIsArray:Array.isArray,
   CommonEntries:Object.entries, CommonIncludes:(a,b)=>a.includes(b),
@@ -25,6 +26,9 @@ extract('Character.js',['CharacterItemsForActivity']);
 extract('Activity.js',['ActivityCheckPrerequisite','ActivityGenerateItemActivitiesFromNeed','ActivityGetAllMirrorGroups']);
 extract('Pose.js',['PoseToMapping','PoseAllStanding','PoseAllKneeling','PoseRefresh']);
 extract('Asset.js',['AssetParsePosePrerequisite']);
+extract('Server.js',['ServerChatRoomGetAllowItem']);
+ctx.AllowedInteractions={Everyone:0,EveryoneExceptBlacklist:1,OwnerLoversWhitelistAndDomsOnly:2,OwnerLoversWhitelistOnly:3,OwnerLoversOnly:4};
+ctx.ReputationCharacterGet=c=>c.Reputation.find(r=>r.Type==='Dominant')?.Value??0;
 ctx.PoseRecord=Object.fromEntries(Object.entries(definitions.poses).map(([Name,Category])=>[Name,{Name,Category}]));
 ctx.PoseFemale3DCG=Object.values(ctx.PoseRecord);
 ctx.InventoryGet=(c,g)=>c.Appearance.find(i=>i.Asset.Group.Name===g)??null;
@@ -75,4 +79,22 @@ for(const Appearance of cases) for(const targetAppearance of cases) {
     comparisons++;
   }
 }
-console.log(`${comparisons} native inventory/group comparisons agree with the local game functions (room, arousal and item permissions excluded from this audit).`);
+console.log(`${comparisons} native inventory/group comparisons agree with the local game functions (room, arousal and item permissions excluded from this inventory matrix).`);
+let permissions=0;
+extract('Inventory.js',['InventoryIsPermissionBlocked','InventoryIsPermissionLimited','InventoryCheckLimitedPermission','InventoryBlockedOrLimited']);
+for(let level=0;level<=5;level++) for(const owner of [false,true]) for(const white of [false,true]) for(const black of [false,true]) for(const lover of [false,true]) for(const dominant of [false,true]) {
+  const source={MemberNumber:1,Reputation:[{Type:'Dominant',Value:dominant?0:-100}],Lovership:lover?[{MemberNumber:2}]:[],IsLoverOfCharacter:()=>lover};
+  const target={MemberNumber:2,AllowedInteractions:level,Reputation:[],BlackList:black?[1]:[],WhiteList:white?[1]:[],Ownership:owner?{MemberNumber:1,Stage:0}:undefined,
+    HasOnBlacklist:()=>black,HasOnWhitelist:()=>white,IsOwnedByCharacter:()=>owner};
+  assert.equal(interactionPermission({phase:'in-room',room:{Name:'audit'},player:source,characters:[source,target]},2)===null,ctx.ServerChatRoomGetAllowItem(source,target));
+  permissions++;
+}
+let itemPermissions=0;
+for(let level=0;level<=5;level++) for(const permission of ['Default','Block','Limited']) for(const owner of [false,true]) for(const lover of [false,true]) for(const white of [false,true]) {
+  const actor={MemberNumber:1},target={MemberNumber:2,AllowedInteractions:level,Ownership:owner?{MemberNumber:1}:undefined,Lovership:lover?[{MemberNumber:1}]:[],WhiteList:white?[1]:[],PermissionItems:{'ItemHandheld/Tool':{TypePermissions:{typed0:permission}}},IsPlayer:()=>false,IsOwnedByPlayer:()=>owner,IsLoverOfPlayer:()=>lover,HasOnWhitelist:()=>white};
+  ctx.Player=actor;
+  const tool={Asset:{Name:'Tool',DynamicName:()=>'Tool',Group:{Name:'ItemHandheld'}}};
+  assert.equal(activityItemPermission(actor,target,'ItemHandheld','Tool',{typed:0})===null,!ctx.InventoryBlockedOrLimited(target,tool,'typed0'));
+  itemPermissions++;
+}
+console.log(`${permissions} directional interaction permissions and ${itemPermissions} typed item permissions agree with the local game functions.`);

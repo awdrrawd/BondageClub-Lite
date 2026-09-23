@@ -2,7 +2,7 @@ import { t } from "../i18n";
 import definitions from "../action/native-data.json";
 import { canonicalPartGroup } from "../action/labels";
 
-type ActivityOption = { group: string; groupLabel: string; name: string; label: string; reason: string | null; warning?: string; source?: string; assetKey?: string };
+import type { ActivityOption } from "../shared/types";
 export function openActivityDialog(name: string, getOptions: (compatibility: boolean) => ActivityOption[], send: (group: string, name: string, compatibility: boolean, assetKey?: string) => void | boolean): HTMLDialogElement {
   const dialog = document.createElement("dialog"); dialog.className = "profile-dialog activity-dialog";
   const heading = document.createElement("h2"); heading.textContent = `${t("interaction.title")} · ${name}`;
