@@ -65,6 +65,12 @@ export function createActivityContext(actor: CharacterSummary, target: Character
         if (pre.any && results.includes(true)) return true;
         return results.includes(undefined) ? undefined : !!pre.all;
       }
+      if (pre.subject === "Relation") {
+        if (pre.check === "Lover") return !!actor.Lovership?.some(love => love.MemberNumber === target.MemberNumber) && !!target.Lovership?.some(love => love.MemberNumber === actor.MemberNumber);
+        if (pre.check === "ActingOwnActed") return target.Ownership?.MemberNumber === actor.MemberNumber;
+        if (pre.check === "ActedOwnActing") return actor.Ownership?.MemberNumber === target.MemberNumber;
+        return undefined;
+      }
       const state = pre.subject === "Acting" ? a : pre.subject === "Acted" ? b : null;
       if (!state) return undefined;
       const args = pre.args ?? [], list = (value: string | string[] | undefined) => value === undefined ? [] : Array.isArray(value) ? value : [value];
@@ -140,6 +146,8 @@ export function createActivityContext(actor: CharacterSummary, target: Character
         allowed = !!item && (["Sword", "分层剑"].includes(item.name) || (item.name === "武器组合" && type?.t === 1 && type?.s === 1) || (item.name === "刀" && type?.A === 1)); break;
       }
       case "CanHighFive": allowed = !b.effects.has("Block") && !b.effects.has("MergedFingers"); break;
+      // LSCG's added butt/cheek targets do not use its persistent ear-grab state.
+      case "TargetCanBePinched": allowed = group === "ItemButt" ? true : group === "ItemMouth" ? !b.zoneBlocked(group) : undefined; break;
       case "CanCustomFlick": allowed = group === "ItemBoots" ? b.naked(group) : ["ItemVulva", "ItemVulvaPiercings"].includes(group) ? b.crotchAccessible() && !b.effects.has("Chaste") : true; break;
       case "CanGrindWithPussy": allowed = group === "ItemVulva" && b.hasItem("Pussy", ["Penis"]) ? !a.effects.has("FillVulva") : kneels(b) || ["Hogtied", "AllFours"].includes(b.pose.BodyFull); break;
       case "SourceAssEmpty": allowed = a.exposed("ItemButt") && !(a.effects.has("IsPlugged") || (a.effects.has("ButtChaste") && !a.blocked("ItemButt", true))); break;

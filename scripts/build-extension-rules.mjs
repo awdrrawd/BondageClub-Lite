@@ -19,6 +19,11 @@ function walk(node, constants = {}) {
   }
   if (node.type === 'ObjectExpression') {
     const properties = props(node);
+    if (properties.ActivityName?.value === 'Pinch' && properties.AddedTargets) {
+      const base = JSON.parse(readFileSync('src/action/native-data.json', 'utf8')).activities.find(activity => activity.name === 'Pinch');
+      const removed = properties.RemovedPrerequisites?.elements.map(n => n.value) ?? [];
+      rules['lscg:LSCG_Pinch'] = [...base.prerequisites.filter(pre => !removed.includes(pre)), ...(properties.CustomPrereqs?.elements ?? []).map(entry => props(entry).Name?.value ?? 'UnsupportedPluginPrerequisite')];
+    }
     const activity = props(properties.Activity || properties.act);
     if (activity.Name?.type === 'StringLiteral') {
       const source = properties.Activity ? 'lscg' : 'xiaosu';
@@ -29,7 +34,10 @@ function walk(node, constants = {}) {
     }
     if (properties.Name?.type === 'StringLiteral' && (properties.Target || properties.TargetSelf)) {
       const values = properties.Prerequisite?.elements ?? (properties.Prerequisite ? [properties.Prerequisite] : []);
-      rules[`echo:${properties.Name.value}`] = values.map(p => readPrerequisite(p, constants));
+      const key = `echo:${properties.Name.value}`, next = values.map(p => readPrerequisite(p, constants));
+      // Multiple source definitions are alternative ways to perform the same named activity.
+      const previous = rules[key];
+      rules[key] = previous && JSON.stringify(previous) !== JSON.stringify(next) ? [{ any: [{ all: previous }, { all: next }] }] : next;
     }
   }
   for (const [key,value] of Object.entries(node)) if (!['loc','comments','tokens'].includes(key)) {

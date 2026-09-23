@@ -31,8 +31,14 @@
       "UseHands",
       {
         "any": [
-          "UnsupportedPluginPrerequisite",
-          "UnsupportedPluginPrerequisite"
+          {
+            "subject": "Relation",
+            "check": "Lover"
+          },
+          {
+            "subject": "Relation",
+            "check": "ActingOwnActed"
+          }
         ]
       },
       {
@@ -60,8 +66,14 @@
       "UseHands",
       {
         "any": [
-          "UnsupportedPluginPrerequisite",
-          "UnsupportedPluginPrerequisite"
+          {
+            "subject": "Relation",
+            "check": "Lover"
+          },
+          {
+            "subject": "Relation",
+            "check": "ActingOwnActed"
+          }
         ]
       },
       {
@@ -619,16 +631,49 @@
     "group": "ItemButt",
     "name": "轻抚尾巴",
     "prerequisites": [
-      "Luzi_TargetHasTail",
-      "UseArms",
-      "UseHands",
       {
-        "not": {
-          "any": [
-            "UnsupportedPluginPrerequisite",
-            "UnsupportedPluginPrerequisite"
-          ]
-        }
+        "any": [
+          {
+            "all": [
+              "Luzi_TargetHasTail",
+              "UseArms",
+              "UseHands",
+              {
+                "any": [
+                  {
+                    "subject": "Relation",
+                    "check": "Lover"
+                  },
+                  {
+                    "subject": "Relation",
+                    "check": "ActingOwnActed"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "all": [
+              "Luzi_TargetHasTail",
+              "UseArms",
+              "UseHands",
+              {
+                "not": {
+                  "any": [
+                    {
+                      "subject": "Relation",
+                      "check": "Lover"
+                    },
+                    {
+                      "subject": "Relation",
+                      "check": "ActingOwnActed"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
       }
     ]
   },
@@ -1101,6 +1146,86 @@
     "self": false,
     "group": "ItemHead",
     "name": "触手摸头",
+    "prerequisites": [
+      "Luzi_HasTentacles"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemNose-触手戳",
+    "source": "echo",
+    "self": false,
+    "group": "ItemNose",
+    "name": "触手戳",
+    "prerequisites": [
+      "Luzi_HasTentacles"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemMouth-触手戳",
+    "source": "echo",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "触手戳",
+    "prerequisites": [
+      "Luzi_HasTentacles"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemBreast-触手戳",
+    "source": "echo",
+    "self": false,
+    "group": "ItemBreast",
+    "name": "触手戳",
+    "prerequisites": [
+      "Luzi_HasTentacles"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemButt-触手戳",
+    "source": "echo",
+    "self": false,
+    "group": "ItemButt",
+    "name": "触手戳",
+    "prerequisites": [
+      "Luzi_HasTentacles"
+    ]
+  },
+  {
+    "key": "ChatSelf-ItemNose-触手戳",
+    "source": "echo",
+    "self": true,
+    "group": "ItemNose",
+    "name": "触手戳",
+    "prerequisites": [
+      "Luzi_HasTentacles"
+    ]
+  },
+  {
+    "key": "ChatSelf-ItemMouth-触手戳",
+    "source": "echo",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "触手戳",
+    "prerequisites": [
+      "Luzi_HasTentacles"
+    ]
+  },
+  {
+    "key": "ChatSelf-ItemBreast-触手戳",
+    "source": "echo",
+    "self": true,
+    "group": "ItemBreast",
+    "name": "触手戳",
+    "prerequisites": [
+      "Luzi_HasTentacles"
+    ]
+  },
+  {
+    "key": "ChatSelf-ItemButt-触手戳",
+    "source": "echo",
+    "self": true,
+    "group": "ItemButt",
+    "name": "触手戳",
     "prerequisites": [
       "Luzi_HasTentacles"
     ]
@@ -1854,6 +1979,78 @@
     ]
   },
   {
+    "key": "ChatOther-ItemHands-阴茎摩擦",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHands",
+    "name": "阴茎摩擦",
+    "prerequisites": [
+      "Luzi_CanWalk",
+      "Luzi_HasPenis",
+      "Luzi_PrivateExposed"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemArms-阴茎摩擦",
+    "source": "echo",
+    "self": false,
+    "group": "ItemArms",
+    "name": "阴茎摩擦",
+    "prerequisites": [
+      "Luzi_CanWalk",
+      "Luzi_HasPenis",
+      "Luzi_PrivateExposed"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemFeet-阴茎摩擦",
+    "source": "echo",
+    "self": false,
+    "group": "ItemFeet",
+    "name": "阴茎摩擦",
+    "prerequisites": [
+      "Luzi_CanWalk",
+      "Luzi_HasPenis",
+      "Luzi_PrivateExposed"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemLegs-阴茎摩擦",
+    "source": "echo",
+    "self": false,
+    "group": "ItemLegs",
+    "name": "阴茎摩擦",
+    "prerequisites": [
+      "Luzi_CanWalk",
+      "Luzi_HasPenis",
+      "Luzi_PrivateExposed"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemButt-阴茎摩擦",
+    "source": "echo",
+    "self": false,
+    "group": "ItemButt",
+    "name": "阴茎摩擦",
+    "prerequisites": [
+      "Luzi_CanWalk",
+      "Luzi_HasPenis",
+      "Luzi_PrivateExposed"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemBreast-阴茎摩擦",
+    "source": "echo",
+    "self": false,
+    "group": "ItemBreast",
+    "name": "阴茎摩擦",
+    "prerequisites": [
+      "Luzi_CanWalk",
+      "Luzi_HasPenis",
+      "Luzi_PrivateExposed"
+    ]
+  },
+  {
     "key": "ChatOther-ItemHands-挥手致意",
     "source": "echo",
     "self": false,
@@ -1915,6 +2112,240 @@
     "group": "ItemHead",
     "name": "轻拍脑袋",
     "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemMouth-戳脸",
+    "source": "echo",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "戳脸",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
+  },
+  {
+    "key": "ChatSelf-ItemMouth-戳脸",
+    "source": "echo",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "戳脸",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemArms-戳手臂",
+    "source": "echo",
+    "self": false,
+    "group": "ItemArms",
+    "name": "戳手臂",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
+  },
+  {
+    "key": "ChatSelf-ItemArms-戳手臂",
+    "source": "echo",
+    "self": true,
+    "group": "ItemArms",
+    "name": "戳手臂",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemLegs-戳腿",
+    "source": "echo",
+    "self": false,
+    "group": "ItemLegs",
+    "name": "戳腿",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemFeet-戳腿",
+    "source": "echo",
+    "self": false,
+    "group": "ItemFeet",
+    "name": "戳腿",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
+  },
+  {
+    "key": "ChatSelf-ItemLegs-戳腿",
+    "source": "echo",
+    "self": true,
+    "group": "ItemLegs",
+    "name": "戳腿",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
+  },
+  {
+    "key": "ChatSelf-ItemFeet-戳腿",
+    "source": "echo",
+    "self": true,
+    "group": "ItemFeet",
+    "name": "戳腿",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemBoots-戳脚",
+    "source": "echo",
+    "self": false,
+    "group": "ItemBoots",
+    "name": "戳脚",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
+  },
+  {
+    "key": "ChatSelf-ItemBoots-戳脚",
+    "source": "echo",
+    "self": true,
+    "group": "ItemBoots",
+    "name": "戳脚",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemBreast-戳胸部",
+    "source": "echo",
+    "self": false,
+    "group": "ItemBreast",
+    "name": "戳胸部",
+    "prerequisites": [
+      "Luzi_TargetHasBreast",
+      "UseHands",
+      "UseArms"
+    ]
+  },
+  {
+    "key": "ChatSelf-ItemBreast-戳胸部",
+    "source": "echo",
+    "self": true,
+    "group": "ItemBreast",
+    "name": "戳胸部",
+    "prerequisites": [
+      "Luzi_TargetHasBreast",
+      "UseHands",
+      "UseArms"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemButt-戳臀部",
+    "source": "echo",
+    "self": false,
+    "group": "ItemButt",
+    "name": "戳臀部",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
+  },
+  {
+    "key": "ChatSelf-ItemButt-戳臀部",
+    "source": "echo",
+    "self": true,
+    "group": "ItemButt",
+    "name": "戳臀部",
+    "prerequisites": [
+      "UseHands",
+      "UseArms"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemNipples-戳乳头",
+    "source": "echo",
+    "self": false,
+    "group": "ItemNipples",
+    "name": "戳乳头",
+    "prerequisites": [
+      "Luzi_TargetHasBreast",
+      "Luzi_ActedZoneNaked",
+      "UseHands",
+      "UseArms"
+    ]
+  },
+  {
+    "key": "ChatSelf-ItemNipples-戳乳头",
+    "source": "echo",
+    "self": true,
+    "group": "ItemNipples",
+    "name": "戳乳头",
+    "prerequisites": [
+      "Luzi_TargetHasBreast",
+      "Luzi_ActedZoneNaked",
+      "UseHands",
+      "UseArms"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemVulva-戳阴部",
+    "source": "echo",
+    "self": false,
+    "group": "ItemVulva",
+    "name": "戳阴部",
+    "prerequisites": [
+      "Luzi_TargetFemale",
+      "Luzi_ActedZoneNaked",
+      "UseHands",
+      "UseArms"
+    ]
+  },
+  {
+    "key": "ChatSelf-ItemVulva-戳阴部",
+    "source": "echo",
+    "self": true,
+    "group": "ItemVulva",
+    "name": "戳阴部",
+    "prerequisites": [
+      "Luzi_TargetFemale",
+      "Luzi_ActedZoneNaked",
+      "UseHands",
+      "UseArms"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemVulvaPiercings-戳阴蒂",
+    "source": "echo",
+    "self": false,
+    "group": "ItemVulvaPiercings",
+    "name": "戳阴蒂",
+    "prerequisites": [
+      "Luzi_TargetFemale",
+      "Luzi_ActedZoneNaked",
+      "UseHands",
+      "UseArms"
+    ]
+  },
+  {
+    "key": "ChatSelf-ItemVulvaPiercings-戳阴蒂",
+    "source": "echo",
+    "self": true,
+    "group": "ItemVulvaPiercings",
+    "name": "戳阴蒂",
+    "prerequisites": [
+      "Luzi_TargetFemale",
+      "Luzi_ActedZoneNaked",
       "UseHands",
       "UseArms"
     ]
@@ -2311,6 +2742,358 @@
     "group": "ItemBoots",
     "name": "跺脚",
     "prerequisites": []
+  },
+  {
+    "key": "ChatOther-ItemPelvis-脚按摩",
+    "source": "echo",
+    "self": false,
+    "group": "ItemPelvis",
+    "name": "脚按摩",
+    "prerequisites": [
+      "UseFeet",
+      "Luzi_TargetKneelOrAllFours"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemLegs-脚按摩",
+    "source": "echo",
+    "self": false,
+    "group": "ItemLegs",
+    "name": "脚按摩",
+    "prerequisites": [
+      "UseFeet",
+      "Luzi_TargetKneelOrAllFours"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemBreast-脚按摩",
+    "source": "echo",
+    "self": false,
+    "group": "ItemBreast",
+    "name": "脚按摩",
+    "prerequisites": [
+      "UseFeet",
+      "Luzi_TargetKneelOrAllFours"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemMouth-脚高处戳",
+    "source": "echo",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "脚高处戳",
+    "prerequisites": [
+      "UseFeet",
+      "Luzi_IsStanding",
+      {
+        "any": [
+          {
+            "subject": "Acted",
+            "check": "PoseIsAllFours",
+            "args": []
+          },
+          {
+            "subject": "Acted",
+            "check": "PoseIsHogtied",
+            "args": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "ChatOther-ItemHead-脚高处戳",
+    "source": "echo",
+    "self": false,
+    "group": "ItemHead",
+    "name": "脚高处戳",
+    "prerequisites": [
+      "UseFeet",
+      "Luzi_IsStanding",
+      {
+        "any": [
+          {
+            "subject": "Acted",
+            "check": "PoseIsAllFours",
+            "args": []
+          },
+          {
+            "subject": "Acted",
+            "check": "PoseIsHogtied",
+            "args": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "ChatOther-ItemNose-脚高处戳",
+    "source": "echo",
+    "self": false,
+    "group": "ItemNose",
+    "name": "脚高处戳",
+    "prerequisites": [
+      "UseFeet",
+      "Luzi_IsStanding",
+      {
+        "any": [
+          {
+            "subject": "Acted",
+            "check": "PoseIsAllFours",
+            "args": []
+          },
+          {
+            "subject": "Acted",
+            "check": "PoseIsHogtied",
+            "args": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "ChatOther-ItemNeck-脚高处戳",
+    "source": "echo",
+    "self": false,
+    "group": "ItemNeck",
+    "name": "脚高处戳",
+    "prerequisites": [
+      "UseFeet",
+      "Luzi_IsStanding",
+      {
+        "any": [
+          {
+            "subject": "Acted",
+            "check": "PoseIsAllFours",
+            "args": []
+          },
+          {
+            "subject": "Acted",
+            "check": "PoseIsHogtied",
+            "args": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "ChatOther-ItemEars-脚高处戳",
+    "source": "echo",
+    "self": false,
+    "group": "ItemEars",
+    "name": "脚高处戳",
+    "prerequisites": [
+      "UseFeet",
+      "Luzi_IsStanding",
+      {
+        "any": [
+          {
+            "subject": "Acted",
+            "check": "PoseIsAllFours",
+            "args": []
+          },
+          {
+            "subject": "Acted",
+            "check": "PoseIsHogtied",
+            "args": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "ChatOther-ItemBreast-脚戳中间",
+    "source": "echo",
+    "self": false,
+    "group": "ItemBreast",
+    "name": "脚戳中间",
+    "prerequisites": [
+      "UseFeet",
+      "Luzi_IsStanding",
+      {
+        "any": [
+          {
+            "subject": "Acted",
+            "check": "PoseIsKneeling",
+            "args": []
+          },
+          {
+            "subject": "Acted",
+            "check": "PoseIsAllFours",
+            "args": []
+          },
+          {
+            "subject": "Acted",
+            "check": "PoseIsHogtied",
+            "args": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "ChatOther-ItemTorso-脚戳中间",
+    "source": "echo",
+    "self": false,
+    "group": "ItemTorso",
+    "name": "脚戳中间",
+    "prerequisites": [
+      "UseFeet",
+      "Luzi_IsStanding",
+      {
+        "any": [
+          {
+            "subject": "Acted",
+            "check": "PoseIsKneeling",
+            "args": []
+          },
+          {
+            "subject": "Acted",
+            "check": "PoseIsAllFours",
+            "args": []
+          },
+          {
+            "subject": "Acted",
+            "check": "PoseIsHogtied",
+            "args": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "ChatOther-ItemLegs-脚戳中间",
+    "source": "echo",
+    "self": false,
+    "group": "ItemLegs",
+    "name": "脚戳中间",
+    "prerequisites": [
+      "UseFeet",
+      "Luzi_IsStanding",
+      {
+        "any": [
+          {
+            "subject": "Acted",
+            "check": "PoseIsKneeling",
+            "args": []
+          },
+          {
+            "subject": "Acted",
+            "check": "PoseIsAllFours",
+            "args": []
+          },
+          {
+            "subject": "Acted",
+            "check": "PoseIsHogtied",
+            "args": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "ChatOther-ItemArms-脚戳中间",
+    "source": "echo",
+    "self": false,
+    "group": "ItemArms",
+    "name": "脚戳中间",
+    "prerequisites": [
+      "UseFeet",
+      "Luzi_IsStanding",
+      {
+        "any": [
+          {
+            "subject": "Acted",
+            "check": "PoseIsKneeling",
+            "args": []
+          },
+          {
+            "subject": "Acted",
+            "check": "PoseIsAllFours",
+            "args": []
+          },
+          {
+            "subject": "Acted",
+            "check": "PoseIsHogtied",
+            "args": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "ChatOther-ItemFeet-脚戳低处",
+    "source": "echo",
+    "self": false,
+    "group": "ItemFeet",
+    "name": "脚戳低处",
+    "prerequisites": [
+      "UseFeet",
+      "Luzi_IsStanding"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemBoots-脚戳低处",
+    "source": "echo",
+    "self": false,
+    "group": "ItemBoots",
+    "name": "脚戳低处",
+    "prerequisites": [
+      "UseFeet",
+      "Luzi_IsStanding"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemNipples-脚戳刺激",
+    "source": "echo",
+    "self": false,
+    "group": "ItemNipples",
+    "name": "脚戳刺激",
+    "prerequisites": [
+      "UseFeet",
+      "Luzi_IsStanding",
+      "TargetZoneNaked",
+      "Luzi_TargetKneelOrAllFours"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemVulva-脚戳刺激",
+    "source": "echo",
+    "self": false,
+    "group": "ItemVulva",
+    "name": "脚戳刺激",
+    "prerequisites": [
+      "UseFeet",
+      "Luzi_IsStanding",
+      "TargetZoneNaked",
+      "Luzi_TargetKneelOrAllFours"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemVulvaPiercings-脚戳刺激",
+    "source": "echo",
+    "self": false,
+    "group": "ItemVulvaPiercings",
+    "name": "脚戳刺激",
+    "prerequisites": [
+      "UseFeet",
+      "Luzi_IsStanding",
+      "TargetZoneNaked",
+      "Luzi_TargetKneelOrAllFours"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemButt-脚戳刺激",
+    "source": "echo",
+    "self": false,
+    "group": "ItemButt",
+    "name": "脚戳刺激",
+    "prerequisites": [
+      "UseFeet",
+      "Luzi_IsStanding",
+      "TargetZoneNaked",
+      "Luzi_TargetKneelOrAllFours"
+    ]
   },
   {
     "key": "ChatOther-ItemBoots-爬到脚边",
@@ -4122,6 +4905,50 @@
       "ZoneAccessible",
       "UseHands",
       "TargetIsHandLeashed"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemButt-LSCG_Pinch",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemButt",
+    "name": "LSCG_Pinch",
+    "prerequisites": [
+      "UseHands",
+      "TargetCanBePinched"
+    ]
+  },
+  {
+    "key": "ChatSelf-ItemButt-LSCG_Pinch",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemButt",
+    "name": "LSCG_Pinch",
+    "prerequisites": [
+      "UseHands",
+      "TargetCanBePinched"
+    ]
+  },
+  {
+    "key": "ChatOther-ItemMouth-LSCG_Pinch",
+    "source": "lscg",
+    "self": false,
+    "group": "ItemMouth",
+    "name": "LSCG_Pinch",
+    "prerequisites": [
+      "UseHands",
+      "TargetCanBePinched"
+    ]
+  },
+  {
+    "key": "ChatSelf-ItemMouth-LSCG_Pinch",
+    "source": "lscg",
+    "self": true,
+    "group": "ItemMouth",
+    "name": "LSCG_Pinch",
+    "prerequisites": [
+      "UseHands",
+      "TargetCanBePinched"
     ]
   },
   {
