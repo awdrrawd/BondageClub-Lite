@@ -9,6 +9,57 @@ const character = MemberNumber => ({ MemberNumber, Appearance: [], ArousalSettin
 const item = (Group, Name, Property) => ({ Group, Name, ...(Property ? { Property } : {}) });
 const rules = JSON.parse(readFileSync('src/action/extension-rules.json', 'utf8'));
 
+test('template-generated poke buttons include their text and inherited hand requirements', () => {
+  const catalog = JSON.parse(readFileSync('src/translations/action/echo/en.json', 'utf8'));
+  const entries = JSON.parse(readFileSync('src/action/extension-data.json', 'utf8'));
+  for (const mode of ['Other', 'Self']) {
+    const key = `Chat${mode}-ItemButt-戳臀部`;
+    assert.equal(catalog[key], 'SourceCharacter pokes DestinationCharacter Butt with the tip of finger.');
+    assert.ok(entries.some(entry => entry.source === 'echo' && entry.key === key));
+  }
+  const a=character(1), b=character(2);
+  assert.equal(activityInventoryReason(a,b,'ItemButt',rules['echo:戳臀部']),null);
+  a.Appearance=[item('ItemHands','PawMittens')];
+  assert.equal(activityInventoryReason(a,b,'ItemButt',rules['echo:戳臀部']),'native.blocked');
+});
+
+test('tail caress admits both relationship variants but still requires the target tail and free hands', () => {
+  const a=character(1), b=character(2), prereqs=rules['echo:轻抚尾巴'];
+  assert.equal(activityInventoryReason(a,b,'ItemButt',prereqs),'native.blocked');
+  b.Appearance=[item('TailStraps','TailStrap')];
+  for (const related of [false,true]) {
+    a.Lovership=related ? [{MemberNumber:2}] : [];
+    b.Lovership=related ? [{MemberNumber:1}] : [];
+    assert.equal(activityInventoryReason(a,b,'ItemButt',prereqs),null);
+  }
+  a.Appearance=[item('ItemHands','PawMittens')];
+  assert.equal(activityInventoryReason(a,b,'ItemButt',prereqs),'native.blocked');
+});
+
+test('LSCG added pinch targets preserve its butt exception and cheek access without changing native targets', () => {
+  const a=character(1),b=character(2),prereqs=rules['lscg:LSCG_Pinch'];
+  assert.ok(prereqs.includes('TargetCanBePinched'));
+  b.Appearance=[item('ItemDevices','Custom',{Block:['ItemButt','ItemMouth','ItemMouth2','ItemMouth3']})];
+  assert.equal(activityInventoryReason(a,b,'ItemButt',prereqs),null);
+  assert.equal(activityInventoryReason(a,b,'ItemMouth',prereqs),'native.blocked');
+  assert.equal(activityInventoryReason(a,b,'ItemEars',prereqs),'native.unsupported');
+  assert.ok(!definitions.activities.find(activity => activity.name === 'Pinch').target.includes('ItemButt'));
+  a.Appearance=[item('ItemHands','PawMittens')];
+  assert.equal(activityInventoryReason(a,b,'ItemButt',prereqs),'native.blocked');
+});
+
+test('declarative relationships use both lovers and the correct ownership direction', () => {
+  const a=character(1),b=character(2);
+  const check = name => activityInventoryReason(a,b,'ItemButt',[readPrerequisite(parseExpression(`Prereqs.Relation.${name}()`))]);
+  a.Lovership=[{MemberNumber:2}];
+  assert.equal(check('Lover'),'native.blocked');
+  b.Lovership=[{MemberNumber:1}];
+  assert.equal(check('Lover'),null);
+  b.Ownership={MemberNumber:1,Stage:0};
+  assert.equal(check('ActingOwnActed'),null);
+  assert.equal(check('ActedOwnActing'),'native.blocked');
+});
+
 test('mirrored activity zones accept any unblocked member, preserving a full block', () => {
   const a=character(1), b=character(2);
   b.Appearance=[item('ItemHood','Custom',{Block:['ItemMouth']})];

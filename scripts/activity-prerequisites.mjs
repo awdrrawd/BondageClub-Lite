@@ -1,6 +1,12 @@
 // Preserve declarative plugin predicates as data; never execute plugin callbacks.
 export function expandActivityTemplate(node, bindings = {}) {
   if (!node || typeof node !== 'object') return node;
+  if (['TSAsExpression', 'TSTypeAssertion'].includes(node.type)) return expandActivityTemplate(node.expression, bindings);
+  if (node.type === 'CallExpression' && node.callee.type === 'MemberExpression' && node.callee.property.name === 'map') {
+    const array = expandActivityTemplate(node.callee.object, bindings), callback = node.arguments[0];
+    if (array?.type === 'ArrayExpression' && callback?.type === 'ArrowFunctionExpression' && callback.params[0]?.type === 'Identifier')
+      return { type: 'ArrayExpression', elements: array.elements.map(value => expandActivityTemplate(callback.body, { ...bindings, [callback.params[0].name]: value })) };
+  }
   if (node.type === 'Identifier' && bindings[node.name]) return bindings[node.name];
   if (node.type === 'MemberExpression' && !node.computed) {
     const object = expandActivityTemplate(node.object, bindings);
@@ -28,6 +34,8 @@ export function readPrerequisite(node, constants = {}) {
   if (node?.type === 'StringLiteral') return node.value;
   if (node?.type !== 'CallExpression') return 'UnsupportedPluginPrerequisite';
   const name = path(node.callee);
+  const relation = name.match(/^Prereqs\.Relation\.(Lover|ActingOwnActed|ActedOwnActing)$/);
+  if (relation && !node.arguments.length) return { subject: 'Relation', check: relation[1] };
   const op = name.replace(/^Prereqs\./, '');
   if (['all', 'and', 'any', 'or', 'not', 'nand', 'nor'].includes(op)) {
     const args = node.arguments.map(n => readPrerequisite(n, constants));

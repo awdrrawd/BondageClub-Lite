@@ -16,16 +16,49 @@
     "UseTongue"
   ],
   "echo:轻抚尾巴": [
-    "Luzi_TargetHasTail",
-    "UseArms",
-    "UseHands",
     {
-      "not": {
-        "any": [
-          "UnsupportedPluginPrerequisite",
-          "UnsupportedPluginPrerequisite"
-        ]
-      }
+      "any": [
+        {
+          "all": [
+            "Luzi_TargetHasTail",
+            "UseArms",
+            "UseHands",
+            {
+              "any": [
+                {
+                  "subject": "Relation",
+                  "check": "Lover"
+                },
+                {
+                  "subject": "Relation",
+                  "check": "ActingOwnActed"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "all": [
+            "Luzi_TargetHasTail",
+            "UseArms",
+            "UseHands",
+            {
+              "not": {
+                "any": [
+                  {
+                    "subject": "Relation",
+                    "check": "Lover"
+                  },
+                  {
+                    "subject": "Relation",
+                    "check": "ActingOwnActed"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ],
   "echo:衔尾": [
@@ -399,8 +432,14 @@
     "UseHands",
     {
       "any": [
-        "UnsupportedPluginPrerequisite",
-        "UnsupportedPluginPrerequisite"
+        {
+          "subject": "Relation",
+          "check": "Lover"
+        },
+        {
+          "subject": "Relation",
+          "check": "ActingOwnActed"
+        }
       ]
     },
     {
@@ -1264,6 +1303,10 @@
     "ZoneAccessible",
     "UseHands",
     "TargetIsHandLeashed"
+  ],
+  "lscg:LSCG_Pinch": [
+    "UseHands",
+    "TargetCanBePinched"
   ],
   "lscg:LSCG_ReleaseEar": [
     "ZoneAccessible",

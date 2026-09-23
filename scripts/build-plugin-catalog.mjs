@@ -4,6 +4,7 @@ import { writeCatalog, writeJson } from './catalog-utils.mjs';
 import { readXiaosuCatalogs } from './xiaosu-catalog.mjs';
 import { join } from 'node:path';
 import { parse } from '@babel/parser';
+import { expandActivityTemplate } from './activity-prerequisites.mjs';
 const catalogs = { zh: {}, en: {} };
 function literal(node) {
   if (!node) return undefined;
@@ -14,6 +15,23 @@ function literal(node) {
 }
 function walk(node, callback) {
   if (!node || typeof node !== 'object') return;
+  if (node.type === 'CallExpression' && node.callee.type === 'MemberExpression' && node.callee.object.name === 'ActivityExt' && node.callee.property.name === 'fromTemplateActivity') {
+    const activities = literal(expandActivityTemplate(node.arguments[0]));
+    const groups = literal(node.arguments[1]), template = literal(node.arguments[2]), tag = literal(node.arguments[3]) ?? '$group';
+    if (groups && template) for (const entry of Array.isArray(activities) ? activities : [activities]) {
+      if (!entry?.activity) continue;
+      const result = { ...entry };
+      for (const [key, translations] of Object.entries(template)) {
+        const targets = key.includes('Self') && entry.activity.TargetSelf !== true ? entry.activity.TargetSelf : entry.activity.Target;
+        if (!Array.isArray(targets)) continue;
+        result[key] = Object.fromEntries(Object.entries(translations ?? {}).map(([lang, text]) => [lang, Object.fromEntries(targets.filter(group => groups[lang]?.[group] && typeof text === 'string').map(group => [group, text.replace(tag, groups[lang][group])]))]));
+      }
+      if (result.activity.TargetSelf === true) result.activity = { ...result.activity, TargetSelf: result.activity.Target };
+      result.dialogSelf ??= result.dialog;
+      callback(result);
+    }
+    return;
+  }
   if (node.type === 'ObjectExpression') callback(literal(node));
   for (const [key, value] of Object.entries(node)) if (!['loc', 'comments', 'tokens'].includes(key)) {
     if (Array.isArray(value)) value.forEach(n => walk(n, callback)); else if (value && typeof value === 'object') walk(value, callback);
@@ -40,6 +58,9 @@ scan('../XiaoSuActivity/src/Modules/MActivity.ts', object => {
   }
 });
 scan('../BCJS/LSCG-main/src/Modules/activities.ts', object => {
+  // Pinch's added butt/cheek targets have no persistent action; expose them as
+  // plugin text options without changing the unmodified game's native activity.
+  if (object.ActivityName === 'Pinch' && Array.isArray(object.AddedTargets)) object = { Activity: { Name: 'Pinch' }, Targets: object.AddedTargets };
   if (!object.Activity?.Name || !Array.isArray(object.Targets)) return;
   for (const target of object.Targets) if (target) for (const locale of ['zh', 'en']) {
     label(locale, 'Other', target.Name, `LSCG_${object.Activity.Name}`, target.TargetLabel || object.Activity.Name);
@@ -58,9 +79,10 @@ function echo(dir) {
         if (!Array.isArray(groups)) continue;
         const text = typeof dialogs === 'string' ? dialogs : dialogs?.[locale === 'zh' ? 'CN' : 'EN'] || dialogs?.EN || dialogs?.CN;
         for (const group of groups) {
-          add(locale, mode, group, object.activity.Name, text);
+          add(locale, mode, group, object.activity.Name, typeof text === 'string' ? text : text?.[group]);
           const labels = mode === 'Self' ? object.labelSelf || object.label : object.label;
-          label(locale, mode, group, object.activity.Name, typeof labels === 'string' ? labels : labels?.[locale === 'zh' ? 'CN' : 'EN'] || labels?.EN || labels?.CN);
+          const translated = typeof labels === 'string' ? labels : labels?.[locale === 'zh' ? 'CN' : 'EN'] || labels?.EN || labels?.CN;
+          label(locale, mode, group, object.activity.Name, typeof translated === 'string' ? translated : translated?.[group]);
         }
       }
     });
