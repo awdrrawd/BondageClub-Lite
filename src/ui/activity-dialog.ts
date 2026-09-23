@@ -2,8 +2,8 @@ import { t } from "../i18n";
 import definitions from "../action/native-data.json";
 import { canonicalPartGroup } from "../action/labels";
 
-type ActivityOption = { group: string; groupLabel: string; name: string; label: string; reason: string | null; warning?: string; source?: string };
-export function openActivityDialog(name: string, getOptions: (compatibility: boolean) => ActivityOption[], send: (group: string, name: string, compatibility: boolean) => void | boolean): HTMLDialogElement {
+import type { ActivityOption } from "../shared/types";
+export function openActivityDialog(name: string, getOptions: (compatibility: boolean) => ActivityOption[], send: (group: string, name: string, compatibility: boolean, assetKey?: string) => void | boolean): HTMLDialogElement {
   const dialog = document.createElement("dialog"); dialog.className = "profile-dialog activity-dialog";
   const heading = document.createElement("h2"); heading.textContent = `${t("interaction.title")} · ${name}`;
   const close = document.createElement("button"); close.type = "button"; close.className = "button ghost dialog-close"; close.textContent = "×"; close.setAttribute("aria-label", t("m173"));
@@ -37,7 +37,7 @@ export function openActivityDialog(name: string, getOptions: (compatibility: boo
     // Prefer an eligible sibling before deduplication, independent of upstream ordering.
     const options = new Map<string, ActivityOption>();
     for (const option of getOptions(false).filter(option => canonicalPartGroup(option.group) === group && (allActions.checked || !option.reason))) {
-      const identity = `${option.source}:${option.group}:${option.name}`;
+      const identity = `${option.source}:${option.group}:${option.name}:${option.assetKey ?? ""}`;
       if (!options.has(identity) || (options.get(identity)!.reason && !option.reason)) options.set(identity, option);
     }
     for (const option of options.values()) {
@@ -46,7 +46,7 @@ export function openActivityDialog(name: string, getOptions: (compatibility: boo
       action.textContent = option.label;
       if(option.source && option.source !== "BC"){const ribbon=document.createElement('span');ribbon.className='activity-source';ribbon.textContent=option.source;row.append(ribbon);action.setAttribute('aria-label',`${option.label} (${option.source})`);} action.disabled = Boolean(option.reason);
       action.addEventListener("click", () => {
-        try { if (send(option.group, option.name, false) !== false) status.textContent = t("interaction.sent"); }
+        try { if (send(option.group, option.name, false, option.assetKey) !== false) status.textContent = t("interaction.sent"); }
         catch (error) { status.textContent = error instanceof Error ? error.message : String(error); }
       }); row.append(action);
       const explanation = option.reason || option.warning;

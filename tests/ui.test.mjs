@@ -385,6 +385,22 @@ test('all-actions menus retain distinct target groups and their individual restr
   await f.window.happyDOM.close();
 });
 
+test('activity dialog preserves tool variants and sends the selected asset key', async () => {
+  const f=setup();
+  f.client.activityOptions=()=>['HandAccessoryLeft/Fingernails','HandAccessoryRight/Claws'].map(assetKey=>({group:'ItemHead',groupLabel:'頭',name:'Scratch',label:assetKey,reason:null,source:'BC',assetKey}));
+  let sent;
+  f.client.sendActivity=(...args)=>{sent=args;};
+  f.emit({phase:'in-room',room:{Name:'Room',Limit:10},characters:[{MemberNumber:55,Name:'Friend'}]});
+  f.document.querySelector('.member-row').click(); f.document.querySelector('.interaction-open').click();
+  const dialog=f.document.querySelector('.activity-dialog');
+  dialog.querySelector('[data-body-group="ItemHead"]').dispatchEvent(new f.window.Event('click'));
+  const buttons=dialog.querySelectorAll('.activity-option button');
+  assert.equal(buttons.length,2);
+  buttons[1].click();
+  assert.deepEqual(sent,[55,'ItemHead','Scratch',false,undefined,'HandAccessoryRight/Claws']);
+  await f.window.happyDOM.close();
+});
+
 function messages(count) {
   return Array.from({ length: count }, (_, index) => ({ id: `id-${index}`, nativeId: `native-${index}`, sender: 55, senderName: 'Friend', text: `message ${index}`, time: new Date(), type: 'Chat' }));
 }

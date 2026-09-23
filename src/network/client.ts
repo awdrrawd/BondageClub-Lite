@@ -7,7 +7,7 @@ import { t, localizeStatus } from "../i18n";
 import { afcLovers } from "../profile/afc";
 import { decodeFriendNames, contactName } from "../profile/friend-names";
 import { renderAction, dictionaryText, pronounEntries } from "../action/render";
-import { nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, activityAsset } from "../action/native";
+import { nativeActivities, activityReason, activityTargetReason, createActivityContext } from "../action/native";
 import { echoPresence } from './echo-presence';
 import { receivedSpeech } from "./speech";
 import { extensionActivities, extensionText } from "../action/extensions";
@@ -15,7 +15,7 @@ import { activityLabel, hasPenis, physicalGroup, textGroup } from "../action/lab
 import { cuddleNames, cuddleReason, cuddleState, createCuddleItem } from "../action/cuddle";
 import { validAppearance, copyAppearance, releaseAppearance, type BundledItem } from "../safety/safeword";
 import { io, type Socket } from "socket.io-client";
-import type { CharacterSummary, ChatMessage, ClientSnapshot, DictionaryEntry, DisplayMessage, OnlineFriend, PlayerSummary, RoomCreateOptions, RoomSearchRequest, RoomSearchResult, RoomSync } from "../shared/types";
+import type { ActivityOption, CharacterSummary, ChatMessage, ClientSnapshot, DictionaryEntry, DisplayMessage, OnlineFriend, PlayerSummary, RoomCreateOptions, RoomSearchRequest, RoomSearchResult, RoomSync } from "../shared/types";
 
 const MAX_MESSAGES = 3000;
 const SEARCH_TIMEOUT_MS = 8_000;
@@ -465,26 +465,32 @@ export class BcLiteClient {
     this.sendChat(`.a ${t(keys[action], [this.state.player?.Nickname || this.state.player?.Name, target.Nickname || target.Name])}`);
   }
 
-  activityOptions(memberNumber: number, compatibility = false, strictActor = true) {
+  // Retain legacy display arguments for extension callers; neither can relax eligibility.
+  activityOptions(memberNumber: number, _compatibility = false, _strictActor = true): ActivityOption[] {
     const actor = { ...this.state.player!, ...this.state.characters.find(c => c.MemberNumber === this.state.player?.MemberNumber) };
-    const target = this.state.characters.find(c => c.MemberNumber === memberNumber);
+    const target = memberNumber === actor.MemberNumber ? actor : this.state.characters.find(c => c.MemberNumber === memberNumber);
     if (!target || !actor.MemberNumber || !this.state.room) return [];
-    const checkInventory = createActivityInventoryCheck(actor, target, !strictActor);
+    const context = createActivityContext(actor, target);
+    const checkInventory = context.checkInventory;
     const permission = interactionPermission(this.state, memberNumber);
     const permissionReason = permission === "permission-unknown" ? "native.data" : permission ? "native.permission" : null;
+    const targetReason = (group: string) => !this.canSend() ? "native.data" : permissionReason || activityTargetReason(actor, target, group, this.state.room!);
     const native = nativeActivities.flatMap(activity => {
       // A tool belongs to an activity, not to each of its target zones.
-      const item = activityAsset(actor, target, activity.name);
-      const suffix = item ? ` · ${this.textCatalog[`Asset.${item.GroupName}.${item.AssetName}`] || item.AssetName}` : "";
-      return (memberNumber === actor.MemberNumber ? activity.self : activity.target).map(group => {
-        const availability = activityAvailability(!this.canSend() ? "native.data" : permissionReason || activityReason(actor, target, group, activity.name, this.state.room!, checkInventory), compatibility);
-        return {
-          group, name: activity.name, groupLabel: this.textCatalog[`DialogGroupName${textGroup(group, target)}`] || this.textCatalog[`Group.${group}`] || group,
-          label: activityLabel(activity.name, group, target, memberNumber === actor.MemberNumber, this.textCatalog) + suffix,
-          reason: availability.reason,
-          warning: availability.warning || (!availability.reason && (actor.ArousalSettings?.Active !== "Manual" || activity.special) ? "native.effects" : ""),
-          source: "BC",
-        };
+      const items = context.assets(activity.name);
+      return (items.length ? items : [null]).flatMap(candidate => {
+        const item = candidate?.asset;
+        const suffix = item ? ` · ${this.textCatalog[`Asset.${item.GroupName}.${item.AssetName}`] || item.AssetName}` : "";
+        return (memberNumber === actor.MemberNumber ? activity.self : activity.target).map(group => {
+          const reason = !this.canSend() ? "native.data" : permissionReason || candidate?.reason || activityReason(actor, target, group, activity.name, this.state.room!, checkInventory);
+          return {
+            group, name: activity.name, asset: item, assetKey: item ? `${item.GroupName}/${item.AssetName}` : undefined, groupLabel: this.textCatalog[`DialogGroupName${textGroup(group, target)}`] || this.textCatalog[`Group.${group}`] || group,
+            label: activityLabel(activity.name, group, target, memberNumber === actor.MemberNumber, this.textCatalog) + suffix,
+            reason,
+            warning: (!reason && (actor.ArousalSettings?.Active !== "Manual" || activity.special) ? "native.effects" : ""),
+            source: "BC",
+          };
+        });
       });
     });
     const extensionKeys = new Set(extensionActivities.map(entry => entry.key));
@@ -496,20 +502,19 @@ export class BcLiteClient {
       return mapped === entry.group || !extensionKeys.has(entry.key.replace(`-${entry.group}-`, `-${mapped}-`));
     }).map(entry => ({
       group: physicalGroup(entry.group), name: `${entry.source === "echo" && cuddleNames.includes(entry.name) ? "cuddle" : "text"}:${entry.key}`, groupLabel: this.textCatalog[`DialogGroupName${textGroup(physicalGroup(entry.group), target)}`] || this.textCatalog[`Group.${physicalGroup(entry.group)}`] || entry.group,
+      asset: context.assets(entry.name, entry.prerequisites).find(candidate => !candidate.reason)?.asset,
       label: entry.name === "钻进怀里" ? t("interaction.cuddleIn") : entry.name === "抱入怀中" ? t("interaction.cuddleHold") : activityLabel(entry.name, physicalGroup(entry.group), target, entry.self, this.textCatalog),
-      reason: !this.canSend() || !Array.isArray(actor.Appearance) || !Array.isArray(target.Appearance) ? "native.data" : permissionReason || (this.state.room!.BlockCategory?.includes("Arousal") || target.ArousalSettings?.Active === "Inactive" ? "native.permission" : this.state.room!.MapType && this.state.room!.MapType !== "Never" ? "native.room" : checkInventory(physicalGroup(entry.group), entry.prerequisites ?? ["UnsupportedPluginPrerequisite"])),
+      // Lite handles cuddle slot consent itself; retain the source's walking requirement.
+      reason: targetReason(physicalGroup(entry.group)) || checkInventory(physicalGroup(entry.group), entry.source === "echo" && cuddleNames.includes(entry.name) ? ["Luzi_CanWalk"] : entry.prerequisites ?? ["UnsupportedPluginPrerequisite"]) || (entry.source === "echo" && cuddleNames.includes(entry.name) ? cuddleReason(actor, target) : null),
       warning: entry.source === "echo" && cuddleNames.includes(entry.name) ? "cuddle.help" : "interaction.textOnly", source: entry.source,
     }));
-    for (const option of extensions) {
-      // Plugin runtime prerequisites are eligibility checks, never compatibility warnings.
-      if (option.name.startsWith("cuddle:")) { option.reason = this.canSend() ? cuddleReason(this.cuddleSelf(), target) : "native.data"; option.warning = "cuddle.help"; }
-    }
-    if (this.safetyCurrent?.some(item => item.Group === "ItemMisc" && item.Name === "贴贴")) extensions.unshift({ group: "ItemTorso", name: "cuddle:stop", groupLabel: this.textCatalog["Group.ItemTorso"] || "ItemTorso", label: t("cuddle.stop"), reason: null, warning: "", source: "echo" });
+    if (this.safetyCurrent?.some(item => item.Group === "ItemMisc" && item.Name === "贴贴")) extensions.unshift({ group: "ItemTorso", name: "cuddle:stop", groupLabel: this.textCatalog["Group.ItemTorso"] || "ItemTorso", label: t("cuddle.stop"), reason: null, warning: "", source: "echo", asset: undefined });
     return [...native, ...extensions];
   }
 
-  sendActivity(memberNumber: number, group: string, name: string, compatibility = false, cuddleToken?: string): void {
-    const option = this.activityOptions(memberNumber, compatibility).find(value => value.group === group && value.name === name);
+  sendActivity(memberNumber: number, group: string, name: string, compatibility = false, cuddleToken?: string, assetKey?: string): void {
+    const candidates = this.activityOptions(memberNumber, compatibility).filter(value => value.group === group && value.name === name && (assetKey === undefined || value.assetKey === assetKey));
+    const option = candidates.find(value => !value.reason) ?? candidates[0];
     if (!option || option.reason) throw new Error(t((option?.reason || "native.target") as Parameters<typeof t>[0]));
     if (name === "cuddle:stop") { this.stopCuddle(); return; }
     if (name.startsWith("cuddle:")) {
@@ -528,14 +533,13 @@ export class BcLiteClient {
       const target = this.state.characters.find(c => c.MemberNumber === memberNumber)!;
       const actor = { ...this.state.player!, ...this.state.characters.find(c => c.MemberNumber === this.state.player!.MemberNumber) };
       const entry = extensionActivities.find(entry => entry.key === name.slice(5))!;
-      this.sendChat(`.a ${extensionText(entry.key, group, actor, target, this.textCatalog, activityAsset(actor, target, entry.name, entry.prerequisites))}`);
+      this.sendChat(`.a ${extensionText(entry.key, group, actor, target, this.textCatalog, option.asset)}`);
       return;
     }
     if (Date.now() - this.lastChatAt < 350) throw new Error(t("m210"));
     this.lastChatAt = Date.now();
     const target = this.state.characters.find(c => c.MemberNumber === memberNumber)!;
-    const actor = { ...this.state.player!, ...this.state.characters.find(c => c.MemberNumber === this.state.player?.MemberNumber) };
-    const asset = activityAsset(actor, target, name);
+    const asset = option.asset;
     this.socket!.emit("ChatRoomChat", { Type: "Activity", Content: `Chat${memberNumber === this.state.player!.MemberNumber ? "Self" : "Other"}-${textGroup(group, target)}-${name}`, Dictionary: [
       { SourceCharacter: this.state.player!.MemberNumber },
       { TargetCharacter: memberNumber }, { FocusGroupName: group }, { ActivityName: name },

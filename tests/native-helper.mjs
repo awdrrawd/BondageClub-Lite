@@ -2,7 +2,10 @@ import { loadTypeScript } from './load-typescript.mjs';
 import { resolveItemProperties } from './item-properties-helper.mjs';
 import { readFileSync } from 'node:fs';
 export const definitions = JSON.parse(readFileSync('src/action/native-data.json', 'utf8'));
+import { activityItemPermission } from './permissions-helper.mjs';
+const appearanceState = new Function('definitions', 'resolveItemProperties', loadTypeScript('src/action/appearance-state.ts') + ';return appearanceState;')(definitions, resolveItemProperties);
 const code = loadTypeScript('src/action/native.ts');
-export const { nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, activityAsset } = new Function('definitions', 'resolveItemProperties', code + ';return {nativeActivities,activityReason,activityAvailability,createActivityInventoryCheck,activityAsset};')(definitions, resolveItemProperties);
-
-export const activityInventoryReason = (actor,target,group,prerequisites=[]) => createActivityInventoryCheck(actor,target)(group,prerequisites);
+export const { nativeActivities, activityReason, activityTargetReason, createActivityContext } = new Function('definitions', 'appearanceState', 'activityItemPermission', code + ';return {nativeActivities,activityReason,activityTargetReason,createActivityContext};')(definitions, appearanceState, activityItemPermission);
+export const createActivityInventoryCheck = (actor,target) => createActivityContext(actor,target).checkInventory;
+export const activityAssets = (actor,target,name,prerequisites) => createActivityContext(actor,target).assets(name,prerequisites).filter(candidate=>!candidate.reason).map(candidate=>candidate.asset);
+export const activityInventoryReason = (actor,target,group,prerequisites=[]) => createActivityContext(actor,target).checkInventory(group,prerequisites);

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { resolveItemProperties } from './item-properties-helper.mjs';
-import { activityInventoryReason, activityAvailability } from './native-helper.mjs';
+import { activityInventoryReason } from './native-helper.mjs';
 import { releaseAppearance } from './safety-helper.mjs';
 import { loadTypeScript } from './load-typescript.mjs';
 import { interactionPermission } from './permissions-helper.mjs';
@@ -31,6 +31,16 @@ test('R132 default typed properties, modular partial records, locks and leashes 
   assert.deepEqual(resolveItemProperties('Plugin', 'Custom', raw).property.Plugin, { keep: 1 });
 });
 
+test('default and partial TypeRecord values are restored for permission checks without changing wire bundles',()=>{
+  const raw={TypeRecord:{d:1},Custom:'preserve'};
+  const before=JSON.stringify(raw);
+  const result=resolveItemProperties('ItemDevices','Kennel',raw);
+  assert.equal(result.property.TypeRecord.d,1);
+  assert.ok(Object.keys(result.property.TypeRecord).length>1);
+  assert.deepEqual(resolveItemProperties('ItemMouth','DuctTape').property.TypeRecord,{typed:0});
+  assert.equal(JSON.stringify(raw),before);
+});
+
 test('R132 inherited configurations and vibration modes retain derived effects', () => {
   assert.deepEqual(resolveItemProperties('ItemDevices', 'SmallLocker', { TypeRecord: { typed: 1 } }).property.Effect, ['GagLight', 'BlindHeavy']);
   assert.ok(resolveItemProperties('ItemVulva', 'VibratingEgg', { TypeRecord: { vibrating: 1 } }).property.Effect.includes('Vibrating'));
@@ -45,7 +55,6 @@ test('R132 invalid variants preserve explicit restrictions without invalidating 
   assert.equal(activityInventoryReason(actor, target, 'ItemHead', ['CanLook']), null);
   target.Appearance[0].Property.Block = ['ItemButt'];
   assert.equal(activityInventoryReason(actor, target, 'ItemButt', ['ZoneAccessible']), 'native.blocked');
-  assert.equal(activityAvailability('native.data', true).reason, 'native.data');
   assert.equal(resolveItemProperties('ItemMouth', 'DuctTape', { TypeRecord: [] }).unknown, true);
   assert.equal(resolveItemProperties('ItemMouth', 'DuctTape', { Effect: 'GagLight' }).unknown, true);
 });

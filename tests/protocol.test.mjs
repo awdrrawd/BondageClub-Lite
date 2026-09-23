@@ -4,7 +4,7 @@ import { loadTypeScript } from './load-typescript.mjs';
 import { interactionPermission } from "./permissions-helper.mjs";
 import { renderAction, dictionaryText, pronounEntries } from './action-helper.mjs';
 import { receivedSpeech } from './speech-helper.mjs';
-import { nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, definitions, activityAsset } from './native-helper.mjs';
+import { nativeActivities, activityReason, activityTargetReason, createActivityInventoryCheck, createActivityContext, definitions } from './native-helper.mjs';
 import { extensionActivities, extensionText } from './extensions-helper.mjs';
 import { hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState, createCuddleItem } from './activity-helper.mjs';
 import { gameCatalog } from './catalog-helper.mjs';
@@ -40,9 +40,9 @@ async function setup(environment, relayAvailable = true, account = {}, storage =
     canFollowLeash: new Function('definitions','interactionPermission','resolveItemProperties',loadTypeScript('src/action/leash.ts')+';return canFollowLeash;')(definitions,interactionPermission,resolveItemProperties),
     LeashSession: new Function(loadTypeScript('src/network/leash-session.ts')+';return LeashSession;')(),
     decodeFriendNames, contactName,
-    hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState, createCuddleItem, receivedSpeech, activityAsset,
+    hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState, createCuddleItem, receivedSpeech,
     localStorage: { getItem(key) { return storage.get(key) ?? null; }, setItem(key, value) { storage.set(key, value); } },
-    io: () => socket, nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, extensionActivities, extensionText, renderAction, dictionaryText, pronounEntries, t, localizeStatus, validAppearance, copyAppearance, releaseAppearance, afcLovers, embeddedAction,
+    io: () => socket, nativeActivities, activityReason, activityTargetReason, createActivityContext, extensionActivities, extensionText, renderAction, dictionaryText, pronounEntries, t, localizeStatus, validAppearance, copyAppearance, releaseAppearance, afcLovers, embeddedAction,
     exports: {},
     require: () => ({ io: () => socket }),
     window: { setTimeout(fn) { timers.set(++timerId, fn); return timerId; }, clearTimeout(id) { timers.delete(id); } },
@@ -120,16 +120,18 @@ test('AEE and SCA bundles survive login, unrelated updates and safeword release 
 test('cuddle previews both slots and pairing IDs; stale consent cannot replace any item', async () => {
   const f=await setup('PROD'); f.client.setTextCatalog(gameCatalog('zh'));
   const base=[{Group:'BodyUpper',Name:'Normal'}];
+  const settings={AllowedInteractions:0,ArousalSettings:{Active:'NoMeter',Zone:'f'.repeat(30)}};
   f.handlers.get('ChatRoomSync')({Name:'Room',BlockCategory:['Arousal'],Character:[
-    {MemberNumber:123,Name:'Me',Appearance:[...base,{Group:'ItemMisc',Name:'OwnItem',Property:{Custom:'keep'}}],ActivePose:['Kneel']},
-    {MemberNumber:55,Name:'Peer',Appearance:[...base,{Group:'ItemMisc',Name:'贴贴'}]},
+    {...settings,MemberNumber:123,Name:'Me',Appearance:[...base,{Group:'ItemMisc',Name:'OwnItem',Property:{Custom:'keep'}}],ActivePose:['Kneel']},
+    {...settings,MemberNumber:55,Name:'Peer',Appearance:[...base,{Group:'ItemMisc',Name:'贴贴'}]},
   ]});
   f.handlers.get('ChatRoomMessage')({Type:'Hidden',Content:'Luzi_XCharacterDrawState',Sender:55,Dictionary:[{prevCharacter:99,associatedAsset:{group:'ItemMisc',asset:'贴贴'}}]});
   const info=f.client.cuddleInfo(55);
   assert.match(info.text,/OwnItem/); assert.match(info.text,/#99/);
   const option=f.client.activityOptions(55,false).find(o=>o.name==='cuddle:ChatOther-ItemTorso-钻进怀里');
-  assert.equal(option.reason,null);
+  assert.equal(option.reason,'native.room');
   assert.throws(()=>f.client.sendActivity(55,option.group,option.name));
+  f.handlers.get('ChatRoomSyncRoomProperties')({BlockCategory:[]});
   f.handlers.get('ChatRoomSyncItem')({Item:{Target:55,Group:'ItemMisc',Name:'Replacement'}});
   assert.throws(()=>f.client.sendActivity(55,option.group,option.name,false,info.token),/重新/);
   assert.ok(!f.sent.some(p=>p.event==='ChatRoomCharacterItemUpdate'));
@@ -384,6 +386,22 @@ test('NoMeter retains the same usable native actions as Manual without relaxing 
   assert.equal(native().length,0);
 });
 
+test('native tool variants remain selectable and a removed selected tool cannot be sent', async () => {
+  const base={AllowedInteractions:0,Name:'Test',Appearance:[{Group:'BodyUpper',Name:'Normal'}],ArousalSettings:{Active:'NoMeter',Activity:'z'.repeat(100),Zone:'f'.repeat(30)}};
+  const f=await setup('PROD',true,base);
+  const actor={...base,MemberNumber:123,Appearance:[...base.Appearance,{Group:'HandAccessoryLeft',Name:'Fingernails'},{Group:'HandAccessoryRight',Name:'Claws'}]},target={...base,MemberNumber:55};
+  const sync=()=>f.handlers.get('ChatRoomSync')({Name:'Room',Character:[actor,target]});
+  sync();
+  const options=f.client.activityOptions(55).filter(o=>o.group==='ItemHead'&&o.name==='Scratch'&&!o.reason);
+  assert.deepEqual(Array.from(options,o=>o.assetKey),['HandAccessoryLeft/Fingernails','HandAccessoryRight/Claws']);
+  f.client.sendActivity(55,'ItemHead','Scratch',false,undefined,options[1].assetKey);
+  assert.deepEqual(f.sent.at(-1).payload.Dictionary.find(d=>d.Tag==='ActivityAsset'),{Tag:'ActivityAsset',AssetName:'Claws',GroupName:'HandAccessoryRight'});
+  actor.Appearance.pop(); sync();
+  const before=f.sent.length;
+  assert.throws(()=>f.client.sendActivity(55,'ItemHead','Scratch',false,undefined,options[1].assetKey));
+  assert.equal(f.sent.length,before);
+});
+
 test('paw activities require the correct wearer in both modes while ordinary automatic-mode activities remain usable', async () => {
   const base={AllowedInteractions:0,Name:'Test',Appearance:[{Group:'BodyUpper',Name:'Normal'}],ArousalSettings:{Active:'Automatic',Activity:'z'.repeat(100),Zone:'f'.repeat(30)}};
   const f=await setup('PROD',true,base);
@@ -439,7 +457,8 @@ test('ECHO cuddle wears only the own slot and shares native activity plus recipr
   const f = await setup('PROD');
   f.client.setTextCatalog(gameCatalog('zh'));
   const appearance = [{ Group: 'BodyUpper', Name: 'Normal', Custom: 'preserve' }];
-  f.handlers.get('ChatRoomSync')({ Name: 'Room', Character: [{ MemberNumber: 123, Name: 'Test', Appearance: appearance }, { MemberNumber: 55, Name: 'Friend', Appearance: appearance }] });
+  const settings={AllowedInteractions:0,ArousalSettings:{Active:'NoMeter',Zone:'f'.repeat(30)}};
+  f.handlers.get('ChatRoomSync')({ Name: 'Room', Character: [{ ...settings, MemberNumber: 123, Name: 'Test', Appearance: appearance }, { ...settings, MemberNumber: 55, Name: 'Friend', Appearance: appearance }] });
   const option = f.client.activityOptions(55).find(option => option.name === 'cuddle:ChatOther-ItemTorso-钻进怀里');
   assert.ok(option); assert.equal(option.warning, 'cuddle.help');
   f.client.sendActivity(55, option.group, option.name, false, f.client.cuddleInfo(55).token);
@@ -482,8 +501,9 @@ test('native activity sends the BC Activity dictionary, rechecks permissions, an
 
 for (const activity of ['钻进怀里','抱入怀中']) test(`two Lite clients create, commit and release cuddle without ECHO: ${activity}`, async () => {
   const base=[{Group:'BodyUpper',Name:'Normal',Custom:'preserve'}, {Group:'ItemCanvas1',Name:'UnknownPlugin',Property:{opaque:['keep']}}];
-  const a=await setup('PROD',true,{MemberNumber:123,ID:'socket-a',Appearance:base});
-  const b=await setup('PROD',true,{MemberNumber:55,ID:'socket-b',Appearance:base});
+  const settings={AllowedInteractions:0,ArousalSettings:{Active:'NoMeter',Zone:'f'.repeat(30)}};
+  const a=await setup('PROD',true,{...settings,MemberNumber:123,ID:'socket-a',Appearance:base});
+  const b=await setup('PROD',true,{...settings,MemberNumber:55,ID:'socket-b',Appearance:base});
   a.client.setTextCatalog(gameCatalog('zh')); b.client.setTextCatalog(gameCatalog('zh'));
   const clients=[a,b], server=new Map(clients.map(f=>[f.state().player.MemberNumber,{...f.state().player,ActivePose:null,Appearance:structuredClone(base)}]));
   const sync=()=>clients.forEach(f=>f.handlers.get('ChatRoomSync')({Name:'Room',Character:structuredClone([...server.values()])}));
@@ -1140,6 +1160,46 @@ test('UI compatibility cannot bypass shared unknown or restricted interaction pe
   }
  }
  assert.ok(!f.sent.some(packet=>packet.event==='ChatRoomChat'&&packet.payload.Type==='Activity'));
+});
+
+test('native, plugin and cuddle options share target and room gates in every display mode',async()=>{
+  const base={AllowedInteractions:0,Name:'Test',Appearance:[{Group:'BodyUpper',Name:'Normal'}],ArousalSettings:{Active:'NoMeter',Zone:'f'.repeat(30),Activity:'z'.repeat(100)}};
+  const f=await setup('PROD',true,base);
+  f.client.setTextCatalog(gameCatalog('zh'));
+  const names=['Pet','text:ChatOther-ItemHead-LSCG_Bap','cuddle:ChatOther-ItemTorso-钻进怀里'];
+  for(const [room, target, expected] of [
+    [{BlockCategory:['Arousal']},{},'native.room'],
+    [{},{AllowedInteractions:5},'native.permission'],
+    [{},{ArousalSettings:{...base.ArousalSettings,Active:'Inactive'}},'native.permission'],
+    [{},{ArousalSettings:{...base.ArousalSettings,Zone:'d'.repeat(30)}},'native.permission'],
+    [{},{ArousalSettings:{Active:'NoMeter'}},'native.preferences'],
+  ]) {
+    f.handlers.get('ChatRoomSync')({Name:'Room',...room,Character:[{...base,MemberNumber:123},{...base,MemberNumber:55,...target}]});
+    for(const mode of [false,true]) for(const name of names) {
+      const option=f.client.activityOptions(55,mode,false).find(o=>o.name===name);
+      assert.equal(option.reason,expected,name);
+      assert.throws(()=>f.client.sendActivity(55,option.group,name,mode,f.client.cuddleInfo(55).token));
+    }
+  }
+  assert.ok(!f.sent.some(p=>p.event==='ChatRoomCharacterItemUpdate'||p.payload?.Type==='Activity'));
+});
+
+test('a target item restriction hides only its tool variant and fresh revocation prevents sending',async()=>{
+  const base={AllowedInteractions:0,Name:'Test',Appearance:[{Group:'BodyUpper',Name:'Normal'}],ArousalSettings:{Active:'NoMeter',Zone:'f'.repeat(30),Activity:'z'.repeat(100)}};
+  const f=await setup('PROD',true,base);
+  const actor={...base,MemberNumber:123,Appearance:[...base.Appearance,{Group:'ItemHandheld',Name:'Hairbrush'},{Group:'HandAccessoryLeft',Name:'Fingernails'}]};
+  const target={...base,MemberNumber:55,BlockItems:{ItemHandheld:{Hairbrush:['']}}};
+  f.handlers.get('ChatRoomSync')({Name:'Room',Character:[actor,target]});
+  const options=f.client.activityOptions(55,true,false).filter(o=>o.name==='Scratch'&&o.group==='ItemHead');
+  assert.equal(options.find(o=>o.assetKey==='ItemHandheld/Hairbrush').reason,'native.permission');
+  assert.equal(options.find(o=>o.assetKey==='HandAccessoryLeft/Fingernails').reason,null);
+  assert.throws(()=>f.client.sendActivity(55,'ItemHead','Scratch',true,undefined,'ItemHandheld/Hairbrush'));
+  f.client.sendActivity(55,'ItemHead','Scratch',false,undefined,'HandAccessoryLeft/Fingernails');
+  target.BlockItems.HandAccessoryLeft={Fingernails:['']};
+  f.handlers.get('ChatRoomSyncCharacter')({Character:target});
+  const before=f.sent.length;
+  assert.throws(()=>f.client.sendActivity(55,'ItemHead','Scratch',true,undefined,'HandAccessoryLeft/Fingernails'));
+  assert.equal(f.sent.length,before);
 });
 
 test('relationship activity permission is revoked immediately by character sync',async()=>{

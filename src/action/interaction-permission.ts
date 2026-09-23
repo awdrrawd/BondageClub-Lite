@@ -36,3 +36,27 @@ export function interactionPermission(state: Readonly<ClientSnapshot> | undefine
   if (level === 4 && lover) return null;
   return "restricted-permission";
 }
+
+/** Item restrictions are independent of the general interaction level. */
+export function activityItemPermission(actor: CharacterSummary, target: CharacterSummary, group: string, name: string, typeRecord?: Record<string, unknown>): string | null {
+  if (typeRecord && Object.values(typeRecord).some(value => !Number.isInteger(value) || Number(value) < 0)) return "native.data";
+  // Include defaults restored from the minimized TypeRecord, plus the whole-item restriction.
+  const types = ["", ...Object.entries(typeRecord ?? {}).map(([key, value]) => `${key}${value}`)];
+  const matches = (data: unknown): boolean | undefined => {
+    if (data === undefined || data === null) return false; // BC initializes omitted item lists to empty.
+    if (Array.isArray(data)) return data.some(row => row?.Group === group && row?.Name === name && types.includes(row.Type || ""));
+    if (typeof data !== "object") return undefined;
+    const entry = (data as Record<string, Record<string, unknown>>)[group]?.[name];
+    if (entry === undefined) return false;
+    return Array.isArray(entry) && entry.every(type => typeof type === "string") ? entry.some(type => types.includes(type)) : undefined;
+  };
+  const permission = target.PermissionItems?.[`${group}/${name}`];
+  const blocked = matches(target.BlockItems), limited = matches(target.LimitedItems);
+  const resolved = types.map(type => type ? permission?.TypePermissions?.[type] : permission?.Permission);
+  if (blocked || resolved.includes("Block")) return "native.permission";
+  if (blocked === undefined || limited === undefined) return "native.data";
+  if (!limited && !resolved.includes("Limited")) return null;
+  if (actor.MemberNumber === target.MemberNumber || target.Ownership?.MemberNumber === actor.MemberNumber || target.Lovership?.some(love => love.MemberNumber === actor.MemberNumber)) return null;
+  const level = target.AllowedInteractions ?? target.ItemPermission;
+  return typeof level === "number" && level < 3 && listed(target.WhiteList, actor.MemberNumber) === true ? null : "native.permission";
+}
