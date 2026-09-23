@@ -1689,6 +1689,32 @@
       ]
     ]
   },
+  "mirrors": {
+    "ItemTorso2": "ItemTorso",
+    "ItemNipplesPiercings": "ItemNipples",
+    "ItemHandheld": "ItemHands",
+    "ItemNeckAccessories": "ItemNeck",
+    "ItemNeckRestraints": "ItemNeck",
+    "ItemMouth2": "ItemMouth",
+    "ItemMouth3": "ItemMouth"
+  },
+  "poses": {
+    "BaseUpper": "BodyUpper",
+    "BaseLower": "BodyLower",
+    "Kneel": "BodyLower",
+    "KneelingSpread": "BodyLower",
+    "Yoked": "BodyUpper",
+    "OverTheHead": "BodyUpper",
+    "Hogtied": "BodyFull",
+    "Suspension": "BodyAddon",
+    "AllFours": "BodyFull",
+    "BackBoxTie": "BodyUpper",
+    "LegsClosed": "BodyLower",
+    "Spread": "BodyLower",
+    "BackElbowTouch": "BodyUpper",
+    "BackCuffs": "BodyUpper",
+    "TapedHands": "BodyHands"
+  },
   "bodies": {
     "Height": [
       "H0950",
@@ -2042,8 +2068,30 @@
     },
     "ClothOuter/WoolCoat": {},
     "ClothOuter/LabCoat": {},
-    "ClothOuter/Transparentraincoat": {},
-    "ClothOuter/GhostCloak": {},
+    "ClothOuter/Transparentraincoat": {
+      "SetPose": [
+        "BackElbowTouch"
+      ],
+      "AllowActivePose": [
+        "BaseUpper",
+        "TapedHands",
+        "BackBoxTie",
+        "BackElbowTouch",
+        "Hogtied",
+        "AllFours"
+      ]
+    },
+    "ClothOuter/GhostCloak": {
+      "AllowActivePose": [
+        "BaseUpper",
+        "BackBoxTie",
+        "BackCuffs",
+        "BackElbowTouch",
+        "Yoked",
+        "Hogtied",
+        "AllFours"
+      ]
+    },
     "ClothOuter/AllureSidecut": {},
     "ClothOuter/Blouse1": {},
     "ClothOuter/BondageDress1": {},
@@ -2157,7 +2205,16 @@
       ]
     },
     "ClothOuter/StarryOceanEveningGown": {},
-    "ClothOuter/LatexHobbleDress": {},
+    "ClothOuter/LatexHobbleDress": {
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "LegsClosed",
+        "Kneel",
+        "Hogtied"
+      ]
+    },
     "ClothOuter/StudentOutfit1": {},
     "ClothOuter/StudentOutfit2": {},
     "ClothOuter/StudentOutfit3": {},
@@ -2279,7 +2336,16 @@
     "Cloth/Gown2Top": {},
     "Cloth/Gown3": {},
     "Cloth/HeavyLeatherDress": {},
-    "Cloth/LatexHobbleDress": {},
+    "Cloth/LatexHobbleDress": {
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "LegsClosed",
+        "Kneel",
+        "Hogtied"
+      ]
+    },
     "Cloth/MaidApron1": {},
     "Cloth/MaidApron2": {
       "Expose": [
@@ -2457,8 +2523,30 @@
     "Cloth/LongQipaoDress": {},
     "Cloth/MaidApron": {},
     "Cloth/FeatherLingerie": {},
-    "Cloth/Transparentraincoat": {},
-    "Cloth/GhostCloak": {},
+    "Cloth/Transparentraincoat": {
+      "SetPose": [
+        "BackElbowTouch"
+      ],
+      "AllowActivePose": [
+        "BaseUpper",
+        "TapedHands",
+        "BackBoxTie",
+        "BackElbowTouch",
+        "Hogtied",
+        "AllFours"
+      ]
+    },
+    "Cloth/GhostCloak": {
+      "AllowActivePose": [
+        "BaseUpper",
+        "BackBoxTie",
+        "BackCuffs",
+        "BackElbowTouch",
+        "Yoked",
+        "Hogtied",
+        "AllFours"
+      ]
+    },
     "Cloth/Plugsuit": {},
     "Cloth/TransparentBunnyGirl": {},
     "Cloth/BunnySuit": {},
@@ -2838,6 +2926,12 @@
         "ItemVulva",
         "ItemVulvaPiercings",
         "ItemButt"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ClothLower/AdmiralSkirt": {
@@ -2880,6 +2974,12 @@
         "ItemVulva",
         "ItemVulvaPiercings",
         "ItemButt"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ClothLower/JeansShorts": {},
@@ -2918,6 +3018,12 @@
         "ItemVulva",
         "ItemVulvaPiercings",
         "ItemButt"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ClothLower/HaremPants": {
@@ -2956,6 +3062,12 @@
         "ItemVulva",
         "ItemVulvaPiercings",
         "ItemButt"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ClothLower/AsymmetricSkirt": {
@@ -3063,6 +3175,13 @@
         "ItemVulva",
         "ItemVulvaPiercings",
         "ItemButt"
+      ],
+      "AllowActivePose": [
+        "BaseLower",
+        "LegsClosed",
+        "Kneel",
+        "Hogtied",
+        "AllFours"
       ]
     },
     "ClothLower/BaggyJeans": {},
@@ -3080,9 +3199,23 @@
         "ItemVulva",
         "ItemVulvaPiercings",
         "ItemButt"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
-    "ClothLower/Shapewear2": {},
+    "ClothLower/Shapewear2": {
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "LegsClosed",
+        "Kneel"
+      ]
+    },
     "ClothLower/LacePants": {},
     "ClothLower/Halfpleatedskirt": {
       "Expose": [
@@ -3096,6 +3229,13 @@
         "ItemVulva",
         "ItemVulvaPiercings",
         "ItemButt"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel",
+        "LegsClosed"
       ]
     },
     "ClothLower/WoolenHighWaistSkirt": {
@@ -3304,6 +3444,12 @@
         "ItemVulva",
         "ItemVulvaPiercings",
         "ItemButt"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "Corset/LatexCorset1": {
@@ -4349,42 +4495,84 @@
       "Effect": [
         "Freeze",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemFeet/HempRope": {
       "Effect": [
         "Freeze",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemFeet/LeatherBelt": {
       "Effect": [
         "Freeze",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemFeet/SturdyLeatherBelts": {
       "Effect": [
         "Freeze",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemFeet/Irish8Cuffs": {
       "Effect": [
         "Freeze",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemFeet/HeavyAnkleCuffs": {
       "Effect": [
         "Freeze",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemFeet/DuctTape": {
       "Effect": [
         "Freeze",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemFeet/LeatherAnkleCuffs": {
@@ -4406,6 +4594,9 @@
       "AllowActivityOn": [
         "ItemLegs",
         "ItemBoots"
+      ],
+      "SetPose": [
+        "Spread"
       ]
     },
     "ItemFeet/SteelAnkleCuffs": {
@@ -4442,6 +4633,9 @@
       ],
       "AllowActivityOn": [
         "ItemLegs"
+      ],
+      "SetPose": [
+        "BaseLower"
       ]
     },
     "ItemFeet/HeavySpreaderMetal": {
@@ -4451,6 +4645,9 @@
       ],
       "AllowActivityOn": [
         "ItemLegs"
+      ],
+      "SetPose": [
+        "BaseLower"
       ]
     },
     "ItemFeet/BallChain": {
@@ -4468,18 +4665,34 @@
       "Effect": [
         "Freeze",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "LegsClosed"
       ]
     },
     "ItemFeet/Zipties": {
       "Effect": [
         "Freeze",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "LegsClosed",
+        "Kneel"
       ]
     },
     "ItemFeet/Chains": {
       "Effect": [
         "Freeze",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemFeet/SpreaderDildoBar": {
@@ -4494,6 +4707,9 @@
       ],
       "AllowActivityOn": [
         "ItemPelvis"
+      ],
+      "SetPose": [
+        "BaseLower"
       ]
     },
     "ItemFeet/SpreaderVibratingDildoBar": {
@@ -4508,12 +4724,18 @@
       ],
       "AllowActivityOn": [
         "ItemPelvis"
+      ],
+      "SetPose": [
+        "BaseLower"
       ]
     },
     "ItemFeet/WoodenCuffs": {
       "Effect": [
         "Freeze",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "BaseLower"
       ]
     },
     "ItemFeet/MedicalBedRestraints": {
@@ -4522,6 +4744,9 @@
       ],
       "Block": [
         "ItemDevices"
+      ],
+      "SetPose": [
+        "BaseLower"
       ]
     },
     "ItemFeet/SuspensionCuffs": {
@@ -4529,17 +4754,33 @@
         "Block",
         "BlockWardrobe",
         "Freeze"
+      ],
+      "SetPose": [
+        "BaseLower",
+        "Suspension"
       ]
     },
     "ItemFeet/Tentacles": {
       "Effect": [
         "Freeze",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemFeet/Slime": {
       "Effect": [
         "Freeze"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemFeet/MassiveAnkleCuffs": {
@@ -4563,36 +4804,78 @@
       ],
       "Block": [
         "ItemBoots"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel",
+        "Hogtied"
       ]
     },
     "ItemLegs/NylonRope": {
       "Effect": [
         "BlockWardrobe",
         "Slow"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel",
+        "LegsClosed",
+        "Hogtied",
+        "AllFours"
       ]
     },
     "ItemLegs/HempRope": {
       "Effect": [
         "BlockWardrobe",
         "Slow"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel",
+        "AllFours",
+        "Hogtied"
       ]
     },
     "ItemLegs/LeatherBelt": {
       "Effect": [
         "BlockWardrobe",
         "Slow"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemLegs/SturdyLeatherBelts": {
       "Effect": [
         "BlockWardrobe",
         "Slow"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemLegs/DuctTape": {
       "Effect": [
         "BlockWardrobe",
         "Slow"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemLegs/LeatherLegCuffs": {
@@ -4622,6 +4905,12 @@
       ],
       "Block": [
         "ItemFeet"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemLegs/ShinyLegBinder": {
@@ -4631,6 +4920,13 @@
       ],
       "Block": [
         "ItemFeet"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "LegsClosed",
+        "Kneel"
       ]
     },
     "ItemLegs/HobbleSkirt": {
@@ -4644,6 +4940,12 @@
         "ItemVulva",
         "ItemVulvaPiercings",
         "ItemButt"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemLegs/SeamlessLegBinder": {
@@ -4653,6 +4955,12 @@
       ],
       "Block": [
         "ItemFeet"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemLegs/SeamlessHobbleSkirt": {
@@ -4666,29 +4974,64 @@
         "ItemVulva",
         "ItemVulvaPiercings",
         "ItemButt"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemLegs/Zipties": {
       "Effect": [
         "BlockWardrobe",
         "Slow"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel",
+        "Hogtied",
+        "AllFours"
       ]
     },
     "ItemLegs/Chains": {
       "Effect": [
         "BlockWardrobe",
         "Slow"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemLegs/PlasticWrap": {
       "Effect": [
         "BlockWardrobe",
         "Slow"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemLegs/FrogtieStraps": {
       "Effect": [
         "Slow"
+      ],
+      "SetPose": [
+        "Kneel"
+      ],
+      "AllowActivePose": [
+        "Kneel",
+        "KneelingSpread",
+        "AllFours",
+        "Hogtied"
       ]
     },
     "ItemLegs/MermaidTail": {
@@ -4706,6 +5049,9 @@
         "ItemVulva",
         "ItemVulvaPiercings",
         "ItemButt"
+      ],
+      "SetPose": [
+        "LegsClosed"
       ]
     },
     "ItemLegs/MedicalBedRestraints": {
@@ -4714,18 +5060,33 @@
       ],
       "Block": [
         "ItemDevices"
+      ],
+      "SetPose": [
+        "BaseLower"
       ]
     },
     "ItemLegs/Ribbons": {
       "Effect": [
         "BlockWardrobe",
         "Slow"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemLegs/Tentacles": {
       "Effect": [
         "BlockWardrobe",
         "Slow"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemLegs/Slime": {
@@ -4737,11 +5098,26 @@
         "ItemVulvaPiercings",
         "ItemButt",
         "ItemPelvis"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemLegs/FrogtieMetalCuffs": {
       "Effect": [
         "Slow"
+      ],
+      "SetPose": [
+        "Kneel"
+      ],
+      "AllowActivePose": [
+        "Kneel",
+        "KneelingSpread",
+        "AllFours",
+        "Hogtied"
       ]
     },
     "ItemLegs/BarrelCorset": {
@@ -4753,16 +5129,38 @@
         "ItemVulva",
         "ItemVulvaPiercings",
         "ItemButt"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemLegs/StrappedPetsuitLegs": {
       "Effect": [
         "Slow"
+      ],
+      "SetPose": [
+        "Kneel"
+      ],
+      "AllowActivePose": [
+        "Kneel",
+        "KneelingSpread",
+        "AllFours"
       ]
     },
     "ItemLegs/PawPaddedPetsuitLegs": {
       "Effect": [
         "Slow"
+      ],
+      "SetPose": [
+        "Kneel"
+      ],
+      "AllowActivePose": [
+        "Kneel",
+        "KneelingSpread",
+        "AllFours"
       ]
     },
     "ItemVulva/VibratingEgg": {
@@ -5583,6 +5981,12 @@
         "ItemVulva",
         "ItemVulvaPiercings",
         "ItemButt"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemTorso/FullBodyStraps": {
@@ -5590,6 +5994,15 @@
         "Block",
         "BlockWardrobe",
         "Slow"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "BackElbowTouch",
+        "Kneel",
+        "LegsClosed"
       ]
     },
     "ItemTorso/HeavyLatexCorset": {},
@@ -5698,6 +6111,12 @@
         "ItemVulva",
         "ItemVulvaPiercings",
         "ItemButt"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemTorso2/FullBodyStraps": {
@@ -5705,6 +6124,15 @@
         "Block",
         "BlockWardrobe",
         "Slow"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "BackElbowTouch",
+        "Kneel",
+        "LegsClosed"
       ]
     },
     "ItemNipples/NippleClamp": {},
@@ -5897,12 +6325,18 @@
       "Effect": [
         "Block",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "BackBoxTie"
       ]
     },
     "ItemArms/HempRope": {
       "Effect": [
         "Block",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "BackBoxTie"
       ]
     },
     "ItemArms/MetalCuffs": {
@@ -5910,6 +6344,9 @@
         "Lock",
         "Block",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "BaseUpper"
       ]
     },
     "ItemArms/SturdyLeatherBelts": {
@@ -5917,6 +6354,9 @@
         "Block",
         "BlockWardrobe",
         "NotSelfPickable"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/LeatherArmbinder": {
@@ -5927,6 +6367,9 @@
       "Block": [
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/ArmbinderJacket": {
@@ -5937,6 +6380,9 @@
       "Block": [
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/LeatherCuffs": {
@@ -5956,6 +6402,9 @@
         "Freeze",
         "NotSelfPickable",
         "MapImmobile"
+      ],
+      "SetPose": [
+        "Yoked"
       ]
     },
     "ItemArms/SteelCuffs": {
@@ -5983,6 +6432,9 @@
         "Block",
         "BlockWardrobe",
         "Lock"
+      ],
+      "SetPose": [
+        "BackBoxTie"
       ]
     },
     "ItemArms/Manacles": {
@@ -5996,6 +6448,10 @@
       ],
       "AllowActivityOn": [
         "ItemFeet"
+      ],
+      "SetPose": [
+        "BackBoxTie",
+        "Kneel"
       ]
     },
     "ItemArms/FullBodyShackles": {
@@ -6009,6 +6465,9 @@
       ],
       "AllowActivityOn": [
         "ItemFeet"
+      ],
+      "SetPose": [
+        "BaseUpper"
       ]
     },
     "ItemArms/WristShackles": {
@@ -6025,6 +6484,9 @@
       "Block": [
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/FuturisticStraitjacket": {
@@ -6040,6 +6502,9 @@
         "ItemButt",
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/StraitJacket": {
@@ -6055,6 +6520,9 @@
         "ItemBreast",
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/CollarCuffs": {
@@ -6065,6 +6533,9 @@
       "Block": [
         "ItemHands",
         "ItemNeck"
+      ],
+      "SetPose": [
+        "BackBoxTie"
       ]
     },
     "ItemArms/LeatherStraitJacket": {
@@ -6080,6 +6551,9 @@
         "ItemBreast",
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/FurStraitJacket": {
@@ -6095,6 +6569,9 @@
         "ItemBreast",
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/Bolero": {
@@ -6105,12 +6582,18 @@
       "Block": [
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/DuctTape": {
       "Effect": [
         "Block",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/BitchSuit": {
@@ -6126,6 +6609,15 @@
         "ItemBreast",
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "Kneel"
+      ],
+      "AllowActivePose": [
+        "BackElbowTouch",
+        "Kneel",
+        "AllFours"
       ]
     },
     "ItemArms/ShinyPetSuit": {
@@ -6141,6 +6633,15 @@
         "ItemBreast",
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "Kneel"
+      ],
+      "AllowActivePose": [
+        "BackElbowTouch",
+        "Kneel",
+        "AllFours"
       ]
     },
     "ItemArms/ShinyStraitjacket": {
@@ -6151,6 +6652,15 @@
       "Block": [
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
+      ],
+      "AllowActivePose": [
+        "BackElbowTouch",
+        "LegsClosed",
+        "Kneel",
+        "BaseLower"
       ]
     },
     "ItemArms/StraitDress": {
@@ -6173,6 +6683,13 @@
         "ItemVulvaPiercings",
         "ItemLegs",
         "ItemButt"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemArms/StraitDressOpen": {
@@ -6192,6 +6709,13 @@
         "ItemNipples",
         "ItemNipplesPiercings",
         "ItemLegs"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemArms/SeamlessStraitDress": {
@@ -6214,6 +6738,13 @@
         "ItemVulvaPiercings",
         "ItemLegs",
         "ItemButt"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemArms/SeamlessStraitDressOpen": {
@@ -6233,6 +6764,13 @@
         "ItemNipples",
         "ItemNipplesPiercings",
         "ItemLegs"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemArms/Yoke": {
@@ -6240,6 +6778,9 @@
         "Block",
         "BlockWardrobe",
         "NotSelfPickable"
+      ],
+      "SetPose": [
+        "Yoked"
       ]
     },
     "ItemArms/HeavyYoke": {
@@ -6247,6 +6788,9 @@
         "Block",
         "BlockWardrobe",
         "NotSelfPickable"
+      ],
+      "SetPose": [
+        "Yoked"
       ]
     },
     "ItemArms/Pillory": {
@@ -6254,6 +6798,9 @@
         "Block",
         "BlockWardrobe",
         "NotSelfPickable"
+      ],
+      "SetPose": [
+        "Yoked"
       ]
     },
     "ItemArms/FullLatexSuit": {
@@ -6272,12 +6819,19 @@
         "ItemHandheld",
         "ItemLegs",
         "ItemFeet"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "LegsClosed"
       ]
     },
     "ItemArms/Zipties": {
       "Effect": [
         "Block",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/BoxTieArmbinder": {
@@ -6288,18 +6842,27 @@
       "Block": [
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/BondageBouquet": {
       "Effect": [
         "BlockWardrobe",
         "Block"
+      ],
+      "SetPose": [
+        "BaseUpper"
       ]
     },
     "ItemArms/Chains": {
       "Effect": [
         "Block",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "BackBoxTie"
       ]
     },
     "ItemArms/PetCrawler": {
@@ -6309,6 +6872,9 @@
       ],
       "Block": [
         "ItemDevices"
+      ],
+      "SetPose": [
+        "AllFours"
       ]
     },
     "ItemArms/MermaidSuit": {
@@ -6327,6 +6893,10 @@
         "ItemHandheld",
         "ItemLegs",
         "ItemFeet"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "LegsClosed"
       ]
     },
     "ItemArms/Web": {
@@ -6343,6 +6913,14 @@
         "ItemLegs",
         "ItemFeet",
         "ItemBoots"
+      ],
+      "SetPose": [
+        "BaseLower",
+        "BackElbowTouch"
+      ],
+      "AllowActivePose": [
+        "BaseLower",
+        "Kneel"
       ]
     },
     "ItemArms/LatexArmbinder": {
@@ -6353,6 +6931,9 @@
       "Block": [
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/FuturisticArmbinder": {
@@ -6363,6 +6944,9 @@
       "Block": [
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/ShinyArmbinder": {
@@ -6373,6 +6957,9 @@
       "Block": [
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/SeamlessLatexArmbinder": {
@@ -6382,6 +6969,9 @@
       ],
       "Block": [
         "ItemHands"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/FullBodyLeatherHarness": {
@@ -6389,6 +6979,13 @@
         "Block",
         "BlockWardrobe",
         "Slow"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemArms/UnderBedBondageCuffs": {
@@ -6407,6 +7004,10 @@
         "ItemLegs",
         "ItemFeet",
         "ItemBoots"
+      ],
+      "SetPose": [
+        "Yoked",
+        "BaseLower"
       ]
     },
     "ItemArms/TightJacket": {
@@ -6422,6 +7023,9 @@
         "ItemBreast",
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/LatexSleevelessLeotard": {
@@ -6432,6 +7036,9 @@
       "Block": [
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/LatexBoxtieLeotard": {
@@ -6442,6 +7049,9 @@
       "Block": [
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/LatexButterflyLeotard": {
@@ -6452,6 +7062,9 @@
       "Block": [
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/PrisonLockdownSuit": {
@@ -6475,12 +7088,19 @@
         "ItemLegs",
         "ItemFeet",
         "ItemBoots"
+      ],
+      "SetPose": [
+        "LegsClosed",
+        "BackElbowTouch"
       ]
     },
     "ItemArms/LeatherArmSplints": {
       "Effect": [
         "Block",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/TightJacketCrotch": {
@@ -6499,6 +7119,9 @@
         "ItemVulva",
         "ItemButt",
         "ItemVulvaPiercings"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/HighSecurityStraitJacket": {
@@ -6514,6 +7137,9 @@
         "ItemBreast",
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/PantyhoseBody": {
@@ -6529,6 +7155,13 @@
         "ItemButt",
         "ItemVulvaPiercings",
         "ItemNipplesPiercings"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemArms/PantyhoseBodyOpen": {
@@ -6541,12 +7174,22 @@
         "ItemHands",
         "ItemHandheld",
         "ItemNipplesPiercings"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemArms/WoodenCuffs": {
       "Effect": [
         "Block",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "BaseUpper"
       ]
     },
     "ItemArms/InflatableStraightLeotard": {
@@ -6566,6 +7209,9 @@
         "ItemTorso2",
         "ItemVulva",
         "ItemVulvaPiercings"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/StrictLeatherPetCrawler": {
@@ -6576,6 +7222,16 @@
       "Block": [
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "Kneel"
+      ],
+      "AllowActivePose": [
+        "Kneel",
+        "KneelingSpread",
+        "BackElbowTouch",
+        "AllFours"
       ]
     },
     "ItemArms/MedicalBedRestraints": {
@@ -6588,6 +7244,9 @@
         "ItemVulvaPiercings",
         "ItemButt",
         "ItemDevices"
+      ],
+      "SetPose": [
+        "Yoked"
       ]
     },
     "ItemArms/TransportJacket": {
@@ -6604,6 +7263,9 @@
         "ItemHands",
         "ItemHandheld",
         "ItemPelvis"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/PlasticWrap": {
@@ -6617,6 +7279,10 @@
         "ItemNipplesPiercings",
         "ItemTorso",
         "ItemTorso2"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "LegsClosed"
       ]
     },
     "ItemArms/WrappedBlanket": {
@@ -6638,24 +7304,40 @@
         "ItemVulvaPiercings",
         "ItemLegs",
         "ItemButt"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemArms/Ribbons": {
       "Effect": [
         "Block",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "BackBoxTie"
       ]
     },
     "ItemArms/ThinLeatherStraps": {
       "Effect": [
         "Block",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "BackBoxTie"
       ]
     },
     "ItemArms/Tentacles": {
       "Effect": [
         "Block",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/Slime": {
@@ -6671,6 +7353,9 @@
         "ItemNipplesPiercings",
         "ItemTorso",
         "ItemTorso2"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/BondageBra": {
@@ -6681,6 +7366,9 @@
       "Block": [
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/SleepSac": {
@@ -6704,6 +7392,10 @@
         "ItemVulva",
         "ItemVulvaPiercings",
         "ItemBoots"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "LegsClosed"
       ]
     },
     "ItemArms/PrisonSJ": {
@@ -6718,6 +7410,9 @@
         "ItemButt",
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/InflatableDress": {
@@ -6741,6 +7436,13 @@
         "ItemHands",
         "ItemHandheld",
         "ItemLegs"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemArms/SmoothLeatherArmbinder1": {
@@ -6750,12 +7452,18 @@
       ],
       "Block": [
         "ItemHands"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/CanvasStraitjacket1": {
       "Effect": [
         "Block",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/CollarMetalcuffs": {
@@ -6766,6 +7474,9 @@
       "Block": [
         "ItemHands",
         "ItemNeck"
+      ],
+      "SetPose": [
+        "BackBoxTie"
       ]
     },
     "ItemArms/ArmbinderSuit": {
@@ -6777,6 +7488,9 @@
       "Block": [
         "ItemHandheld",
         "ItemHands"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
       ]
     },
     "ItemArms/BedMetalCuffs": {
@@ -6787,6 +7501,9 @@
       ],
       "Block": [
         "ItemDevices"
+      ],
+      "SetPose": [
+        "Yoked"
       ]
     },
     "ItemArms/SteelBelt": {},
@@ -6798,6 +7515,15 @@
       "Block": [
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
+      ],
+      "AllowActivePose": [
+        "BackElbowTouch",
+        "Yoked",
+        "OverTheHead",
+        "AllFours"
       ]
     },
     "ItemArms/StrappedPetsuitArms": {
@@ -6808,6 +7534,15 @@
       "Block": [
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
+      ],
+      "AllowActivePose": [
+        "BackElbowTouch",
+        "Yoked",
+        "OverTheHead",
+        "AllFours"
       ]
     },
     "ItemHands/PaddedMittens": {
@@ -6838,11 +7573,21 @@
       ],
       "Block": [
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "TapedHands"
       ]
     },
     "ItemHands/FuturisticMittens": {
       "Effect": [
         "UseRemote"
+      ],
+      "SetPose": [
+        "TapedHands"
+      ],
+      "AllowActivePose": [
+        "Hogtied",
+        "AllFours"
       ]
     },
     "ItemHands/PaddedLeatherMittens": {
@@ -6853,6 +7598,13 @@
       ],
       "Block": [
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "TapedHands"
+      ],
+      "AllowActivePose": [
+        "Hogtied",
+        "AllFours"
       ]
     },
     "ItemHands/PolishedMittens": {
@@ -6873,6 +7625,13 @@
       ],
       "Block": [
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "TapedHands"
+      ],
+      "AllowActivePose": [
+        "Hogtied",
+        "AllFours"
       ]
     },
     "ItemHands/HoofMittens": {
@@ -6883,6 +7642,13 @@
       ],
       "Block": [
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "TapedHands"
+      ],
+      "AllowActivePose": [
+        "Hogtied",
+        "AllFours"
       ]
     },
     "ItemHands/SmoothLeatherMittens1": {
@@ -6893,6 +7659,13 @@
       ],
       "Block": [
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "TapedHands"
+      ],
+      "AllowActivePose": [
+        "Hogtied",
+        "AllFours"
       ]
     },
     "ItemHands/CheerleaderPomPoms": {
@@ -6913,6 +7686,13 @@
       ],
       "Block": [
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "TapedHands"
+      ],
+      "AllowActivePose": [
+        "Hogtied",
+        "AllFours"
       ]
     },
     "ItemHands/ElbowLengthMittens": {
@@ -6923,6 +7703,9 @@
       ],
       "Block": [
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "TapedHands"
       ]
     },
     "ItemHands/GlueMittens": {
@@ -6933,6 +7716,9 @@
       ],
       "Block": [
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "TapedHands"
       ]
     },
     "ItemHands/HempRopeCuffs": {},
@@ -6943,6 +7729,9 @@
       ],
       "Block": [
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "TapedHands"
       ]
     },
     "ItemHands/LatexBondageMitts": {
@@ -6952,6 +7741,9 @@
       ],
       "Block": [
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "TapedHands"
       ]
     },
     "ItemHands/FoamMittens": {
@@ -6962,6 +7754,9 @@
       ],
       "Block": [
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "TapedHands"
       ]
     },
     "ItemHands/BalletBootsMittens": {
@@ -6972,6 +7767,9 @@
       ],
       "Block": [
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "TapedHands"
       ]
     },
     "ItemHandheld/KeyProp": {},
@@ -7554,6 +8352,13 @@
         "Freeze",
         "IsChained",
         "MapImmobile"
+      ],
+      "SetPose": [
+        "Kneel"
+      ],
+      "AllowActivePose": [
+        "Kneel",
+        "KneelingSpread"
       ]
     },
     "ItemNeckRestraints/Post": {
@@ -7561,6 +8366,13 @@
         "Freeze",
         "IsChained",
         "MapImmobile"
+      ],
+      "SetPose": [
+        "Kneel"
+      ],
+      "AllowActivePose": [
+        "Kneel",
+        "KneelingSpread"
       ]
     },
     "ItemNeckRestraints/CollarLeash": {
@@ -7592,6 +8404,13 @@
         "Freeze",
         "IsChained",
         "MapImmobile"
+      ],
+      "SetPose": [
+        "Kneel"
+      ],
+      "AllowActivePose": [
+        "Kneel",
+        "KneelingSpread"
       ]
     },
     "ItemNeckRestraints/CollarRopeMedium": {
@@ -11680,6 +12499,13 @@
       ],
       "Block": [
         "ItemAddon"
+      ],
+      "SetPose": [
+        "BaseLower"
+      ],
+      "AllowActivePose": [
+        "BaseLower",
+        "LegsClosed"
       ]
     },
     "ItemDevices/SmallWoodenBox": {
@@ -11692,6 +12518,9 @@
       ],
       "Block": [
         "ItemAddon"
+      ],
+      "SetPose": [
+        "Kneel"
       ]
     },
     "ItemDevices/MilkCan": {
@@ -11701,6 +12530,9 @@
         "Enclose",
         "GagHeavy",
         "Freeze"
+      ],
+      "SetPose": [
+        "Kneel"
       ]
     },
     "ItemDevices/WaterCell": {
@@ -11712,6 +12544,10 @@
       ],
       "Block": [
         "ItemFeet"
+      ],
+      "SetPose": [
+        "Suspension",
+        "LegsClosed"
       ]
     },
     "ItemDevices/Cage": {
@@ -11722,6 +12558,13 @@
       ],
       "Block": [
         "ItemAddon"
+      ],
+      "SetPose": [
+        "BaseLower"
+      ],
+      "AllowActivePose": [
+        "BaseLower",
+        "LegsClosed"
       ]
     },
     "ItemDevices/LowCage": {
@@ -11732,6 +12575,9 @@
       ],
       "Block": [
         "ItemAddon"
+      ],
+      "SetPose": [
+        "Kneel"
       ]
     },
     "ItemDevices/SaddleStand": {
@@ -11745,6 +12591,9 @@
       ],
       "AllowActivityOn": [
         "ItemPelvis"
+      ],
+      "SetPose": [
+        "BaseLower"
       ]
     },
     "ItemDevices/BurlapSack": {
@@ -11770,6 +12619,10 @@
         "ItemVulva",
         "ItemVulvaPiercings",
         "ItemBoots"
+      ],
+      "SetPose": [
+        "Kneel",
+        "BackElbowTouch"
       ]
     },
     "ItemDevices/InflatableBodyBag": {
@@ -11795,6 +12648,13 @@
         "ItemVulva",
         "ItemVulvaPiercings",
         "ItemBoots"
+      ],
+      "SetPose": [
+        "LegsClosed",
+        "BackElbowTouch"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemDevices/FurBlanketWrap": {
@@ -11819,11 +12679,21 @@
         "ItemTorso2",
         "ItemVulva",
         "ItemVulvaPiercings"
+      ],
+      "SetPose": [
+        "LegsClosed",
+        "BackElbowTouch"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemDevices/BondageBench": {
       "Effect": [
         "Mounted"
+      ],
+      "SetPose": [
+        "LegsClosed"
       ]
     },
     "ItemDevices/BBQ": {},
@@ -11833,11 +12703,17 @@
     "ItemDevices/Coffin": {
       "Block": [
         "ItemAddon"
+      ],
+      "SetPose": [
+        "LegsClosed"
       ]
     },
     "ItemDevices/CryoCapsule": {
       "Block": [
         "ItemAddon"
+      ],
+      "SetPose": [
+        "LegsClosed"
       ]
     },
     "ItemDevices/OneBarPrison": {
@@ -11850,6 +12726,9 @@
       ],
       "Block": [
         "ItemVulva"
+      ],
+      "SetPose": [
+        "BaseLower"
       ]
     },
     "ItemDevices/PersonalCage": {
@@ -11859,6 +12738,14 @@
       ],
       "Block": [
         "ItemAddon"
+      ],
+      "SetPose": [
+        "BaseLower"
+      ],
+      "AllowActivePose": [
+        "BaseLower",
+        "LegsClosed",
+        "Spread"
       ]
     },
     "ItemDevices/LeatherCage": {
@@ -11868,6 +12755,9 @@
       ],
       "Block": [
         "ItemAddon"
+      ],
+      "SetPose": [
+        "LegsClosed"
       ]
     },
     "ItemDevices/TheDisplayFrame": {
@@ -11883,6 +12773,10 @@
         "ItemFeet",
         "ItemBoots",
         "ItemNeckAccessories"
+      ],
+      "SetPose": [
+        "LegsClosed",
+        "BackElbowTouch"
       ]
     },
     "ItemDevices/TheHangingFrame": {
@@ -11897,6 +12791,10 @@
         "ItemFeet",
         "ItemBoots",
         "ItemNeckAccessories"
+      ],
+      "SetPose": [
+        "LegsClosed",
+        "BackElbowTouch"
       ]
     },
     "ItemDevices/Sybian": {
@@ -11913,6 +12811,9 @@
       "AllowActivityOn": [
         "ItemBoots",
         "ItemPelvis"
+      ],
+      "SetPose": [
+        "KneelingSpread"
       ]
     },
     "ItemDevices/StrapOnSmooth": {
@@ -11925,7 +12826,13 @@
         "PenetrateItem"
       ]
     },
-    "ItemDevices/Potty": {},
+    "ItemDevices/Potty": {
+      "AllowActivePose": [
+        "KneelingSpread",
+        "Spread",
+        "BaseLower"
+      ]
+    },
     "ItemDevices/DisplayCase": {
       "Effect": [
         "BlockWardrobe",
@@ -11936,6 +12843,13 @@
       ],
       "Block": [
         "ItemAddon"
+      ],
+      "SetPose": [
+        "BaseLower"
+      ],
+      "AllowActivePose": [
+        "BaseLower",
+        "LegsClosed"
       ]
     },
     "ItemDevices/SmallDisplayCase": {
@@ -11948,6 +12862,9 @@
       ],
       "Block": [
         "ItemAddon"
+      ],
+      "SetPose": [
+        "Kneel"
       ]
     },
     "ItemDevices/FuturisticCrate": {
@@ -11967,6 +12884,13 @@
       ],
       "Block": [
         "ItemAddon"
+      ],
+      "SetPose": [
+        "BaseLower"
+      ],
+      "AllowActivePose": [
+        "BaseLower",
+        "LegsClosed"
       ]
     },
     "ItemDevices/WoodenBoxOpenHead": {
@@ -11993,6 +12917,13 @@
         "ItemBoots",
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "BaseLower"
+      ],
+      "AllowActivePose": [
+        "BaseLower",
+        "LegsClosed"
       ]
     },
     "ItemDevices/SmallWoodenBoxOpenHead": {
@@ -12019,6 +12950,9 @@
         "ItemBoots",
         "ItemHands",
         "ItemHandheld"
+      ],
+      "SetPose": [
+        "Kneel"
       ]
     },
     "ItemDevices/WoodenStocks": {
@@ -12035,6 +12969,10 @@
       "AllowActivityOn": [
         "ItemArms",
         "ItemFeet"
+      ],
+      "SetPose": [
+        "Yoked",
+        "BaseLower"
       ]
     },
     "ItemDevices/Vacbed": {
@@ -12082,6 +13020,10 @@
         "ItemButt",
         "ItemVulva",
         "ItemVulvaPiercings"
+      ],
+      "SetPose": [
+        "Yoked",
+        "BaseLower"
       ]
     },
     "ItemDevices/VacBedDeluxe": {
@@ -12117,6 +13059,10 @@
         "ItemFeet",
         "ItemLegs",
         "ItemBoots"
+      ],
+      "SetPose": [
+        "BaseUpper",
+        "BaseLower"
       ]
     },
     "ItemDevices/VacbedClear": {
@@ -12164,6 +13110,10 @@
         "ItemButt",
         "ItemVulva",
         "ItemVulvaPiercings"
+      ],
+      "SetPose": [
+        "Yoked",
+        "BaseLower"
       ]
     },
     "ItemDevices/Crib": {
@@ -12195,6 +13145,10 @@
       "AllowActivityOn": [
         "ItemArms",
         "ItemFeet"
+      ],
+      "SetPose": [
+        "OverTheHead",
+        "Spread"
       ]
     },
     "ItemDevices/ChangingTable": {
@@ -12221,6 +13175,9 @@
       ],
       "Block": [
         "ItemAddon"
+      ],
+      "SetPose": [
+        "Kneel"
       ]
     },
     "ItemDevices/ConcealingCloak": {
@@ -12242,6 +13199,13 @@
         "ItemTorso2",
         "ItemVulva",
         "ItemVulvaPiercings"
+      ],
+      "SetPose": [
+        "BaseUpper"
+      ],
+      "AllowActivePose": [
+        "BackBoxTie",
+        "BackElbowTouch"
       ]
     },
     "ItemDevices/Kennel": {
@@ -12251,18 +13215,43 @@
       ],
       "Block": [
         "ItemAddon"
+      ],
+      "SetPose": [
+        "Kneel"
       ]
     },
     "ItemDevices/PetBed": {
       "Effect": [
         "Tethered",
         "MapImmobile"
+      ],
+      "SetPose": [
+        "Kneel"
+      ],
+      "AllowActivePose": [
+        "Kneel",
+        "KneelingSpread",
+        "AllFours",
+        "Hogtied"
       ]
     },
     "ItemDevices/Stroller": {
       "Effect": [
         "Freeze",
         "Leash"
+      ],
+      "AllowActivePose": [
+        "BaseUpper",
+        "BackBoxTie",
+        "BackCuffs",
+        "BackElbowTouch",
+        "OverTheHead",
+        "Yoked",
+        "Kneel",
+        "KneelingSpread",
+        "Spread",
+        "LegsClosed",
+        "BaseLower"
       ]
     },
     "ItemDevices/TransportWoodenBox": {
@@ -12274,6 +13263,13 @@
       ],
       "Block": [
         "ItemAddon"
+      ],
+      "SetPose": [
+        "BaseLower"
+      ],
+      "AllowActivePose": [
+        "BaseLower",
+        "LegsClosed"
       ]
     },
     "ItemDevices/VacCube": {
@@ -12310,6 +13306,10 @@
         "ItemPelvis",
         "ItemTorso",
         "ItemTorso2"
+      ],
+      "SetPose": [
+        "BaseUpper",
+        "BaseLower"
       ]
     },
     "ItemDevices/PetBowl": {},
@@ -12333,6 +13333,13 @@
         "ItemFeet",
         "ItemLegs",
         "ItemBoots"
+      ],
+      "SetPose": [
+        "BaseLower"
+      ],
+      "AllowActivePose": [
+        "BaseLower",
+        "Spread"
       ]
     },
     "ItemDevices/Net": {
@@ -12340,6 +13347,9 @@
         "Freeze",
         "Block",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "Kneel"
       ]
     },
     "ItemDevices/Snowman": {
@@ -12364,6 +13374,15 @@
         "ItemHands",
         "ItemHandheld",
         "ItemBoots"
+      ],
+      "SetPose": [
+        "BackBoxTie",
+        "BaseLower"
+      ],
+      "AllowActivePose": [
+        "BaseLower",
+        "LegsClosed",
+        "Spread"
       ]
     },
     "ItemDevices/MedicalBed": {
@@ -12379,6 +13398,17 @@
         "Freeze",
         "Mounted",
         "OnBed"
+      ],
+      "AllowActivePose": [
+        "BaseUpper",
+        "BackBoxTie",
+        "BackCuffs",
+        "BackElbowTouch",
+        "OverTheHead",
+        "Yoked",
+        "Spread",
+        "LegsClosed",
+        "BaseLower"
       ]
     },
     "ItemDevices/WoodenHorse": {
@@ -12386,6 +13416,9 @@
         "BlockWardrobe",
         "Freeze",
         "Mounted"
+      ],
+      "SetPose": [
+        "KneelingSpread"
       ]
     },
     "ItemDevices/LuckyWheel": {},
@@ -12420,6 +13453,10 @@
         "ItemNeckRestraints",
         "ItemNeckRestraints",
         "ItemAddon"
+      ],
+      "SetPose": [
+        "BaseLower",
+        "BackCuffs"
       ]
     },
     "ItemDevices/Trolley": {
@@ -12446,6 +13483,9 @@
       "AllowActivityOn": [
         "ItemLegs",
         "ItemFeet"
+      ],
+      "SetPose": [
+        "LegsClosed"
       ]
     },
     "ItemDevices/GlueFloor": {
@@ -12457,6 +13497,10 @@
       "Block": [
         "ItemBoots",
         "ItemAddon"
+      ],
+      "AllowActivePose": [
+        "BaseLower",
+        "LegsClosed"
       ]
     },
     "ItemDevices/Cement": {
@@ -12464,6 +13508,9 @@
         "ItemBoots",
         "ItemFeet",
         "ItemAddon"
+      ],
+      "SetPose": [
+        "LegsClosed"
       ]
     },
     "ItemDevices/BrickWall": {
@@ -12474,11 +13521,21 @@
       ],
       "Block": [
         "ItemAddon"
+      ],
+      "SetPose": [
+        "LegsClosed",
+        "BackElbowTouch"
       ]
     },
     "ItemDevices/PogoBall": {
       "Block": [
         "ItemBoots"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemDevices/Throne": {
@@ -12491,17 +13548,33 @@
       "Effect": [
         "UseRemote",
         "OneWayEnclose"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "LegsClosed"
       ]
     },
     "ItemDevices/Highchair": {
       "Effect": [
         "Freeze",
         "MapImmobile"
+      ],
+      "AllowActivePose": [
+        "BaseLower",
+        "LegsClosed",
+        "Spread"
       ]
     },
     "ItemDevices/SingleBalletBoot": {
       "Block": [
         "ItemBoots"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel",
+        "Hogtied"
       ]
     },
     "ItemDevices/Microphone": {},
@@ -12521,9 +13594,24 @@
         "MapImmobile",
         "OnBed",
         "OneWayEnclose"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "LegsClosed"
       ]
     },
-    "ItemDevices/LongBag": {},
+    "ItemDevices/LongBag": {
+      "SetPose": [
+        "BackBoxTie",
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "BackBoxTie",
+        "BackElbowTouch",
+        "LegsClosed",
+        "Kneel"
+      ]
+    },
     "ItemAddon/Covers": {},
     "ItemAddon/BedRopes": {
       "Block": [
@@ -12583,18 +13671,36 @@
       "Effect": [
         "Freeze",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemBoots/LeatherToeCuffs": {
       "Effect": [
         "Freeze",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemBoots/ToeTie": {
       "Effect": [
         "Freeze",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemBoots/ThighHighLatexHeels": {},
@@ -12606,22 +13712,47 @@
     "ItemBoots/FuturisticHeels2": {},
     "ItemBoots/LockingBoots1": {},
     "ItemBoots/LeatherFootMitts1": {},
-    "ItemBoots/ToeTape": {},
+    "ItemBoots/ToeTape": {
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
+      ]
+    },
     "ItemBoots/Zipties": {
       "Effect": [
         "Freeze",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemBoots/Slime": {
       "Effect": [
         "Freeze"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemBoots/MonoHeel": {
       "Effect": [
         "Freeze",
         "BlockWardrobe"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
       ]
     },
     "ItemBoots/ShortPonyBoots": {},
@@ -12638,7 +13769,15 @@
         "Slow"
       ]
     },
-    "ItemBoots/SingleBalletBoot": {},
+    "ItemBoots/SingleBalletBoot": {
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel",
+        "Hogtied"
+      ]
+    },
     "ItemScript/Script": {}
   },
   "locks": {

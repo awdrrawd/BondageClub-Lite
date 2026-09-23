@@ -1,10 +1,10 @@
 import catalog from './item-properties-data.json';
 import definitions from './native-data.json';
 
-export type ItemProperties = { Effect?: string[]; Block?: string[]; AllowActivity?: string[]; AllowActivityOn?: string[]; Expose?: string[]; [key: string]: unknown };
+export type ItemProperties = { Effect?: string[]; Block?: string[]; AllowActivity?: string[]; AllowActivityOn?: string[]; Expose?: string[]; SetPose?: string[]; AllowActivePose?: string[]; [key: string]: unknown };
 type Option = { property: ItemProperties; child?: Config };
 type Config = { kind?: string; key?: string; baseline: ItemProperties; options?: Option[]; modules?: { key: string; options: Option[] }[]; unknown?: boolean };
-const keys = ['Effect', 'Block', 'AllowActivity', 'AllowActivityOn', 'Expose'] as const;
+const keys = ['Effect', 'Block', 'AllowActivity', 'AllowActivityOn', 'Expose', 'SetPose', 'AllowActivePose'] as const;
 
 /** Read-only gameplay view of an R132 bundle. Raw appearance remains lossless for sending/backups. */
 export function resolveItemProperties(group: string, name: string, raw?: Record<string, unknown>) {

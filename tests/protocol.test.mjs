@@ -4,7 +4,7 @@ import { loadTypeScript } from './load-typescript.mjs';
 import { interactionPermission } from "./permissions-helper.mjs";
 import { renderAction, dictionaryText, pronounEntries } from './action-helper.mjs';
 import { receivedSpeech } from './speech-helper.mjs';
-import { nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, definitions, activityAsset } from './native-helper.mjs';
+import { nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, definitions, activityAssets } from './native-helper.mjs';
 import { extensionActivities, extensionText } from './extensions-helper.mjs';
 import { hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState, createCuddleItem } from './activity-helper.mjs';
 import { gameCatalog } from './catalog-helper.mjs';
@@ -40,7 +40,7 @@ async function setup(environment, relayAvailable = true, account = {}, storage =
     canFollowLeash: new Function('definitions','interactionPermission','resolveItemProperties',loadTypeScript('src/action/leash.ts')+';return canFollowLeash;')(definitions,interactionPermission,resolveItemProperties),
     LeashSession: new Function(loadTypeScript('src/network/leash-session.ts')+';return LeashSession;')(),
     decodeFriendNames, contactName,
-    hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState, createCuddleItem, receivedSpeech, activityAsset,
+    hasPenis, physicalGroup, textGroup, activityLabel, cuddleNames, cuddleReason, cuddleState, createCuddleItem, receivedSpeech, activityAssets,
     localStorage: { getItem(key) { return storage.get(key) ?? null; }, setItem(key, value) { storage.set(key, value); } },
     io: () => socket, nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, extensionActivities, extensionText, renderAction, dictionaryText, pronounEntries, t, localizeStatus, validAppearance, copyAppearance, releaseAppearance, afcLovers, embeddedAction,
     exports: {},
@@ -382,6 +382,22 @@ test('NoMeter retains the same usable native actions as Manual without relaxing 
   assert.throws(()=>f.client.sendActivity(55,'ItemHead','Pet',false));
   target.ArousalSettings={...base.ArousalSettings,Active:'Inactive'};sync();
   assert.equal(native().length,0);
+});
+
+test('native tool variants remain selectable and a removed selected tool cannot be sent', async () => {
+  const base={AllowedInteractions:0,Name:'Test',Appearance:[{Group:'BodyUpper',Name:'Normal'}],ArousalSettings:{Active:'NoMeter',Activity:'z'.repeat(100),Zone:'f'.repeat(30)}};
+  const f=await setup('PROD',true,base);
+  const actor={...base,MemberNumber:123,Appearance:[...base.Appearance,{Group:'HandAccessoryLeft',Name:'Fingernails'},{Group:'HandAccessoryRight',Name:'Claws'}]},target={...base,MemberNumber:55};
+  const sync=()=>f.handlers.get('ChatRoomSync')({Name:'Room',Character:[actor,target]});
+  sync();
+  const options=f.client.activityOptions(55).filter(o=>o.group==='ItemHead'&&o.name==='Scratch'&&!o.reason);
+  assert.deepEqual(Array.from(options,o=>o.assetKey),['HandAccessoryLeft/Fingernails','HandAccessoryRight/Claws']);
+  f.client.sendActivity(55,'ItemHead','Scratch',false,undefined,options[1].assetKey);
+  assert.deepEqual(f.sent.at(-1).payload.Dictionary.find(d=>d.Tag==='ActivityAsset'),{Tag:'ActivityAsset',AssetName:'Claws',GroupName:'HandAccessoryRight'});
+  actor.Appearance.pop(); sync();
+  const before=f.sent.length;
+  assert.throws(()=>f.client.sendActivity(55,'ItemHead','Scratch',false,undefined,options[1].assetKey));
+  assert.equal(f.sent.length,before);
 });
 
 test('paw activities require the correct wearer in both modes while ordinary automatic-mode activities remain usable', async () => {

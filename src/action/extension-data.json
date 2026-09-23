@@ -6,7 +6,18 @@
     "group": "ItemTorso",
     "name": "躺上去",
     "prerequisites": [
-      "UnsupportedPluginPrerequisite",
+      {
+        "subject": "Acted",
+        "check": "GroupIs",
+        "args": [
+          "ItemDevices",
+          [
+            "Bed",
+            "床左边",
+            "床右边"
+          ]
+        ]
+      },
       "UnsupportedPluginPrerequisite"
     ]
   },
@@ -18,8 +29,24 @@
     "name": "拉上床",
     "prerequisites": [
       "UseHands",
-      "UnsupportedPluginPrerequisite",
-      "UnsupportedPluginPrerequisite",
+      {
+        "any": [
+          "UnsupportedPluginPrerequisite",
+          "UnsupportedPluginPrerequisite"
+        ]
+      },
+      {
+        "subject": "Acting",
+        "check": "GroupIs",
+        "args": [
+          "ItemDevices",
+          [
+            "Bed",
+            "床左边",
+            "床右边"
+          ]
+        ]
+      },
       "UnsupportedPluginPrerequisite"
     ]
   },
@@ -31,8 +58,24 @@
     "name": "拉上床",
     "prerequisites": [
       "UseHands",
-      "UnsupportedPluginPrerequisite",
-      "UnsupportedPluginPrerequisite",
+      {
+        "any": [
+          "UnsupportedPluginPrerequisite",
+          "UnsupportedPluginPrerequisite"
+        ]
+      },
+      {
+        "subject": "Acting",
+        "check": "GroupIs",
+        "args": [
+          "ItemDevices",
+          [
+            "Bed",
+            "床左边",
+            "床右边"
+          ]
+        ]
+      },
       "UnsupportedPluginPrerequisite"
     ]
   },
@@ -46,8 +89,37 @@
       "UseHands",
       "Luzi_TargetLeashedOrCanBeLeashed",
       "UnsupportedPluginPrerequisite",
-      "UnsupportedPluginPrerequisite",
-      "UnsupportedPluginPrerequisite"
+      {
+        "subject": "Acted",
+        "check": "GroupIs",
+        "args": [
+          "ItemDevices",
+          [
+            "Trolley"
+          ]
+        ]
+      },
+      {
+        "any": [
+          {
+            "subject": "Acting",
+            "check": "GroupEmpty",
+            "args": [
+              "ItemMisc"
+            ]
+          },
+          {
+            "subject": "Acting",
+            "check": "GroupIs",
+            "args": [
+              "ItemMisc",
+              [
+                "抓住推车"
+              ]
+            ]
+          }
+        ]
+      }
     ]
   },
   {
@@ -58,8 +130,35 @@
     "name": "扛起",
     "prerequisites": [
       "UnsupportedPluginPrerequisite",
-      "UnsupportedPluginPrerequisite",
-      "UnsupportedPluginPrerequisite"
+      {
+        "any": [
+          {
+            "subject": "Acting",
+            "check": "GroupEmpty",
+            "args": [
+              "ItemMisc"
+            ]
+          },
+          {
+            "subject": "Acting",
+            "check": "GroupIs",
+            "args": [
+              "ItemMisc",
+              [
+                "扛起来的麻袋"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "subject": "Acted",
+        "check": "GroupIs",
+        "args": [
+          "ItemDevices",
+          "BurlapSack"
+        ]
+      }
     ]
   },
   {
@@ -71,7 +170,11 @@
     "prerequisites": [
       "UseHands",
       "Luzi_TargetLeashedOrCanBeLeashed",
-      "UnsupportedPluginPrerequisite"
+      {
+        "any": [
+          "UnsupportedPluginPrerequisite"
+        ]
+      }
     ]
   },
   {
@@ -83,7 +186,11 @@
     "prerequisites": [
       "UseHands",
       "Luzi_TargetLeashedOrCanBeLeashed",
-      "UnsupportedPluginPrerequisite"
+      {
+        "any": [
+          "UnsupportedPluginPrerequisite"
+        ]
+      }
     ]
   },
   {
@@ -95,7 +202,11 @@
     "prerequisites": [
       "UseHands",
       "Luzi_TargetLeashedOrCanBeLeashed",
-      "UnsupportedPluginPrerequisite"
+      {
+        "any": [
+          "UnsupportedPluginPrerequisite"
+        ]
+      }
     ]
   },
   {
@@ -127,8 +238,24 @@
     "prerequisites": [
       "UnsupportedPluginPrerequisite",
       "Luzi_CanWalk",
-      "UnsupportedPluginPrerequisite",
-      "UnsupportedPluginPrerequisite"
+      {
+        "subject": "Acted",
+        "check": "GroupEmpty",
+        "args": [
+          [
+            "ItemMisc"
+          ]
+        ]
+      },
+      {
+        "subject": "Acting",
+        "check": "GroupEmpty",
+        "args": [
+          [
+            "ItemMisc"
+          ]
+        ]
+      }
     ]
   },
   {
@@ -140,8 +267,24 @@
     "prerequisites": [
       "UnsupportedPluginPrerequisite",
       "Luzi_CanWalk",
-      "UnsupportedPluginPrerequisite",
-      "UnsupportedPluginPrerequisite"
+      {
+        "subject": "Acted",
+        "check": "GroupEmpty",
+        "args": [
+          [
+            "ItemMisc"
+          ]
+        ]
+      },
+      {
+        "subject": "Acting",
+        "check": "GroupEmpty",
+        "args": [
+          [
+            "ItemMisc"
+          ]
+        ]
+      }
     ]
   },
   {
@@ -153,8 +296,24 @@
     "prerequisites": [
       "UnsupportedPluginPrerequisite",
       "Luzi_CanWalk",
-      "UnsupportedPluginPrerequisite",
-      "UnsupportedPluginPrerequisite"
+      {
+        "subject": "Acted",
+        "check": "GroupEmpty",
+        "args": [
+          [
+            "ItemMisc"
+          ]
+        ]
+      },
+      {
+        "subject": "Acting",
+        "check": "GroupEmpty",
+        "args": [
+          [
+            "ItemMisc"
+          ]
+        ]
+      }
     ]
   },
   {
@@ -166,8 +325,24 @@
     "prerequisites": [
       "UnsupportedPluginPrerequisite",
       "Luzi_CanWalk",
-      "UnsupportedPluginPrerequisite",
-      "UnsupportedPluginPrerequisite"
+      {
+        "subject": "Acted",
+        "check": "GroupEmpty",
+        "args": [
+          [
+            "ItemMisc"
+          ]
+        ]
+      },
+      {
+        "subject": "Acting",
+        "check": "GroupEmpty",
+        "args": [
+          [
+            "ItemMisc"
+          ]
+        ]
+      }
     ]
   },
   {
@@ -179,8 +354,24 @@
     "prerequisites": [
       "UnsupportedPluginPrerequisite",
       "Luzi_CanWalk",
-      "UnsupportedPluginPrerequisite",
-      "UnsupportedPluginPrerequisite"
+      {
+        "subject": "Acted",
+        "check": "GroupEmpty",
+        "args": [
+          [
+            "ItemMisc"
+          ]
+        ]
+      },
+      {
+        "subject": "Acting",
+        "check": "GroupEmpty",
+        "args": [
+          [
+            "ItemMisc"
+          ]
+        ]
+      }
     ]
   },
   {
@@ -192,8 +383,24 @@
     "prerequisites": [
       "UnsupportedPluginPrerequisite",
       "Luzi_CanWalk",
-      "UnsupportedPluginPrerequisite",
-      "UnsupportedPluginPrerequisite"
+      {
+        "subject": "Acted",
+        "check": "GroupEmpty",
+        "args": [
+          [
+            "ItemMisc"
+          ]
+        ]
+      },
+      {
+        "subject": "Acting",
+        "check": "GroupEmpty",
+        "args": [
+          [
+            "ItemMisc"
+          ]
+        ]
+      }
     ]
   },
   {
@@ -204,8 +411,26 @@
     "name": "驾驶马车",
     "prerequisites": [
       "UseFeet",
-      "UnsupportedPluginPrerequisite",
-      "UnsupportedPluginPrerequisite"
+      {
+        "subject": "Acting",
+        "check": "GroupIs",
+        "args": [
+          "ItemDevices",
+          [
+            "马车"
+          ]
+        ]
+      },
+      {
+        "subject": "Acted",
+        "check": "GroupIs",
+        "args": [
+          "ItemDevices",
+          [
+            "马车前"
+          ]
+        ]
+      }
     ]
   },
   {
@@ -215,8 +440,39 @@
     "group": "ItemTorso",
     "name": "骑上去",
     "prerequisites": [
-      "UnsupportedPluginPrerequisite",
-      "UnsupportedPluginPrerequisite"
+      {
+        "any": [
+          {
+            "subject": "Acting",
+            "check": "GroupIs",
+            "args": [
+              "ItemTorso",
+              [
+                "缰绳"
+              ]
+            ]
+          },
+          {
+            "subject": "Acting",
+            "check": "GroupIs",
+            "args": [
+              "ItemTorso2",
+              [
+                "缰绳"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "subject": "Acted",
+        "check": "TargetGroupIs",
+        "args": [
+          [
+            "鞍"
+          ]
+        ]
+      }
     ]
   },
   {
@@ -226,8 +482,39 @@
     "group": "ItemTorso2",
     "name": "骑上去",
     "prerequisites": [
-      "UnsupportedPluginPrerequisite",
-      "UnsupportedPluginPrerequisite"
+      {
+        "any": [
+          {
+            "subject": "Acting",
+            "check": "GroupIs",
+            "args": [
+              "ItemTorso",
+              [
+                "缰绳"
+              ]
+            ]
+          },
+          {
+            "subject": "Acting",
+            "check": "GroupIs",
+            "args": [
+              "ItemTorso2",
+              [
+                "缰绳"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "subject": "Acted",
+        "check": "TargetGroupIs",
+        "args": [
+          [
+            "鞍"
+          ]
+        ]
+      }
     ]
   },
   {
@@ -335,7 +622,14 @@
       "Luzi_TargetHasTail",
       "UseArms",
       "UseHands",
-      "UnsupportedPluginPrerequisite"
+      {
+        "not": {
+          "any": [
+            "UnsupportedPluginPrerequisite",
+            "UnsupportedPluginPrerequisite"
+          ]
+        }
+      }
     ]
   },
   {
@@ -1021,7 +1315,36 @@
     "prerequisites": [
       "UseHands",
       "UseArms",
-      "UnsupportedPluginPrerequisite"
+      {
+        "any": [
+          {
+            "all": [
+              {
+                "subject": "Acted",
+                "check": "PoseIs",
+                "args": [
+                  "BodyLower",
+                  "Kneel"
+                ]
+              },
+              "UnsupportedPluginPrerequisite"
+            ]
+          },
+          {
+            "all": [
+              {
+                "subject": "Acted",
+                "check": "PoseIs",
+                "args": [
+                  "BodyLower",
+                  "LegsClosed"
+                ]
+              },
+              "UnsupportedPluginPrerequisite"
+            ]
+          }
+        ]
+      }
     ]
   },
   {
@@ -1033,7 +1356,36 @@
     "prerequisites": [
       "UseHands",
       "UseArms",
-      "UnsupportedPluginPrerequisite"
+      {
+        "any": [
+          {
+            "all": [
+              {
+                "subject": "Acted",
+                "check": "PoseIs",
+                "args": [
+                  "BodyLower",
+                  "KneelingSpread"
+                ]
+              },
+              "UnsupportedPluginPrerequisite"
+            ]
+          },
+          {
+            "all": [
+              {
+                "subject": "Acted",
+                "check": "PoseIs",
+                "args": [
+                  "BodyLower",
+                  "BaseLower"
+                ]
+              },
+              "UnsupportedPluginPrerequisite"
+            ]
+          }
+        ]
+      }
     ]
   },
   {
@@ -1063,7 +1415,19 @@
     "group": "ItemLegs",
     "name": "跪着张开腿",
     "prerequisites": [
-      "UnsupportedPluginPrerequisite"
+      {
+        "all": [
+          {
+            "subject": "Acting",
+            "check": "PoseIs",
+            "args": [
+              "BodyLower",
+              "Kneel"
+            ]
+          },
+          "UnsupportedPluginPrerequisite"
+        ]
+      }
     ]
   },
   {
@@ -1073,7 +1437,19 @@
     "group": "ItemLegs",
     "name": "跪着并拢腿",
     "prerequisites": [
-      "UnsupportedPluginPrerequisite"
+      {
+        "all": [
+          {
+            "subject": "Acting",
+            "check": "PoseIs",
+            "args": [
+              "BodyLower",
+              "KneelingSpread"
+            ]
+          },
+          "UnsupportedPluginPrerequisite"
+        ]
+      }
     ]
   },
   {
@@ -1093,7 +1469,19 @@
     "group": "ItemBoots",
     "name": "起身跪下",
     "prerequisites": [
-      "UnsupportedPluginPrerequisite"
+      {
+        "all": [
+          {
+            "subject": "Acting",
+            "check": "PoseIs",
+            "args": [
+              "BodyFull",
+              "AllFours"
+            ]
+          },
+          "UnsupportedPluginPrerequisite"
+        ]
+      }
     ]
   },
   {
@@ -1254,7 +1642,17 @@
     "name": "叼牵绳",
     "prerequisites": [
       "UseMouth",
-      "UnsupportedPluginPrerequisite"
+      {
+        "subject": "Acting",
+        "check": "GroupIs",
+        "args": [
+          "ItemNeckRestraints",
+          [
+            "ChainLeash",
+            "CollarLeash"
+          ]
+        ]
+      }
     ]
   },
   {
@@ -1371,7 +1769,17 @@
     "name": "夹紧双腿",
     "prerequisites": [
       "Luzi_TargetHasItemVulva",
-      "UnsupportedPluginPrerequisite"
+      {
+        "subject": "Acting",
+        "check": "PoseIs",
+        "args": [
+          "BodyLower",
+          [
+            "LegsClosed",
+            "Kneel"
+          ]
+        ]
+      }
     ]
   },
   {
@@ -2096,8 +2504,23 @@
     "name": "用嘴脱掉手套",
     "prerequisites": [
       "UseMouth",
-      "UnsupportedPluginPrerequisite",
-      "UnsupportedPluginPrerequisite"
+      {
+        "subject": "Acted",
+        "check": "TargetGroupEmpty",
+        "args": []
+      },
+      {
+        "not": {
+          "subject": "Acted",
+          "check": "GroupEmpty",
+          "args": [
+            [
+              "Gloves",
+              "Gloves_笨笨蛋Luzi"
+            ]
+          ]
+        }
+      }
     ]
   },
   {
@@ -2108,8 +2531,23 @@
     "name": "用嘴脱掉鞋子",
     "prerequisites": [
       "UseMouth",
-      "UnsupportedPluginPrerequisite",
-      "UnsupportedPluginPrerequisite"
+      {
+        "subject": "Acted",
+        "check": "TargetGroupEmpty",
+        "args": []
+      },
+      {
+        "not": {
+          "subject": "Acted",
+          "check": "GroupEmpty",
+          "args": [
+            [
+              "Shoes",
+              "Shoes_笨笨蛋Luzi"
+            ]
+          ]
+        }
+      }
     ]
   },
   {
@@ -2120,9 +2558,34 @@
     "name": "用嘴脱掉袜子",
     "prerequisites": [
       "UseMouth",
-      "UnsupportedPluginPrerequisite",
-      "UnsupportedPluginPrerequisite",
-      "UnsupportedPluginPrerequisite"
+      {
+        "subject": "Acted",
+        "check": "TargetGroupEmpty",
+        "args": []
+      },
+      {
+        "subject": "Acted",
+        "check": "GroupEmpty",
+        "args": [
+          [
+            "Shoes",
+            "Shoes_笨笨蛋Luzi"
+          ]
+        ]
+      },
+      {
+        "not": {
+          "subject": "Acted",
+          "check": "GroupEmpty",
+          "args": [
+            [
+              "Socks",
+              "SocksLeft",
+              "SocksRight"
+            ]
+          ]
+        }
+      }
     ]
   },
   {

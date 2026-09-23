@@ -19,7 +19,14 @@
     "Luzi_TargetHasTail",
     "UseArms",
     "UseHands",
-    "UnsupportedPluginPrerequisite"
+    {
+      "not": {
+        "any": [
+          "UnsupportedPluginPrerequisite",
+          "UnsupportedPluginPrerequisite"
+        ]
+      }
+    }
   ],
   "echo:衔尾": [
     "Luzi_TargetHasCatTail",
@@ -274,19 +281,74 @@
   ],
   "echo:用嘴脱掉手套": [
     "UseMouth",
-    "UnsupportedPluginPrerequisite",
-    "UnsupportedPluginPrerequisite"
+    {
+      "subject": "Acted",
+      "check": "TargetGroupEmpty",
+      "args": []
+    },
+    {
+      "not": {
+        "subject": "Acted",
+        "check": "GroupEmpty",
+        "args": [
+          [
+            "Gloves",
+            "Gloves_笨笨蛋Luzi"
+          ]
+        ]
+      }
+    }
   ],
   "echo:用嘴脱掉鞋子": [
     "UseMouth",
-    "UnsupportedPluginPrerequisite",
-    "UnsupportedPluginPrerequisite"
+    {
+      "subject": "Acted",
+      "check": "TargetGroupEmpty",
+      "args": []
+    },
+    {
+      "not": {
+        "subject": "Acted",
+        "check": "GroupEmpty",
+        "args": [
+          [
+            "Shoes",
+            "Shoes_笨笨蛋Luzi"
+          ]
+        ]
+      }
+    }
   ],
   "echo:用嘴脱掉袜子": [
     "UseMouth",
-    "UnsupportedPluginPrerequisite",
-    "UnsupportedPluginPrerequisite",
-    "UnsupportedPluginPrerequisite"
+    {
+      "subject": "Acted",
+      "check": "TargetGroupEmpty",
+      "args": []
+    },
+    {
+      "subject": "Acted",
+      "check": "GroupEmpty",
+      "args": [
+        [
+          "Shoes",
+          "Shoes_笨笨蛋Luzi"
+        ]
+      ]
+    },
+    {
+      "not": {
+        "subject": "Acted",
+        "check": "GroupEmpty",
+        "args": [
+          [
+            "Socks",
+            "SocksLeft",
+            "SocksRight"
+          ]
+        ]
+      }
+    }
   ],
   "echo:挤出来球": [
     "TargetZoneAccessible",
@@ -308,52 +370,196 @@
   "echo:剪刀剪掉上衣": [
     "UseHands",
     "UseArms",
-    "UnsupportedPluginPrerequisite",
+    {
+      "subject": "Acting",
+      "check": "GroupIs",
+      "args": [
+        "ItemHandheld",
+        "Scissors"
+      ]
+    },
     "UnsupportedPluginPrerequisite"
   ],
   "echo:躺上去": [
-    "UnsupportedPluginPrerequisite",
+    {
+      "subject": "Acted",
+      "check": "GroupIs",
+      "args": [
+        "ItemDevices",
+        [
+          "Bed",
+          "床左边",
+          "床右边"
+        ]
+      ]
+    },
     "UnsupportedPluginPrerequisite"
   ],
   "echo:拉上床": [
     "UseHands",
-    "UnsupportedPluginPrerequisite",
-    "UnsupportedPluginPrerequisite",
+    {
+      "any": [
+        "UnsupportedPluginPrerequisite",
+        "UnsupportedPluginPrerequisite"
+      ]
+    },
+    {
+      "subject": "Acting",
+      "check": "GroupIs",
+      "args": [
+        "ItemDevices",
+        [
+          "Bed",
+          "床左边",
+          "床右边"
+        ]
+      ]
+    },
     "UnsupportedPluginPrerequisite"
   ],
   "echo:手推车": [
     "UseHands",
     "Luzi_TargetLeashedOrCanBeLeashed",
     "UnsupportedPluginPrerequisite",
-    "UnsupportedPluginPrerequisite",
-    "UnsupportedPluginPrerequisite"
+    {
+      "subject": "Acted",
+      "check": "GroupIs",
+      "args": [
+        "ItemDevices",
+        [
+          "Trolley"
+        ]
+      ]
+    },
+    {
+      "any": [
+        {
+          "subject": "Acting",
+          "check": "GroupEmpty",
+          "args": [
+            "ItemMisc"
+          ]
+        },
+        {
+          "subject": "Acting",
+          "check": "GroupIs",
+          "args": [
+            "ItemMisc",
+            [
+              "抓住推车"
+            ]
+          ]
+        }
+      ]
+    }
   ],
   "echo:扛起": [
     "UnsupportedPluginPrerequisite",
-    "UnsupportedPluginPrerequisite",
-    "UnsupportedPluginPrerequisite"
+    {
+      "any": [
+        {
+          "subject": "Acting",
+          "check": "GroupEmpty",
+          "args": [
+            "ItemMisc"
+          ]
+        },
+        {
+          "subject": "Acting",
+          "check": "GroupIs",
+          "args": [
+            "ItemMisc",
+            [
+              "扛起来的麻袋"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "subject": "Acted",
+      "check": "GroupIs",
+      "args": [
+        "ItemDevices",
+        "BurlapSack"
+      ]
+    }
   ],
   "echo:拉到身边": [
     "UseHands",
     "Luzi_TargetLeashedOrCanBeLeashed",
-    "UnsupportedPluginPrerequisite"
+    {
+      "any": [
+        "UnsupportedPluginPrerequisite"
+      ]
+    }
   ],
   "echo:驾驶马车": [
     "UseFeet",
-    "UnsupportedPluginPrerequisite",
-    "UnsupportedPluginPrerequisite"
+    {
+      "subject": "Acting",
+      "check": "GroupIs",
+      "args": [
+        "ItemDevices",
+        [
+          "马车"
+        ]
+      ]
+    },
+    {
+      "subject": "Acted",
+      "check": "GroupIs",
+      "args": [
+        "ItemDevices",
+        [
+          "马车前"
+        ]
+      ]
+    }
   ],
   "echo:钻进怀里": [
     "UnsupportedPluginPrerequisite",
     "Luzi_CanWalk",
-    "UnsupportedPluginPrerequisite",
-    "UnsupportedPluginPrerequisite"
+    {
+      "subject": "Acted",
+      "check": "GroupEmpty",
+      "args": [
+        [
+          "ItemMisc"
+        ]
+      ]
+    },
+    {
+      "subject": "Acting",
+      "check": "GroupEmpty",
+      "args": [
+        [
+          "ItemMisc"
+        ]
+      ]
+    }
   ],
   "echo:抱入怀中": [
     "UnsupportedPluginPrerequisite",
     "Luzi_CanWalk",
-    "UnsupportedPluginPrerequisite",
-    "UnsupportedPluginPrerequisite"
+    {
+      "subject": "Acted",
+      "check": "GroupEmpty",
+      "args": [
+        [
+          "ItemMisc"
+        ]
+      ]
+    },
+    {
+      "subject": "Acting",
+      "check": "GroupEmpty",
+      "args": [
+        [
+          "ItemMisc"
+        ]
+      ]
+    }
   ],
   "echo:躲到身后": [
     "Luzi_CharacterViewWithinReach"
@@ -362,8 +568,39 @@
     "Luzi_CharacterViewWithinReach"
   ],
   "echo:骑上去": [
-    "UnsupportedPluginPrerequisite",
-    "UnsupportedPluginPrerequisite"
+    {
+      "any": [
+        {
+          "subject": "Acting",
+          "check": "GroupIs",
+          "args": [
+            "ItemTorso",
+            [
+              "缰绳"
+            ]
+          ]
+        },
+        {
+          "subject": "Acting",
+          "check": "GroupIs",
+          "args": [
+            "ItemTorso2",
+            [
+              "缰绳"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "subject": "Acted",
+      "check": "TargetGroupIs",
+      "args": [
+        [
+          "鞍"
+        ]
+      ]
+    }
   ],
   "echo:剑架在脖子上": [
     "UseHands",
@@ -378,12 +615,30 @@
   "echo:阿巴阿巴": [
     "UseArms",
     "UseHands",
-    "UnsupportedPluginPrerequisite"
+    {
+      "subject": "Acting",
+      "check": "GroupIs",
+      "args": [
+        "ItemHandheld",
+        [
+          "阿巴阿巴"
+        ]
+      ]
+    }
   ],
   "echo:阿巴阿巴_瞄准": [
     "UseArms",
     "UseHands",
-    "UnsupportedPluginPrerequisite"
+    {
+      "subject": "Acting",
+      "check": "GroupIs",
+      "args": [
+        "ItemHandheld",
+        [
+          "阿巴阿巴"
+        ]
+      ]
+    }
   ],
   "echo:跪下": [
     "UnsupportedPluginPrerequisite"
@@ -392,26 +647,120 @@
     "UnsupportedPluginPrerequisite"
   ],
   "echo:跪着张开腿": [
-    "UnsupportedPluginPrerequisite"
+    {
+      "all": [
+        {
+          "subject": "Acting",
+          "check": "PoseIs",
+          "args": [
+            "BodyLower",
+            "Kneel"
+          ]
+        },
+        "UnsupportedPluginPrerequisite"
+      ]
+    }
   ],
   "echo:跪着并拢腿": [
-    "UnsupportedPluginPrerequisite"
+    {
+      "all": [
+        {
+          "subject": "Acting",
+          "check": "PoseIs",
+          "args": [
+            "BodyLower",
+            "KneelingSpread"
+          ]
+        },
+        "UnsupportedPluginPrerequisite"
+      ]
+    }
   ],
   "echo:四肢着地": [
     "UnsupportedPluginPrerequisite"
   ],
   "echo:起身跪下": [
-    "UnsupportedPluginPrerequisite"
+    {
+      "all": [
+        {
+          "subject": "Acting",
+          "check": "PoseIs",
+          "args": [
+            "BodyFull",
+            "AllFours"
+          ]
+        },
+        "UnsupportedPluginPrerequisite"
+      ]
+    }
   ],
   "echo:掰开双腿": [
     "UseHands",
     "UseArms",
-    "UnsupportedPluginPrerequisite"
+    {
+      "any": [
+        {
+          "all": [
+            {
+              "subject": "Acted",
+              "check": "PoseIs",
+              "args": [
+                "BodyLower",
+                "Kneel"
+              ]
+            },
+            "UnsupportedPluginPrerequisite"
+          ]
+        },
+        {
+          "all": [
+            {
+              "subject": "Acted",
+              "check": "PoseIs",
+              "args": [
+                "BodyLower",
+                "LegsClosed"
+              ]
+            },
+            "UnsupportedPluginPrerequisite"
+          ]
+        }
+      ]
+    }
   ],
   "echo:合并双腿": [
     "UseHands",
     "UseArms",
-    "UnsupportedPluginPrerequisite"
+    {
+      "any": [
+        {
+          "all": [
+            {
+              "subject": "Acted",
+              "check": "PoseIs",
+              "args": [
+                "BodyLower",
+                "KneelingSpread"
+              ]
+            },
+            "UnsupportedPluginPrerequisite"
+          ]
+        },
+        {
+          "all": [
+            {
+              "subject": "Acted",
+              "check": "PoseIs",
+              "args": [
+                "BodyLower",
+                "BaseLower"
+              ]
+            },
+            "UnsupportedPluginPrerequisite"
+          ]
+        }
+      ]
+    }
   ],
   "echo:挥手致意": [
     "UseHands",
@@ -433,20 +782,48 @@
     "UseHands",
     "UseArms"
   ],
+  "echo:戳脸": [
+    "UseHands",
+    "UseArms"
+  ],
+  "echo:戳手臂": [
+    "UseHands",
+    "UseArms"
+  ],
+  "echo:戳腿": [
+    "UseHands",
+    "UseArms"
+  ],
+  "echo:戳脚": [
+    "UseHands",
+    "UseArms"
+  ],
   "echo:戳胸部": [
-    "Luzi_TargetHasBreast"
+    "Luzi_TargetHasBreast",
+    "UseHands",
+    "UseArms"
+  ],
+  "echo:戳臀部": [
+    "UseHands",
+    "UseArms"
   ],
   "echo:戳乳头": [
     "Luzi_TargetHasBreast",
-    "Luzi_ActedZoneNaked"
+    "Luzi_ActedZoneNaked",
+    "UseHands",
+    "UseArms"
   ],
   "echo:戳阴部": [
     "Luzi_TargetFemale",
-    "Luzi_ActedZoneNaked"
+    "Luzi_ActedZoneNaked",
+    "UseHands",
+    "UseArms"
   ],
   "echo:戳阴蒂": [
     "Luzi_TargetFemale",
-    "Luzi_ActedZoneNaked"
+    "Luzi_ActedZoneNaked",
+    "UseHands",
+    "UseArms"
   ],
   "echo:摇晃手臂": [
     "UseHands"
@@ -527,7 +904,17 @@
   "echo:托起乳房": [],
   "echo:夹紧双腿": [
     "Luzi_TargetHasItemVulva",
-    "UnsupportedPluginPrerequisite"
+    {
+      "subject": "Acting",
+      "check": "PoseIs",
+      "args": [
+        "BodyLower",
+        [
+          "LegsClosed",
+          "Kneel"
+        ]
+      ]
+    }
   ],
   "echo:手指插进阴道": [
     "UseHands",
@@ -653,12 +1040,43 @@
   "echo:脚高处戳": [
     "UseFeet",
     "Luzi_IsStanding",
-    "UnsupportedPluginPrerequisite"
+    {
+      "any": [
+        {
+          "subject": "Acted",
+          "check": "PoseIsAllFours",
+          "args": []
+        },
+        {
+          "subject": "Acted",
+          "check": "PoseIsHogtied",
+          "args": []
+        }
+      ]
+    }
   ],
   "echo:脚戳中间": [
     "UseFeet",
     "Luzi_IsStanding",
-    "UnsupportedPluginPrerequisite"
+    {
+      "any": [
+        {
+          "subject": "Acted",
+          "check": "PoseIsKneeling",
+          "args": []
+        },
+        {
+          "subject": "Acted",
+          "check": "PoseIsAllFours",
+          "args": []
+        },
+        {
+          "subject": "Acted",
+          "check": "PoseIsHogtied",
+          "args": []
+        }
+      ]
+    }
   ],
   "echo:脚戳低处": [
     "UseFeet",
@@ -756,7 +1174,17 @@
   ],
   "echo:叼牵绳": [
     "UseMouth",
-    "UnsupportedPluginPrerequisite"
+    {
+      "subject": "Acting",
+      "check": "GroupIs",
+      "args": [
+        "ItemNeckRestraints",
+        [
+          "ChainLeash",
+          "CollarLeash"
+        ]
+      ]
+    }
   ],
   "echo:挣脱牵绳": [
     "Luzi_LeashedBy"

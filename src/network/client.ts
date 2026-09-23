@@ -7,7 +7,7 @@ import { t, localizeStatus } from "../i18n";
 import { afcLovers } from "../profile/afc";
 import { decodeFriendNames, contactName } from "../profile/friend-names";
 import { renderAction, dictionaryText, pronounEntries } from "../action/render";
-import { nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, activityAsset } from "../action/native";
+import { nativeActivities, activityReason, activityAvailability, createActivityInventoryCheck, activityAssets } from "../action/native";
 import { echoPresence } from './echo-presence';
 import { receivedSpeech } from "./speech";
 import { extensionActivities, extensionText } from "../action/extensions";
@@ -474,17 +474,19 @@ export class BcLiteClient {
     const permissionReason = permission === "permission-unknown" ? "native.data" : permission ? "native.permission" : null;
     const native = nativeActivities.flatMap(activity => {
       // A tool belongs to an activity, not to each of its target zones.
-      const item = activityAsset(actor, target, activity.name);
-      const suffix = item ? ` · ${this.textCatalog[`Asset.${item.GroupName}.${item.AssetName}`] || item.AssetName}` : "";
-      return (memberNumber === actor.MemberNumber ? activity.self : activity.target).map(group => {
-        const availability = activityAvailability(!this.canSend() ? "native.data" : permissionReason || activityReason(actor, target, group, activity.name, this.state.room!, checkInventory), compatibility);
-        return {
-          group, name: activity.name, groupLabel: this.textCatalog[`DialogGroupName${textGroup(group, target)}`] || this.textCatalog[`Group.${group}`] || group,
-          label: activityLabel(activity.name, group, target, memberNumber === actor.MemberNumber, this.textCatalog) + suffix,
-          reason: availability.reason,
-          warning: availability.warning || (!availability.reason && (actor.ArousalSettings?.Active !== "Manual" || activity.special) ? "native.effects" : ""),
-          source: "BC",
-        };
+      const items = activityAssets(actor, target, activity.name);
+      return (items.length ? items : [null]).flatMap(item => {
+        const suffix = item ? ` · ${this.textCatalog[`Asset.${item.GroupName}.${item.AssetName}`] || item.AssetName}` : "";
+        return (memberNumber === actor.MemberNumber ? activity.self : activity.target).map(group => {
+          const availability = activityAvailability(!this.canSend() ? "native.data" : permissionReason || activityReason(actor, target, group, activity.name, this.state.room!, checkInventory), compatibility);
+          return {
+            group, name: activity.name, assetKey: item ? `${item.GroupName}/${item.AssetName}` : undefined, groupLabel: this.textCatalog[`DialogGroupName${textGroup(group, target)}`] || this.textCatalog[`Group.${group}`] || group,
+            label: activityLabel(activity.name, group, target, memberNumber === actor.MemberNumber, this.textCatalog) + suffix,
+            reason: availability.reason,
+            warning: availability.warning || (!availability.reason && (actor.ArousalSettings?.Active !== "Manual" || activity.special) ? "native.effects" : ""),
+            source: "BC",
+          };
+        });
       });
     });
     const extensionKeys = new Set(extensionActivities.map(entry => entry.key));
@@ -508,8 +510,8 @@ export class BcLiteClient {
     return [...native, ...extensions];
   }
 
-  sendActivity(memberNumber: number, group: string, name: string, compatibility = false, cuddleToken?: string): void {
-    const option = this.activityOptions(memberNumber, compatibility).find(value => value.group === group && value.name === name);
+  sendActivity(memberNumber: number, group: string, name: string, compatibility = false, cuddleToken?: string, assetKey?: string): void {
+    const option = this.activityOptions(memberNumber, compatibility).find(value => value.group === group && value.name === name && (assetKey === undefined || ("assetKey" in value && value.assetKey === assetKey)));
     if (!option || option.reason) throw new Error(t((option?.reason || "native.target") as Parameters<typeof t>[0]));
     if (name === "cuddle:stop") { this.stopCuddle(); return; }
     if (name.startsWith("cuddle:")) {
@@ -528,14 +530,14 @@ export class BcLiteClient {
       const target = this.state.characters.find(c => c.MemberNumber === memberNumber)!;
       const actor = { ...this.state.player!, ...this.state.characters.find(c => c.MemberNumber === this.state.player!.MemberNumber) };
       const entry = extensionActivities.find(entry => entry.key === name.slice(5))!;
-      this.sendChat(`.a ${extensionText(entry.key, group, actor, target, this.textCatalog, activityAsset(actor, target, entry.name, entry.prerequisites))}`);
+      this.sendChat(`.a ${extensionText(entry.key, group, actor, target, this.textCatalog, activityAssets(actor, target, entry.name, entry.prerequisites)[0])}`);
       return;
     }
     if (Date.now() - this.lastChatAt < 350) throw new Error(t("m210"));
     this.lastChatAt = Date.now();
     const target = this.state.characters.find(c => c.MemberNumber === memberNumber)!;
     const actor = { ...this.state.player!, ...this.state.characters.find(c => c.MemberNumber === this.state.player?.MemberNumber) };
-    const asset = activityAsset(actor, target, name);
+    const asset = activityAssets(actor, target, name).find(item => assetKey === undefined || `${item.GroupName}/${item.AssetName}` === assetKey);
     this.socket!.emit("ChatRoomChat", { Type: "Activity", Content: `Chat${memberNumber === this.state.player!.MemberNumber ? "Self" : "Other"}-${textGroup(group, target)}-${name}`, Dictionary: [
       { SourceCharacter: this.state.player!.MemberNumber },
       { TargetCharacter: memberNumber }, { FocusGroupName: group }, { ActivityName: name },

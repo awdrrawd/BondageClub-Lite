@@ -1543,7 +1543,7 @@ export class LiteApp {
       const interact = this.button(t("interaction.title"), "secondary interaction-open", "button");
       interact.addEventListener("click", () => {
         dismiss();
-        const activityDialog = openActivityDialog(character.Nickname || character.Name, compatibility => this.client.activityOptions(character.MemberNumber, compatibility), (group, name, compatibility) => {
+        const activityDialog = openActivityDialog(character.Nickname || character.Name, compatibility => this.client.activityOptions(character.MemberNumber, compatibility), (group, name, compatibility, assetKey) => {
           if (name.startsWith("cuddle:") && name !== "cuddle:stop") {
             this.showCuddleConfirmation(character.MemberNumber, `${t("cuddle.item")} · ${character.Nickname || character.Name}`, token => {
               this.client.sendActivity(character.MemberNumber, group, name, compatibility, token);
@@ -1552,7 +1552,7 @@ export class LiteApp {
             });
             return false;
           }
-          this.client.sendActivity(character.MemberNumber, group, name, compatibility);
+          this.client.sendActivity(character.MemberNumber, group, name, compatibility, undefined, assetKey);
         });
       });
       actions.append(interact);

@@ -5,7 +5,9 @@ import { dirname, resolve as resolvePath } from 'node:path';
 // Extract data only. Never execute upstream item hooks in Lite or during builds.
 export function itemPropertiesCatalog(path) {
   const ast = parse(readFileSync(path, 'utf8'));
-  const keys = ['Effect', 'Block', 'AllowActivity', 'AllowActivityOn', 'Expose'];
+  const poseAst = parse(readFileSync(resolvePath(dirname(path), '../../Scripts/Pose.js'), 'utf8'));
+  const poseLists = Object.fromEntries(poseAst.program.body.flatMap(n => n.declarations ?? []).filter(n => ['PoseAllStanding', 'PoseAllKneeling'].includes(n.id.name)).map(n => [n.id.name, n.init.arguments[0].elements.map(p => p.value)]));
+  const keys = ['Effect', 'Block', 'AllowActivity', 'AllowActivityOn', 'Expose', 'SetPose', 'AllowActivePose'];
   function literal(n) {
     if (!n) return undefined;
     if (['StringLiteral', 'NumericLiteral', 'BooleanLiteral'].includes(n.type)) return n.value;
@@ -15,8 +17,8 @@ export function itemPropertiesCatalog(path) {
       if (n.object.name === 'ExtendedArchetype') return n.property.name.toLowerCase();
       if (n.object.name === 'VibratorModeSet') return n.property.name === 'STANDARD' ? 'Standard' : 'Advanced';
     }
-    if (n.type === 'ArrayExpression') return n.elements.map(literal);
-    if (n.type === 'Identifier') return { reference: n.name };
+    if (n.type === 'ArrayExpression') return n.elements.flatMap(e => e?.type === 'SpreadElement' ? (literal(e.argument) ?? [undefined]) : [literal(e)]);
+    if (n.type === 'Identifier') return poseLists[n.name] ?? { reference: n.name };
     if (n.type === 'ObjectExpression') return Object.fromEntries(n.properties.filter(p => p.type === 'ObjectProperty').map(p => [p.computed ? literal(p.key) : p.key.name ?? p.key.value, literal(p.value)]));
     return undefined;
   }

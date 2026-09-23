@@ -34,8 +34,10 @@ test('Lite actor restraint policy retains actual tool, target and refusal checks
   assert.equal(createActivityInventoryCheck(a,b,true)('ItemHead',['ZoneAccessible']),'native.blocked');
 });
 
-test('barehand scratch and care differ from comb use; wings require the correct wearer', () => {
+test('scratch requires nails or a tool while care is barehanded; wings require the correct wearer', () => {
   const a=character(1), b=character(2);
+  assert.equal(activityReason(a,b,'ItemHead','Scratch',{}),'native.blocked');
+  a.Appearance.push({Group:'HandAccessoryLeft',Name:'Fingernails'});
   assert.equal(activityReason(a,b,'ItemHead','Scratch',{}),null);
   assert.equal(activityReason(a,b,'ItemHead','TakeCare',{}),null);
   assert.equal(activityReason(a,b,'ItemHead','BrushItem',{}),'native.blocked');
