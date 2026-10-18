@@ -1,5 +1,6 @@
 // Mechanical conversion of BC text resources; no BC executable code or images.
 import { readFileSync, existsSync } from 'node:fs';
+import { parseBcTranslations, bcTranslation, legacyTextSource } from './bc-text-format.mjs';
 import { bcTextLocales } from './bc-text-locales.mjs';
 import { writeBcCatalog, writeJson, bcCategory, localeDelta } from './catalog-utils.mjs';
 import { resolve } from 'node:path';
@@ -18,10 +19,7 @@ function csv(source) {
 }
 function translation(path) {
   try {
-    const lines = readFileSync(path, 'utf8').replace(/^\uFEFF/, '').trim().split(/\r?\n/).filter(line => !line.startsWith('###')).map(line => line.trim());
-    const result = new Map();
-    for (let i = 0; i + 1 < lines.length; i++) if (lines[i] && !result.has(lines[i])) result.set(lines[i], lines[i + 1]);
-    return result;
+    return parseBcTranslations(readFileSync(path, 'utf8'));
   } catch (error) { if (error.code === 'ENOENT') return new Map(); throw error; }
 }
 const catalog = {};
@@ -34,26 +32,27 @@ function additionalTranslations(file) {
 }
 function collectAdditional(key, english, translations) {
   for (const [locale, dictionary] of Object.entries(translations)) {
-    const translated = dictionary.get(english.trim());
+    const translated = bcTranslation(dictionary, key, english);
     if (validTranslation(english, translated)) additionalCatalogs[locale][key] = translated;
   }
 }
 // Invalid upstream substitutions fall back to English instead of losing actors or item names.
 function validTranslation(english, translated) {
   if(!translated)return false;
-  const tokens=text=>[...new Set(text.match(/\b(?:SourceCharacter|DestinationCharacter|TargetCharacter(?:Name)?|FocusAssetGroup|PrevAsset|NextAsset|(?:Target)?Pronoun(?:Possessive|Subject|Object))\b/g) || [])].sort().join('|');
+  const tokens=text=>[...new Set(text.match(/\b(?:SourceCharacter|DestinationCharacter|TargetCharacter(?:Name)?|FocusAssetGroup|ActivityAsset|PrevAsset|NextAsset|(?:Target)?Pronoun(?:Possessive|Subject|Object|Self))\b/g) || [])].sort().join('|');
   return tokens(english)===tokens(translated);
 }
-for (const file of ['Screens/Interface', 'Assets/Female3DCG/AssetStrings', 'Screens/Online/ChatRoom/Text_ChatRoom', 'Screens/Character/Preference/ActivityDictionary']) {
+for (const source of ['Screens/Interface', 'Assets/AssetStrings', 'Screens/Online/ChatRoom/Text_ChatRoom', 'Screens/Character/Preference/ActivityDictionary']) {
+  const file = existsSync(resolve(root, source + '.csv')) ? source : (legacyTextSource(source) || source);
   const translations = additionalTranslations(file);
   const ru = translation(resolve(root, file + '_RU.txt'));
   const cn = translation(resolve(root, file + '_CN.txt'));
   const tw = translation(resolve(root, file + '_TW.txt'));
   for (const [key, english] of csv(readFileSync(resolve(root, file + '.csv'), 'utf8'))) {
-    if (key && english) { catalog[key] = tw.get(english.trim()) || cn.get(english.trim()) || english; englishCatalog[key] = english; const translated=ru.get(english.trim()); if(validTranslation(english,translated))russianCatalog[key]=translated; collectAdditional(key, english, translations); }
+    if (key && english) { catalog[key] = [bcTranslation(tw, key, english), bcTranslation(cn, key, english)].find(value => validTranslation(english, value)) || english; englishCatalog[key] = english; const translated=bcTranslation(ru, key, english); if(validTranslation(english,translated))russianCatalog[key]=translated; collectAdditional(key, english, translations); }
   }
 }
-const assetFile = 'Assets/Female3DCG/Female3DCG';
+const assetFile = existsSync(resolve(root, 'Assets/Female3DCG.csv')) ? 'Assets/Female3DCG' : 'Assets/Female3DCG/Female3DCG';
 const additionalAssets = additionalTranslations(assetFile);
 const ruAssets = translation(resolve(root, assetFile + '_RU.txt'));
 const cnAssets = translation(resolve(root, assetFile + '_CN.txt'));
