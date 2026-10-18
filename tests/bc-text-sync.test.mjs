@@ -6,6 +6,58 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fetchBcText, textSources } from '../scripts/fetch-bc-text.mjs';
 import { bcTextLocales } from '../scripts/bc-text-locales.mjs';
+import { parseBcTranslations, bcTranslation } from '../scripts/bc-text-format.mjs';
+
+test('translation parsing never treats a translated value as a source key', () => {
+  const dictionary = parseBcTranslations('First\nSecond\nThird\n第四\n');
+  assert.equal(dictionary.has('Second'), false);
+  assert.equal(bcTranslation(dictionary, 'First', 'English'), 'Second');
+  assert.equal(bcTranslation(new Map([['English', '舊譯文']]), 'First', 'English'), '舊譯文');
+});
+
+test('R133 identifier translations are extracted for every locale while asset names stay English-based', () => {
+  const root = mkdtempSync(join(tmpdir(), 'bc-r133-text-'));
+  const write = (path, text) => { const file = join(root, path); mkdirSync(dirname(file), {recursive:true}); writeFileSync(file, text); };
+  try {
+    for (const source of textSources) {
+      const assets = source === 'Assets/Female3DCG';
+      write(`upstream/${source}.csv`, assets ? 'ItemArms,,Arms\n' : 'ActionFresh,SourceCharacter smiles.\nActionInvalid,SourceCharacter touches ActivityAsset.\n');
+      for (const [locale, suffix] of Object.entries(bcTextLocales)) {
+        write(`upstream/${source}_${suffix}.txt`, assets ? `Arms\n${locale} arms\n` : `ActionFresh\nSourceCharacter ${locale} fresh\nActionInvalid\nSourceCharacter missing item\n`);
+      }
+    }
+    const result = spawnSync(process.execPath, [resolve('scripts/build-text-catalog.mjs'), join(root, 'upstream')], {cwd:root, encoding:'utf8'});
+    assert.equal(result.status, 0, result.stderr);
+    for (const locale of Object.keys(bcTextLocales)) {
+      const read = category => JSON.parse(readFileSync(join(root, `src/translations/bc/${category}/${locale}.json`), 'utf8'));
+      assert.equal(read('actions').ActionFresh, `SourceCharacter ${locale} fresh`);
+      assert.equal(read('actions').ActionInvalid, undefined);
+      assert.equal(read('groups')['Group.ItemArms'], `${locale} arms`);
+    }
+  } finally {
+    assert.equal(dirname(resolve(root)), resolve(tmpdir()));
+    rmSync(root, {recursive:true, force:true});
+  }
+});
+
+test('mirror sync falls back to legacy asset paths and saves canonical paths', async () => {
+  const root = mkdtempSync(join(tmpdir(), 'bc-legacy-text-'));
+  const calls = [];
+  try {
+    await fetchBcText(root, async url => {
+      calls.push(url);
+      if (url.includes('api.github.com')) return Response.json({sha:'b'.repeat(40)});
+      if (/\/Assets\/(AssetStrings|Female3DCG)\.csv$/.test(url)) return new Response('', {status:404});
+      return new Response('Key,Text\n');
+    });
+    assert.equal(readFileSync(join(root, 'Assets/AssetStrings.csv'), 'utf8'), 'Key,Text\n');
+    assert.ok(calls.some(url => url.endsWith('/Assets/Female3DCG/AssetStrings_CN.txt')));
+    assert.ok(calls.some(url => url.endsWith('/Assets/Female3DCG/Female3DCG_TW.txt')));
+  } finally {
+    assert.equal(dirname(resolve(root)), resolve(tmpdir()));
+    rmSync(root, {recursive:true, force:true});
+  }
+});
 
 test('mirror sync pins text downloads, tolerates missing translations and rejects stale directories', async () => {
   const root = mkdtempSync(join(tmpdir(), 'bc-text-test-'));

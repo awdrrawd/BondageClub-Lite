@@ -1,13 +1,14 @@
 import { existsSync, readdirSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { legacyTextSource } from './bc-text-format.mjs';
 import { bcTextLocales } from './bc-text-locales.mjs';
 
 export const textSources = [
-  'Screens/Interface', 'Assets/Female3DCG/AssetStrings',
+  'Screens/Interface', 'Assets/AssetStrings',
   'Screens/Online/ChatRoom/Text_ChatRoom',
   'Screens/Character/Preference/ActivityDictionary',
-  'Assets/Female3DCG/Female3DCG'
+  'Assets/Female3DCG'
 ];
 export async function fetchBcText(destination, fetcher = fetch) {
   if (existsSync(destination) && readdirSync(destination).length) throw new Error('Destination must be empty');
@@ -19,9 +20,14 @@ export async function fetchBcText(destination, fetcher = fetch) {
   if (!/^[a-f0-9]{40}$/.test(sha ?? '')) throw new Error('Invalid mirror commit');
   let files = 0;
   for (const source of textSources) {
+    let remoteSource = source;
     for (const suffix of ['.csv', ...Object.values(bcTextLocales).map(locale => `_${locale}.txt`)]) {
       const path = source + suffix;
-      const response = await get(`https://raw.githubusercontent.com/${repo}/${sha}/${path}`);
+      let response = await get(`https://raw.githubusercontent.com/${repo}/${sha}/${remoteSource}${suffix}`);
+      if (response.status === 404 && suffix === ".csv" && legacyTextSource(source)) {
+        remoteSource = legacyTextSource(source);
+        response = await get(`https://raw.githubusercontent.com/${repo}/${sha}/${remoteSource}${suffix}`);
+      }
       if (response.status === 404 && suffix !== '.csv') continue;
       if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
       const body = await response.text();
