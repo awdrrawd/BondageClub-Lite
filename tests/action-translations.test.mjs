@@ -7,10 +7,16 @@ import {reviewedLabel,reviewedMessage} from '../scripts/refine-action-translatio
 import {renderAction} from './action-helper.mjs';
 import {activityLabel} from './activity-helper.mjs';
 import {xiaosuCatalog,xiaosuLocales} from '../scripts/xiaosu-catalog.mjs';
+import {isReviewedSource} from '../scripts/reviewed-bc-text.mjs';
 
 const catalogs=compileCatalogs();
 const languages=['de','fr','ru','uk','zh-cn','zh','ja','ko'];
-const keys=Object.keys(catalogs.en).filter(actionKey);
+const bc=Object.assign({},...['actions','messages'].map(category=>JSON.parse(readFileSync(`src/translations/bc/${category}/en.json`,'utf8'))));
+const reviewed=JSON.parse(readFileSync('src/translations/reviewed-bc-sources.json','utf8'));
+const isReviewed=key=>Object.hasOwn(bc,key) ? isReviewedSource(reviewed,key,bc[key]) : !Object.hasOwn(reviewed,key);
+// Full translation coverage applies to reviewed sources. New/changed upstream
+// text uses the compiler's English or current upstream translation fallback.
+const keys=Object.keys(catalogs.en).filter(actionKey).filter(isReviewed);
 const read=locale=>JSON.parse(readFileSync(`src/translations/overrides/${locale}.json`,'utf8'));
 
 test('XiaoSu keeps upstream labels and messages in every provided language',()=>{
@@ -34,8 +40,9 @@ test('XiaoSu extraction substitutes participants and body parts without retransl
   });
 });
 
-test('every supported language explicitly covers messages and activity labels',()=>{
-  assert.ok(keys.length>=2175);
+test('every supported language explicitly covers reviewed messages and activity labels',()=>{
+  assert.ok(Object.keys(catalogs.en).filter(actionKey).length>=2175);
+  assert.ok(Object.keys(reviewed).length>=1352);
   for(const locale of languages) {
     const overrides=read(locale);
     const file=`src/translations/action/xiaosu/${locale}.json`;
@@ -60,7 +67,7 @@ test('translation drafts preserve overlapping character, item and pronoun placeh
 test('new translations retain source placeholders from English or the Chinese reference',()=>{
   for(const locale of ['de','fr','ru','uk','zh-cn','ja','ko']) {
     for(const [key,value] of Object.entries(read(locale)).filter(([key])=>actionKey(key))) {
-      if(!catalogs.en[key]) continue;
+      if(!catalogs.en[key] || !isReviewed(key)) continue;
       const actual=JSON.stringify(tokens(value).sort());
       const candidates=[catalogs.en[key],catalogs.zh[key]].filter(Boolean).map(v=>JSON.stringify(tokens(v).sort()));
       assert.ok(candidates.includes(actual),`${locale}: ${key}: ${actual}`);

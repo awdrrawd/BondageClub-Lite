@@ -2,6 +2,7 @@ import { readFileSync, readdirSync, existsSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { localeDelta, writeJson } from './catalog-utils.mjs';
+import { isReviewedSource } from './reviewed-bc-text.mjs';
 
 export function readDictionary(file) {
   const data = JSON.parse(readFileSync(file, 'utf8'));
@@ -10,6 +11,8 @@ export function readDictionary(file) {
 }
 /** Compile all sources to one base and sparse per-locale deltas. Overrides are hand maintained. */
 export function compileCatalogs(root = resolve('src/translations')) {
+  const reviewFile = join(root, 'reviewed-bc-sources.json');
+  const reviewed = existsSync(reviewFile) ? JSON.parse(readFileSync(reviewFile, 'utf8')) : {};
   const discover = directory => {
     if (!existsSync(directory)) return [];
     const leaves = existsSync(join(directory, 'en.json')) ? [directory] : [];
@@ -34,7 +37,14 @@ export function compileCatalogs(root = resolve('src/translations')) {
     for (const dictionary of Object.values(dictionaries)) Object.assign(result, dictionary.en, dictionary[locale]);
     for (const language of new Set(['en', locale])) {
       const file = join(root, 'overrides', `${language}.json`);
-      if (existsSync(file)) Object.assign(result, readDictionary(file));
+      if (existsSync(file)) for (const [key, value] of Object.entries(readDictionary(file))) {
+        const owner = owners.get(key);
+        // Preserve upstream/English fallback when a reviewed BC source changes.
+        // Plugin overrides and explicit English corrections retain their priority.
+        if (language !== 'en' && Object.hasOwn(reviewed, key) &&
+            (!owner || !isReviewedSource(reviewed, key, dictionaries[owner].en[key]))) continue;
+        result[key] = value;
+      }
     }
     merged[locale] = result;
   }
