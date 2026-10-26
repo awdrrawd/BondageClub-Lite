@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { compileCatalogs, packCatalogs } from '../scripts/compile-action-catalogs.mjs';
 import { localeDelta, writeJson } from '../scripts/catalog-utils.mjs';
+import { sourceHash } from '../scripts/reviewed-bc-text.mjs';
 
 const mergeCode = loadTypeScript('src/action/merge.ts');
 const mergeCatalog = new Function(mergeCode + '; return mergeCatalog;')();
@@ -72,4 +73,32 @@ test('compiler rejects blank or non-string translation values', t => {
     write('overrides/zh.json', { Native: value });
     assert.throws(() => compileCatalogs(root), /Invalid text dictionary/);
   }
+});
+
+test('BC updates use fresh upstream text instead of stale reviewed overrides', t => {
+  const root = mkdtempSync(join(tmpdir(), 'bc-lite-reviewed-test-'));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const write = (file, data) => writeJson(join(root, file), data);
+  write('bc/en.json', { ActionKeep: 'SourceCharacter waves.', ActionChanged: 'SourceCharacter holds ActivityAsset.', ActionNew: 'SourceCharacter nods.' });
+  write('bc/fr.json', { ActionChanged: 'SourceCharacter tient ActivityAsset.' });
+  write('reviewed-bc-sources.json', {
+    ActionKeep: sourceHash('SourceCharacter waves.'),
+    ActionChanged: sourceHash('SourceCharacter holds something.'),
+    ActionRemoved: sourceHash('Removed source')
+  });
+  write('overrides/en.json', {});
+  write('overrides/fr.json', { ActionKeep: 'SourceCharacter salue.', ActionChanged: 'Stale translation', ActionRemoved: 'Stale removed text' });
+  write('overrides/ja.json', { ActionChanged: 'Stale translation' });
+  const data = compileCatalogs(root);
+  assert.equal(data.fr.ActionKeep, 'SourceCharacter salue.');
+  assert.equal(data.fr.ActionChanged, 'SourceCharacter tient ActivityAsset.');
+  assert.equal(data.ja.ActionChanged, undefined);
+  assert.equal(data.en.ActionChanged, 'SourceCharacter holds ActivityAsset.');
+  assert.equal(data.fr.ActionNew, undefined);
+  assert.equal(data.en.ActionNew, 'SourceCharacter nods.');
+  assert.equal(data.fr.ActionRemoved, undefined);
+  // A reviewer can explicitly accept the new source after fixing its override.
+  write('reviewed-bc-sources.json', { ActionChanged: sourceHash('SourceCharacter holds ActivityAsset.') });
+  write('overrides/fr.json', { ActionChanged: 'SourceCharacter garde ActivityAsset.' });
+  assert.equal(compileCatalogs(root).fr.ActionChanged, 'SourceCharacter garde ActivityAsset.');
 });

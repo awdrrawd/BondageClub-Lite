@@ -11,6 +11,8 @@
 
 文件檢查涵蓋本機 Markdown 連結、圖片及參照目的地是否存在；不連網檢查外部網址，也不驗證標題錨點。一般 CI 與 Site health 僅要求 contents: read；BC 資料更新另需 contents／pull-requests 寫入權限以提出 PR。不需要 BC 帳密、Cloudflare Token 或自動合併權限。
 
+Wrangler 4.151.3 的 Miniflare 固定依賴 undici 7.29.1，Dependabot 無法直接升級這個間接依賴。本庫升級至 Wrangler 4.153.0，由新版 Miniflare 直接使用已修補的 undici 7.30.1。遇到類似鎖定依賴問題，先確認上游開發工具版本，更新後執行 `npm ci`、`npm audit`、`npm run ci` 驗證。
+
 若所有測試顯示通過卻沒有最後總結，可能是測試程序尚有存活資源。npm test 對每個測試程序設定 60 秒診斷期限；逾時會輸出 TEST WORKER TIMEOUT、測試檔、Node／平台及資源建立堆疊，並以失敗退出。GitHub 與 Cloudflare 都適用；這是診斷與等待上限，不代表已修復資源洩漏。
 
 ## GitHub 手動設定
@@ -46,6 +48,8 @@ Push these files, confirm the Verify check, then optionally require it in a bran
 BC text data update 工作流程每月 5、10、15、20、25、30 日臺灣時間 11:23（沒有 30 日的月份略過該次） 檢查，也可在 Actions 手動 Run workflow。排程時間可能受 GitHub 排隊影響。來源是 awdrrawd/Bondage-College-Mirror 的 bondageclub 分支；每次先取得 commit，再下載該 commit 的 CSV／翻譯 TXT。
 
 只產生 src/translations/bc 的訊息、動作敘述、道具與部位名稱更新。沒有差異不建立 PR；已有 codex/bc-data- 開頭的待審 PR 則暫停新提案。PR 記錄來源 commit，通過建置及測試後才建立，不自動合併。人工 overrides、通訊、native-data 的活動／道具限制、插件程式皆保持人工維護。
+
+PR 同時列出新增／變更的待審校動作文字。已審校來源的完整翻譯檢查照常執行；新來源暫用上游譯文或英文回退，過期的人工覆寫不再覆蓋新版來源。人工審校紀錄的維護方式見[翻譯貢獻指南](../src/translations/README.md#bc-自動更新與人工審校)。
 
 推送工作流程至預設分支後，到 Settings → Actions → General → Workflow permissions，允許 GitHub Actions 建立 Pull requests。此工作流程單獨要求 contents／pull-requests 寫入權限，其他 CI 保持唯讀；不需要額外 Token。Bot PR 的 CI 可能要求點選 Approve workflows to run，核對檢查通過才合併。若政策禁止建立 PR，工作流程會失敗，不會直接修改 Mater。
 

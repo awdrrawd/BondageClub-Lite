@@ -38,6 +38,7 @@ jobs:
         run: |
           npm ci
           npm run catalog:bc -- "$RUNNER_TEMP/bc-text"
+          node scripts/report-bc-review.mjs >> "$RUNNER_TEMP/bc-text/PR.md"
           npm run ci
       - name: Propose text changes
         if: steps.pending.outputs.count == '0'
