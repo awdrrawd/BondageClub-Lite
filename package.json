@@ -36,11 +36,11 @@
     "sharp": "^0.35.4"
   },
   "devDependencies": {
-    "@babel/parser": "^8.0.7",
+    "@babel/parser": "^8.0.8",
     "fake-indexeddb": "^6.2.6",
     "happy-dom": "^21.0.4",
     "typescript": "^7.0.2",
     "vite": "^8.3.5",
-    "wrangler": "4.153.0"
+    "wrangler": "4.154.0"
   }
 }
