@@ -18,9 +18,16 @@ test('unchanged immutable history records are not serialized again when one mess
   let reads=0;
   state.messages=Array.from({length:3000},(_,i)=>({...state.messages[0],id:`incremental-${i}`,get text(){ reads++; return 'old'; }}));
   const session=new Session(store,()=>{},()=>assert.fail('storage failed'));
-  session.observe(state); await session.flush(); const initialReads=reads;
+  let signatures=0;
+  const signature=session.signature.bind(session);
+  session.signature=row=>{ signatures++; return signature(row); };
+  session.observe(state);
+  assert.equal(signatures,3000,'each new record is serialized once');
+  await session.flush(); const initialReads=reads;
   state.messages=[...state.messages.slice(1),{...state.messages[0],id:'new',text:'new'}];
-  const before=reads; session.observe(state); await session.flush();
+  const before=reads; signatures=0; session.observe(state);
+  assert.equal(signatures,1,'only the new record needs a signature');
+  await session.flush();
   assert.equal(reads,before,'old message fields must not be re-read to build or serialize records');
   assert.ok(initialReads>=3000);
   state.messages=[{...state.messages[0],text:'corrected'},...state.messages.slice(1)];

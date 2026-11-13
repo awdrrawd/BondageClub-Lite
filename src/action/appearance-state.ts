@@ -4,6 +4,12 @@ import type { CharacterSummary } from "../shared/types";
 
 type ItemRule = { Effect?: string[]; Block?: string[]; AllowActivityOn?: string[]; AllowActivity?: string[]; Expose?: string[]; SetPose?: string[]; AllowActivePose?: string[]; TypeRecord?: Record<string, unknown>; unknown?: boolean };
 type AppearanceItem = { Group?: string; Name?: string; Property?: ItemRule; Asset?: ItemRule & { Name?: string; Group?: { Name?: string } } };
+const mirroredZones = new Map<string, string[]>();
+for (const [part, group] of Object.entries(definitions.mirrors)) {
+  const zones = mirroredZones.get(group) ?? [group];
+  zones.push(part);
+  mirroredZones.set(group, zones);
+}
 export function appearanceState(character: CharacterSummary) {
   const effects = new Set<string>(), blocked = new Set<string>(), accessible = new Set<string>(), groups = new Set<string>();
   const items: { group: string; name: string; rule?: ItemRule; property?: ItemRule }[] = [];
@@ -54,7 +60,7 @@ export function appearanceState(character: CharacterSummary) {
   };
   const activityItems = (activity: string) => items.filter(item => property(item, "AllowActivity")?.includes(activity)
     && !(item.name === "Penis" && effects.has("Chaste"))
-    && ![...(item.rule?.Effect ?? []), ...(item.property?.Effect ?? [])].includes("UseRemote"));
+    && !item.rule?.Effect?.includes("UseRemote") && !item.property?.Effect?.includes("UseRemote"));
   const hasItem = (group: string, names?: string[]) => items.some(item => item.group === group && (!names || names.includes(item.name)));
   // PoseRefresh: active poses take priority only when permitted by every worn item.
   const categories = definitions.poses as Record<string, string>;
@@ -86,8 +92,7 @@ export function appearanceState(character: CharacterSummary) {
   if (pose.BodyFull) { delete pose.BodyUpper; delete pose.BodyLower; }
   else { pose.BodyUpper ??= "BaseUpper"; pose.BodyLower ??= "BaseLower"; }
   const isBlocked = (group: string, activity = false) => blocked.has(group) && !(activity && accessible.has(group));
-  const mirrors = definitions.mirrors as Record<string, string>;
-  const zoneBlocked = (group: string) => [group, ...Object.keys(mirrors).filter(key => mirrors[key] === group)].every(part => isBlocked(part, true));
+  const zoneBlocked = (group: string) => mirroredZones.get(group)?.every(part => isBlocked(part, true)) ?? isBlocked(group, true);
   const echoNaked = (group: string) => group === "ItemHands" ? !effects.has("MergedFingers")
     : ["ItemVulva", "ItemVulvaPiercings"].includes(group) ? exposed("ItemVulva") : group === "ItemButt" ? exposed(group) : naked(group);
   return { effects, groups, naked, exposed, crotchAccessible, echoNaked, pose, hasItem, activityItems, blocked: isBlocked, zoneBlocked,

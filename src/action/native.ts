@@ -40,6 +40,10 @@ export function activityTargetReason(actor: CharacterSummary, target: CharacterS
 /** One read-only snapshot per actor/target pair, shared by eligibility and tool selection. */
 export function createActivityContext(actor: CharacterSummary, target: CharacterSummary) {
   const a = appearanceState(actor), b = actor === target ? a : appearanceState(target);
+  const walk = !["Freeze", "Tethered", "Mounted"].some(effect => a.effects.has(effect));
+  const hands = !a.effects.has("Block");
+  const arms = hands || (!a.groups.has("ItemArms") && !a.blocked("ItemArms"));
+  const gagged = [...a.effects].some(effect => /^Gag/.test(effect));
   const tools = (pre: string) => (pre.startsWith("TargetNeeds-") ? b : a).activityItems(pre.replace(/^(Target)?Needs-/, ""))
     .map(item => ({ item, reason: activityItemPermission(actor, target, item.group, item.name, item.property?.TypeRecord) || (a.blocked(item.group) ? "native.blocked" : null) }));
   const assets = (name: string, prerequisites?: ActivityPrerequisite[]) => {
@@ -52,10 +56,6 @@ export function createActivityContext(actor: CharacterSummary, target: Character
   const code = activityZoneCode(target, group);
   if (Number.isFinite(code) && code >= 0 && code % 10 === 0) return "native.permission";
   if (actor.MemberNumber !== target.MemberNumber && (a.effects.has("Enclose") || a.effects.has("OneWayEnclose") || b.effects.has("Enclose"))) return "native.blocked";
-  const walk = !["Freeze", "Tethered", "Mounted"].some(effect => a.effects.has(effect));
-  const hands = !a.effects.has("Block");
-  const arms = hands || (!a.groups.has("ItemArms") && !a.blocked("ItemArms"));
-  const gagged = [...a.effects].some(effect => /^Gag/.test(effect));
   const evaluate = (pre: ActivityPrerequisite): boolean | undefined => {
     if (typeof pre !== "string") {
       if (pre.not !== undefined) { const result = evaluate(pre.not); return result === undefined ? undefined : !result; }

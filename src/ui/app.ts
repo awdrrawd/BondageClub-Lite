@@ -201,7 +201,7 @@ export class LiteApp {
       // Preserve the mounted authenticated view across synchronization and reconnection.
       if (previous && !ownerChanged && !!snapshot.player===!!previous.player && (snapshot.player || snapshot.phase===previous.phase) && this.viewRoom()?.Name === oldViewRoom) {
         this.updateHeader();
-        this.updateDeliveryStatus();
+        if (snapshot.deliveries !== previous.deliveries) this.updateDeliveryStatus();
         this.updateChatLog();
         if (snapshot.characters !== previous.characters || snapshot.room !== previous.room || snapshot.player !== previous.player || snapshot.cuddlePartner !== previous.cuddlePartner) this.updateRoomInfo();
         if (snapshot.rooms !== previous.rooms) this.refreshRoomResults?.();
