@@ -10,7 +10,7 @@ export function openActivityDialog(name: string, getOptions: (compatibility: boo
   close.addEventListener("click", () => dialog.close());
   dialog.addEventListener("close", () => dialog.remove());
   const help = document.createElement("p"); help.className = "muted"; help.textContent = t("native.help"); help.hidden = true;
-  const mode = document.createElement("label"); mode.className = "checkbox";
+  const mode = document.createElement("label");
   const allActions = document.createElement("input"); allActions.type = "checkbox"; allActions.checked = false;
   mode.className='activity-all'; allActions.hidden=true; mode.append(allActions);
   const allButton=document.createElement('button'); allButton.type='button'; allButton.className='button ghost'; allButton.textContent='ALL'; allButton.title=t('interaction.allActions'); allButton.setAttribute('aria-pressed','false');

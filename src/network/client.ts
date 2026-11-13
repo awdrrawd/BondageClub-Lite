@@ -318,7 +318,7 @@ export class BcLiteClient {
     this.credentials = null;
     this.loginAccepted = false;
     this.serverReady = false;
-    this.clearSearchTimer();
+    this.searches.clearTimer();
     this.clearRoomTimer();
     this.clearFriendsTimer();
     this.lastBeepAt = 0;
@@ -773,7 +773,7 @@ export class BcLiteClient {
       this.credentials = null;
       this.loginAccepted = false;
       this.serverReady = false;
-      this.clearSearchTimer();
+      this.searches.clearTimer();
       this.clearRoomTimer();
       this.clearFriendsTimer();
       this.patch({ phase: "error", status });
@@ -792,7 +792,7 @@ export class BcLiteClient {
       if (reason !== "io server disconnect" && this.state.room) this.returnRoom = this.state.room.Name;
       this.serverReady = false;
       this.loginAccepted = false;
-      this.clearSearchTimer();
+      this.searches.clearTimer();
       this.clearRoomTimer();
       this.clearFriendsTimer();
       this.patch({ friends: [], loverRooms: {}, friendsQueryState: "idle", friendsStatus: t("m228") });
@@ -948,7 +948,6 @@ export class BcLiteClient {
       this.patch({ phase: "ready", status: t("m241") });
     }, 12_000);
   }
-  private clearSearchTimer(): void { this.searches.clearTimer(); }
   private patch(change: Partial<ClientSnapshot>): void {
     this.state = { ...this.state, ...change };
     if (this.state.leashHolder && this.state.phase === 'in-room' && (change.characters || change.player || change.room)) this.leash.current(this.state.characters);

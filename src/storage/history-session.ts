@@ -87,10 +87,14 @@ export class HistorySession {
       whispers: sameContext && (previous.whispers || previous.messages)===(state.whispers || state.messages) ? [] : unseen(state.whispers || state.messages,this.observedPrivate),
       beeps: sameContext && previous.beeps===state.beeps ? [] : unseen(state.beeps,this.observedBeeps),
     }, this.suppressed);
-    batch.messages = batch.messages.filter(row => this.seen.get(row.key) !== this.signature(row));
+    batch.messages = batch.messages.filter(row => {
+      const signature = this.signature(row);
+      if (this.seen.get(row.key) === signature) return false;
+      this.seen.set(row.key, signature);
+      return true;
+    });
     const changedPrivate = new Set(batch.messages.filter(row=>row.kind==='private').map(row=>row.timestamp));
     batch.contacts = batch.contacts.filter(row=>changedPrivate.has(row.timestamp));
-    for (const row of batch.messages) this.seen.set(row.key, this.signature(row));
     // Bound the dedup set to the client's live ring + in-flight records, not days of traffic.
     if (this.seen.size > 15000) {
       const live = new Set(historyBatch(state).messages.map(row=>row.key));
