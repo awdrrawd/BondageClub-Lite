@@ -44,7 +44,6 @@
   "Group.ItemTorso": "Torse",
   "Group.ItemTorso2": "Torse",
   "Group.ItemVulva": "Vulve",
-  "Group.ItemVulvaPiercings": "Straight Clit Piercing",
   "Group.Mask": "Masque",
   "Group.Mouth": "Bouche",
   "Group.Necklace": "Collier",
@@ -54,5 +53,6 @@
   "Group.Suit": "Habit supérieure",
   "Group.SuitLower": "Habit inférieur",
   "Group.TailStraps": "Queue",
-  "Group.Wings": "Ailes"
+  "Group.Wings": "Ailes",
+  "Group.ItemVulvaPiercings": "Straight Clit Piercing"
 }
