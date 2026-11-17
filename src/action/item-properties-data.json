@@ -371,6 +371,45 @@
       }
     ]
   },
+  "Hat/FrogHat": {
+    "kind": "modular",
+    "baseline": {},
+    "modules": [
+      {
+        "key": "s",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "n",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "t",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      }
+    ]
+  },
   "HandAccessoryLeft/Rings": {
     "kind": "modular",
     "baseline": {},
@@ -1223,6 +1262,22 @@
     "baseline": {},
     "key": "typed",
     "options": [
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      }
+    ]
+  },
+  "Cloth/TransparentBunnyGirl": {
+    "kind": "typed",
+    "baseline": {},
+    "key": "typed",
+    "options": [
+      {
+        "property": {}
+      },
       {
         "property": {}
       },
@@ -8270,6 +8325,211 @@
       }
     ]
   },
+  "ItemArms/PetUpperSuit": {
+    "kind": "modular",
+    "baseline": {},
+    "modules": [
+      {
+        "key": "l",
+        "options": [
+          {
+            "property": {
+              "Effect": [
+                "Block",
+                "BlockWardrobe"
+              ],
+              "SetPose": [
+                "BackElbowTouch"
+              ],
+              "AllowActivePose": [
+                "BackElbowTouch",
+                "OverTheHead",
+                "Yoked",
+                "AllFours"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "CuffedArms",
+                "Mounted"
+              ],
+              "SetPose": [
+                "OverTheHead"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "ll",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "Effect": [
+                "CuffedFeet",
+                "Mounted"
+              ],
+              "SetPose": [
+                "KneelingSpread"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "lll",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {},
+            "child": {
+              "kind": "variableheight",
+              "baseline": {}
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "ItemArms/RestraintPillow": {
+    "kind": "modular",
+    "baseline": {},
+    "modules": [
+      {
+        "key": "s",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "Effect": [
+                "Block",
+                "BlockWardrobe"
+              ],
+              "Block": [
+                "ItemHands",
+                "ItemHandheld"
+              ],
+              "SetPose": [
+                "BaseUpper"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "Block",
+                "BlockWardrobe"
+              ],
+              "Block": [
+                "ItemHands",
+                "ItemHandheld"
+              ],
+              "SetPose": [
+                "BaseUpper"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "n",
+        "options": [
+          {
+            "property": {
+              "Effect": [
+                "Egged"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "Egged",
+                "Vibrating"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "Egged",
+                "Vibrating"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "Egged",
+                "Vibrating"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "Egged",
+                "Vibrating"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "c",
+        "options": [
+          {
+            "property": {
+              "Effect": [
+                "Egged"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "Egged",
+                "Vibrating"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "Egged",
+                "Vibrating"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "Egged",
+                "Vibrating"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "Egged",
+                "Vibrating"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
   "ItemNeck/ShinySteelCollar": {
     "kind": "typed",
     "baseline": {},
@@ -9524,6 +9784,20 @@
       },
       {
         "key": "at",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "fc",
         "options": [
           {
             "property": {}
@@ -11874,6 +12148,73 @@
       }
     ]
   },
+  "ItemHood/LatexHood": {
+    "kind": "modular",
+    "baseline": {},
+    "modules": [
+      {
+        "key": "l",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "Effect": [
+                "BlindHeavy",
+                "DeafLight",
+                "BlockWardrobe"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "F",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "B",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "AC",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "P",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      }
+    ]
+  },
   "Jewelry/NavelBar1": {
     "kind": "modular",
     "baseline": {},
@@ -13446,6 +13787,202 @@
       }
     ]
   },
+  "ItemDevices/GiantJar": {
+    "kind": "modular",
+    "baseline": {},
+    "modules": [
+      {
+        "key": "a",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "Effect": [
+                "BlockWardrobe"
+              ],
+              "Block": [
+                "ItemAddon",
+                "ItemArms",
+                "ItemBoots",
+                "ItemBreast",
+                "ItemButt",
+                "ItemEars",
+                "ItemFeet",
+                "ItemHandheld",
+                "ItemHands",
+                "ItemHead",
+                "ItemHood",
+                "ItemLegs",
+                "ItemMisc",
+                "ItemMouth",
+                "ItemMouth2",
+                "ItemMouth3",
+                "ItemNeck",
+                "ItemNeckAccessories",
+                "ItemNeckRestraints",
+                "ItemNipples",
+                "ItemNipplesPiercings",
+                "ItemNose",
+                "ItemPelvis",
+                "ItemTorso",
+                "ItemTorso2",
+                "ItemVulva",
+                "ItemVulvaPiercings"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "b",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "Block": [
+                "ItemBoots"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Block": [
+                "ItemBoots",
+                "ItemFeet"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Block": [
+                "ItemBoots",
+                "ItemFeet",
+                "ItemLegs"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Block": [
+                "ItemBoots",
+                "ItemButt",
+                "ItemFeet",
+                "ItemLegs",
+                "ItemPelvis",
+                "ItemVulva",
+                "ItemVulvaPiercings"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Block": [
+                "ItemArms",
+                "ItemBoots",
+                "ItemBreast",
+                "ItemButt",
+                "ItemFeet",
+                "ItemHandheld",
+                "ItemHands",
+                "ItemLegs",
+                "ItemNipples",
+                "ItemNipplesPiercings",
+                "ItemPelvis",
+                "ItemTorso",
+                "ItemTorso2",
+                "ItemVulva",
+                "ItemVulvaPiercings"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Block": [
+                "ItemArms",
+                "ItemBoots",
+                "ItemBreast",
+                "ItemButt",
+                "ItemFeet",
+                "ItemHandheld",
+                "ItemHands",
+                "ItemLegs",
+                "ItemNeck",
+                "ItemNeckAccessories",
+                "ItemNeckRestraints",
+                "ItemNipples",
+                "ItemNipplesPiercings",
+                "ItemPelvis",
+                "ItemTorso",
+                "ItemTorso2",
+                "ItemVulva",
+                "ItemVulvaPiercings"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "c",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "d",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {},
+            "child": {
+              "kind": "text",
+              "baseline": {}
+            }
+          },
+          {
+            "property": {},
+            "child": {
+              "kind": "text",
+              "baseline": {}
+            }
+          },
+          {
+            "property": {},
+            "child": {
+              "kind": "text",
+              "baseline": {}
+            }
+          },
+          {
+            "property": {},
+            "child": {
+              "kind": "text",
+              "baseline": {}
+            }
+          }
+        ]
+      }
+    ]
+  },
   "ItemDevices/Locker": {
     "kind": "typed",
     "baseline": {},
@@ -14894,6 +15431,686 @@
       },
       {
         "property": {}
+      }
+    ]
+  },
+  "ItemDevices/CardBoardBox": {
+    "kind": "modular",
+    "baseline": {},
+    "modules": [
+      {
+        "key": "h",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "t",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "Effect": [
+                "BlindLight",
+                "Enclose"
+              ],
+              "SetPose": [
+                "AllFours"
+              ],
+              "AllowActivePose": [
+                "Hogtied"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "BlindLight",
+                "BlockWardrobe",
+                "Freeze",
+                "Enclose"
+              ],
+              "SetPose": [
+                "AllFours"
+              ],
+              "AllowActivePose": [
+                "Hogtied"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "x",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {},
+            "child": {
+              "kind": "text",
+              "baseline": {}
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "ItemDevices/BarStool": {
+    "kind": "modular",
+    "baseline": {},
+    "modules": [
+      {
+        "key": "s",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "p",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "d",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      }
+    ]
+  },
+  "ItemDevices/LatexbeltBed": {
+    "kind": "modular",
+    "baseline": {},
+    "modules": [
+      {
+        "key": "g",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "Effect": [
+                "BlindHeavy",
+                "GagLight",
+                "BlockWardrobe",
+                "Freeze",
+                "Enclose"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "BlindHeavy",
+                "GagLight",
+                "BlockWardrobe",
+                "Freeze"
+              ],
+              "Block": [
+                "ItemPelvis",
+                "ItemVulva",
+                "ItemVulvaPiercings",
+                "ItemButt",
+                "ItemLegs"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "BlockWardrobe",
+                "Freeze"
+              ],
+              "Block": [
+                "ItemHead",
+                "ItemHood",
+                "ItemEars",
+                "ItemMouth",
+                "ItemMouth2",
+                "ItemMouth3",
+                "ItemNeck",
+                "ItemNose",
+                "ItemNeckAccessories",
+                "ItemNeckRestraints"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "l",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      }
+    ]
+  },
+  "ItemDevices/TrashCan": {
+    "kind": "typed",
+    "baseline": {},
+    "key": "typed",
+    "options": [
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      }
+    ]
+  },
+  "ItemDevices/GiantStuffedToy": {
+    "kind": "typed",
+    "baseline": {},
+    "key": "typed",
+    "options": [
+      {
+        "property": {}
+      }
+    ]
+  },
+  "ItemDevices/LegSpreadDisplayStand": {
+    "kind": "modular",
+    "baseline": {},
+    "modules": [
+      {
+        "key": "o",
+        "options": [
+          {
+            "property": {
+              "SetPose": [
+                "BackElbowTouch",
+                "KneelingSpread"
+              ]
+            }
+          },
+          {
+            "property": {
+              "SetPose": [
+                "OverTheHead",
+                "KneelingSpread"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "g",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "v",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "d",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {},
+            "child": {
+              "kind": "variableheight",
+              "baseline": {}
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "ItemDevices/BoxingBag": {
+    "kind": "typed",
+    "baseline": {},
+    "key": "typed",
+    "options": [
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      }
+    ]
+  },
+  "ItemDevices/UnicornStuffedToy": {
+    "kind": "typed",
+    "baseline": {},
+    "key": "typed",
+    "options": [
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      }
+    ]
+  },
+  "ItemDevices/GlassJar": {
+    "kind": "modular",
+    "baseline": {},
+    "modules": [
+      {
+        "key": "c",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "Effect": [
+                "BlindHeavy",
+                "GagLight",
+                "Freeze",
+                "Enclose"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "t",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "Effect": [
+                "Freeze",
+                "Mounted"
+              ],
+              "SetPose": [
+                "LegsClosed"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "s",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "Effect": [
+                "Freeze",
+                "Block",
+                "Mounted"
+              ],
+              "SetPose": [
+                "BackElbowTouch"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "gz",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "yt",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "k",
+        "options": [
+          {
+            "property": {
+              "Effect": [
+                "Egged"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "Egged",
+                "Vibrating"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "Egged",
+                "Vibrating"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "Egged",
+                "Vibrating"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "Egged",
+                "Vibrating"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "d",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "g",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "Effect": [
+                "DenialMode"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "DenialMode",
+                "RuinOrgasms"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "ItemDevices/ShackledOneBarPrison": {
+    "kind": "modular",
+    "baseline": {},
+    "modules": [
+      {
+        "key": "o",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "SetPose": [
+                "LegsClosed"
+              ]
+            }
+          },
+          {
+            "property": {
+              "SetPose": [
+                "Spread"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "d",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "Effect": [
+                "Egged",
+                "FillVulva",
+                "VulvaShaft"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "Egged",
+                "Vibrating",
+                "FillVulva",
+                "VulvaShaft"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "Egged",
+                "Vibrating",
+                "FillVulva",
+                "VulvaShaft"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "Egged",
+                "Vibrating",
+                "FillVulva",
+                "VulvaShaft"
+              ]
+            }
+          }
+        ]
       }
     ]
   },
@@ -16708,6 +17925,76 @@
       }
     ]
   },
+  "ItemVulva/MoreWiredVibrators": {
+    "kind": "modular",
+    "baseline": {},
+    "modules": [
+      {
+        "key": "o",
+        "options": [
+          {
+            "property": {
+              "Effect": [
+                "Egged"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "Egged",
+                "Vibrating"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "Egged",
+                "Vibrating"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "Egged",
+                "Vibrating"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "Egged",
+                "Vibrating"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "n",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      }
+    ]
+  },
   "ItemVulvaPiercings/ClitRing": {
     "kind": "typed",
     "baseline": {},
@@ -17245,15 +18532,14 @@
       {
         "property": {
           "Effect": [
-            "Freeze",
-            "Egged"
+            "Freeze"
           ]
         }
       },
       {
         "property": {
           "Effect": [
-            "Egged"
+            "FixedHead"
           ]
         }
       }
@@ -18501,6 +19787,32 @@
       }
     ]
   },
+  "ItemTorso/ServingTray": {
+    "kind": "typed",
+    "baseline": {},
+    "key": "typed",
+    "options": [
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      }
+    ]
+  },
+  "ItemTorso/WoodenSign": {
+    "kind": "text",
+    "baseline": {}
+  },
   "ItemTorso/HeavyLatexCorset": {
     "kind": "typed",
     "baseline": {},
@@ -18872,6 +20184,558 @@
         "options": [
           {
             "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      }
+    ]
+  },
+  "ItemTorso/Movableglasscabinet": {
+    "kind": "modular",
+    "baseline": {},
+    "modules": [
+      {
+        "key": "t",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "up",
+        "options": [
+          {
+            "property": {
+              "Block": [
+                "ItemHands",
+                "ItemHandheld",
+                "ItemArms",
+                "ItemBreast",
+                "ItemNipples",
+                "ItemNipplesPiercings"
+              ]
+            }
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "down",
+        "options": [
+          {
+            "property": {
+              "Block": [
+                "ItemPelvis",
+                "ItemButt",
+                "ItemVulva",
+                "ItemVulvaPiercings"
+              ]
+            }
+          },
+          {
+            "property": {}
+          }
+        ]
+      }
+    ]
+  },
+  "ItemTorso/RestraintSet": {
+    "kind": "typed",
+    "baseline": {},
+    "key": "typed",
+    "options": [
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      }
+    ]
+  },
+  "ItemTorso/TentacleSuit": {
+    "kind": "modular",
+    "baseline": {},
+    "modules": [
+      {
+        "key": "d",
+        "options": [
+          {
+            "property": {
+              "Block": [
+                "ItemVulva",
+                "ItemVulvaPiercings",
+                "ItemButt"
+              ]
+            }
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "Effect": [
+                "VulvaShaft"
+              ],
+              "Block": [
+                "ItemVulva",
+                "ItemButt"
+              ]
+            },
+            "child": {
+              "kind": "vibrating",
+              "baseline": {},
+              "key": "d2",
+              "options": [
+                {
+                  "property": {
+                    "Effect": [
+                      "Egged"
+                    ]
+                  }
+                },
+                {
+                  "property": {
+                    "Effect": [
+                      "Egged",
+                      "Vibrating"
+                    ]
+                  }
+                },
+                {
+                  "property": {
+                    "Effect": [
+                      "Egged",
+                      "Vibrating"
+                    ]
+                  }
+                },
+                {
+                  "property": {
+                    "Effect": [
+                      "Egged",
+                      "Vibrating"
+                    ]
+                  }
+                },
+                {
+                  "property": {
+                    "Effect": [
+                      "Egged",
+                      "Vibrating"
+                    ]
+                  }
+                },
+                {
+                  "property": {
+                    "Effect": [
+                      "Egged"
+                    ]
+                  }
+                },
+                {
+                  "property": {
+                    "Effect": [
+                      "Egged",
+                      "Vibrating"
+                    ]
+                  }
+                },
+                {
+                  "property": {
+                    "Effect": [
+                      "Egged"
+                    ]
+                  }
+                },
+                {
+                  "property": {
+                    "Effect": [
+                      "Egged",
+                      "Edged"
+                    ]
+                  }
+                },
+                {
+                  "property": {
+                    "Effect": [
+                      "Egged",
+                      "Vibrating",
+                      "Edged"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "s",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "h",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "Effect": [
+                "Block"
+              ],
+              "Block": [
+                "ItemArms",
+                "ItemHands"
+              ],
+              "SetPose": [
+                "BackElbowTouch"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "m",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "Effect": [
+                "BlockMouth",
+                "GagLight"
+              ],
+              "Block": [
+                "ItemMouth"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "f",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "Effect": [
+                "Slow"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "ItemTorso2/ServingTray": {
+    "kind": "typed",
+    "baseline": {},
+    "key": "typed",
+    "options": [
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      }
+    ]
+  },
+  "ItemTorso2/WoodenSign": {
+    "kind": "text",
+    "baseline": {}
+  },
+  "ItemTorso2/TentacleSuit": {
+    "kind": "modular",
+    "baseline": {},
+    "modules": [
+      {
+        "key": "d",
+        "options": [
+          {
+            "property": {
+              "Block": [
+                "ItemVulva",
+                "ItemVulvaPiercings",
+                "ItemButt"
+              ]
+            }
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "Effect": [
+                "VulvaShaft"
+              ],
+              "Block": [
+                "ItemVulva",
+                "ItemButt"
+              ]
+            },
+            "child": {
+              "kind": "vibrating",
+              "baseline": {},
+              "key": "d2",
+              "options": [
+                {
+                  "property": {
+                    "Effect": [
+                      "Egged"
+                    ]
+                  }
+                },
+                {
+                  "property": {
+                    "Effect": [
+                      "Egged",
+                      "Vibrating"
+                    ]
+                  }
+                },
+                {
+                  "property": {
+                    "Effect": [
+                      "Egged",
+                      "Vibrating"
+                    ]
+                  }
+                },
+                {
+                  "property": {
+                    "Effect": [
+                      "Egged",
+                      "Vibrating"
+                    ]
+                  }
+                },
+                {
+                  "property": {
+                    "Effect": [
+                      "Egged",
+                      "Vibrating"
+                    ]
+                  }
+                },
+                {
+                  "property": {
+                    "Effect": [
+                      "Egged"
+                    ]
+                  }
+                },
+                {
+                  "property": {
+                    "Effect": [
+                      "Egged",
+                      "Vibrating"
+                    ]
+                  }
+                },
+                {
+                  "property": {
+                    "Effect": [
+                      "Egged"
+                    ]
+                  }
+                },
+                {
+                  "property": {
+                    "Effect": [
+                      "Egged",
+                      "Edged"
+                    ]
+                  }
+                },
+                {
+                  "property": {
+                    "Effect": [
+                      "Egged",
+                      "Vibrating",
+                      "Edged"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "s",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "h",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "Effect": [
+                "Block"
+              ],
+              "Block": [
+                "ItemArms",
+                "ItemHands"
+              ],
+              "SetPose": [
+                "BackElbowTouch"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "m",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "Effect": [
+                "BlockMouth",
+                "GagLight"
+              ],
+              "Block": [
+                "ItemMouth"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "f",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "Effect": [
+                "Slow"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "ItemTorso2/RestraintSet": {
+    "kind": "typed",
+    "baseline": {},
+    "key": "typed",
+    "options": [
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      }
+    ]
+  },
+  "ItemTorso2/Movableglasscabinet": {
+    "kind": "modular",
+    "baseline": {},
+    "modules": [
+      {
+        "key": "t",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "up",
+        "options": [
+          {
+            "property": {
+              "Block": [
+                "ItemHands",
+                "ItemHandheld",
+                "ItemArms",
+                "ItemBreast",
+                "ItemNipples",
+                "ItemNipplesPiercings"
+              ]
+            }
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "down",
+        "options": [
+          {
+            "property": {
+              "Block": [
+                "ItemPelvis",
+                "ItemButt",
+                "ItemVulva",
+                "ItemVulvaPiercings"
+              ]
+            }
           },
           {
             "property": {}
@@ -23865,42 +25729,48 @@
       {
         "property": {
           "Effect": [
-            "BlockMouth"
+            "BlockMouth",
+            "GagMedium"
           ]
         }
       },
       {
         "property": {
           "Effect": [
-            "OpenMouth"
+            "OpenMouth",
+            "GagMedium"
           ]
         }
       },
       {
         "property": {
           "Effect": [
-            "BlockMouth"
+            "BlockMouth",
+            "GagMedium"
           ]
         }
       },
       {
         "property": {
           "Effect": [
-            "BlockMouth"
+            "BlockMouth",
+            "GagMedium"
           ]
         }
       },
       {
         "property": {
           "Effect": [
-            "BlockMouth"
+            "BlockMouth",
+            "GagHeavy"
           ]
         }
       },
       {
         "property": {
           "Effect": [
-            "OpenMouth"
+            "OpenMouth",
+            "GagHeavy"
           ]
         }
       }
@@ -25529,42 +27399,48 @@
       {
         "property": {
           "Effect": [
-            "BlockMouth"
+            "BlockMouth",
+            "GagMedium"
           ]
         }
       },
       {
         "property": {
           "Effect": [
-            "OpenMouth"
+            "OpenMouth",
+            "GagMedium"
           ]
         }
       },
       {
         "property": {
           "Effect": [
-            "BlockMouth"
+            "BlockMouth",
+            "GagMedium"
           ]
         }
       },
       {
         "property": {
           "Effect": [
-            "BlockMouth"
+            "BlockMouth",
+            "GagMedium"
           ]
         }
       },
       {
         "property": {
           "Effect": [
-            "BlockMouth"
+            "BlockMouth",
+            "GagHeavy"
           ]
         }
       },
       {
         "property": {
           "Effect": [
-            "OpenMouth"
+            "OpenMouth",
+            "GagHeavy"
           ]
         }
       }
@@ -27192,42 +29068,48 @@
       {
         "property": {
           "Effect": [
-            "BlockMouth"
+            "BlockMouth",
+            "GagMedium"
           ]
         }
       },
       {
         "property": {
           "Effect": [
-            "OpenMouth"
+            "OpenMouth",
+            "GagMedium"
           ]
         }
       },
       {
         "property": {
           "Effect": [
-            "BlockMouth"
+            "BlockMouth",
+            "GagMedium"
           ]
         }
       },
       {
         "property": {
           "Effect": [
-            "BlockMouth"
+            "BlockMouth",
+            "GagMedium"
           ]
         }
       },
       {
         "property": {
           "Effect": [
-            "BlockMouth"
+            "BlockMouth",
+            "GagHeavy"
           ]
         }
       },
       {
         "property": {
           "Effect": [
-            "OpenMouth"
+            "OpenMouth",
+            "GagHeavy"
           ]
         }
       }
@@ -27932,6 +29814,20 @@
       },
       {
         "key": "at",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "fc",
         "options": [
           {
             "property": {}
@@ -29263,6 +31159,67 @@
       },
       {
         "property": {}
+      }
+    ]
+  },
+  "ItemLegs/ShockDevice": {
+    "kind": "modular",
+    "baseline": {},
+    "modules": [
+      {
+        "key": "a",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "Effect": [
+                "IsPlugged"
+              ],
+              "Block": [
+                "ItemButt"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "p",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "Block": [
+                "ItemVulva"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "u",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "d",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
       }
     ]
   },
@@ -30657,6 +32614,261 @@
             "property": {}
           }
         ]
+      },
+      {
+        "key": "VelvetBunnyCabaret",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "SubbycatsPlace",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "SADollhouse",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "FoxworthManor",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "MansionValentine",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "AybesSuite",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "FaircloughManor",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "FoxDen",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "Position",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
       }
     ]
   },
@@ -30674,6 +32886,88 @@
       {
         "property": {}
       },
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      }
+    ]
+  },
+  "ItemMisc/BountySuitcaseEmpty": {
+    "kind": "noarch",
+    "baseline": {}
+  },
+  "ItemMisc/PumpkinPot": {
+    "kind": "typed",
+    "baseline": {},
+    "key": "typed",
+    "options": [
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      }
+    ]
+  },
+  "ItemMisc/Cat": {
+    "kind": "typed",
+    "baseline": {},
+    "key": "typed",
+    "options": [
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      }
+    ]
+  },
+  "ItemMisc/Dog": {
+    "kind": "typed",
+    "baseline": {},
+    "key": "typed",
+    "options": [
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      }
+    ]
+  },
+  "ItemMisc/Panda": {
+    "kind": "typed",
+    "baseline": {},
+    "key": "typed",
+    "options": [
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      }
+    ]
+  },
+  "ItemMisc/Penguin": {
+    "kind": "typed",
+    "baseline": {},
+    "key": "typed",
+    "options": [
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      }
+    ]
+  },
+  "ItemMisc/Unicorn": {
+    "kind": "typed",
+    "baseline": {},
+    "key": "typed",
+    "options": [
       {
         "property": {}
       },
@@ -32225,6 +34519,77 @@
           },
           {
             "property": {}
+          }
+        ]
+      }
+    ]
+  },
+  "ItemPelvis/FortuneChastityBelt": {
+    "kind": "modular",
+    "baseline": {},
+    "modules": [
+      {
+        "key": "s",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "Effect": [
+                "Chaste"
+              ],
+              "Block": [
+                "ItemVulva",
+                "ItemVulvaPiercings"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "ButtChaste"
+              ],
+              "Block": [
+                "ItemButt"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "Chaste",
+                "ButtChaste"
+              ],
+              "Block": [
+                "ItemVulva",
+                "ItemVulvaPiercings",
+                "ItemButt"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "key": "o",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {
+              "Effect": [
+                "DenialMode"
+              ]
+            }
+          },
+          {
+            "property": {
+              "Effect": [
+                "DenialMode",
+                "RuinOrgasms"
+              ]
+            }
           }
         ]
       }
@@ -33792,6 +36157,22 @@
       }
     ]
   },
+  "Bra/TransparentBunnyGirl": {
+    "kind": "typed",
+    "baseline": {},
+    "key": "typed",
+    "options": [
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      }
+    ]
+  },
   "Bra/Ribbons": {
     "kind": "typed",
     "baseline": {},
@@ -34736,6 +37117,10 @@
       }
     ]
   },
+  "Necklace/InitialLocket": {
+    "kind": "text",
+    "baseline": {}
+  },
   "Necklace/NecklaceKey": {
     "kind": "typed",
     "baseline": {},
@@ -35483,6 +37868,20 @@
       },
       {
         "key": "at",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "fc",
         "options": [
           {
             "property": {}
@@ -36692,6 +39091,31 @@
       }
     ]
   },
+  "ItemNose/ExpandingNoseHook": {
+    "kind": "typed",
+    "baseline": {},
+    "key": "typed",
+    "options": [
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      }
+    ]
+  },
   "Wings/SteampunkWings": {
     "kind": "typed",
     "baseline": {},
@@ -37312,6 +39736,261 @@
             "property": {}
           }
         ]
+      },
+      {
+        "key": "VelvetBunnyCabaret",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "SubbycatsPlace",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "SADollhouse",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "FoxworthManor",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "MansionValentine",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "AybesSuite",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "FaircloughManor",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "FoxDen",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "Position",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
       }
     ]
   },
@@ -37373,6 +40052,27 @@
       },
       {
         "property": {}
+      }
+    ]
+  },
+  "ItemHandheld/ToyHammer": {
+    "kind": "modular",
+    "baseline": {},
+    "modules": [
+      {
+        "key": "a",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {},
+            "child": {
+              "kind": "text",
+              "baseline": {}
+            }
+          }
+        ]
       }
     ]
   },

@@ -10,7 +10,7 @@
 
 資料產生器僅解析靜態設定，不執行遊戲或插件 hook。未知初始化 hook、無法解析的規則或非法選項不套用推測的衍生屬性；動作回到原有的基礎資產與明確 Property 判定，不因單件資料不足封鎖整個動作清單。已知封鎖效果、工具需求、偏好與互動權限仍生效。牽繩自動移動仍要求完整判定。純顏色透明度初始化不影響所擷取的遊戲欄位。這份解析器不是完整遊戲執行環境。
 
-更新：`npm run catalog:native -- <R132來源>/Assets/Female3DCG/Female3DCG.js`。來源須包含同版的 Female3DCGExtended、VibratorMode 與 SlaveCollar 腳本。生成的兩份 JSON 提交入庫，正常建置不依赖外部遊戲目錄。
+更新：`npm run catalog:native -- <BC 原始碼目錄>`（鏡像根目錄或上游倉庫；R134 起 Female3DCG.js 位於 `Assets/` 下，舊佈局的 `Assets/Female3DCG/` 與舊式傳入 Female3DCG.js 路徑仍可用）。來源須包含同版的 Female3DCGExtended、VibratorMode 與 SlaveCollar 腳本；R134 以識別字共用的 modular module 由 `Screens/Inventory/` 解析。生成的兩份 JSON 與版本標記 `bc-native-meta.json` 提交入庫，正常建置不依賴外部遊戲目錄。資料是否落後由每週的檢查提醒，見[自動化文件](automation.md#bc-判定資料落後檢查)。
 
 建房增加 `Location` 分類，供設定房間不分享位置的要求。Lite 現有 beep 使用 IsSecret，不對 AFC 位置請求自動回傳自己的房間；此選項不代表能阻止其他客戶端或插件分享位置。
 
@@ -29,3 +29,10 @@
 可執行 `node scripts/audit-activity-filters.mjs <R132來源目錄>`，以該目錄的遊戲函式與 Lite 對照。物品／部位矩陣涵蓋道具、口塞、鏡像部位、衣物、貞操及強制姿勢；另比較雙方互動權限和型態道具權限。物品矩陣的遊戲端使用 Lite 還原後的物品資料，因此不是對還原器的獨立驗證；完整／精簡封包等價性另由固定案例回歸測試覆蓋。均不能視為實際帳號驗證。地圖距離與插件內部執行狀態仍未完整模擬，地圖房間維持限制。
 
 臀部清單的另一類缺漏與 R132 壓縮無關：ECHO 的 `fromTemplateActivity` 文字以前未展開，導致戳臀部等動作即使有條件資料也不會進入選單。擷取器現在靜態展開字面值模板和 map，不執行插件程式。尾巴撫摸的兩個同名關係分支以 OR 合併，保留尾巴及手部條件；關係採雙向戀人或指定方向的所有權判定。LSCG 對 Pinch 新增的臀部／臉頰部位以文字擴充選項提供，不改寫原版活動。LSCG Grab／Chomp 依賴牽引模組持續狀態，目前仍不支援；不可只憑尾巴物品存在就放行。新增模板的多語系文字由本地 `scripts/translate-template-actions.mjs` 產生，無外部翻譯服務。
+
+## 已知差異（僅註記，未修改）
+
+以下是比對 R134 原始碼時發現、並非這次資料更新引入的既有差異，尚未驗證實際影響，也沒有改動判定行為：
+
+- `Sisters`、`Brothers`、`SiblingsWithDifferentGender` 在 `native.ts` 以 Penis 道具判斷性別；BC 的 `ActivityCheckPrerequisite` 則以 `Pronouns` 裝備（無裝備時為 SheHer）判斷。R134 新增的 `SiblingsNeutral` 依 BC 原始碼使用 `Pronouns`，因此與前三者的判定依據不同。
+- 前置條件的語意是否與 BC 一致，目前只能由 `scripts/bc-native-baseline.json` 的函式雜湊在 BC 改動後提醒，無法偵測「Lite 一開始就與 BC 不同」的情況。

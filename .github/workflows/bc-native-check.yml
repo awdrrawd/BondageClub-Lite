@@ -1,0 +1,64 @@
+name: BC native data check
+
+# 每週對照 Bondage Club 原始碼，確認 Lite 提交的判定資料（native-data.json、item-properties-data.json）沒有落後，
+# 並確認 Lite 模仿的 BC 判定函式內容與基準（scripts/bc-native-baseline.json）相同。
+# 發現差異時只開／更新一則 issue 通知，不會讓工作流程失敗（BC 鏡像常有 BETA 或領先線上版本的情況）。
+# 與 bc-data.yml 不同：這裡不產生 PR、不改資料；判定資料需人工重新產生並審查差異。
+# 來源預設為 awdrrawd/Bondage-College-Mirror 的 bondageclub 分支（與 bc-data.yml 相同）；
+# 可用 Actions Variables 的 BC_SOURCE_REPO、BC_SOURCE_REF 覆蓋。
+on:
+  schedule:
+    - cron: '41 3 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: bc-native-check
+  cancel-in-progress: false
+jobs:
+  bc-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # 只取檢查需要的檔案：資產定義、Scripts/、以及 Screens/Inventory 內的腳本（SlaveCollar 與共用 module 定義）。
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          repository: ${{ vars.BC_SOURCE_REPO || 'awdrrawd/Bondage-College-Mirror' }}
+          ref: ${{ vars.BC_SOURCE_REF || 'bondageclub' }}
+          path: bc-src
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /Assets/Female3DCG.js
+            /Assets/Female3DCGExtended.js
+            /Assets/Female3DCG/Female3DCG.js
+            /Assets/Female3DCG/Female3DCGExtended.js
+            /Scripts/*.js
+            /Screens/Inventory/**/*.js
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: package-lock.json
+      # 檢查腳本用 @babel/parser 解析 BC 原始碼，需要先安裝依賴（不執行安裝腳本）。
+      - run: npm ci --ignore-scripts
+      - name: Compare against BC and notify
+        env:
+          BC_SOURCE_DIR: bc-src
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set +e
+          node scripts/check-bc-native.mjs --json bc-native-report.json --report bc-native-report.txt
+          code=$?
+          set -e
+          # 1 = 有差異（交給 issue 通知）；2 以上 = 檢查腳本本身壞了，才讓工作流程失敗
+          if [ "$code" -ge 2 ]; then exit "$code"; fi
+          # 腳本沒能產生報告時結束碼也可能是 1，不能當成「有差異」。
+          if [ ! -f bc-native-report.json ]; then echo "::error::檢查腳本沒有產生報告"; exit 2; fi
+          cat bc-native-report.txt >> "$GITHUB_STEP_SUMMARY"
+          node scripts/bc-native-issue.mjs bc-native-report.json

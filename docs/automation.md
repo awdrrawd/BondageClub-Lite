@@ -54,3 +54,27 @@ PR 同時列出新增／變更的待審校動作文字。已審校來源的完�
 推送工作流程至預設分支後，到 Settings → Actions → General → Workflow permissions，允許 GitHub Actions 建立 Pull requests。此工作流程單獨要求 contents／pull-requests 寫入權限，其他 CI 保持唯讀；不需要額外 Token。Bot PR 的 CI 可能要求點選 Approve workflows to run，核對檢查通過才合併。若政策禁止建立 PR，工作流程會失敗，不會直接修改 Mater。
 
 English: Text-only synchronization on days 5, 10, 15, 20, 25 and 30 of each month opens a reviewed PR from a pinned mirror commit. No auto-merge, protocol changes, native item/activity rules, plugin code or manual overrides. Enable Actions PR creation and approve the bot PR's checks when prompted.
+
+## BC 判定資料落後檢查
+
+BC native data check 工作流程每週一臺灣時間 11:41 執行，也可在 Actions 手動 Run workflow。它不產生 PR、不改資料，只在發現差異時開（或更新）一則 label 為 `bc-native` 的 issue，差異消失後自動關閉；內容沒變不會重複通知。檢查腳本本身壞掉（結束碼 2）才讓工作流程失敗。來源預設與文字更新相同（awdrrawd/Bondage-College-Mirror 的 bondageclub 分支），可用 Actions Variables 的 `BC_SOURCE_REPO`、`BC_SOURCE_REF` 覆蓋，只取檢查需要的腳本與資產定義檔。
+
+為什麼需要：`native-data.json` 與 `item-properties-data.json` 是事先從 BC 抽取後提交的，文字更新工作流程不會碰它們。Lite 查不到的道具不會貢獻任何 Effect／Block，所以 BC 新增的限制道具（例如 `ItemDevices/GiantJar` 的 `Block`、`OneWayEnclose`）在資料更新前會被放行，而不是被保守封鎖。
+
+檢查兩層，抽取邏輯與產生器共用同一份（`scripts/native-extract.mjs`），所以「檢查器認為的正確答案」就是「重新產生後會寫入的內容」：
+
+- **資料層**：缺漏或規則不同的道具、缺漏或不同的擴展道具設定、新增／移除／變動的活動、部位／姿勢／鎖等結構資料，以及 `native.ts` 不認得的前置條件（該活動會被停用，方向安全但活動無法使用）。抽取器無法忠實建模的 BC 資料（例如沒有登記重建方式的共用 module）會列為警告，相關道具標為 unknown，判定退回保守路徑。
+- **邏輯層**：`native.ts`、`appearance-state.ts` 註解中引用、手工模仿的 BC 函式（`ActivityCheckPrerequisite`、`CharacterGetEffects`、`InventoryGetItemProperty`、`PoseRefresh`、`AssetParsePosePrerequisite`、`ServerChatRoomGetAllowItem`），其內容雜湊與 `scripts/bc-native-baseline.json` 不同時提醒檢視。算法與 HSC 的 BC compatibility 相同。基準只記錄建立當下的函式內容，不代表當時已逐行核對過模仿邏輯。
+
+本機執行：`BC_SOURCE_DIR=<BC 原始碼> npm run check:bc-native`（或 `-- --bc-dir <BC 原始碼>`）。BC 原始碼可為程式碼鏡像或上游倉庫，R134 前後兩種檔案佈局都支援。結束碼 0 = 一致、1 = 有差異、2 = 用法或解析錯誤。`--json`、`--report` 可輸出報告檔。
+
+收到 issue 之後：
+
+1. 重新產生資料：`npm run catalog:native -- <BC 原始碼>`。會同時寫入 `native-data.json`、`item-properties-data.json` 與版本標記 `src/action/bc-native-meta.json`；抽取器警告會印在終端機。
+2. 用 `git diff` 審查差異再提交；資料是活動與道具限制的判定依據，不要未經審查就合併。
+3. 報告列出 `native.ts` 不認得的前置條件時，需在 `native.ts` 補上對應判定（參照 BC 的 `ActivityCheckPrerequisite`）。`npm test` 內的 native 資料測試也會檢查已提交的活動是否都有被認得的前置條件。
+4. 報告列出判定函式變動時，先對照 BC 新舊函式檢視 `native.ts` 與 `appearance-state.ts`，確認後執行 `npm run check:bc-native -- --bc-dir <BC 原始碼> --update-baseline` 更新基準並提交。
+
+限制：檢查只比對靜態資料與函式文字，不能證明判定行為與線上遊戲一致，也沒有使用真實帳號驗證。同一個 R 版本內鏡像仍會持續新增道具，所以資料版本相同不代表沒有差異，檢查以內容比對為準，版本標記只供參考。
+
+English: A weekly, notify-only workflow compares the committed native data against the BC mirror and opens a `bc-native` issue on drift, closing it when resolved. Regenerate with `npm run catalog:native -- <BC source>`, review the diff, then commit. Function-hash drift is checked against `scripts/bc-native-baseline.json`; update it with `--update-baseline` after reviewing `native.ts`.

@@ -1,0 +1,29 @@
+{
+  "gameVersion": "R134",
+  "functions": {
+    "ActivityCheckPrerequisite": {
+      "hash": "22A1805B",
+      "file": "Scripts/Activity.js"
+    },
+    "CharacterGetEffects": {
+      "hash": "12A38B4F",
+      "file": "Scripts/Character.js"
+    },
+    "InventoryGetItemProperty": {
+      "hash": "2BBE6B7F",
+      "file": "Scripts/Inventory.js"
+    },
+    "PoseRefresh": {
+      "hash": "93F51C63",
+      "file": "Scripts/Pose.js"
+    },
+    "AssetParsePosePrerequisite": {
+      "hash": "CF7375E0",
+      "file": "Scripts/Asset.js"
+    },
+    "ServerChatRoomGetAllowItem": {
+      "hash": "88A22C2C",
+      "file": "Scripts/Server.js"
+    }
+  }
+}
