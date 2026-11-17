@@ -20,7 +20,8 @@
         "ItemMouth"
       ],
       "prerequisites": [
-        "IsGagged"
+        "IsGagged",
+        "Needs-GagItem"
       ],
       "special": true
     },
@@ -32,7 +33,8 @@
         "ItemMouth"
       ],
       "prerequisites": [
-        "IsGagged"
+        "IsGagged",
+        "Needs-GagItem"
       ],
       "special": true
     },
@@ -44,7 +46,8 @@
         "ItemMouth"
       ],
       "prerequisites": [
-        "IsGagged"
+        "IsGagged",
+        "Needs-GagItem"
       ],
       "special": true
     },
@@ -56,7 +59,8 @@
         "ItemMouth"
       ],
       "prerequisites": [
-        "IsGagged"
+        "IsGagged",
+        "Needs-GagItem"
       ],
       "special": true
     },
@@ -68,7 +72,8 @@
         "ItemMouth"
       ],
       "prerequisites": [
-        "IsGagged"
+        "IsGagged",
+        "Needs-GagItem"
       ],
       "special": true
     },
@@ -80,7 +85,8 @@
         "ItemMouth"
       ],
       "prerequisites": [
-        "IsGagged"
+        "IsGagged",
+        "Needs-GagItem"
       ],
       "special": true
     },
@@ -94,7 +100,8 @@
       "prerequisites": [
         "ZoneAccessible",
         "UseMouth",
-        "TargetMouthBlocked"
+        "TargetMouthBlocked",
+        "TargetNeeds-GagItem"
       ],
       "special": false
     },
@@ -110,6 +117,20 @@
         "IsGagged"
       ],
       "special": true
+    },
+    {
+      "name": "SpitOutGag",
+      "id": 68,
+      "target": [],
+      "self": [
+        "ItemMouth"
+      ],
+      "prerequisites": [
+        "ZoneAccessible",
+        "TargetMouthBlocked",
+        "Needs-SpitItem"
+      ],
+      "special": false
     },
     {
       "name": "Nibble",
@@ -259,7 +280,8 @@
       ],
       "self": [],
       "prerequisites": [
-        "IsGagged"
+        "IsGagged",
+        "Needs-GagItem"
       ],
       "special": false
     },
@@ -879,6 +901,66 @@
       "special": true
     },
     {
+      "name": "ShakeItem",
+      "id": 69,
+      "target": [
+        "ItemHands"
+      ],
+      "self": [
+        "ItemHands"
+      ],
+      "prerequisites": [
+        "Needs-ShakeItem",
+        "UseHands"
+      ],
+      "special": false
+    },
+    {
+      "name": "PowderItem",
+      "id": 70,
+      "target": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemButt",
+        "ItemEars",
+        "ItemFeet",
+        "ItemHood",
+        "ItemLegs",
+        "ItemMouth",
+        "ItemNeck",
+        "ItemNipples",
+        "ItemNose",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ],
+      "self": [
+        "ItemArms",
+        "ItemBoots",
+        "ItemBreast",
+        "ItemButt",
+        "ItemEars",
+        "ItemFeet",
+        "ItemHood",
+        "ItemLegs",
+        "ItemMouth",
+        "ItemNeck",
+        "ItemNipples",
+        "ItemNose",
+        "ItemPelvis",
+        "ItemTorso",
+        "ItemVulva",
+        "ItemVulvaPiercings"
+      ],
+      "prerequisites": [
+        "Needs-PowderItem",
+        "UseHands"
+      ],
+      "special": false
+    },
+    {
       "name": "SpankItem",
       "id": 43,
       "target": [
@@ -1374,6 +1456,18 @@
       "special": true
     },
     {
+      "name": "SiblingsHug",
+      "id": 71,
+      "target": [
+        "ItemArms"
+      ],
+      "self": [],
+      "prerequisites": [
+        "SiblingsNeutral"
+      ],
+      "special": true
+    },
+    {
       "name": "BrushItem",
       "id": 62,
       "target": [
@@ -1397,7 +1491,7 @@
       "self": [],
       "prerequisites": [
         "ZoneAccessible",
-        "UseMouth",
+        "UseTongue",
         "ZoneNaked",
         "TargetNeeds-PenetrateItem"
       ],
@@ -1412,7 +1506,7 @@
       "self": [],
       "prerequisites": [
         "ZoneAccessible",
-        "UseMouth",
+        "UseTongue",
         "ZoneNaked",
         "TargetNeeds-PenetrateItem"
       ],
@@ -2620,6 +2714,13 @@
     "Decals/BellFlower": {},
     "Decals/VelvetBunny": {},
     "Decals/LMF": {},
+    "Decals/BFPin": {},
+    "Decals/DisciplineCorner": {},
+    "Decals/CTSimplified": {},
+    "Decals/TheOddRoom": {},
+    "Decals/SADollhouse": {},
+    "Decals/MansionValentine": {},
+    "Decals/FaircloughManor": {},
     "ClothAccessory/StudentOutfit3Scarf": {},
     "ClothAccessory/StudentOutfit3Bow1": {},
     "ClothAccessory/StudentOutfit3Bow2": {},
@@ -2675,6 +2776,8 @@
     "ClothAccessory/Epaulet": {},
     "ClothAccessory/ForeheadJewelry": {},
     "ClothAccessory/TriskelionNecklace": {},
+    "Necklace/InitialLocket": {},
+    "Necklace/PhoenixNecklace": {},
     "Necklace/Necklace1": {},
     "Necklace/Necklace2": {},
     "Necklace/Necklace3": {},
@@ -3831,6 +3934,7 @@
     "Hat/NPCBalloon": {},
     "Hat/FeatheredHeadpiece": {},
     "Hat/WitchHat": {},
+    "Hat/FrogHat": {},
     "HairAccessory3/Ribbons1": {},
     "HairAccessory3/Ribbons2": {},
     "HairAccessory3/Ribbons3": {},
@@ -5163,6 +5267,32 @@
         "AllFours"
       ]
     },
+    "ItemLegs/KneeSpreader": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe"
+      ],
+      "SetPose": [
+        "KneelingSpread"
+      ],
+      "AllowActivePose": [
+        "KneelingSpread"
+      ]
+    },
+    "ItemLegs/OverKneeOvernighter": {
+      "Effect": [
+        "Slow",
+        "BlockWardrobe"
+      ],
+      "SetPose": [
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel",
+        "Hogtied"
+      ]
+    },
+    "ItemLegs/ShockDevice": {},
     "ItemVulva/VibratingEgg": {
       "Effect": [
         "UseRemote"
@@ -5368,6 +5498,11 @@
     },
     "ItemVulva/MysteryBox": {},
     "ItemVulva/UsedCondom": {},
+    "ItemVulva/MoreWiredVibrators": {
+      "Effect": [
+        "UseRemote"
+      ]
+    },
     "ItemVulvaPiercings/StraightClitPiercing": {},
     "ItemVulvaPiercings/RoundClitPiercing": {},
     "ItemVulvaPiercings/BarbellClitPiercing": {},
@@ -5877,6 +6012,11 @@
       ]
     },
     "ItemPelvis/WombTattoos": {},
+    "ItemPelvis/FortuneChastityBelt": {
+      "Effect": [
+        "CanEdge"
+      ]
+    },
     "ItemTorso/NylonRopeHarness": {},
     "ItemTorso/HempRopeHarness": {},
     "ItemTorso/LeatherHarness": {},
@@ -6006,6 +6146,52 @@
       ]
     },
     "ItemTorso/HeavyLatexCorset": {},
+    "ItemTorso/Movableglasscabinet": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Slow"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "BackElbowTouch",
+        "LegsClosed",
+        "Kneel"
+      ]
+    },
+    "ItemTorso/RestraintSet": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Slow"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
+      ],
+      "AllowActivePose": [
+        "BackElbowTouch"
+      ]
+    },
+    "ItemTorso/TentacleSuit": {},
+    "ItemTorso/ServingTray": {},
+    "ItemTorso/WoodenSign": {},
+    "ItemTorso/FullBodyLeatherHarness": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Slow"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
+      ]
+    },
     "ItemTorso2/LeatherStrapHarness": {},
     "ItemTorso2/LeatherHarness": {},
     "ItemTorso2/NylonRopeHarness": {},
@@ -6135,6 +6321,52 @@
         "LegsClosed"
       ]
     },
+    "ItemTorso2/TentacleSuit": {},
+    "ItemTorso2/RestraintSet": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Slow"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
+      ],
+      "AllowActivePose": [
+        "BackElbowTouch"
+      ]
+    },
+    "ItemTorso2/Movableglasscabinet": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Slow"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "BackElbowTouch",
+        "LegsClosed",
+        "Kneel"
+      ]
+    },
+    "ItemTorso2/ServingTray": {},
+    "ItemTorso2/WoodenSign": {},
+    "ItemTorso2/FullBodyLeatherHarness": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe",
+        "Slow"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "LegsClosed"
+      ],
+      "AllowActivePose": [
+        "Kneel"
+      ]
+    },
     "ItemNipples/NippleClamp": {},
     "ItemNipples/VibeNippleClamp": {
       "Effect": [
@@ -6204,6 +6436,11 @@
     "ItemNipples/KittyPasties": {},
     "ItemNipples/NippleTape": {},
     "ItemNipples/ChainTassles": {},
+    "ItemNipples/NippleClamps1": {
+      "Effect": [
+        "Wiggling"
+      ]
+    },
     "ItemNipplesPiercings/StraightPiercing": {},
     "ItemNipplesPiercings/RoundPiercing": {},
     "ItemNipplesPiercings/NecklacePiercingChain": {},
@@ -6236,6 +6473,8 @@
     "ItemNipplesPiercings/BellPiercing": {},
     "ItemNipplesPiercings/CrossedStraightPiercing": {},
     "ItemNipplesPiercings/PiercingNameBadge": {},
+    "ItemNipplesPiercings/ShortStraightPiercings": {},
+    "ItemNipplesPiercings/ThroughPiercings": {},
     "ItemBreast/MetalChastityBra": {
       "Effect": [
         "BreastChaste"
@@ -6497,8 +6736,6 @@
       "Block": [
         "ItemNipples",
         "ItemNipplesPiercings",
-        "ItemVulva",
-        "ItemVulvaPiercings",
         "ItemButt",
         "ItemHands",
         "ItemHandheld"
@@ -6811,14 +7048,8 @@
         "Slow"
       ],
       "Block": [
-        "ItemBoots",
-        "ItemPelvis",
-        "ItemTorso",
-        "ItemTorso2",
         "ItemHands",
-        "ItemHandheld",
-        "ItemLegs",
-        "ItemFeet"
+        "ItemHandheld"
       ],
       "SetPose": [
         "BackElbowTouch",
@@ -7545,6 +7776,46 @@
         "AllFours"
       ]
     },
+    "ItemArms/Handraisedbar": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "SetPose": [
+        "OverTheHead"
+      ],
+      "AllowActivePose": [
+        "OverTheHead"
+      ]
+    },
+    "ItemArms/PetUpperSuit": {
+      "Block": [
+        "ItemHands",
+        "ItemHandheld"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
+      ],
+      "AllowActivePose": [
+        "BackElbowTouch",
+        "OverTheHead",
+        "Yoked",
+        "AllFours"
+      ]
+    },
+    "ItemArms/SimpleRopeBondage": {
+      "Effect": [
+        "Block",
+        "BlockWardrobe"
+      ],
+      "SetPose": [
+        "BackElbowTouch"
+      ],
+      "AllowActivePose": [
+        "BackElbowTouch"
+      ]
+    },
+    "ItemArms/RestraintPillow": {},
     "ItemHands/PaddedMittens": {
       "Effect": [
         "Block",
@@ -7849,6 +8120,12 @@
         "RubItem"
       ]
     },
+    "ItemHandheld/Rattle": {
+      "AllowActivity": [
+        "ShakeItem",
+        "RubItem"
+      ]
+    },
     "ItemHandheld/Gavel": {
       "AllowActivity": [
         "SpankItem",
@@ -7876,8 +8153,19 @@
       ]
     },
     "ItemHandheld/Diaper": {},
-    "ItemHandheld/BabyPowder": {},
-    "ItemHandheld/Wipes": {},
+    "ItemHandheld/BabyPowder": {
+      "AllowActivity": [
+        "PowderItem"
+      ]
+    },
+    "ItemHandheld/Wipes": {
+      "AllowActivity": [
+        "RubItem",
+        "SpankItem",
+        "MasturbateItem",
+        "TickleItem"
+      ]
+    },
     "ItemHandheld/WartenbergWheel": {
       "AllowActivity": [
         "RollItem"
@@ -8184,6 +8472,22 @@
       ]
     },
     "ItemHandheld/Oilpaperumbrella": {},
+    "ItemHandheld/Book": {
+      "AllowActivity": [
+        "SpankItem",
+        "RubItem"
+      ]
+    },
+    "ItemHandheld/ToyHammer": {
+      "AllowActivity": [
+        "SpankItem"
+      ]
+    },
+    "ItemHandheld/Cat": {},
+    "ItemHandheld/Dog": {},
+    "ItemHandheld/Panda": {},
+    "ItemHandheld/Penguin": {},
+    "ItemHandheld/Unicorn": {},
     "ItemNeck/LeatherCollar": {},
     "ItemNeck/LeatherCollarBell": {},
     "ItemNeck/LeatherCollarBow": {},
@@ -8243,15 +8547,12 @@
       ]
     },
     "ItemNeck/HeartCollar": {},
-    "ItemNeck/LeatherCorsetCollar": {
-      "Effect": [
-        "GagNormal"
-      ]
-    },
+    "ItemNeck/LeatherCorsetCollar": {},
     "ItemNeck/LatexPostureCollar": {
       "Effect": [
-        "GagNormal",
-        "FixedHead"
+        "FixedHead",
+        "BlockMouth",
+        "GagNormal"
       ]
     },
     "ItemNeck/HighSecurityCollar": {},
@@ -8506,12 +8807,18 @@
         "GagVeryLight"
       ],
       "AllowActivity": [
-        "ChewItem"
+        "ChewItem",
+        "SpitItem"
       ]
     },
     "ItemMouth/PacifierClip": {
       "Effect": [
-        "BlockMouth"
+        "BlockMouth",
+        "GagVeryLight"
+      ],
+      "AllowActivity": [
+        "ChewItem",
+        "SpitItem"
       ]
     },
     "ItemMouth/HarnessPacifierGag": {
@@ -8732,7 +9039,8 @@
         "GagLight"
       ],
       "AllowActivity": [
-        "ChewItem"
+        "ChewItem",
+        "SpitItem"
       ]
     },
     "ItemMouth/PantyStuffing": {
@@ -8741,7 +9049,8 @@
         "GagLight"
       ],
       "AllowActivity": [
-        "ChewItem"
+        "ChewItem",
+        "SpitItem"
       ]
     },
     "ItemMouth/LargeDildo": {
@@ -8792,9 +9101,6 @@
       "Effect": [
         "BlockMouth",
         "GagNormal"
-      ],
-      "Block": [
-        "ItemNeck"
       ]
     },
     "ItemMouth/LatexPostureCollar": {
@@ -8802,9 +9108,6 @@
         "FixedHead",
         "BlockMouth",
         "GagNormal"
-      ],
-      "Block": [
-        "ItemNeck"
       ]
     },
     "ItemMouth/BitGag": {
@@ -9184,9 +9487,6 @@
       ]
     },
     "ItemMouth/QualityHarnessGag": {
-      "Effect": [
-        "GagMedium"
-      ],
       "AllowActivity": [
         "ChewItem"
       ]
@@ -9287,6 +9587,16 @@
       "Effect": [
         "BlockMouth",
         "ProtrudingMouth"
+      ],
+      "Block": [
+        "ItemMouth2",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth/CheekRetractor": {
+      "Effect": [
+        "BlockMouth",
+        "GagNormal"
       ]
     },
     "ItemMouth2/ClothGag": {
@@ -9331,11 +9641,15 @@
       ],
       "Block": [
         "ItemMouth"
+      ],
+      "AllowActivity": [
+        "ChewItem"
       ]
     },
     "ItemMouth2/RingGag": {
       "Effect": [
-        "GagEasy"
+        "GagEasy",
+        "OpenMouth"
       ],
       "Block": [
         "ItemMouth"
@@ -9366,10 +9680,15 @@
     },
     "ItemMouth2/PacifierClip": {
       "Effect": [
-        "BlockMouth"
+        "BlockMouth",
+        "GagVeryLight"
       ],
       "Block": [
         "ItemMouth"
+      ],
+      "AllowActivity": [
+        "ChewItem",
+        "SpitItem"
       ]
     },
     "ItemMouth2/DusterGag": {
@@ -9453,6 +9772,9 @@
       ],
       "Block": [
         "ItemMouth"
+      ],
+      "AllowActivity": [
+        "ChewItem"
       ]
     },
     "ItemMouth2/PantiesMask": {
@@ -9589,7 +9911,6 @@
         "GagNormal"
       ],
       "Block": [
-        "ItemNeck",
         "ItemMouth"
       ]
     },
@@ -9698,15 +10019,12 @@
       "Block": [
         "ItemMouth",
         "ItemMouth3"
-      ],
-      "AllowActivity": [
-        "ChewItem"
       ]
     },
     "ItemMouth2/WebGag": {
       "Effect": [
         "BlockMouth",
-        "GagLight"
+        "GagEasy"
       ],
       "Block": [
         "ItemMouth"
@@ -9793,6 +10111,9 @@
       ],
       "Block": [
         "ItemMouth"
+      ],
+      "AllowActivity": [
+        "ChewItem"
       ]
     },
     "ItemMouth2/FuturisticPanelGag": {
@@ -9802,9 +10123,6 @@
       ],
       "Block": [
         "ItemMouth"
-      ],
-      "AllowActivity": [
-        "ChewItem"
       ]
     },
     "ItemMouth2/FuturisticHarnessBallGag": {
@@ -9828,6 +10146,16 @@
       ]
     },
     "ItemMouth2/CageMuzzle": {
+      "Effect": [
+        "BlockMouth",
+        "ProtrudingMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth3"
+      ]
+    },
+    "ItemMouth2/ShapedMouthCage": {
       "Effect": [
         "BlockMouth",
         "ProtrudingMouth"
@@ -9923,6 +10251,9 @@
       ],
       "Block": [
         "ItemMouth"
+      ],
+      "AllowActivity": [
+        "ChewItem"
       ]
     },
     "ItemMouth2/ModularGag": {
@@ -9965,7 +10296,8 @@
         "ItemMouth"
       ],
       "AllowActivity": [
-        "ChewItem"
+        "ChewItem",
+        "SpitItem"
       ]
     },
     "ItemMouth2/Ball": {
@@ -10026,7 +10358,8 @@
         "ItemMouth"
       ],
       "AllowActivity": [
-        "ChewItem"
+        "ChewItem",
+        "SpitItem"
       ]
     },
     "ItemMouth2/CropGag": {
@@ -10161,7 +10494,8 @@
         "ItemMouth"
       ],
       "AllowActivity": [
-        "ChewItem"
+        "ChewItem",
+        "SpitItem"
       ]
     },
     "ItemMouth2/PlugGag": {
@@ -10246,9 +10580,6 @@
       ]
     },
     "ItemMouth2/QualityHarnessGag": {
-      "Effect": [
-        "GagMedium"
-      ],
       "Block": [
         "ItemMouth"
       ],
@@ -10428,23 +10759,26 @@
     },
     "ItemMouth3/PacifierClip": {
       "Effect": [
-        "BlockMouth"
-      ],
-      "Block": [
-        "ItemMouth",
-        "ItemMouth2"
-      ]
-    },
-    "ItemMouth3/RingGag": {
-      "Effect": [
-        "GagEasy"
+        "BlockMouth",
+        "GagVeryLight"
       ],
       "Block": [
         "ItemMouth",
         "ItemMouth2"
       ],
       "AllowActivity": [
-        "ChewItem"
+        "ChewItem",
+        "SpitItem"
+      ]
+    },
+    "ItemMouth3/RingGag": {
+      "Effect": [
+        "GagEasy",
+        "OpenMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
       ]
     },
     "ItemMouth3/DuctTape": {
@@ -10708,7 +11042,6 @@
         "GagNormal"
       ],
       "Block": [
-        "ItemNeck",
         "ItemMouth",
         "ItemMouth2"
       ]
@@ -10759,9 +11092,6 @@
       "Block": [
         "ItemMouth",
         "ItemMouth2"
-      ],
-      "AllowActivity": [
-        "ChewItem"
       ]
     },
     "ItemMouth3/BallGag": {
@@ -10835,7 +11165,7 @@
     "ItemMouth3/WebGag": {
       "Effect": [
         "BlockMouth",
-        "GagLight"
+        "GagEasy"
       ],
       "Block": [
         "ItemMouth",
@@ -10930,6 +11260,16 @@
         "ItemMouth2"
       ]
     },
+    "ItemMouth3/ShapedMouthCage": {
+      "Effect": [
+        "BlockMouth",
+        "ProtrudingMouth"
+      ],
+      "Block": [
+        "ItemMouth",
+        "ItemMouth2"
+      ]
+    },
     "ItemMouth3/PlasticWrap": {
       "Effect": [
         "BlockMouth",
@@ -10938,9 +11278,6 @@
       "Block": [
         "ItemMouth",
         "ItemMouth2"
-      ],
-      "AllowActivity": [
-        "ChewItem"
       ]
     },
     "ItemMouth3/Ribbons": {
@@ -11085,9 +11422,6 @@
       "Block": [
         "ItemMouth",
         "ItemMouth2"
-      ],
-      "AllowActivity": [
-        "ChewItem"
       ]
     },
     "ItemMouth3/FuturisticHarnessBallGag": {
@@ -11134,6 +11468,9 @@
       "Block": [
         "ItemMouth",
         "ItemMouth2"
+      ],
+      "AllowActivity": [
+        "ChewItem"
       ]
     },
     "ItemMouth3/AsylumMuzzle": {
@@ -11143,6 +11480,9 @@
       "Block": [
         "ItemMouth",
         "ItemMouth2"
+      ],
+      "AllowActivity": [
+        "ChewItem"
       ]
     },
     "ItemMouth3/PacifierGag": {
@@ -11155,7 +11495,8 @@
         "ItemMouth2"
       ],
       "AllowActivity": [
-        "ChewItem"
+        "ChewItem",
+        "SpitItem"
       ]
     },
     "ItemMouth3/Ball": {
@@ -11219,7 +11560,8 @@
         "ItemMouth2"
       ],
       "AllowActivity": [
-        "ChewItem"
+        "ChewItem",
+        "SpitItem"
       ]
     },
     "ItemMouth3/CropGag": {
@@ -11363,7 +11705,8 @@
         "ItemMouth2"
       ],
       "AllowActivity": [
-        "ChewItem"
+        "ChewItem",
+        "SpitItem"
       ]
     },
     "ItemMouth3/PlugGag": {
@@ -11445,9 +11788,6 @@
       ]
     },
     "ItemMouth3/QualityHarnessGag": {
-      "Effect": [
-        "GagMedium"
-      ],
       "Block": [
         "ItemMouth",
         "ItemMouth2"
@@ -11747,6 +12087,15 @@
       ]
     },
     "ItemHead/AsylumBlindfold": {},
+    "ItemHead/PantiesMask": {
+      "Effect": [
+        "BlockMouth",
+        "GagVeryLight"
+      ],
+      "AllowActivity": [
+        "ChewItem"
+      ]
+    },
     "ItemNose/ClownNose": {},
     "ItemNose/NoseHook": {},
     "ItemNose/PigNose": {},
@@ -11758,6 +12107,7 @@
     "ItemNose/PigNoseHook": {},
     "ItemNose/GlueNose": {},
     "ItemNose/NoseClip": {},
+    "ItemNose/ExpandingNoseHook": {},
     "ItemHood/LeatherHoodSealed": {
       "Effect": [
         "BlindHeavy",
@@ -12253,7 +12603,6 @@
     },
     "ItemHood/LatexBunny": {
       "Effect": [
-        "BlockWardrobe",
         "GagHeavy",
         "BlockMouth",
         "DeafLight"
@@ -12267,7 +12616,6 @@
     },
     "ItemHood/FoxHood": {
       "Effect": [
-        "BlockWardrobe",
         "GagHeavy",
         "BlockMouth"
       ],
@@ -12291,7 +12639,8 @@
         "DeafTotal",
         "BlindHeavy",
         "BlockMouth",
-        "GagVeryHeavy"
+        "GagVeryHeavy",
+        "BlockWardrobe"
       ],
       "Block": [
         "ItemMouth",
@@ -12375,6 +12724,16 @@
     "ItemHood/TransparentLatexHood": {
       "Effect": [
         "BlindLight"
+      ]
+    },
+    "ItemHood/LatexHood": {},
+    "ItemHood/PantiesMask": {
+      "Effect": [
+        "BlockMouth",
+        "GagVeryLight"
+      ],
+      "AllowActivity": [
+        "ChewItem"
       ]
     },
     "ItemEars/LightDutyEarPlugs": {
@@ -12471,12 +12830,14 @@
     "ItemMisc/PetPost": {},
     "ItemMisc/BunPlush": {
       "AllowActivity": [
-        "SpankItem"
+        "SpankItem",
+        "RubItem"
       ]
     },
     "ItemMisc/FoxPlush": {
       "AllowActivity": [
-        "SpankItem"
+        "SpankItem",
+        "RubItem"
       ]
     },
     "ItemMisc/Karl": {},
@@ -12491,6 +12852,12 @@
         "SqueezeItem"
       ]
     },
+    "ItemMisc/PumpkinPot": {},
+    "ItemMisc/Cat": {},
+    "ItemMisc/Dog": {},
+    "ItemMisc/Panda": {},
+    "ItemMisc/Penguin": {},
+    "ItemMisc/Unicorn": {},
     "ItemDevices/WoodenBox": {
       "Effect": [
         "BlockWardrobe",
@@ -12565,6 +12932,22 @@
       "AllowActivePose": [
         "BaseLower",
         "LegsClosed"
+      ]
+    },
+    "ItemDevices/BirdCage": {
+      "Effect": [
+        "BlockWardrobe",
+        "Freeze"
+      ],
+      "Block": [
+        "ItemAddon"
+      ],
+      "SetPose": [
+        "Kneel"
+      ],
+      "AllowActivePose": [
+        "Kneel",
+        "KneelingSpread"
       ]
     },
     "ItemDevices/LowCage": {
@@ -13131,6 +13514,14 @@
         "OnBed"
       ]
     },
+    "ItemDevices/GiantJar": {
+      "Effect": [
+        "MapImmobile",
+        "Mounted",
+        "OneWayEnclose",
+        "Block"
+      ]
+    },
     "ItemDevices/X-Cross": {
       "Effect": [
         "BlockWardrobe",
@@ -13610,6 +14001,102 @@
         "BackElbowTouch",
         "LegsClosed",
         "Kneel"
+      ]
+    },
+    "ItemDevices/CardBoardBox": {},
+    "ItemDevices/BarStool": {},
+    "ItemDevices/LatexbeltBed": {
+      "Effect": [
+        "Tethered",
+        "Block",
+        "Mounted",
+        "MapImmobile",
+        "OnBed"
+      ],
+      "SetPose": [
+        "BackElbowTouch",
+        "LegsClosed"
+      ]
+    },
+    "ItemDevices/TrashCan": {
+      "SetPose": [
+        "Kneel"
+      ],
+      "AllowActivePose": [
+        "Kneel"
+      ]
+    },
+    "ItemDevices/GiantStuffedToy": {
+      "Effect": [
+        "BlockWardrobe",
+        "Freeze"
+      ],
+      "SetPose": [
+        "Kneel"
+      ],
+      "AllowActivePose": [
+        "Kneel"
+      ]
+    },
+    "ItemDevices/LegSpreadDisplayStand": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe",
+        "Block",
+        "Mounted",
+        "MapImmobile",
+        "OnBed",
+        "OneWayEnclose"
+      ]
+    },
+    "ItemDevices/BoxingBag": {
+      "SetPose": [
+        "BackElbowTouch",
+        "Kneel"
+      ]
+    },
+    "ItemDevices/Seizaisu": {
+      "Effect": [
+        "Tethered",
+        "MapImmobile"
+      ],
+      "SetPose": [
+        "Kneel"
+      ],
+      "AllowActivePose": [
+        "Kneel",
+        "KneelingSpread"
+      ]
+    },
+    "ItemDevices/UnicornStuffedToy": {
+      "Effect": [
+        "BlockWardrobe",
+        "Freeze"
+      ],
+      "SetPose": [
+        "AllFours"
+      ],
+      "AllowActivePose": [
+        "AllFours"
+      ]
+    },
+    "ItemDevices/GlassJar": {
+      "AllowActivePose": [
+        "BackBoxTie",
+        "BackCuffs",
+        "BackElbowTouch",
+        "LegsClosed"
+      ]
+    },
+    "ItemDevices/ShackledOneBarPrison": {
+      "Effect": [
+        "Freeze",
+        "BlockWardrobe",
+        "Mounted",
+        "MapImmobile"
+      ],
+      "SetPose": [
+        "BaseLower"
       ]
     },
     "ItemAddon/Covers": {},

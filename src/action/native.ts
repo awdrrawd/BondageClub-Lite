@@ -157,6 +157,13 @@ export function createActivityContext(actor: CharacterSummary, target: Character
         const first = a.hasItem("Pussy", ["Penis"]), second = b.hasItem("Pussy", ["Penis"]);
         allowed = siblings && (pre === "Sisters" ? !first && !second : pre === "Brothers" ? first && second : first !== second); break;
       }
+      // R134 SiblingsHug：BC 以 Pronouns 裝備判定（沒有裝備時是 SheHer），任一方的代名詞不是 SheHer／HeHim 即成立。
+      case "SiblingsNeutral": {
+        const owner = actor.Ownership, other = target.Ownership;
+        const siblings = typeof owner?.MemberNumber === "number" && owner.MemberNumber > 0 && owner.MemberNumber === other?.MemberNumber;
+        const pronouns = (state: ReturnType<typeof appearanceState>) => state.item("Pronouns")?.name ?? "SheHer";
+        allowed = siblings && [a, b].some(state => !["SheHer", "HeHim"].includes(pronouns(state))); break;
+      }
       case "Collared": allowed = b.groups.has("ItemNeck"); break;
       case "Luzi_HasPawMittens": allowed = a.hasItem("ItemHands", ["PawMittens", "ElbowLengthMittens"]); break;
       case "Luzi_TargetHasPawMittens": allowed = b.hasItem("ItemHands", ["PawMittens", "ElbowLengthMittens"]); break;
