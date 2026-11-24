@@ -2071,7 +2071,10 @@
       "HairBack82",
       "HairBack83",
       "HairBack84",
-      "HairBack85"
+      "HairBack85",
+      "HairBack86",
+      "HairBack86b",
+      "HairBack87"
     ],
     "Eyebrows": [
       "Eyebrows1",
@@ -2721,6 +2724,7 @@
     "Decals/SADollhouse": {},
     "Decals/MansionValentine": {},
     "Decals/FaircloughManor": {},
+    "Decals/ACF": {},
     "ClothAccessory/StudentOutfit3Scarf": {},
     "ClothAccessory/StudentOutfit3Bow1": {},
     "ClothAccessory/StudentOutfit3Bow2": {},
@@ -4244,6 +4248,7 @@
     "BodyMarkings/FacePaints": {},
     "BodyMarkings/FaceCrests": {},
     "BodyMarkings/NavelBar1": {},
+    "BodyMarkings/LowerBodyScars": {},
     "FaceMarkings/FaceWritings": {},
     "FaceMarkings/FaceScars": {},
     "FaceMarkings/Splatters": {},
@@ -4506,6 +4511,9 @@
     "HairBack/HairBack83": {},
     "HairBack/HairBack84": {},
     "HairBack/HairBack85": {},
+    "HairBack/HairBack86": {},
+    "HairBack/HairBack86b": {},
+    "HairBack/HairBack87": {},
     "FacialHair/Goatee": {},
     "FacialHair/BigBeard": {},
     "FacialHair/MediumBeard": {},
@@ -8609,6 +8617,8 @@
     "ItemNeck/SteampunkCollar": {},
     "ItemNeck/SSpikedCollar": {},
     "ItemNeck/RibbonCollar": {},
+    "ItemNeck/RestrictCollar": {},
+    "ItemNeck/PaddedChoker": {},
     "ItemNeckAccessories/CustomCollarTag": {},
     "ItemNeckAccessories/ElectronicTag": {},
     "ItemNeckAccessories/CollarBell": {},
@@ -13363,9 +13373,7 @@
         "BlockWardrobe",
         "Freeze",
         "Block",
-        "Mounted",
-        "Chaste",
-        "ButtChaste"
+        "Mounted"
       ],
       "Block": [
         "ItemArms",
@@ -13438,10 +13446,19 @@
         "ItemVulvaPiercings"
       ],
       "AllowActivityOn": [
+        "ItemNeck",
         "ItemArms",
-        "ItemFeet",
+        "ItemHands",
+        "ItemHandheld",
+        "ItemBreast",
+        "ItemNipples",
+        "ItemPelvis",
         "ItemLegs",
-        "ItemBoots"
+        "ItemFeet",
+        "ItemBoots",
+        "ItemButt",
+        "ItemVulva",
+        "ItemVulvaPiercings"
       ],
       "SetPose": [
         "BaseUpper",
@@ -13453,9 +13470,7 @@
         "BlockWardrobe",
         "Freeze",
         "Block",
-        "Mounted",
-        "Chaste",
-        "ButtChaste"
+        "Mounted"
       ],
       "Block": [
         "ItemArms",
@@ -13689,14 +13704,19 @@
       ],
       "AllowActivityOn": [
         "ItemArms",
+        "ItemHands",
+        "ItemHandheld",
         "ItemBoots",
         "ItemBreast",
+        "ItemButt",
         "ItemFeet",
         "ItemLegs",
         "ItemNipples",
         "ItemPelvis",
         "ItemTorso",
-        "ItemTorso2"
+        "ItemTorso2",
+        "ItemVulva",
+        "ItemVulvaPiercings"
       ],
       "SetPose": [
         "BaseUpper",
