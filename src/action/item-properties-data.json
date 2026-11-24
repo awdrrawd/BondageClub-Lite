@@ -3046,6 +3046,67 @@
       }
     ]
   },
+  "BodyMarkings/LowerBodyScars": {
+    "kind": "modular",
+    "baseline": {},
+    "modules": [
+      {
+        "key": "a",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "b",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "c",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "d",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "e",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      }
+    ]
+  },
   "FaceMarkings/FaceWritings": {
     "kind": "modular",
     "baseline": {},
@@ -3596,6 +3657,19 @@
     ]
   },
   "HairFront/HairFront56b": {
+    "kind": "typed",
+    "baseline": {},
+    "key": "typed",
+    "options": [
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      }
+    ]
+  },
+  "HairFront/HairFront57": {
     "kind": "typed",
     "baseline": {},
     "key": "typed",
@@ -4335,6 +4409,38 @@
     ]
   },
   "HairBack/HairBack84": {
+    "kind": "typed",
+    "baseline": {},
+    "key": "typed",
+    "options": [
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      }
+    ]
+  },
+  "HairBack/HairBack86": {
+    "kind": "typed",
+    "baseline": {},
+    "key": "typed",
+    "options": [
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      },
+      {
+        "property": {}
+      }
+    ]
+  },
+  "HairBack/HairBack86b": {
     "kind": "typed",
     "baseline": {},
     "key": "typed",
@@ -9679,8 +9785,7 @@
           {
             "property": {
               "Effect": [
-                "Leash",
-                "IsLeashed"
+                "Leash"
               ]
             }
           }
@@ -15536,6 +15641,9 @@
       {
         "key": "d",
         "options": [
+          {
+            "property": {}
+          },
           {
             "property": {}
           },
@@ -29793,11 +29901,7 @@
             "property": {}
           },
           {
-            "property": {
-              "Effect": [
-                "GagEasy"
-              ]
-            }
+            "property": {}
           }
         ]
       },
@@ -30490,21 +30594,6 @@
         "options": [
           {
             "property": {}
-          },
-          {
-            "property": {
-              "Effect": [
-                "BlindLight"
-              ]
-            }
-          },
-          {
-            "property": {
-              "Effect": [
-                "BlindHeavy",
-                "BlockWardrobe"
-              ]
-            }
           }
         ]
       },
@@ -32686,6 +32775,18 @@
           },
           {
             "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
           }
         ]
       },
@@ -32848,6 +32949,57 @@
           {
             "property": {}
           },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "LMF",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "ACF",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "Vagabond",
+        "options": [
           {
             "property": {}
           },
@@ -39808,6 +39960,18 @@
           },
           {
             "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
           }
         ]
       },
@@ -39970,6 +40134,57 @@
           {
             "property": {}
           },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "LMF",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "ACF",
+        "options": [
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          },
+          {
+            "property": {}
+          }
+        ]
+      },
+      {
+        "key": "Vagabond",
+        "options": [
           {
             "property": {}
           },
