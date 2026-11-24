@@ -4,6 +4,9 @@ updates:
     directory: /
     schedule:
       interval: weekly
+      day: saturday
+      time: '08:10'
+      timezone: Asia/Taipei
     open-pull-requests-limit: 5
     groups:
       npm-minor-patch:
@@ -12,6 +15,9 @@ updates:
     directory: /
     schedule:
       interval: weekly
+      day: saturday
+      time: '08:10'
+      timezone: Asia/Taipei
     open-pull-requests-limit: 5
     groups:
       actions-minor-patch:
