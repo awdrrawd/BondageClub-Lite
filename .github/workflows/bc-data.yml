@@ -32,7 +32,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         if: steps.pending.outputs.count == '0'
         with:
-          node-version: '22'
+          node-version: '24'
           cache: npm
       - name: Download pinned text sources
         if: steps.pending.outputs.count == '0'
