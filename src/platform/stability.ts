@@ -64,6 +64,8 @@ export class StabilityControls {
       }
       this.audio.pause();
       if (this.objectUrl) URL.revokeObjectURL(this.objectUrl);
+      // 只播放使用者自己在本機選的檔案：createObjectURL 產生的一定是同源 blob: URL，且 <audio> 不會把內容當成 HTML 解析。
+      // CodeQL 的 js/xss-through-dom 在這裡是誤報，已在 Code scanning 以 False positive 關閉。
       this.objectUrl = URL.createObjectURL(selected);
       this.audio.src = this.objectUrl;
       this.show(t("stability.selected"));
