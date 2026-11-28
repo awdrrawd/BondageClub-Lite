@@ -25,6 +25,10 @@ jobs:
         run: |
           count=$(gh pr list --state open --json headRefName --jq '[.[] | select(.headRefName | startswith("codex/bc-data-"))] | length')
           echo "count=$count" >> "$GITHUB_OUTPUT"
+          if [ "$count" != "0" ]; then
+            echo "::notice::已有 $count 個尚未處理的 codex/bc-data-* PR，本次略過；合併或關閉後下次排程才會再提出更新。"
+            echo "已有 $count 個尚未處理的 BC 文字資料 PR（codex/bc-data-*），本次略過。" >> "$GITHUB_STEP_SUMMARY"
+          fi
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         if: steps.pending.outputs.count == '0'
         with:

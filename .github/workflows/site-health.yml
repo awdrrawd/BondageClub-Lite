@@ -2,7 +2,7 @@ name: Site Health Check
 
 on:
   schedule:
-    - cron: '0 0 * * 0' # 調整為每週執行 (UTC 時間週日 00:00)
+    - cron: '13 0 * * 0' # 每週日 08:13 Asia/Taipei（UTC 00:13，避開整點排程擁擠）
   workflow_dispatch:
 
 permissions:
@@ -12,6 +12,7 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -25,7 +26,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Run Site Health Check
         id: health_check
