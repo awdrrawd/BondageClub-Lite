@@ -8,6 +8,9 @@ import { fetchBcText, textSources } from '../scripts/fetch-bc-text.mjs';
 import { bcTextLocales } from '../scripts/bc-text-locales.mjs';
 import { parseBcTranslations, bcTranslation } from '../scripts/bc-text-format.mjs';
 
+// 依主機名稱判斷 mock 請求，不用子字串比對（CodeQL js/incomplete-url-substring-sanitization）。
+const isGitHubApi = url => new URL(url).hostname === 'api.github.com';
+
 test('translation parsing never treats a translated value as a source key', () => {
   const dictionary = parseBcTranslations('First\nSecond\nThird\n第四\n');
   assert.equal(dictionary.has('Second'), false);
@@ -46,7 +49,7 @@ test('mirror sync falls back to legacy asset paths and saves canonical paths', a
   try {
     await fetchBcText(root, async url => {
       calls.push(url);
-      if (url.includes('api.github.com')) return Response.json({sha:'b'.repeat(40)});
+      if (isGitHubApi(url)) return Response.json({sha:'b'.repeat(40)});
       if (/\/Assets\/(AssetStrings|Female3DCG)\.csv$/.test(url)) return new Response('', {status:404});
       return new Response('Key,Text\n');
     });
@@ -65,7 +68,7 @@ test('mirror sync pins text downloads, tolerates missing translations and reject
   try {
     await fetchBcText(root, async url => {
       calls.push(url);
-      if (url.includes('api.github.com')) return Response.json({sha});
+      if (isGitHubApi(url)) return Response.json({sha});
       assert.ok(url.includes(`/${sha}/`));
       assert.match(url, /(?:\.csv|_(?:CN|TW|RU|DE|FR|UA|JP|KR)\.txt)$/);
       return url.endsWith('.csv') ? new Response('Key,Text\n') : new Response('', {status:404});
