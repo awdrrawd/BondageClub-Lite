@@ -43,6 +43,10 @@ Push these files, confirm the Verify check, then optionally require it in a bran
 
 平台文件：[GitHub 工作流程觸發](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow)、[Dependabot 版本更新](https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/configure-version-updates)、[Cloudflare 建置路徑](https://developers.cloudflare.com/pages/configuration/build-watch-paths/)、[預覽部署與 Access](https://developers.cloudflare.com/pages/configuration/preview-deployments/)。
 
+## 安全檢查
+
+Security checks（`security.yml`）在 PR、推送 Mater、每週一臺灣時間 10:30 與手動時執行：`npm audit`（隨網站發布的正式相依有 high 以上漏洞才失敗，開發工具只提醒）、CodeQL 靜態分析；PR 另有 dependency review，擋下帶有已知 high 以上漏洞的新相依。CodeQL 警報在 Security 分頁查看。若倉庫已啟用 CodeQL 的 Default setup，請先改成 Advanced 或停用，否則上傳結果會衝突。
+
 ## BC 原生文字每月更新
 
 BC text data update 工作流程每月 5、10、15、20、25、30 日臺灣時間 11:23（沒有 30 日的月份略過該次） 檢查，也可在 Actions 手動 Run workflow。排程時間可能受 GitHub 排隊影響。來源是 awdrrawd/Bondage-College-Mirror 的 bondageclub 分支；每次先取得 commit，再下載該 commit 的 CSV／翻譯 TXT。

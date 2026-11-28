@@ -1,0 +1,74 @@
+name: Security checks
+
+# 相依漏洞、PR 帶進來的新相依、原始碼靜態分析（與 BC-LCE 的 security.yml 相同做法）。
+# 與 ci.yml 分開，外部服務暫時故障時不會擋住一般 PR 的建置與測試。
+on:
+  pull_request:
+  push:
+    branches: [Mater]
+  schedule:
+    - cron: '30 2 * * 1' # 週一 10:30 Asia/Taipei
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  audit:
+    name: npm audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: package-lock.json
+      # --ignore-scripts：安裝時不執行相依套件的 lifecycle script，audit 不需要它們。
+      - run: npm ci --ignore-scripts
+      # 隨網站發布的正式相依有 high 以上漏洞就失敗。
+      - run: npm audit --omit=dev --audit-level=high
+      # 開發工具的漏洞只提醒，不擋發布；修補交給 Dependabot。
+      - run: npm audit --audit-level=high
+        continue-on-error: true
+
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # 比對 PR 前後的 lockfile，擋下帶有 high 以上已知漏洞的新增或升級相依。
+      - uses: actions/dependency-review-action@bbc44d14a204704ccc493733616cd1e93a0321ec # v5.0.1
+        with:
+          fail-on-severity: high
+
+  codeql:
+    name: CodeQL (JavaScript/TypeScript)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: github/codeql-action/init@915412ff23e8b7659517e607487dbeae018f2934 # v4.39.5
+        with:
+          languages: javascript-typescript
+          build-mode: none
+      - uses: github/codeql-action/analyze@915412ff23e8b7659517e607487dbeae018f2934 # v4.39.5
+        with:
+          category: /language:javascript-typescript
