@@ -5,7 +5,7 @@
 ## 倉庫已提供
 
 - **CI / Verify**：PR、推送 Mater、手動執行時驗證。純 Markdown／一般 docs 只檢查本機連結；程式、測試、工作流程及 docs/architecture/ 變更會安裝依賴、建置並跑測試。無法判定變更時跑完整驗證。
-- **Dependabot**：每週檢查 npm 與 GitHub Actions；minor／patch 分組，major 個別 PR，不自動合併。
+- **Dependabot**：每週六台北時間 08:10 檢查 npm 與 GitHub Actions；minor／patch 分組，major 個別 PR，不自動合併；新版本發布滿 7 天才提出（安全性更新不受影響）。
 - **Site health**：手動檢查正式站首頁、/docs/architecture/ 和 /api/relay-status。檢查內容與 HTTP 狀態，不登入 BC，也不證明 PROD 登入或 WebSocket 正常。
 - 本機完整驗證：先執行 npm ci，再執行 npm run ci。只檢查文件可用 npm run check:docs；線上健康檢查用 npm run check:site。
 
@@ -27,7 +27,7 @@ CI 整個工作流程不使用 paths 過濾，讓文件 PR 仍能取得 Verify �
 ## Cloudflare 手動設定
 
 1. **Workers & Pages → bondageclub-lite → Settings → Builds / Builds & deployments → Build configuration**：Build command 改成 **npm run ci**，Build output directory 保持 **dist**，Root directory 為專案根目錄。
-2. 在建置環境變數設定 **NODE_VERSION = 22**，不要略過依賴安裝，也不要只安裝 production dependencies。建置失敗或測試失敗便不發布新版。
+2. 在建置環境變數設定 **NODE_VERSION = 24**，不要略過依賴安裝，也不要只安裝 production dependencies。建置失敗或測試失敗便不發布新版。
 3. 在 **Build watch paths** 套用[建置觸發規則](cloudflare-builds.md)的 Include／Exclude 清單；倉庫 JSON 不會自動同步到後台。
 4. **Branch control**：Production branch 核對為要發布的 Mater。Preview 可選 **Custom branches**，只納入需要測試的分支，例如 codex/*；不需要預覽可停用 Preview deployments。
 5. 若預覽不想公開，可在 Preview deployments 的 **Enable access policy** 啟用 Cloudflare Access，並核對 Zero Trust Access 允許登入的人。這是選配；測試預覽時需先登入 Access。
@@ -37,9 +37,9 @@ Cloudflare 的 Git 整合不會因 GitHub CI 尚未完成就自動等待，因�
 
 ## English summary
 
-CI validates local Markdown links on every PR and push to Mater. Code, tests, workflow changes and deployable architecture files also trigger dependency installation, build and tests. Weekly Dependabot updates group minor/patch releases; major updates stay separate and nothing auto-merges.
+CI validates local Markdown links on every PR and push to Mater. Code, tests, workflow changes and deployable architecture files also trigger dependency installation, build and tests. Weekly Dependabot updates group minor/patch releases and wait 7 days after a release (security updates are not delayed); major updates stay separate and nothing auto-merges.
 
-Push these files, confirm the Verify check, then optionally require it in a branch ruleset. Enable Dependabot alerts/security updates in repository settings. In Cloudflare Pages, set the build command to **npm run ci**, output to **dist**, Node to **22**, and apply the documented build watch paths manually. Limit preview branches and optionally protect previews with Access. After deployment, run **Actions → Site health → Run workflow**. No credentials are needed; this checks public pages and relay metadata, not BC login.
+Push these files, confirm the Verify check, then optionally require it in a branch ruleset. Enable Dependabot alerts/security updates in repository settings. In Cloudflare Pages, set the build command to **npm run ci**, output to **dist**, Node to **24**, and apply the documented build watch paths manually. Limit preview branches and optionally protect previews with Access. After deployment, run **Actions → Site health → Run workflow**. No credentials are needed; this checks public pages and relay metadata, not BC login.
 
 平台文件：[GitHub 工作流程觸發](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow)、[Dependabot 版本更新](https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/configure-version-updates)、[Cloudflare 建置路徑](https://developers.cloudflare.com/pages/configuration/build-watch-paths/)、[預覽部署與 Access](https://developers.cloudflare.com/pages/configuration/preview-deployments/)。
 

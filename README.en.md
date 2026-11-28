@@ -17,7 +17,7 @@ Wardrobe tools, character rendering and full plugin functionality are not includ
 
 ## Development
 
-Use Node.js 22.13+:
+Use Node.js 24 (22.13 or newer also works):
 
 ```sh
 npm ci
